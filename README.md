@@ -9,7 +9,7 @@ Installation is easy. There are no dependencies on Python modules that are not p
 - Copy [configurator.py](https://github.com/danielperna84/hass-poc-configurator/blob/master/configurator.py) to your HASS configuration directory (e.g /home/hass/.homeassistant)
 - Make it executable (`sudo chmod 755 configurator.py`)
 - Execute it (`sudo ./configurator.py`)
-- To terminate the process do the usual CTRL+C, maybe once or twice
+- To terminate the process do the usual `CTRL+C`, maybe once or twice
 
 By default the webapp listens on IP `0.0.0.0` (which is every IP the machine has) on port `3218`. If you leave it that way, you can embed the configurator into HASS using a [panel_iframe](https://home-assistant.io/components/panel_iframe/):
 
@@ -20,5 +20,5 @@ panel_iframe:
     url: http://123.123.132.132:3218
 ```
 
-Since this is no service, one way to always keep this running would be to use [screen](http://ss64.com/bash/screen.html). If it's not already installed on your system, you can do `sudo apt-get install screen` to get it. When it's installed, start a screen session by executing `screen`. Then navigate to your HASS directory and start the configurator like described above. Put the screen session into the background by pressing CTRL+A and then CTRL+D.
+Since this is no service, one way to always keep this running would be to use [screen](http://ss64.com/bash/screen.html). If it's not already installed on your system, you can do `sudo apt-get install screen` to get it. When it's installed, start a screen session by executing `screen`. Then navigate to your HASS directory and start the configurator like described above. Put the screen session into the background by pressing `CTRL+A` and then `CTRL+D`.
 To resume the screen session, log in to your machine and execute `screen -r`.
