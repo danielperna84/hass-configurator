@@ -22,3 +22,6 @@ panel_iframe:
 
 Since this is no service, one way to always keep this running would be to use [screen](http://ss64.com/bash/screen.html). If it's not already installed on your system, you can do `sudo apt-get install screen` to get it. When it's installed, start a screen session by executing `screen`. Then navigate to your HASS directory and start the configurator like described above. Put the screen session into the background by pressing `CTRL+A` and then `CTRL+D`.
 To resume the screen session, log in to your machine and execute `screen -r`.
+
+And here a screenshot of this thing embedded into HASS:
+![Screenshot](https://github.com/danielperna84/hass-poc-configurator/blob/master/hass-poc-configurator.PNG)
