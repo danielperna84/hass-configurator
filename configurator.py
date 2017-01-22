@@ -18,13 +18,17 @@ INDEX = """<!DOCTYPE html>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>
         <style type="text/css" media="screen">
             body {
-                font-family: sans-serif;
+                margin: 0;
+                padding: 0;
+                font-family: monospace;
             }
             
             #menu {
                 position:relative;
-                width: 19%;
+                width: 20%;
                 float: left;
+                font-size: 9pt;
+                
             }
             
             #buttons {
@@ -32,10 +36,15 @@ INDEX = """<!DOCTYPE html>
                 top: 0;
                 right: 0;
             }
+            
+            #toolbar {
+                position: relative;
+                height: 20px;
+            }
 
             #editor { 
                 position: absolute;
-                top: 0;
+                top: 20px;
                 right: 0;
                 bottom: 0;
                 left: 20%;
@@ -44,10 +53,15 @@ INDEX = """<!DOCTYPE html>
     </head>
     <body>
         <div id="menu">
-            <div id="buttons">
-                <button id="savebutton" type="button" onclick="save()">Save</button><br />
-            </div>
             <div id="tree"></div>
+        </div>
+        <div id="toolbar">
+            <button id="savebutton" type="button" onclick="save()">Save</button>
+            <button id="whitespace" type="button" onclick="toggle_whitespace()">Whitespace</button>
+            <button id="fold" type="button" onclick="toggle_fold()">Fold</button>
+            <button id="highlight" type="button" onclick="toggle_highlightSelectedWord()">Highlight selected words</button>
+            <button id="help" type="button" onclick="window.open('https://home-assistant.io/getting-started/','_blank');">Help</button>
+            <button id="components" type="button" onclick="window.open('https://home-assistant.io/components/','_blank');">Components</button>
         </div>
         <div id="editor"></div>
     </body>
@@ -62,12 +76,35 @@ INDEX = """<!DOCTYPE html>
         });
         $('#tree').on("select_node.jstree", function (e, data) { load(); });
         
+        var whitespacestatus = false;
+        var foldstatus = true;
+        var highlightwords = true;
+        
+        function toggle_highlightSelectedWord() {
+            highlightwords = !highlightwords;
+            editor.setOption("highlightSelectedWord", highlightwords);
+        }
+        
+        function toggle_whitespace() {
+            whitespacestatus = !whitespacestatus;
+            editor.setOption("showInvisibles", whitespacestatus);
+        }
+        
+        function toggle_fold() {
+            if (foldstatus) {
+                editor.getSession().foldAll();
+            }
+            else {
+                editor.getSession().unfold();
+            }
+            foldstatus = !foldstatus;
+        }
+        
         function load() {
             var n = $("#tree").jstree("get_selected");
             if (n) {
                 $.get("api/file?filename=" + n[0], function( data ) {
                   editor.setValue(data);
-                  //editor.getValue(); // or session.getValue
                 });
             }
         }
@@ -91,11 +128,14 @@ INDEX = """<!DOCTYPE html>
     <script>
         var editor = ace.edit("editor");
         editor.getSession().setMode("ace/mode/yaml");
-        editor.setOption("showInvisibles", true);
+        editor.setOption("showInvisibles", whitespacestatus);
         editor.setOption("useSoftTabs", true);
+        editor.setOption("displayIndentGuides", true);
+        editor.setOption("highlightSelectedWord", highlightwords);
         editor.$blockScrolling = Infinity;
     </script>
 </html>
+
 """
 
 class Node:
