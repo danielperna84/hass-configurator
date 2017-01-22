@@ -24,4 +24,4 @@ Since this is no service, one way to always keep this running would be to use [s
 To resume the screen session, log in to your machine and execute `screen -r`.
 
 And here a screenshot of this thing embedded into HASS:
-![Screenshot](https://github.com/danielperna84/hass-poc-configurator/blob/master/hass-poc-configurator.PNG)
+![Screenshot](https://github.com/danielperna84/hass-poc-configurator/blob/master/hass-poc-configurator.png)
