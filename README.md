@@ -2,6 +2,15 @@
 Proof of concept confguration UI for Home Assistant
 
 Since there currently is no nice way to edit the yaml-files HASS is using through the UI, I've code-snippet-patchworked this small webapp that lists yaml (and conf) files in the directory it's being executed in in a nice little [jsTree](https://www.jstree.com/). By clicking on an element, the file is loaded into an embedded [Ace editor](https://ace.c9.io/), which has syntax hightlighting for yaml. When done editing the file, click the save-button and you're done.
+
+_Update:_
+I've decided to make some minor improvements to this:
+
+1. Toolbar to toggle some editor options
+2. Fetching of bootstrap-data from HASS to get available entity ids, events etc.  
+Selecting one of those list items will directly insert the value at the current cursor position within the editor
+
+
 This isn't designed to be pretty or complete in any way. I didn't even take the time to choose the MIT license. All this is is a temporary workaround for people tired of SSH-ing into their machines. And maybe there's even someone who takes this as a reference and builds something like this directly into HASS, which would be totally awesome!
 If there's anything you want to have differently, feel free to fork and enhance this rather ugly piece of code.
 
