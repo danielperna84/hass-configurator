@@ -39,11 +39,59 @@
                 bottom: 0;
                 left: 20%;
             }
+            
+            #triggers {
+                max-width: 100%;
+            }
+            
+            #events {
+                max-width: 100%;
+            }
+            
+            #entities {
+                max-width: 100%;
+            }
+            
+            #conditions {
+                max-width: 100%;
+            }
+            
+            #services {
+                max-width: 100%;
+            }
         </style>
     </head>
     <body>
         <div id="menu">
-            <div id="tree"></div>
+            <div id="tree"></div><br />
+            <label for="triggers">Trigger platforms:</label><br />
+            <select id="triggers" onchange="editor.session.insert(editor.getCursorPosition(), this.value)">
+                <option value="" disabled selected>...</option>
+                <option value="event">Event</option>
+                <option value="mqtt">MQTT</option>
+                <option value="numeric_state">Numeric state</option>
+                <option value="state">State</option>
+                <option value="sun">Sun</option>
+                <option value="template">Template</option>
+                <option value="time">Time</option>
+                <option value="zone">Zone</option>
+            </select><br /><br />
+            <label for="events">Events:</label><br />
+            <select id="events" onchange="editor.session.insert(editor.getCursorPosition(), this.value)"></select><br /><br />
+            <label for="entities">Entities:</label><br />
+            <select id="entities" onchange="editor.session.insert(editor.getCursorPosition(), this.value)"></select><br /><br />
+            <label for="conditions">Conditions:</label><br />
+            <select id="conditions" onchange="editor.session.insert(editor.getCursorPosition(), this.value)">
+                <option value="" disabled selected>...</option>
+                <option value="numeric_state">Numeric state</option>
+                <option value="state">State</option>
+                <option value="sun">Sun</option>
+                <option value="template">Template</option>
+                <option value="time">Time</option>
+                <option value="zone">Zone</option>
+            </select><br /><br />
+            <label for="services">Services:</label><br />
+            <select id="services" onchange="editor.session.insert(editor.getCursorPosition(), this.value)"></select>
         </div>
         <div id="toolbar">
             <button id="savebutton" type="button" onclick="save()">Save</button>
@@ -56,6 +104,71 @@
         <div id="editor"></div>
     </body>
     <script>
+        var bootstrap = $bootstrap;
+        if (bootstrap) {
+            var events = document.getElementById("events");
+            for (var i = 0; i < bootstrap.events.length; i++) {
+                var option = document.createElement("option");
+                option.value = bootstrap.events[i].event;
+                option.text = bootstrap.events[i].event;
+                events.add(option);
+            }
+            
+            var entities = document.getElementById("entities");
+            for (var i = 0; i < bootstrap.states.length; i++) {
+                var option = document.createElement("option");
+                option.value = bootstrap.states[i].entity_id;
+                option.text = bootstrap.states[i].attributes.friendly_name + ' (' + bootstrap.states[i].entity_id + ')';
+                entities.add(option);
+            }
+            
+            var services = document.getElementById("services");
+            for (var i = 0; i < bootstrap.services.length; i++) {
+                for (var k in bootstrap.services[i].services) {
+                    var option = document.createElement("option");
+                    option.value = bootstrap.services[i].domain + '.' + k;
+                    option.text = bootstrap.services[i].domain + '.' + k;
+                    services.add(option);
+                }
+            }
+            
+            var options = $('#events option');
+            var arr = options.map(function(_, o) { return { t: $(o).text(), v: o.value }; }).get();
+            arr.sort(function(o1, o2) {
+              var t1 = o1.t.toLowerCase(), t2 = o2.t.toLowerCase();
+            
+              return t1 > t2 ? 1 : t1 < t2 ? -1 : 0;
+            });
+            options.each(function(i, o) {
+              o.value = arr[i].v;
+              $(o).text(arr[i].t);
+            });
+            
+            var options = $('#entities option');
+            var arr = options.map(function(_, o) { return { t: $(o).text(), v: o.value }; }).get();
+            arr.sort(function(o1, o2) {
+              var t1 = o1.t.toLowerCase(), t2 = o2.t.toLowerCase();
+            
+              return t1 > t2 ? 1 : t1 < t2 ? -1 : 0;
+            });
+            options.each(function(i, o) {
+              o.value = arr[i].v;
+              $(o).text(arr[i].t);
+            });
+            
+            var options = $('#services option');
+            var arr = options.map(function(_, o) { return { t: $(o).text(), v: o.value }; }).get();
+            arr.sort(function(o1, o2) {
+              var t1 = o1.t.toLowerCase(), t2 = o2.t.toLowerCase();
+            
+              return t1 > t2 ? 1 : t1 < t2 ? -1 : 0;
+            });
+            options.each(function(i, o) {
+              o.value = arr[i].v;
+              $(o).text(arr[i].t);
+            });
+        }
+        
         $('#tree').jstree(
         {
           'core' : {

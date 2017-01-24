@@ -2,13 +2,16 @@
 import os
 import sys
 import json
+import urllib.request
+from string import Template
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse, parse_qs
 
 BASEDIR = "."
 LISTENIP = "0.0.0.0"
 LISTENPORT = 3218
-INDEX = """<!DOCTYPE html>
+BOOTSTRAPAPI = "http://127.0.0.1:8123/api/bootstrap"
+INDEX = Template("""<!DOCTYPE html>
 <html>
     <head>
         <title>HASS-PoC-Configurator</title>
@@ -49,11 +52,59 @@ INDEX = """<!DOCTYPE html>
                 bottom: 0;
                 left: 20%;
             }
+            
+            #triggers {
+                max-width: 100%;
+            }
+            
+            #events {
+                max-width: 100%;
+            }
+            
+            #entities {
+                max-width: 100%;
+            }
+            
+            #conditions {
+                max-width: 100%;
+            }
+            
+            #services {
+                max-width: 100%;
+            }
         </style>
     </head>
     <body>
         <div id="menu">
-            <div id="tree"></div>
+            <div id="tree"></div><br />
+            <label for="triggers">Trigger platforms:</label><br />
+            <select id="triggers" onchange="editor.session.insert(editor.getCursorPosition(), this.value)">
+                <option value="" disabled selected>...</option>
+                <option value="event">Event</option>
+                <option value="mqtt">MQTT</option>
+                <option value="numeric_state">Numeric state</option>
+                <option value="state">State</option>
+                <option value="sun">Sun</option>
+                <option value="template">Template</option>
+                <option value="time">Time</option>
+                <option value="zone">Zone</option>
+            </select><br /><br />
+            <label for="events">Events:</label><br />
+            <select id="events" onchange="editor.session.insert(editor.getCursorPosition(), this.value)"></select><br /><br />
+            <label for="entities">Entities:</label><br />
+            <select id="entities" onchange="editor.session.insert(editor.getCursorPosition(), this.value)"></select><br /><br />
+            <label for="conditions">Conditions:</label><br />
+            <select id="conditions" onchange="editor.session.insert(editor.getCursorPosition(), this.value)">
+                <option value="" disabled selected>...</option>
+                <option value="numeric_state">Numeric state</option>
+                <option value="state">State</option>
+                <option value="sun">Sun</option>
+                <option value="template">Template</option>
+                <option value="time">Time</option>
+                <option value="zone">Zone</option>
+            </select><br /><br />
+            <label for="services">Services:</label><br />
+            <select id="services" onchange="editor.session.insert(editor.getCursorPosition(), this.value)"></select>
         </div>
         <div id="toolbar">
             <button id="savebutton" type="button" onclick="save()">Save</button>
@@ -66,6 +117,71 @@ INDEX = """<!DOCTYPE html>
         <div id="editor"></div>
     </body>
     <script>
+        var bootstrap = $bootstrap;
+        if (bootstrap) {
+            var events = document.getElementById("events");
+            for (var i = 0; i < bootstrap.events.length; i++) {
+                var option = document.createElement("option");
+                option.value = bootstrap.events[i].event;
+                option.text = bootstrap.events[i].event;
+                events.add(option);
+            }
+            
+            var entities = document.getElementById("entities");
+            for (var i = 0; i < bootstrap.states.length; i++) {
+                var option = document.createElement("option");
+                option.value = bootstrap.states[i].entity_id;
+                option.text = bootstrap.states[i].attributes.friendly_name + ' (' + bootstrap.states[i].entity_id + ')';
+                entities.add(option);
+            }
+            
+            var services = document.getElementById("services");
+            for (var i = 0; i < bootstrap.services.length; i++) {
+                for (var k in bootstrap.services[i].services) {
+                    var option = document.createElement("option");
+                    option.value = bootstrap.services[i].domain + '.' + k;
+                    option.text = bootstrap.services[i].domain + '.' + k;
+                    services.add(option);
+                }
+            }
+            
+            var options = $('#events option');
+            var arr = options.map(function(_, o) { return { t: $(o).text(), v: o.value }; }).get();
+            arr.sort(function(o1, o2) {
+              var t1 = o1.t.toLowerCase(), t2 = o2.t.toLowerCase();
+            
+              return t1 > t2 ? 1 : t1 < t2 ? -1 : 0;
+            });
+            options.each(function(i, o) {
+              o.value = arr[i].v;
+              $(o).text(arr[i].t);
+            });
+            
+            var options = $('#entities option');
+            var arr = options.map(function(_, o) { return { t: $(o).text(), v: o.value }; }).get();
+            arr.sort(function(o1, o2) {
+              var t1 = o1.t.toLowerCase(), t2 = o2.t.toLowerCase();
+            
+              return t1 > t2 ? 1 : t1 < t2 ? -1 : 0;
+            });
+            options.each(function(i, o) {
+              o.value = arr[i].v;
+              $(o).text(arr[i].t);
+            });
+            
+            var options = $('#services option');
+            var arr = options.map(function(_, o) { return { t: $(o).text(), v: o.value }; }).get();
+            arr.sort(function(o1, o2) {
+              var t1 = o1.t.toLowerCase(), t2 = o2.t.toLowerCase();
+            
+              return t1 > t2 ? 1 : t1 < t2 ? -1 : 0;
+            });
+            options.each(function(i, o) {
+              o.value = arr[i].v;
+              $(o).text(arr[i].t);
+            });
+        }
+        
         $('#tree').jstree(
         {
           'core' : {
@@ -135,8 +251,7 @@ INDEX = """<!DOCTYPE html>
         editor.$blockScrolling = Infinity;
     </script>
 </html>
-
-"""
+""")
 
 class Node:
     def __init__(self, id, text, parent):
@@ -188,7 +303,7 @@ def getdirs(searchpath):
                 for node in nodes:
                     if not any(node.is_equal(unode) for unode in unique_nodes):
                         unique_nodes.append(node)
-    return json.dumps([node.as_json() for node in unique_nodes])
+    return [node.as_json() for node in unique_nodes]
 
 class RequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -198,7 +313,8 @@ class RequestHandler(BaseHTTPRequestHandler):
         if req.path == '/api/files':
             self.send_header('Content-type','text/json')
             self.end_headers()
-            self.wfile.write(bytes(getdirs(BASEDIR), "utf8"))
+            dirs = sorted(getdirs(BASEDIR), key=lambda x: x["text"])
+            self.wfile.write(bytes(json.dumps(dirs), "utf8"))
             return
         elif req.path == '/api/file':
             content = ""
@@ -214,7 +330,16 @@ class RequestHandler(BaseHTTPRequestHandler):
 
         self.send_header('Content-type','text/html')
         self.end_headers()
-        self.wfile.write(bytes(INDEX, "utf8"))
+        
+        boot = "{}"
+        try:
+            response = urllib.request.urlopen(BOOTSTRAPAPI)
+            boot = response.read().decode('utf-8')
+        except Exception as err:
+            print(err)
+        
+        html = INDEX.safe_substitute(bootstrap=boot)
+        self.wfile.write(bytes(html, "utf8"))
         return
 
     def do_POST(self):

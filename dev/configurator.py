@@ -2,12 +2,15 @@
 import os
 import sys
 import json
+import urllib.request
+from string import Template
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse, parse_qs
 
 BASEDIR = "."
 LISTENIP = "0.0.0.0"
 LISTENPORT = 3218
+BOOTSTRAPAPI = "http://127.0.0.1:8123/api/bootstrap"
 
 class Node:
     def __init__(self, id, text, parent):
@@ -59,7 +62,7 @@ def getdirs(searchpath):
                 for node in nodes:
                     if not any(node.is_equal(unode) for unode in unique_nodes):
                         unique_nodes.append(node)
-    return json.dumps([node.as_json() for node in unique_nodes])
+    return [node.as_json() for node in unique_nodes]
 
 class RequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -69,7 +72,8 @@ class RequestHandler(BaseHTTPRequestHandler):
         if req.path == '/api/files':
             self.send_header('Content-type','text/json')
             self.end_headers()
-            self.wfile.write(bytes(getdirs(BASEDIR), "utf8"))
+            dirs = sorted(getdirs(BASEDIR), key=lambda x: x["text"])
+            self.wfile.write(bytes(json.dumps(dirs), "utf8"))
             return
         elif req.path == '/api/file':
             content = ""
@@ -87,7 +91,15 @@ class RequestHandler(BaseHTTPRequestHandler):
         self.end_headers()
         html = ""
         with open("index.html") as fptr:
-            html = fptr.read()
+            html = Template(fptr.read())
+        boot = "{}"
+        try:
+            response = urllib.request.urlopen(BOOTSTRAPAPI)
+            boot = response.read().decode('utf-8')
+        except Exception as err:
+            print(err)
+        
+        html = html.safe_substitute(bootstrap=boot)
         self.wfile.write(bytes(html, "utf8"))
         return
 
