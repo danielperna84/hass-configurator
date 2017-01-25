@@ -1,4 +1,8 @@
 #!/usr/bin/python3
+"""
+Proof of concept configurator for Home Assistant.
+https://github.com/danielperna84/hass-poc-configurator
+"""
 import os
 import sys
 import json
