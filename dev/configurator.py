@@ -7,6 +7,7 @@ from string import Template
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse, parse_qs
 
+VERSION = "0.0.4"
 BASEDIR = "."
 LISTENIP = "0.0.0.0"
 LISTENPORT = 3218

@@ -7,6 +7,7 @@ from string import Template
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse, parse_qs
 
+VERSION = "0.0.4"
 BASEDIR = "."
 LISTENIP = "0.0.0.0"
 LISTENPORT = 3218
@@ -17,6 +18,7 @@ INDEX = Template("""<!DOCTYPE html>
         <title>HASS-PoC-Configurator</title>
         <meta charset="UTF-8">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/simplemodal/1.4.4/jquery.simplemodal.min.js"></script>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>
         <style type="text/css" media="screen">
@@ -118,7 +120,7 @@ INDEX = Template("""<!DOCTYPE html>
     </body>
     <script>
         var bootstrap = $bootstrap;
-        if (bootstrap) {
+        if (bootstrap.hasOwnProperty("events")) {
             var events = document.getElementById("events");
             for (var i = 0; i < bootstrap.events.length; i++) {
                 var option = document.createElement("option");
@@ -195,6 +197,7 @@ INDEX = Template("""<!DOCTYPE html>
         var whitespacestatus = false;
         var foldstatus = true;
         var highlightwords = true;
+        var modaloptions = {close: true, overlayClose: true, containerCss: {border: "1px solid #000", padding: "5px", background: "#fff"}};
         
         function toggle_highlightSelectedWord() {
             highlightwords = !highlightwords;
@@ -233,7 +236,7 @@ INDEX = Template("""<!DOCTYPE html>
                 data.text = editor.getValue()
                 $.post("api/save", data).done(
                     function( resp ) {
-                    alert( resp );
+                    $.modal("<div><pre>" + resp + "</pre></div>", modaloptions);
                   }
                 );
             }
