@@ -20,6 +20,8 @@ Installation is easy. There are no dependencies on Python modules that are not p
 - Execute it (`sudo ./configurator.py`)
 - To terminate the process do the usual `CTRL+C`, maybe once or twice
 
+It is also possible to place configurator.py somewhere else. For this to work though, you have to modify the source code. Near the top you'll find the variable `BASEPATH`. Set this to something like `"/home/hass/.homeassistant"`, and no matter where you're running the configurator from, it will [chroot](https://linux.die.net/man/1/chroot) into that directory and start serving files from there.
+
 By default the webapp listens on IP `0.0.0.0` (which is every IP the machine has) on port `3218`. If you leave it that way and you DON'T USE SSL, you can embed the configurator into HASS using a [panel_iframe](https://home-assistant.io/components/panel_iframe/):
 
 ```yaml
@@ -30,7 +32,7 @@ panel_iframe:
 ```
 
 Since this is no service, one way to always keep this running would be to use [screen](http://ss64.com/bash/screen.html). If it's not already installed on your system, you can do `sudo apt-get install screen` to get it. When it's installed, start a screen session by executing `screen`. Then navigate to your HASS directory and start the configurator like described above. Put the screen session into the background by pressing `CTRL+A` and then `CTRL+D`.
-To resume the screen session, log in to your machine and execute `screen -r`.
+To resume the screen session, log in to your machine and execute `screen -r`.  
 
 And here a screenshot of this thing embedded into HASS:
 ![Screenshot](https://github.com/danielperna84/hass-poc-configurator/blob/master/hass-poc-configurator.png)

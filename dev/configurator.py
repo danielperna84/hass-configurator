@@ -11,8 +11,10 @@ from string import Template
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse, parse_qs
 
-VERSION = "0.0.4"
+VERSION = "0.0.5"
 BASEDIR = "."
+# Set BASEPATH to something like "/home/hass/.homeasssitant" if you're not running the configurator from that path
+BASEPATH = None
 LISTENIP = "0.0.0.0"
 LISTENPORT = 3218
 BOOTSTRAPAPI = "http://127.0.0.1:8123/api/bootstrap"
@@ -144,6 +146,9 @@ def run():
     server_address = (LISTENIP, LISTENPORT)
     httpd = HTTPServer(server_address, RequestHandler)
     print('running server...')
+    if BASEPATH:
+        os.chroot(BASEPATH)
+        os.chdir('/')
     httpd.serve_forever()
 
 run()
