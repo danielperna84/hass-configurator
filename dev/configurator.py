@@ -14,7 +14,7 @@ from urllib.parse import urlparse, parse_qs
 VERSION = "0.0.5"
 BASEDIR = "."
 # Set BASEPATH to something like "/home/hass/.homeasssitant" if you're not running the configurator from that path
-BASEPATH = None
+BASEPATH = "."
 LISTENIP = "0.0.0.0"
 LISTENPORT = 3218
 BOOTSTRAPAPI = "http://127.0.0.1:8123/api/bootstrap"
