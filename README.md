@@ -20,7 +20,7 @@ Installation is easy. There are no dependencies on Python modules that are not p
 - Execute it (`sudo ./configurator.py`)
 - To terminate the process do the usual `CTRL+C`, maybe once or twice
 
-It is also possible to place configurator.py somewhere else. For this to work though, you have to modify the source code. Near the top you'll find the variable `BASEPATH`. Set this to something like `"/home/hass/.homeassistant"`, and no matter where you're running the configurator from, it will [chroot](https://linux.die.net/man/1/chroot) into that directory and start serving files from there.
+__On Linux systems__ it is also possible to place configurator.py somewhere else. For this to work though, you have to modify the source code. Near the top you'll find the variable `BASEPATH`. Set this to something like `"/home/hass/.homeassistant"`, and no matter where you're running the configurator from, it will [chroot](https://linux.die.net/man/1/chroot) into that directory and start serving files from there.
 
 By default the webapp listens on IP `0.0.0.0` (which is every IP the machine has) on port `3218`. If you leave it that way and you DON'T USE SSL, you can embed the configurator into HASS using a [panel_iframe](https://home-assistant.io/components/panel_iframe/):
 
