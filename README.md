@@ -28,23 +28,24 @@ There are no dependencies on Python modules that are not part of the standard li
 - To terminate the process do the usual `CTRL+C`, maybe once or twice
 
 ###Configuration
-Near the top of the py-file you'll find some global variables you can change to customize the configurator a little bit.
+Near the top of the py-file you'll find some global variables you can change to customize the configurator a little bit. If you're unfamiliar with Python: when setting variables of the type _string_, you have to write that within quotation marks.
 
-####LISTENIP
+####LISTENIP (string)
 The IP the service is listening on. By default it's binding to `0.0.0.0`, which is every interface on the system.
-####LISTENPORT
+####LISTENPORT (integer)
 The port the service is listening on. By default it's using 3218, but you can change this if you need to.
-####BASEPATH
+####BASEPATH (string)
 __On Linux systems__ it is possible to place configurator.py somewhere else. Set the `BASEPATH` to something like `"/home/hass/.homeassistant"`, and no matter where you're running the configurator from, it will [chroot](https://linux.die.net/man/1/chroot) into that directory and start serving files from there.
-####SSL_CERTIFICATE / SSL_KEY
+####SSL_CERTIFICATE / SSL_KEY (string)
 If you're using SSL, set the paths to your SSL files here. This is similar to the SSL setup you can do in HASS.
-####HASS_API
+####HASS_API (string)
 The configurator fetches some data from your running HASS instance. If the API isn't available through the default URL, modify this variable to fix this.
-####HASS_API_PASSWORD
+####HASS_API_PASSWORD (string)
 If you plan on using the restart button, you have to set your API password. Calling the restart service of HASS is prohibited without authentication.
 
 ###Embedding into HASS
-HASS has the [panel_iframe](https://home-assistant.io/components/panel_iframe/) component. With this it is possible to embed the configurator directly into HASS, allowing you to modify your configuration through the HASS frontend. An example configuration would look like this:
+HASS has the [panel_iframe](https://home-assistant.io/components/panel_iframe/) component. With this it is possible to embed the configurator directly into HASS, allowing you to modify your configuration through the HASS frontend.  
+An example configuration would look like this:
 
 ```yaml
 panel_iframe:
@@ -53,6 +54,7 @@ panel_iframe:
     icon: mdi:wrench
     url: http://123.123.132.132:3218
 ```
+__IMPORTANT__: Do NOT setup port forwarding to the configurator. There are no authentication mechanisms, and a port forwarding would expose your configuration to the whole world!
 
 ####Keeping the configurator running
 Since this is no service, one way to always keep this running (on Linux at least) would be to use [screen](http://ss64.com/bash/screen.html). If it's not already installed on your system, you can do `sudo apt-get install screen` to get it. When it's installed, start a screen session by executing `screen`. Then navigate to your HASS directory and start the configurator like described above. Put the screen session into the background by pressing `CTRL+A` and then `CTRL+D`.
