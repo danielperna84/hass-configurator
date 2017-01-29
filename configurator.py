@@ -401,8 +401,15 @@ class RequestHandler(BaseHTTPRequestHandler):
         
         boot = "{}"
         try:
-            response = urllib.request.urlopen("%sbootstrap" % HASS_API)
-            boot = response.read().decode('utf-8')
+            headers = {
+                "Content-Type": "application/json"
+            }
+            if HASS_API_PASSWORD:
+                headers["x-ha-access"] = HASS_API_PASSWORD
+            req = urllib.request.Request("%sbootstrap" % HASS_API, headers=headers, method='GET')
+            with urllib.request.urlopen(req) as response:
+                boot = response.read().decode('utf-8')
+            
         except Exception as err:
             print(err)
         
