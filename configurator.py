@@ -306,6 +306,7 @@ INDEX = Template("""<!DOCTYPE html>
             var pos = editor.selection.getCursor();
             var end = editor.session.insert(pos, text);
             editor.selection.setRange({start:pos, end:end});
+            editor.focus();
         }
     </script>
 </html>
@@ -465,11 +466,6 @@ class RequestHandler(BaseHTTPRequestHandler):
         return
 
 class AuthHandler(RequestHandler):
-    def do_HEAD(self):
-        self.send_response(200)
-        self.send_header('Content-type', 'text/html')
-        self.end_headers()
-
     def do_AUTHHEAD(self):
         print("Requesting authorization")
         self.send_response(401)

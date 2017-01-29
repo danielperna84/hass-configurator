@@ -271,6 +271,7 @@
             var pos = editor.selection.getCursor();
             var end = editor.session.insert(pos, text);
             editor.selection.setRange({start:pos, end:end});
+            editor.focus();
         }
     </script>
 </html>
