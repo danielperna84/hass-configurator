@@ -57,5 +57,9 @@ panel_iframe:
 __IMPORTANT__: Do NOT setup port forwarding to the configurator. There are no authentication mechanisms, and a port forwarding would expose your configuration to the whole world!
 
 ####Keeping the configurator running
-Since this is no service, one way to always keep this running (on Linux at least) would be to use [screen](http://ss64.com/bash/screen.html). If it's not already installed on your system, you can do `sudo apt-get install screen` to get it. When it's installed, start a screen session by executing `screen`. Then navigate to your HASS directory and start the configurator like described above. Put the screen session into the background by pressing `CTRL+A` and then `CTRL+D`.
+Since the configurator script on its own is no service, you'll have to take some extra steps to keep it running. Here are three options (for Linux), but there are more, depending on your usecase.
+
+1. Simple fork into the background with the command `nohup sudo ./configurator.py &`
+2. If your system is using systemd (that's usually what you'll find on a Raspberry PI), there's a [template file](https://github.com/danielperna84/hass-poc-configurator/blob/master/hass-poc-configurator.systemd) you can use and then apply the same process to integrate it as mentioned in the [HASS documentation](https://home-assistant.io/getting-started/autostart-systemd/)
+3. A tool called [screen](http://ss64.com/bash/screen.html). If it's not already installed on your system, you can do `sudo apt-get install screen` to get it. When it's installed, start a screen session by executing `screen`. Then navigate to your HASS directory and start the configurator like described above. Put the screen session into the background by pressing `CTRL+A` and then `CTRL+D`.
 To resume the screen session, log in to your machine and execute `screen -r`.
