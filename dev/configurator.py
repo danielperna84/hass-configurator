@@ -6,18 +6,24 @@ https://github.com/danielperna84/hass-poc-configurator
 import os
 import sys
 import json
+import ssl
+import socketserver
 import urllib.request
 from string import Template
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse, parse_qs
 
-VERSION = "0.0.5"
-BASEDIR = "."
-# Set BASEPATH to something like "/home/hass/.homeasssitant" if you're not running the configurator from that path
-BASEPATH = None
+### Some options for you to change
 LISTENIP = "0.0.0.0"
 LISTENPORT = 3218
-BOOTSTRAPAPI = "http://127.0.0.1:8123/api/bootstrap"
+# Set BASEPATH to something like "/home/hass/.homeasssitant" if you're not running the configurator from that path
+BASEPATH = None
+SSL_CERTIFICATE = None
+SSL_KEY = None
+### End of options
+
+VERSION = "0.0.6"
+BASEDIR = "."
 
 class Node:
     def __init__(self, id, text, parent):
@@ -134,7 +140,6 @@ class RequestHandler(BaseHTTPRequestHandler):
                     response = "%s" % (str(err))
                     print(err)
         else:
-            #print(postvars)
             response = "Missing filename or text"
         self.send_response(200)
         self.end_headers()
@@ -142,10 +147,14 @@ class RequestHandler(BaseHTTPRequestHandler):
         return
 
 def run():
-    print('starting server...')
+    print('Starting server')
     server_address = (LISTENIP, LISTENPORT)
-    httpd = HTTPServer(server_address, RequestHandler)
-    print('running server...')
+    if not SSL_CERTIFICATE:
+        httpd = HTTPServer(server_address, RequestHandler)
+    else:
+        httpd = socketserver.TCPServer(server_address, RequestHandler)
+        httpd.socket = ssl.wrap_socket(httpd.socket, certfile=SSL_CERTIFICATE, keyfile=SSL_KEY, server_side=True)
+    print('Listening on: %s://%s:%i' % ('https' if SSL_CERTIFICATE else 'http', LISTENIP, LISTENPORT))
     if BASEPATH:
         os.chroot(BASEPATH)
         os.chdir('/')
