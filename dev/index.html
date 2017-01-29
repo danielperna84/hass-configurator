@@ -19,13 +19,17 @@
                 width: 20%;
                 float: left;
                 font-size: 9pt;
-                
             }
             
             #buttons {
                 position: absolute;
                 top: 0;
                 right: 0;
+            }
+            
+            #release {
+                float: right;
+                padding: 2px;
             }
             
             #toolbar {
@@ -59,6 +63,14 @@
             
             #services {
                 max-width: 100%;
+            }
+            
+            .green {
+                color: #0f0;
+            }
+            
+            .red {
+                color: #f00;
             }
         </style>
     </head>
@@ -102,6 +114,7 @@
             <button id="restart" type="button" onclick="restart_dialog()">Restart HASS</button>
             <button id="help" type="button" onclick="window.open('https://home-assistant.io/getting-started/','_blank');">Help</button>
             <button id="components" type="button" onclick="window.open('https://home-assistant.io/components/','_blank');">Components</button>
+            <a id="release" class="$versionclass" href="https://github.com/danielperna84/hass-poc-configurator/releases/latest" target="_blank">$current</a>
         </div>
         <div id="editor"></div>
     </body>

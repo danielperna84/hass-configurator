@@ -25,6 +25,7 @@ SSL_KEY = None
 HASS_API = "http://127.0.0.1:8123/api/"
 ### End of options
 
+RELEASEURL = "https://api.github.com/repos/danielperna84/hass-poc-configurator/releases/latest"
 VERSION = "0.0.6"
 BASEDIR = "."
 
@@ -115,7 +116,15 @@ class RequestHandler(BaseHTTPRequestHandler):
         except Exception as err:
             print(err)
         
-        html = html.safe_substitute(bootstrap=boot)
+        color = "green"
+        try:
+            response = urllib.request.urlopen(RELEASEURL)
+            latest = json.loads(response.read().decode('utf-8'))['tag_name']
+            if VERSION != latest:
+                color = "red"
+        except Exception as err:
+            print(err)
+        html = INDEX.safe_substitute(bootstrap=boot, current=VERSION, versionclass=color)
         self.wfile.write(bytes(html, "utf8"))
         return
 

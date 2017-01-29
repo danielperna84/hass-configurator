@@ -1,6 +1,7 @@
 Version 0.0.6 (2017-01-29)
 - Added SSL support
-- Added restart button
+- Added HASS restart button
+- Added version indicator with link to repo
 
 Version 0.0.5 (2017-01-27)
 - Ugly workaround to run configurator.py from somewhere else than HASS-dir (Issue #1)

@@ -26,6 +26,7 @@ HASS_API = "http://127.0.0.1:8123/api/"
 HASS_API_PASSWORD = None
 ### End of options
 
+RELEASEURL = "https://api.github.com/repos/danielperna84/hass-poc-configurator/releases/latest"
 VERSION = "0.0.6"
 BASEDIR = "."
 INDEX = Template("""<!DOCTYPE html>
@@ -49,13 +50,17 @@ INDEX = Template("""<!DOCTYPE html>
                 width: 20%;
                 float: left;
                 font-size: 9pt;
-                
             }
             
             #buttons {
                 position: absolute;
                 top: 0;
                 right: 0;
+            }
+            
+            #release {
+                float: right;
+                padding: 2px;
             }
             
             #toolbar {
@@ -89,6 +94,14 @@ INDEX = Template("""<!DOCTYPE html>
             
             #services {
                 max-width: 100%;
+            }
+            
+            .green {
+                color: #0f0;
+            }
+            
+            .red {
+                color: #f00;
             }
         </style>
     </head>
@@ -132,6 +145,7 @@ INDEX = Template("""<!DOCTYPE html>
             <button id="restart" type="button" onclick="restart_dialog()">Restart HASS</button>
             <button id="help" type="button" onclick="window.open('https://home-assistant.io/getting-started/','_blank');">Help</button>
             <button id="components" type="button" onclick="window.open('https://home-assistant.io/components/','_blank');">Components</button>
+            <a id="release" class="$versionclass" href="https://github.com/danielperna84/hass-poc-configurator/releases/latest" target="_blank">$current</a>
         </div>
         <div id="editor"></div>
     </body>
@@ -392,7 +406,15 @@ class RequestHandler(BaseHTTPRequestHandler):
         except Exception as err:
             print(err)
         
-        html = INDEX.safe_substitute(bootstrap=boot)
+        color = "green"
+        try:
+            response = urllib.request.urlopen(RELEASEURL)
+            latest = json.loads(response.read().decode('utf-8'))['tag_name']
+            if VERSION != latest:
+                color = "red"
+        except Exception as err:
+            print(err)
+        html = INDEX.safe_substitute(bootstrap=boot, current=VERSION, versionclass=color)
         self.wfile.write(bytes(html, "utf8"))
         return
 
