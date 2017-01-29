@@ -99,6 +99,7 @@
             <button id="whitespace" type="button" onclick="toggle_whitespace()">Whitespace</button>
             <button id="fold" type="button" onclick="toggle_fold()">Fold</button>
             <button id="highlight" type="button" onclick="toggle_highlightSelectedWord()">Highlight selected words</button>
+            <button id="restart" type="button" onclick="restart_dialog()">Restart HASS</button>
             <button id="help" type="button" onclick="window.open('https://home-assistant.io/getting-started/','_blank');">Help</button>
             <button id="components" type="button" onclick="window.open('https://home-assistant.io/components/','_blank');">Components</button>
         </div>
@@ -214,6 +215,21 @@
             }
         }
         
+        function restart_dialog() {
+            $.modal("<div><h3>Do you really want to restart HASS?</h3><p><button type='button' class='simplemodal-close' onclick='restart()'>Yes</button>&nbsp;<button type='button' class='simplemodal-close'>No</button></p></div>", modaloptions);
+        }
+        
+        function restart() {
+            $.get("api/restart", function( resp ) {
+                if (resp.length == 0) {
+                    $.modal("<div><pre>Restarting HASS</pre></div>", modaloptions);
+                }
+                else {
+                    $.modal("<div><pre>" + resp + "</pre></div>", modaloptions);
+                }
+            });
+        }
+        
         function save() {
             var n = $("#tree").jstree("get_selected");
             if (n) {
@@ -222,7 +238,7 @@
                 data.text = editor.getValue()
                 $.post("api/save", data).done(
                     function( resp ) {
-                    $.modal("<div><pre>" + resp + "</pre></div>", modaloptions);
+                        $.modal("<div><pre>" + resp + "</pre></div>", modaloptions);
                   }
                 );
             }

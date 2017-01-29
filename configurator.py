@@ -18,14 +18,16 @@ LISTENIP = "0.0.0.0"
 LISTENPORT = 3218
 # Set BASEPATH to something like "/home/hass/.homeasssitant" if you're not running the configurator from that path
 BASEPATH = None
+# Set the paths to a certificate and the key if you're using SSL
 SSL_CERTIFICATE = None
 SSL_KEY = None
+# Set the destination where the HASS API is reachable
+HASS_API = "http://127.0.0.1:8123/api/"
+HASS_API_PASSWORD = None
 ### End of options
 
 VERSION = "0.0.6"
 BASEDIR = "."
-
-BOOTSTRAPAPI = "http://127.0.0.1:8123/api/bootstrap"
 INDEX = Template("""<!DOCTYPE html>
 <html>
     <head>
@@ -127,6 +129,7 @@ INDEX = Template("""<!DOCTYPE html>
             <button id="whitespace" type="button" onclick="toggle_whitespace()">Whitespace</button>
             <button id="fold" type="button" onclick="toggle_fold()">Fold</button>
             <button id="highlight" type="button" onclick="toggle_highlightSelectedWord()">Highlight selected words</button>
+            <button id="restart" type="button" onclick="restart_dialog()">Restart HASS</button>
             <button id="help" type="button" onclick="window.open('https://home-assistant.io/getting-started/','_blank');">Help</button>
             <button id="components" type="button" onclick="window.open('https://home-assistant.io/components/','_blank');">Components</button>
         </div>
@@ -242,6 +245,21 @@ INDEX = Template("""<!DOCTYPE html>
             }
         }
         
+        function restart_dialog() {
+            $.modal("<div><h3>Do you really want to restart HASS?</h3><p><button type='button' class='simplemodal-close' onclick='restart()'>Yes</button>&nbsp;<button type='button' class='simplemodal-close'>No</button></p></div>", modaloptions);
+        }
+        
+        function restart() {
+            $.get("api/restart", function( resp ) {
+                if (resp.length == 0) {
+                    $.modal("<div><pre>Restarting HASS</pre></div>", modaloptions);
+                }
+                else {
+                    $.modal("<div><pre>" + resp + "</pre></div>", modaloptions);
+                }
+            });
+        }
+        
         function save() {
             var n = $("#tree").jstree("get_selected");
             if (n) {
@@ -250,7 +268,7 @@ INDEX = Template("""<!DOCTYPE html>
                 data.text = editor.getValue()
                 $.post("api/save", data).done(
                     function( resp ) {
-                    $.modal("<div><pre>" + resp + "</pre></div>", modaloptions);
+                        $.modal("<div><pre>" + resp + "</pre></div>", modaloptions);
                   }
                 );
             }
@@ -344,13 +362,32 @@ class RequestHandler(BaseHTTPRequestHandler):
                         content += fptr.read()
             self.wfile.write(bytes(content, "utf8"))
             return
+        elif req.path == '/api/restart':
+            self.send_header('Content-type','text/json')
+            self.end_headers()
+            r = {"restart": False}
+            try:
+                headers = {
+                    "Content-Type": "application/json"
+                }
+                if HASS_API_PASSWORD:
+                    headers["x-ha-access"] = HASS_API_PASSWORD
+                req = urllib.request.Request("%sservices/homeassistant/restart" % HASS_API, headers=headers, method='POST')
+                with urllib.request.urlopen(req) as response:
+                    r = json.loads(response.read().decode('utf-8'))
+                    print(r)
+            except Exception as err:
+                print(err)
+                r['restart'] = str(err)
+            self.wfile.write(bytes(json.dumps(r), "utf8"))
+            return
 
         self.send_header('Content-type','text/html')
         self.end_headers()
         
         boot = "{}"
         try:
-            response = urllib.request.urlopen(BOOTSTRAPAPI)
+            response = urllib.request.urlopen("%sbootstrap" % HASS_API)
             boot = response.read().decode('utf-8')
         except Exception as err:
             print(err)

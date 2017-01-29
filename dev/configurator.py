@@ -18,8 +18,11 @@ LISTENIP = "0.0.0.0"
 LISTENPORT = 3218
 # Set BASEPATH to something like "/home/hass/.homeasssitant" if you're not running the configurator from that path
 BASEPATH = None
+# Set the paths to a certificate and the key if you're using SSL
 SSL_CERTIFICATE = None
 SSL_KEY = None
+# Set the destination where the HASS API is reachable
+HASS_API = "http://127.0.0.1:8123/api/"
 ### End of options
 
 VERSION = "0.0.6"
@@ -107,7 +110,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             html = Template(fptr.read())
         boot = "{}"
         try:
-            response = urllib.request.urlopen(BOOTSTRAPAPI)
+            response = urllib.request.urlopen("%sbootstrap" % HASS_API)
             boot = response.read().decode('utf-8')
         except Exception as err:
             print(err)
