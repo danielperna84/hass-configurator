@@ -56,7 +56,7 @@ panel_iframe:
 ```
 __IMPORTANT__: Do NOT setup port forwarding to the configurator. There are no authentication mechanisms, and a port forwarding would expose your configuration to the whole world!
 
-####Keeping the configurator running
+###Keeping the configurator running
 Since the configurator script on its own is no service, you'll have to take some extra steps to keep it running. Here are three options (for Linux), but there are more, depending on your usecase.
 
 1. Simple fork into the background with the command `nohup sudo ./configurator.py &`
