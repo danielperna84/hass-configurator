@@ -13,7 +13,7 @@ from string import Template
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse, parse_qs
 
-### Some options for you to change
+######### Some options for you to change #########
 LISTENIP = "0.0.0.0"
 LISTENPORT = 3218
 # Set BASEPATH to something like "/home/hass/.homeasssitant" if you're not running the configurator from that path
@@ -23,7 +23,9 @@ SSL_CERTIFICATE = None
 SSL_KEY = None
 # Set the destination where the HASS API is reachable
 HASS_API = "http://127.0.0.1:8123/api/"
-### End of options
+# To enable authentication, set the credentials in the form of "username:password"
+CREDENTIALS = None
+################# End of options #################
 
 RELEASEURL = "https://api.github.com/repos/danielperna84/hass-poc-configurator/releases/latest"
 VERSION = "0.0.6"
@@ -165,11 +167,60 @@ class RequestHandler(BaseHTTPRequestHandler):
         self.wfile.write(bytes(response, "utf8"))
         return
 
+class AuthHandler(RequestHandler):
+    def do_HEAD(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+
+    def do_AUTHHEAD(self):
+        print("Requesting authorization")
+        self.send_response(401)
+        self.send_header('WWW-Authenticate', 'Basic realm=\"HASS-PoC-Configurator\"')
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+
+    def do_GET(self):
+        global CREDENTIALS
+        authorization = self.headers.get('Authorization', None)
+        if authorization == None:
+            self.do_AUTHHEAD()
+            self.wfile.write(bytes('no auth header received', 'utf-8'))
+            pass
+        elif authorization == 'Basic %s' % CREDENTIALS.decode('utf-8'):
+            super().do_GET()
+            pass
+        else:
+            self.do_AUTHHEAD()
+            self.wfile.write(bytes('not authenticated', 'utf-8'))
+            pass
+    
+    def do_POST(self):
+        global CREDENTIALS
+        authorization = self.headers.get('Authorization', None)
+        if authorization == None:
+            self.do_AUTHHEAD()
+            self.wfile.write(bytes('no auth header received', 'utf-8'))
+            pass
+        elif authorization == 'Basic %s' % CREDENTIALS.decode('utf-8'):
+            super().do_POST()
+            pass
+        else:
+            self.do_AUTHHEAD()
+            self.wfile.write(bytes('not authenticated', 'utf-8'))
+            pass
+
 def run():
+    global CREDENTIALS
     print('Starting server')
     server_address = (LISTENIP, LISTENPORT)
+    if CREDENTIALS:
+        CREDENTIALS = base64.b64encode(bytes(CREDENTIALS, "utf-8"))
+        Handler = AuthHandler
+    else:
+        Handler = RequestHandler
     if not SSL_CERTIFICATE:
-        httpd = HTTPServer(server_address, RequestHandler)
+        httpd = HTTPServer(server_address, Handler)
     else:
         httpd = socketserver.TCPServer(server_address, RequestHandler)
         httpd.socket = ssl.wrap_socket(httpd.socket, certfile=SSL_CERTIFICATE, keyfile=SSL_KEY, server_side=True)

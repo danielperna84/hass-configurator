@@ -9,6 +9,7 @@ import json
 import ssl
 import socketserver
 import urllib.request
+import base64
 from string import Template
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse, parse_qs
@@ -24,6 +25,8 @@ SSL_KEY = None
 # Set the destination where the HASS API is reachable
 HASS_API = "http://127.0.0.1:8123/api/"
 HASS_API_PASSWORD = None
+# To enable authentication, set the credentials in the form of "username:password"
+CREDENTIALS = None
 ### End of options
 
 RELEASEURL = "https://api.github.com/repos/danielperna84/hass-poc-configurator/releases/latest"
@@ -109,7 +112,7 @@ INDEX = Template("""<!DOCTYPE html>
         <div id="menu">
             <div id="tree"></div><br />
             <label for="triggers">Trigger platforms:</label><br />
-            <select id="triggers" onchange="editor.session.insert(editor.getCursorPosition(), this.value)">
+            <select id="triggers" onchange="insert(this.value)">
                 <option value="" disabled selected>...</option>
                 <option value="event">Event</option>
                 <option value="mqtt">MQTT</option>
@@ -121,11 +124,11 @@ INDEX = Template("""<!DOCTYPE html>
                 <option value="zone">Zone</option>
             </select><br /><br />
             <label for="events">Events:</label><br />
-            <select id="events" onchange="editor.session.insert(editor.getCursorPosition(), this.value)"></select><br /><br />
+            <select id="events" onchange="insert(this.value)"></select><br /><br />
             <label for="entities">Entities:</label><br />
-            <select id="entities" onchange="editor.session.insert(editor.getCursorPosition(), this.value)"></select><br /><br />
+            <select id="entities" onchange="insert(this.value)"></select><br /><br />
             <label for="conditions">Conditions:</label><br />
-            <select id="conditions" onchange="editor.session.insert(editor.getCursorPosition(), this.value)">
+            <select id="conditions" onchange="insert(this.value)">
                 <option value="" disabled selected>...</option>
                 <option value="numeric_state">Numeric state</option>
                 <option value="state">State</option>
@@ -135,7 +138,7 @@ INDEX = Template("""<!DOCTYPE html>
                 <option value="zone">Zone</option>
             </select><br /><br />
             <label for="services">Services:</label><br />
-            <select id="services" onchange="editor.session.insert(editor.getCursorPosition(), this.value)"></select>
+            <select id="services" onchange="insert(this.value)"></select>
         </div>
         <div id="toolbar">
             <button id="savebutton" type="button" onclick="save()">Save</button>
@@ -298,6 +301,11 @@ INDEX = Template("""<!DOCTYPE html>
         editor.setOption("displayIndentGuides", true);
         editor.setOption("highlightSelectedWord", highlightwords);
         editor.$blockScrolling = Infinity;
+        function insert(text) {
+            var pos = editor.selection.getCursor();
+            var end = editor.session.insert(pos, text);
+            editor.selection.setRange({start:pos, end:end});
+        }
     </script>
 </html>
 """)
@@ -455,11 +463,60 @@ class RequestHandler(BaseHTTPRequestHandler):
         self.wfile.write(bytes(response, "utf8"))
         return
 
+class AuthHandler(RequestHandler):
+    def do_HEAD(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+
+    def do_AUTHHEAD(self):
+        print("Requesting authorization")
+        self.send_response(401)
+        self.send_header('WWW-Authenticate', 'Basic realm=\"HASS-PoC-Configurator\"')
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+
+    def do_GET(self):
+        global CREDENTIALS
+        authorization = self.headers.get('Authorization', None)
+        if authorization == None:
+            self.do_AUTHHEAD()
+            self.wfile.write(bytes('no auth header received', 'utf-8'))
+            pass
+        elif authorization == 'Basic %s' % CREDENTIALS.decode('utf-8'):
+            super().do_GET()
+            pass
+        else:
+            self.do_AUTHHEAD()
+            self.wfile.write(bytes('not authenticated', 'utf-8'))
+            pass
+    
+    def do_POST(self):
+        global CREDENTIALS
+        authorization = self.headers.get('Authorization', None)
+        if authorization == None:
+            self.do_AUTHHEAD()
+            self.wfile.write(bytes('no auth header received', 'utf-8'))
+            pass
+        elif authorization == 'Basic %s' % CREDENTIALS.decode('utf-8'):
+            super().do_POST()
+            pass
+        else:
+            self.do_AUTHHEAD()
+            self.wfile.write(bytes('not authenticated', 'utf-8'))
+            pass
+
 def run():
+    global CREDENTIALS
     print('Starting server')
     server_address = (LISTENIP, LISTENPORT)
+    if CREDENTIALS:
+        CREDENTIALS = base64.b64encode(bytes(CREDENTIALS, "utf-8"))
+        Handler = AuthHandler
+    else:
+        Handler = RequestHandler
     if not SSL_CERTIFICATE:
-        httpd = HTTPServer(server_address, RequestHandler)
+        httpd = HTTPServer(server_address, Handler)
     else:
         httpd = socketserver.TCPServer(server_address, RequestHandler)
         httpd.socket = ssl.wrap_socket(httpd.socket, certfile=SSL_CERTIFICATE, keyfile=SSL_KEY, server_side=True)

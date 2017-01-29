@@ -42,6 +42,8 @@ If you're using SSL, set the paths to your SSL files here. This is similar to th
 The configurator fetches some data from your running HASS instance. If the API isn't available through the default URL, modify this variable to fix this.
 ####HASS_API_PASSWORD (string)
 If you plan on using the restart button, you have to set your API password. Calling the restart service of HASS is prohibited without authentication.
+####CREDENTIALS (string)
+Set credentials in the form of `"username:password"` if authentication should be required for access.
 
 ###Embedding into HASS
 HASS has the [panel_iframe](https://home-assistant.io/components/panel_iframe/) component. With this it is possible to embed the configurator directly into HASS, allowing you to modify your configuration through the HASS frontend.  

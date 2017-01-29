@@ -78,7 +78,7 @@
         <div id="menu">
             <div id="tree"></div><br />
             <label for="triggers">Trigger platforms:</label><br />
-            <select id="triggers" onchange="editor.session.insert(editor.getCursorPosition(), this.value)">
+            <select id="triggers" onchange="insert(this.value)">
                 <option value="" disabled selected>...</option>
                 <option value="event">Event</option>
                 <option value="mqtt">MQTT</option>
@@ -90,11 +90,11 @@
                 <option value="zone">Zone</option>
             </select><br /><br />
             <label for="events">Events:</label><br />
-            <select id="events" onchange="editor.session.insert(editor.getCursorPosition(), this.value)"></select><br /><br />
+            <select id="events" onchange="insert(this.value)"></select><br /><br />
             <label for="entities">Entities:</label><br />
-            <select id="entities" onchange="editor.session.insert(editor.getCursorPosition(), this.value)"></select><br /><br />
+            <select id="entities" onchange="insert(this.value)"></select><br /><br />
             <label for="conditions">Conditions:</label><br />
-            <select id="conditions" onchange="editor.session.insert(editor.getCursorPosition(), this.value)">
+            <select id="conditions" onchange="insert(this.value)">
                 <option value="" disabled selected>...</option>
                 <option value="numeric_state">Numeric state</option>
                 <option value="state">State</option>
@@ -104,7 +104,7 @@
                 <option value="zone">Zone</option>
             </select><br /><br />
             <label for="services">Services:</label><br />
-            <select id="services" onchange="editor.session.insert(editor.getCursorPosition(), this.value)"></select>
+            <select id="services" onchange="insert(this.value)"></select>
         </div>
         <div id="toolbar">
             <button id="savebutton" type="button" onclick="save()">Save</button>
@@ -267,5 +267,10 @@
         editor.setOption("displayIndentGuides", true);
         editor.setOption("highlightSelectedWord", highlightwords);
         editor.$blockScrolling = Infinity;
+        function insert(text) {
+            var pos = editor.selection.getCursor();
+            var end = editor.session.insert(pos, text);
+            editor.selection.setRange({start:pos, end:end});
+        }
     </script>
 </html>
