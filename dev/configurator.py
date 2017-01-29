@@ -13,19 +13,21 @@ from string import Template
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse, parse_qs
 
-######### Some options for you to change #########
+### Some options for you to change
 LISTENIP = "0.0.0.0"
 LISTENPORT = 3218
 # Set BASEPATH to something like "/home/hass/.homeasssitant" if you're not running the configurator from that path
 BASEPATH = None
-# Set the paths to a certificate and the key if you're using SSL
+# Set the paths to a certificate and the key if you're using SSL, e.g "/etc/ssl/certs/mycert.pem"
 SSL_CERTIFICATE = None
 SSL_KEY = None
 # Set the destination where the HASS API is reachable
 HASS_API = "http://127.0.0.1:8123/api/"
+# If a password is required to access the API, set it in the form of "password"
+HASS_API_PASSWORD = None
 # To enable authentication, set the credentials in the form of "username:password"
 CREDENTIALS = None
-################# End of options #################
+### End of options
 
 RELEASEURL = "https://api.github.com/repos/danielperna84/hass-poc-configurator/releases/latest"
 VERSION = "0.0.6"
