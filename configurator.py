@@ -10,6 +10,7 @@ import ssl
 import socketserver
 import urllib.request
 import base64
+import ipaddress
 from string import Template
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse, parse_qs
@@ -28,6 +29,9 @@ HASS_API = "http://127.0.0.1:8123/api/"
 HASS_API_PASSWORD = None
 # To enable authentication, set the credentials in the form of "username:password"
 CREDENTIALS = None
+# Limit access to the configurator by adding allowed IP addresses / networks to the list
+# E.g ALLOWED_NETWORKS = ["192.168.0.0/24", "172.16.47.23"]
+ALLOWED_NETWORKS = []
 ### End of options
 
 RELEASEURL = "https://api.github.com/repos/danielperna84/hass-poc-configurator/releases/latest"
@@ -312,6 +316,14 @@ INDEX = Template("""<!DOCTYPE html>
 </html>
 """)
 
+def check_access(clientip):
+    if not ALLOWED_NETWORKS:
+        return True
+    for net in ALLOWED_NETWORKS:
+        if ipaddress.ip_address(clientip) in ipaddress.ip_network(net):
+            return True
+    return False
+
 class Node:
     def __init__(self, id, text, parent):
         self.id = id
@@ -365,7 +377,15 @@ def getdirs(searchpath):
     return [node.as_json() for node in unique_nodes]
 
 class RequestHandler(BaseHTTPRequestHandler):
+    def do_BLOCK(self):
+        self.send_response(420)
+        self.end_headers()
+        self.wfile.write(bytes("Policy Not Fulfilled", "utf8"))
+
     def do_GET(self):
+        if not check_access(self.client_address[0]):
+            self.do_BLOCK()
+            return
         req = urlparse(self.path)
         query = parse_qs(req.query)
         self.send_response(200)
@@ -436,6 +456,9 @@ class RequestHandler(BaseHTTPRequestHandler):
         return
 
     def do_POST(self):
+        if not check_access(self.client_address[0]):
+            self.do_BLOCK()
+            return
         postvars = {}
         response = "Failure"
         try:
@@ -485,7 +508,7 @@ class AuthHandler(RequestHandler):
             pass
         else:
             self.do_AUTHHEAD()
-            self.wfile.write(bytes('not authenticated', 'utf-8'))
+            self.wfile.write(bytes('Authentication required', 'utf-8'))
             pass
     
     def do_POST(self):
@@ -500,7 +523,7 @@ class AuthHandler(RequestHandler):
             pass
         else:
             self.do_AUTHHEAD()
-            self.wfile.write(bytes('not authenticated', 'utf-8'))
+            self.wfile.write(bytes('Authentication required', 'utf-8'))
             pass
 
 def run():
