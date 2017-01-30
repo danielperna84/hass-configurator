@@ -538,7 +538,7 @@ def run():
     if not SSL_CERTIFICATE:
         httpd = HTTPServer(server_address, Handler)
     else:
-        httpd = socketserver.TCPServer(server_address, RequestHandler)
+        httpd = socketserver.TCPServer(server_address, Handler)
         httpd.socket = ssl.wrap_socket(httpd.socket, certfile=SSL_CERTIFICATE, keyfile=SSL_KEY, server_side=True)
     print('Listening on: %s://%s:%i' % ('https' if SSL_CERTIFICATE else 'http', LISTENIP, LISTENPORT))
     if BASEPATH:
