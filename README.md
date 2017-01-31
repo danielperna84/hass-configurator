@@ -75,7 +75,7 @@ panel_iframe:
     icon: mdi:wrench
     url: http://123.123.132.132:3218
 ```
-__IMPORTANT__: Do NOT setup port forwarding to the configurator. There are no authentication mechanisms, and a port forwarding would expose your configuration to the whole world!
+__IMPORTANT__: Be careful when setting up port forwarding to the configurator while embedding into HASS. If you don't restrict access by requiring authentication and / or blocking based on client IP addresses, your configuration will be exposed to the web!
 
 ###Keeping the configurator running
 Since the configurator script on its own is no service, you'll have to take some extra steps to keep it running. Here are three options (for Linux), but there are more, depending on your usecase.
