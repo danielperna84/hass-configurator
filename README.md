@@ -44,6 +44,25 @@ The configurator fetches some data from your running HASS instance. If the API i
 If you plan on using the restart button, you have to set your API password. Calling the restart service of HASS is prohibited without authentication.
 ####CREDENTIALS (string)
 Set credentials in the form of `"username:password"` if authentication should be required for access.
+####ALLOWED_NETWORKS (list)
+Limit access to the configurator by adding allowed IP addresses / networks to the list, e.g ALLOWED_NETWORKS = ["192.168.0.0/24", "172.16.47.23"]
+####BANNED_IPS (list)
+List of statically banned IP addresses, e.g. ["1.1.1.1", "2.2.2.2"]
+####BANLIMIT (integer)
+Ban IPs after n failed login attempts. Restart service to reset banning. The default of `0` disables this feature. `CREDENTIALS` has to be set for this to work.
+
+__Note regarding `ALLOWED_NETWORKS`, `BANNED_IPS` and `BANLIMIT`__:  
+The way this is implemented works in the following order:
+
+1. (Only if `CREDENTIALS` is set) Check credentials
+  - Failure: Retry `BANLIMIT` times, after that return error 420 (unless you try again without any authentication headers set, e.g. private tab of your browser)
+  - Success: Continue
+2. Check if client IP address is in `BANNED_IPS`
+  - Yes: Return error 420
+  - No: Continue
+3. Check if client IP address is in `ALLOWED_NETWORKS`
+  - No: Return error 420
+  - Yes: Continue and display UI of configurator
 
 ###Embedding into HASS
 HASS has the [panel_iframe](https://home-assistant.io/components/panel_iframe/) component. With this it is possible to embed the configurator directly into HASS, allowing you to modify your configuration through the HASS frontend.  

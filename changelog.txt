@@ -1,6 +1,10 @@
 Version 0.0.7 (2017-01-nn)
-- Added optional authentication
 - Inserted elements are selected as visual feedback
+- Focus jumps to end of selection
+- Added optional authentication
+- Added optional ALLOWED_NETWORKS to restrict access
+- Added optional BANNED_IPS to restrict access
+- Added optional IP banning if authentication fails
 
 Version 0.0.6 (2017-01-29)
 - Added SSL support

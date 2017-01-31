@@ -29,14 +29,19 @@ HASS_API = "http://127.0.0.1:8123/api/"
 HASS_API_PASSWORD = None
 # To enable authentication, set the credentials in the form of "username:password"
 CREDENTIALS = None
-# Limit access to the configurator by adding allowed IP addresses / networks to the list
-# E.g ALLOWED_NETWORKS = ["192.168.0.0/24", "172.16.47.23"]
+# Limit access to the configurator by adding allowed IP addresses / networks to the list,
+# e.g ALLOWED_NETWORKS = ["192.168.0.0/24", "172.16.47.23"]
 ALLOWED_NETWORKS = []
+# List of statically banned IP addresses, e.g. ["1.1.1.1", "2.2.2.2"]
+BANNED_IPS = []
+# Ban IPs after n failed login attempts. Restart service to reset banning. The default of `0` disables this feature.
+BANLIMIT = 0
 ### End of options
 
 RELEASEURL = "https://api.github.com/repos/danielperna84/hass-poc-configurator/releases/latest"
 VERSION = "0.0.6"
 BASEDIR = "."
+FAIL2BAN_IPS = {}
 INDEX = Template("""<!DOCTYPE html>
 <html>
     <head>
@@ -317,11 +322,16 @@ INDEX = Template("""<!DOCTYPE html>
 """)
 
 def check_access(clientip):
+    global BANNED_IPS
+    if clientip in BANNED_IPS:
+        return False
     if not ALLOWED_NETWORKS:
         return True
     for net in ALLOWED_NETWORKS:
-        if ipaddress.ip_address(clientip) in ipaddress.ip_network(net):
+        ipobject = ipaddress.ip_address(clientip)
+        if ipobject in ipaddress.ip_network(net):
             return True
+    BANNED_IPS.append(clientip)
     return False
 
 class Node:
@@ -333,10 +343,10 @@ class Node:
         self.state = {'opened': self.id == '.'}
         if os.path.isfile(os.path.join(parent, text)):
             self.icon = "jstree-file"
- 
+
     def is_equal(self, node):
         return self.id == node.id
- 
+
     def as_json(self):
         return dict(
             id=self.id,
@@ -345,8 +355,7 @@ class Node:
             icon=self.icon,
             state=self.state
         )
- 
- 
+
 def get_nodes_from_path(path):
     nodes = []
     path_nodes = path.split(os.sep)
@@ -362,8 +371,7 @@ def get_nodes_from_path(path):
         
         nodes.append(Node(node_id, node_name, parent))
     return nodes
- 
- 
+
 def getdirs(searchpath):
     unique_nodes = []
     for root, dirs, files in os.walk(searchpath, topdown=True):
@@ -380,7 +388,7 @@ class RequestHandler(BaseHTTPRequestHandler):
     def do_BLOCK(self):
         self.send_response(420)
         self.end_headers()
-        self.wfile.write(bytes("Policy Not Fulfilled", "utf8"))
+        self.wfile.write(bytes("Policy not fulfilled", "utf8"))
 
     def do_GET(self):
         if not check_access(self.client_address[0]):
@@ -442,7 +450,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             
         except Exception as err:
             print(err)
-        
+
         color = "green"
         try:
             response = urllib.request.urlopen(RELEASEURL)
@@ -504,13 +512,23 @@ class AuthHandler(RequestHandler):
             self.wfile.write(bytes('no auth header received', 'utf-8'))
             pass
         elif authorization == 'Basic %s' % CREDENTIALS.decode('utf-8'):
+            if BANLIMIT:
+                FAIL2BAN_IPS.pop(self.client_address[0], None)
             super().do_GET()
             pass
         else:
+            if BANLIMIT:
+                bancounter = FAIL2BAN_IPS.get(self.client_address[0], 1)
+                if bancounter >= BANLIMIT:
+                    print("Blocking access from %s" % self.client_address[0])
+                    self.do_BLOCK()
+                    return
+                else:
+                    FAIL2BAN_IPS[self.client_address[0]] = bancounter + 1
             self.do_AUTHHEAD()
             self.wfile.write(bytes('Authentication required', 'utf-8'))
             pass
-    
+
     def do_POST(self):
         global CREDENTIALS
         authorization = self.headers.get('Authorization', None)
@@ -519,9 +537,19 @@ class AuthHandler(RequestHandler):
             self.wfile.write(bytes('no auth header received', 'utf-8'))
             pass
         elif authorization == 'Basic %s' % CREDENTIALS.decode('utf-8'):
+            if BANLIMIT:
+                FAIL2BAN_IPS.pop(self.client_address[0], None)
             super().do_POST()
             pass
         else:
+            if BANLIMIT:
+                bancounter = FAIL2BAN_IPS.get(self.client_address[0], 1)
+                if bancounter >= BANLIMIT:
+                    print("Blocking access from %s" % self.client_address[0])
+                    self.do_BLOCK()
+                    return
+                else:
+                    FAIL2BAN_IPS[self.client_address[0]] = bancounter + 1
             self.do_AUTHHEAD()
             self.wfile.write(bytes('Authentication required', 'utf-8'))
             pass
