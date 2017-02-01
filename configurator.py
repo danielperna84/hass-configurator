@@ -417,7 +417,7 @@ def get_nodes_from_path(path):
 def getdirs(searchpath):
     unique_nodes = []
     for root, dirs, files in os.walk(searchpath, topdown=True):
-        if './deps' not in root and './.git' not in root and './www' not in root:
+        if '/deps' not in root and '/.git' not in root and '/www' not in root:
             for name in files:
                 path = os.path.join(root, name)
                 nodes = get_nodes_from_path(path)
@@ -621,8 +621,7 @@ def main(args):
         HTTPD.socket = ssl.wrap_socket(HTTPD.socket, certfile=SSL_CERTIFICATE, keyfile=SSL_KEY, server_side=True)
     print('Listening on: %s://%s:%i' % ('https' if SSL_CERTIFICATE else 'http', LISTENIP, LISTENPORT))
     if BASEPATH:
-        os.chroot(BASEPATH)
-        os.chdir('/')
+        os.chdir(BASEPATH)
     HTTPD.serve_forever()
 
 if __name__ == "__main__":
