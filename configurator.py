@@ -11,6 +11,7 @@ import socketserver
 import urllib.request
 import base64
 import ipaddress
+import signal
 from string import Template
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse, parse_qs
@@ -42,6 +43,7 @@ RELEASEURL = "https://api.github.com/repos/danielperna84/hass-poc-configurator/r
 VERSION = "0.0.6"
 BASEDIR = "."
 DEV = False
+HTTPD = None
 FAIL2BAN_IPS = {}
 INDEX = Template("""<!DOCTYPE html>
 <html>
@@ -322,6 +324,24 @@ INDEX = Template("""<!DOCTYPE html>
 </html>
 """)
 
+def signal_handler(signal, frame):
+    global HTTPD
+    print("Shutting down server")
+    HTTPD.server_close()
+    HTTPD.shutdown()
+    sys.exit(0)
+
+def load_settings(settingsfile):
+    try:
+        if os.path.isfile(settingsfile):
+            with open(settingsfile) as fptr:
+                settings = json.loads(fptr.read())
+                print(settings)
+    except Exception as err:
+        print(err)
+        print("Not loading static settings")
+    return False
+
 def get_html():
     if DEV:
         try:
@@ -566,9 +586,10 @@ class AuthHandler(RequestHandler):
             self.wfile.write(bytes('Authentication required', 'utf-8'))
             pass
 
-def run():
-    global CREDENTIALS
-    print('Starting server')
+def main(args):
+    global HTTPD, CREDENTIALS
+    print(args)
+    print("Starting server")
     server_address = (LISTENIP, LISTENPORT)
     if CREDENTIALS:
         CREDENTIALS = base64.b64encode(bytes(CREDENTIALS, "utf-8"))
@@ -576,14 +597,16 @@ def run():
     else:
         Handler = RequestHandler
     if not SSL_CERTIFICATE:
-        httpd = HTTPServer(server_address, Handler)
+        HTTPD = HTTPServer(server_address, Handler)
     else:
-        httpd = socketserver.TCPServer(server_address, Handler)
-        httpd.socket = ssl.wrap_socket(httpd.socket, certfile=SSL_CERTIFICATE, keyfile=SSL_KEY, server_side=True)
+        HTTPD = socketserver.TCPServer(server_address, Handler)
+        HTTPD.socket = ssl.wrap_socket(HTTPD.socket, certfile=SSL_CERTIFICATE, keyfile=SSL_KEY, server_side=True)
     print('Listening on: %s://%s:%i' % ('https' if SSL_CERTIFICATE else 'http', LISTENIP, LISTENPORT))
     if BASEPATH:
         os.chroot(BASEPATH)
         os.chdir('/')
-    httpd.serve_forever()
+    HTTPD.serve_forever()
 
-run()
+if __name__ == "__main__":
+    signal.signal(signal.SIGINT, signal_handler)
+    main(sys.argv[1:])
