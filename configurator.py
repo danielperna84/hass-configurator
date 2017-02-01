@@ -328,15 +328,25 @@ def signal_handler(signal, frame):
     global HTTPD
     print("Shutting down server")
     HTTPD.server_close()
-    HTTPD.shutdown()
     sys.exit(0)
 
 def load_settings(settingsfile):
+    global LISTENIP, LISTENPORT, BASEPATH, SSL_CERTIFICATE, SSL_KEY, HASS_API, HASS_API_PASSWORD, CREDENTIALS, ALLOWED_NETWORKS, BANNED_IPS, BANLIMIT
     try:
         if os.path.isfile(settingsfile):
             with open(settingsfile) as fptr:
                 settings = json.loads(fptr.read())
-                print(settings)
+                LISTENIP = settings.get("LISTENIP", LISTENIP)
+                LISTENPORT = settings.get("LISTENPORT", LISTENPORT)
+                BASEPATH = settings.get("BASEPATH", BASEPATH)
+                SSL_CERTIFICATE = settings.get("SSL_CERTIFICATE", SSL_CERTIFICATE)
+                SSL_KEY = settings.get("SSL_KEY", SSL_KEY)
+                HASS_API = settings.get("HASS_API", HASS_API)
+                HASS_API_PASSWORD = settings.get("HASS_API_PASSWORD", HASS_API_PASSWORD)
+                CREDENTIALS = settings.get("CREDENTIALS", CREDENTIALS)
+                ALLOWED_NETWORKS = settings.get("ALLOWED_NETWORKS", ALLOWED_NETWORKS)
+                BANNED_IPS = settings.get("BANNED_IPS", BANNED_IPS)
+                BANLIMIT = settings.get("BANLIMIT", BANLIMIT)
     except Exception as err:
         print(err)
         print("Not loading static settings")
@@ -447,6 +457,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.wfile.write(bytes(content, "utf8"))
             return
         elif req.path == '/api/restart':
+            print("/api/restart")
             self.send_header('Content-type','text/json')
             self.end_headers()
             r = {"restart": False}
@@ -465,35 +476,41 @@ class RequestHandler(BaseHTTPRequestHandler):
                 r['restart'] = str(err)
             self.wfile.write(bytes(json.dumps(r), "utf8"))
             return
-
-        self.send_header('Content-type','text/html')
-        self.end_headers()
-        
-        boot = "{}"
-        try:
-            headers = {
-                "Content-Type": "application/json"
-            }
-            if HASS_API_PASSWORD:
-                headers["x-ha-access"] = HASS_API_PASSWORD
-            req = urllib.request.Request("%sbootstrap" % HASS_API, headers=headers, method='GET')
-            with urllib.request.urlopen(req) as response:
-                boot = response.read().decode('utf-8')
+        elif req.path == '/':
+            self.send_header('Content-type','text/html')
+            self.end_headers()
             
-        except Exception as err:
-            print(err)
-
-        color = "green"
-        try:
-            response = urllib.request.urlopen(RELEASEURL)
-            latest = json.loads(response.read().decode('utf-8'))['tag_name']
-            if VERSION != latest:
-                color = "red"
-        except Exception as err:
-            print(err)
-        html = get_html().safe_substitute(bootstrap=boot, current=VERSION, versionclass=color)
-        self.wfile.write(bytes(html, "utf8"))
-        return
+            boot = "{}"
+            try:
+                headers = {
+                    "Content-Type": "application/json"
+                }
+                if HASS_API_PASSWORD:
+                    headers["x-ha-access"] = HASS_API_PASSWORD
+                req = urllib.request.Request("%sbootstrap" % HASS_API, headers=headers, method='GET')
+                with urllib.request.urlopen(req) as response:
+                    boot = response.read().decode('utf-8')
+                
+            except Exception as err:
+                print("Exception getting bootstrap")
+                print(err)
+    
+            color = "green"
+            try:
+                response = urllib.request.urlopen(RELEASEURL)
+                latest = json.loads(response.read().decode('utf-8'))['tag_name']
+                if VERSION != latest:
+                    color = "red"
+            except Exception as err:
+                print("Exception getting release")
+                print(err)
+            html = get_html().safe_substitute(bootstrap=boot, current=VERSION, versionclass=color)
+            self.wfile.write(bytes(html, "utf8"))
+            return
+        else:
+            self.send_response(404)
+            self.end_headers()
+            self.wfile.write(bytes("File not found", "utf8"))
 
     def do_POST(self):
         if not check_access(self.client_address[0]):
@@ -588,7 +605,8 @@ class AuthHandler(RequestHandler):
 
 def main(args):
     global HTTPD, CREDENTIALS
-    print(args)
+    if args:
+        load_settings(args[0])
     print("Starting server")
     server_address = (LISTENIP, LISTENPORT)
     if CREDENTIALS:
