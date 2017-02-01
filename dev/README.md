@@ -1,1 +1,0 @@
-The files in the dev folder are intended for making it easier to work on the HTML part of the configurator. It's pretty much the same as the single file version, except that this loads an external index.html.

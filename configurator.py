@@ -41,6 +41,7 @@ BANLIMIT = 0
 RELEASEURL = "https://api.github.com/repos/danielperna84/hass-poc-configurator/releases/latest"
 VERSION = "0.0.6"
 BASEDIR = "."
+DEV = False
 FAIL2BAN_IPS = {}
 INDEX = Template("""<!DOCTYPE html>
 <html>
@@ -321,6 +322,17 @@ INDEX = Template("""<!DOCTYPE html>
 </html>
 """)
 
+def get_html():
+    if DEV:
+        try:
+            with open("dev.html") as fptr:
+                html = Template(fptr.read())
+                return html
+        except Exception as err:
+            print(err)
+            print("Delivering embedded HTML")
+    return INDEX
+
 def check_access(clientip):
     global BANNED_IPS
     if clientip in BANNED_IPS:
@@ -459,7 +471,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 color = "red"
         except Exception as err:
             print(err)
-        html = INDEX.safe_substitute(bootstrap=boot, current=VERSION, versionclass=color)
+        html = get_html().safe_substitute(bootstrap=boot, current=VERSION, versionclass=color)
         self.wfile.write(bytes(html, "utf8"))
         return
 
