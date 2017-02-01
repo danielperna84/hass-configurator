@@ -36,7 +36,7 @@ The IP the service is listening on. By default it's binding to `0.0.0.0`, which 
 ####LISTENPORT (integer)
 The port the service is listening on. By default it's using 3218, but you can change this if you need to.
 ####BASEPATH (string)
-__On Linux systems__ it is possible to place configurator.py somewhere else. Set the `BASEPATH` to something like `"/home/hass/.homeassistant"`, and no matter where you're running the configurator from, it will [chroot](https://linux.die.net/man/1/chroot) into that directory and start serving files from there.
+It is possible to place configurator.py somewhere else. Set the `BASEPATH` to something like `"/home/hass/.homeassistant"`, and no matter where you're running the configurator from, it will start serving files from there. This is needed if you plan on running the configurator with systemd.
 ####SSL_CERTIFICATE / SSL_KEY (string)
 If you're using SSL, set the paths to your SSL files here. This is similar to the SSL setup you can do in HASS.
 ####HASS_API (string)
