@@ -1,5 +1,5 @@
 List of changes that have to be done
-- Get rid of the chroot-workaround (which would fix some SSL issues)
+
 
 List of ideas that could be implemented
 - Confirmation dialog before saving files
