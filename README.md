@@ -28,7 +28,8 @@ There are no dependencies on Python modules that are not part of the standard li
 - To terminate the process do the usual `CTRL+C`, maybe once or twice
 
 ###Configuration
-Near the top of the py-file you'll find some global variables you can change to customize the configurator a little bit. If you're unfamiliar with Python: when setting variables of the type _string_, you have to write that within quotation marks.
+Near the top of the py-file you'll find some global variables you can change to customize the configurator a little bit. If you're unfamiliar with Python: when setting variables of the type _string_, you have to write that within quotation marks. The default settings are fine for just checking this out quickly. With more customized setups you'l have to change some settings though.  
+To keep your setting across updates it is also possible to save settings in an external file. In that case copy [settings.conf](https://github.com/danielperna84/hass-poc-configurator/blob/master/settings.conf) whereever you like and append the full path to the file to the command when starting the configurator. E.g. `sudo .configurator.py /home/hass/.homeassistant/mysettings.conf`. This file is in JSON format. So make sure it has a valid syntax. The major difference to the settings in the py-file is, that `None` becomes `null`.
 
 ####LISTENIP (string)
 The IP the service is listening on. By default it's binding to `0.0.0.0`, which is every interface on the system.
