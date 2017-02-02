@@ -268,6 +268,7 @@ INDEX = Template("""<!DOCTYPE html>
             if (n) {
                 $.get("api/file?filename=" + n[0], function( data ) {
                   editor.setValue(data);
+                  editor.selection.selectFileStart();
                 });
             }
         }
