@@ -37,6 +37,8 @@ ALLOWED_NETWORKS = []
 BANNED_IPS = []
 # Ban IPs after n failed login attempts. Restart service to reset banning. The default of `0` disables this feature.
 BANLIMIT = 0
+# File extensions the file browser should include
+EXTENSIONS = ['yaml', 'conf']
 ### End of options
 
 RELEASEURL = "https://api.github.com/repos/danielperna84/hass-poc-configurator/releases/latest"
@@ -337,7 +339,9 @@ def signal_handler(signal, frame):
     sys.exit(0)
 
 def load_settings(settingsfile):
-    global LISTENIP, LISTENPORT, BASEPATH, SSL_CERTIFICATE, SSL_KEY, HASS_API, HASS_API_PASSWORD, CREDENTIALS, ALLOWED_NETWORKS, BANNED_IPS, BANLIMIT
+    global LISTENIP, LISTENPORT, BASEPATH, SSL_CERTIFICATE, SSL_KEY, HASS_API, \
+    HASS_API_PASSWORD, CREDENTIALS, ALLOWED_NETWORKS, BANNED_IPS, BANLIMIT, \
+    EXTENSIONS
     try:
         if os.path.isfile(settingsfile):
             with open(settingsfile) as fptr:
@@ -353,6 +357,7 @@ def load_settings(settingsfile):
                 ALLOWED_NETWORKS = settings.get("ALLOWED_NETWORKS", ALLOWED_NETWORKS)
                 BANNED_IPS = settings.get("BANNED_IPS", BANNED_IPS)
                 BANLIMIT = settings.get("BANLIMIT", BANLIMIT)
+                EXTENSIONS = settings.get("EXTENSIONS", EXTENSIONS)
     except Exception as err:
         print(err)
         print("Not loading static settings")
@@ -412,7 +417,7 @@ def get_nodes_from_path(path):
         node_id = os.sep.join(path_nodes[0:idx+1])
         if idx != 0:
             parent = os.sep.join(path_nodes[0:idx])
-            if os.path.isfile(os.path.join(parent, node_name)) and (not node_name.endswith('.yaml') and not node_name.endswith('.conf')):
+            if os.path.isfile(os.path.join(parent, node_name)) and node_name.split('.')[-1] not in EXTENSIONS:
                 continue
         else:
             parent = "#"

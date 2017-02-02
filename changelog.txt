@@ -3,6 +3,7 @@ Version 0.0.8 (2017-02-nn)
 - Added confirmation dialog before saving files
 - Changes to toolbar with extended editor settings
 - Editor settings saved when Save-dialog is shown
+- Allow setting file extensions to be shown in browser
 
 Version 0.0.7 (2017-02-01)
 - Inserted elements are selected as visual feedback
