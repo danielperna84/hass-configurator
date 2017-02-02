@@ -220,6 +220,7 @@
                 $.get("api/file?filename=" + n[0], function( data ) {
                   editor.setValue(data);
                   editor.selection.selectFileStart();
+                  editor.focus();
                 });
             }
         }

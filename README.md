@@ -53,6 +53,8 @@ List of statically banned IP addresses, e.g. `BANNED_IPS = ["1.1.1.1", "2.2.2.2"
 Ban IPs after n failed login attempts. Restart service to reset banning. The default of `0` disables this feature. `CREDENTIALS` has to be set for this to work.
 ####EXTENSIONS (list)
 File extensions the file browser should include.
+####EXCLUDE_DIRS (list)
+Directories to exclude from the file browser.
 
 __Note regarding `ALLOWED_NETWORKS`, `BANNED_IPS` and `BANLIMIT`__:  
 The way this is implemented works in the following order:

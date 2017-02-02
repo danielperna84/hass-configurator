@@ -8,10 +8,10 @@ import sys
 import json
 import ssl
 import socketserver
-import urllib.request
 import base64
 import ipaddress
 import signal
+import urllib.request
 from string import Template
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse, parse_qs
@@ -39,6 +39,8 @@ BANNED_IPS = []
 BANLIMIT = 0
 # File extensions the file browser should include
 EXTENSIONS = ['yaml', 'conf']
+# Directories to exclude from the file browser
+EXCLUDE_DIRS = ['/deps', '/.git']
 ### End of options
 
 RELEASEURL = "https://api.github.com/repos/danielperna84/hass-poc-configurator/releases/latest"
@@ -269,6 +271,7 @@ INDEX = Template("""<!DOCTYPE html>
                 $.get("api/file?filename=" + n[0], function( data ) {
                   editor.setValue(data);
                   editor.selection.selectFileStart();
+                  editor.focus();
                 });
             }
         }
@@ -342,7 +345,7 @@ def signal_handler(signal, frame):
 def load_settings(settingsfile):
     global LISTENIP, LISTENPORT, BASEPATH, SSL_CERTIFICATE, SSL_KEY, HASS_API, \
     HASS_API_PASSWORD, CREDENTIALS, ALLOWED_NETWORKS, BANNED_IPS, BANLIMIT, \
-    EXTENSIONS
+    EXTENSIONS, EXCLUDE_DIRS
     try:
         if os.path.isfile(settingsfile):
             with open(settingsfile) as fptr:
@@ -359,6 +362,7 @@ def load_settings(settingsfile):
                 BANNED_IPS = settings.get("BANNED_IPS", BANNED_IPS)
                 BANLIMIT = settings.get("BANLIMIT", BANLIMIT)
                 EXTENSIONS = settings.get("EXTENSIONS", EXTENSIONS)
+                EXCLUDE_DIRS = settings.get("EXCLUDE_DIRS", EXCLUDE_DIRS)
     except Exception as err:
         print(err)
         print("Not loading static settings")
@@ -429,13 +433,14 @@ def get_nodes_from_path(path):
 def getdirs(searchpath):
     unique_nodes = []
     for root, dirs, files in os.walk(searchpath, topdown=True):
-        if '/deps' not in root and '/.git' not in root and '/www' not in root:
-            for name in files:
-                path = os.path.join(root, name)
-                nodes = get_nodes_from_path(path)
-                for node in nodes:
-                    if not any(node.is_equal(unode) for unode in unique_nodes):
-                        unique_nodes.append(node)
+        if [d for d in EXCLUDE_DIRS if d in root]:
+            continue
+        for name in files:
+            path = os.path.join(root, name)
+            nodes = get_nodes_from_path(path)
+            for node in nodes:
+                if not any(node.is_equal(unode) for unode in unique_nodes):
+                    unique_nodes.append(node)
     return [node.as_json() for node in unique_nodes]
 
 class RequestHandler(BaseHTTPRequestHandler):
