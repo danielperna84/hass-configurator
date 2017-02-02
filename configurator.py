@@ -313,7 +313,6 @@ INDEX = Template("""<!DOCTYPE html>
         editor.setOption("displayIndentGuides", true);
         editor.setOption("highlightSelectedWord", highlightwords);
         editor.$blockScrolling = Infinity;
-        //document.getElementById("acesettings").addEventListener('click', function(){editor.showSettingsMenu;}, false);
         function insert(text) {
             var pos = editor.selection.getCursor();
             var end = editor.session.insert(pos, text);
