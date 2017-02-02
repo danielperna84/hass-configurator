@@ -286,6 +286,7 @@ INDEX = Template("""<!DOCTYPE html>
         }
         
         function save_dialog() {
+            localStorage.pochass = JSON.stringify(editor.getOptions())
             $.modal("<div><h3>Do you really want to save the changes?</h3><p><button type='button' class='simplemodal-close' onclick='save()'>Yes</button>&nbsp;<button type='button' class='simplemodal-close'>No</button></p></div>", modaloptions);
         }
         
@@ -307,12 +308,18 @@ INDEX = Template("""<!DOCTYPE html>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ext-modelist.js" type="text/javascript" charset="utf-8"></script>
     <script>
         var editor = ace.edit("editor");
-        editor.getSession().setMode("ace/mode/yaml");
-        editor.setOption("showInvisibles", whitespacestatus);
-        editor.setOption("useSoftTabs", true);
-        editor.setOption("displayIndentGuides", true);
-        editor.setOption("highlightSelectedWord", highlightwords);
-        editor.$blockScrolling = Infinity;
+        if (localStorage.hasOwnProperty("pochass")) {
+            editor.setOptions(JSON.parse(localStorage.pochass));
+        }
+        else {
+            editor.getSession().setMode("ace/mode/yaml");
+            editor.setOption("showInvisibles", whitespacestatus);
+            editor.setOption("useSoftTabs", true);
+            editor.setOption("displayIndentGuides", true);
+            editor.setOption("highlightSelectedWord", highlightwords);
+            editor.$blockScrolling = Infinity;
+        }
+        
         function insert(text) {
             var pos = editor.selection.getCursor();
             var end = editor.session.insert(pos, text);
