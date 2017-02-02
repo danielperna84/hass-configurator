@@ -2,7 +2,6 @@ List of changes that have to be done
 
 
 List of ideas that could be implemented
-- Confirmation dialog before saving files
 - post-save scripts (to workaround current limitations)
 - Configuration validation
 - Git functionality (with local repository)

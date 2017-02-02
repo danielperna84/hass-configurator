@@ -1,5 +1,7 @@
 Version 0.0.8 (2017-02-nn)
 - Got rid of chroot workaround
+- Added confirmation dialog before saving files
+- Changes to toolbar with extended editor settings
 
 Version 0.0.7 (2017-02-01)
 - Inserted elements are selected as visual feedback

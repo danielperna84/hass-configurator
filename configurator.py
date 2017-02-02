@@ -81,12 +81,12 @@ INDEX = Template("""<!DOCTYPE html>
             
             #toolbar {
                 position: relative;
-                height: 20px;
+                height: 22px;
             }
 
             #editor { 
                 position: absolute;
-                top: 20px;
+                top: 22px;
                 right: 0;
                 bottom: 0;
                 left: 20%;
@@ -154,13 +154,8 @@ INDEX = Template("""<!DOCTYPE html>
             <select id="services" onchange="insert(this.value)"></select>
         </div>
         <div id="toolbar">
-            <button id="savebutton" type="button" onclick="save()">Save</button>
-            <button id="whitespace" type="button" onclick="toggle_whitespace()">Whitespace</button>
-            <button id="fold" type="button" onclick="toggle_fold()">Fold</button>
-            <button id="highlight" type="button" onclick="toggle_highlightSelectedWord()">Highlight selected words</button>
-            <button id="restart" type="button" onclick="restart_dialog()">Restart HASS</button>
-            <button id="help" type="button" onclick="window.open('https://home-assistant.io/getting-started/','_blank');">Help</button>
-            <button id="components" type="button" onclick="window.open('https://home-assistant.io/components/','_blank');">Components</button>
+            <button id="savebutton" type="button" onclick="save_dialog()">Save</button><button id="acesettings" type="button" onclick="editor.execCommand('showSettingsMenu')">Editor settings</button><button id="aceshortcuts" type="button" onclick="window.open('https://github.com/ajaxorg/ace/wiki/Default-Keyboard-Shortcuts','_blank');">Editor keyboard shortcuts</button>
+            <button id="restart" type="button" onclick="restart_dialog()">HASS Restart</button><button id="help" type="button" onclick="window.open('https://home-assistant.io/getting-started/','_blank');">HASS Help</button><button id="components" type="button" onclick="window.open('https://home-assistant.io/components/','_blank');">HASS Components</button>
             <a id="release" class="$versionclass" href="https://github.com/danielperna84/hass-poc-configurator/releases/latest" target="_blank">$current</a>
         </div>
         <div id="editor"></div>
@@ -290,6 +285,10 @@ INDEX = Template("""<!DOCTYPE html>
             });
         }
         
+        function save_dialog() {
+            $.modal("<div><h3>Do you really want to save the changes?</h3><p><button type='button' class='simplemodal-close' onclick='save()'>Yes</button>&nbsp;<button type='button' class='simplemodal-close'>No</button></p></div>", modaloptions);
+        }
+        
         function save() {
             var n = $("#tree").jstree("get_selected");
             if (n) {
@@ -314,6 +313,7 @@ INDEX = Template("""<!DOCTYPE html>
         editor.setOption("displayIndentGuides", true);
         editor.setOption("highlightSelectedWord", highlightwords);
         editor.$blockScrolling = Infinity;
+        //document.getElementById("acesettings").addEventListener('click', function(){editor.showSettingsMenu;}, false);
         function insert(text) {
             var pos = editor.selection.getCursor();
             var end = editor.session.insert(pos, text);
