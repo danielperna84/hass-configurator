@@ -1,24 +1,23 @@
 # hass-poc-configurator
 ###Proof of concept configuration UI for Home Assistant
 
-Since there currently is no nice way to edit the yaml-files HASS is using through the HASS frontend, I've code-snippet-patchworked this small webapp that lists yaml (and conf) files in the directory it's being executed in in a nice little [jsTree](https://www.jstree.com/). By clicking on an element, the file is loaded into an embedded [Ace editor](https://ace.c9.io/), which has syntax hightlighting for yaml. When done editing the file, click the save-button and you're done. Dialogs are being displayed using the [SimpleModal](http://www.ericmmartin.com/projects/simplemodal/) plug-in for jQuery.
+Since there currently is no nice way to edit the yaml-files HASS is using through the HASS frontend, I've code-snippet-patchworked this small webapp that lists yaml (and other) files in the directory it's being executed in in a nice little [jsTree](https://www.jstree.com/). By clicking on an element, the file is loaded into an embedded [Ace editor](https://ace.c9.io/), which has syntax hightlighting for yaml (and a ton of other features you can turn on and off). When you're done with editing the file, click the save-button and it will replace the original file. Dialogs are being displayed using the [SimpleModal](http://www.ericmmartin.com/projects/simplemodal/) plug-in for jQuery.
 
 ###Feature list:
 
-- Web-Based editor to modify your yaml (and conf) files with syntax highlighting
+- Web-Based editor to modify your files with syntax highlighting
 - Lists of available triggers, events, entities, conditions and services. Selected element gets inserted into the editor at the last cursor position.
-- Toggle displaying of whitespace
-- Fold / Unfold the content for better overview
-- Highlight selected word to see where else it's being used
 - Restart HASS directly with the click of a button (API-password required)
+- SSL support
+- Optional authentication and IP filtering for added security
 - Direct links to HASS documentation
-- SSL support (configuration required)
+- Modified editor settings are saved in your [browser](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage) when you press the save button
 
 ####Screenshot of the configurator embedded into HASS:
 ![Screenshot](https://github.com/danielperna84/hass-poc-configurator/blob/master/hass-poc-configurator.png)
 
-This isn't designed to be pretty or complete in any way. It is a workaround for people tired of SSH-ing into their machines. And maybe there's even someone who takes this as a reference and builds something like this directly into HASS, which would be totally awesome!
-If there's anything you want to have differently, feel free to fork and enhance.
+This isn't designed to be pretty or complete in any way. It is a workaround for people tired of SSH-ing into their machines. And maybe someone someday takes this as a reference and builds something like this directly into HASS, which would be totally awesome!
+If there's anything you want to have differently, feel free to fork and enhance. And if something is not working, create an issue here and I'll have a look at it.
 
 ###Installation
 There are no dependencies on Python modules that are not part of the standard library. And all the fancy JavaScript libraries are loaded from CDN (which means this doesn't work when you're offline).  
@@ -28,8 +27,8 @@ There are no dependencies on Python modules that are not part of the standard li
 - To terminate the process do the usual `CTRL+C`, maybe once or twice
 
 ###Configuration
-Near the top of the py-file you'll find some global variables you can change to customize the configurator a little bit. If you're unfamiliar with Python: when setting variables of the type _string_, you have to write that within quotation marks. The default settings are fine for just checking this out quickly. With more customized setups you'l have to change some settings though.  
-To keep your setting across updates it is also possible to save settings in an external file. In that case copy [settings.conf](https://github.com/danielperna84/hass-poc-configurator/blob/master/settings.conf) whereever you like and append the full path to the file to the command when starting the configurator. E.g. `sudo .configurator.py /home/hass/.homeassistant/mysettings.conf`. This file is in JSON format. So make sure it has a valid syntax. The major difference to the settings in the py-file is, that `None` becomes `null`.
+Near the top of the py-file you'll find some global variables you can change to customize the configurator a little bit. If you're unfamiliar with Python: when setting variables of the type _string_, you have to write that within quotation marks. The default settings are fine for just checking this out quickly. With more customized setups you'll have to change some settings though.  
+To keep your setting across updates it is also possible to save settings in an external file. In that case copy [settings.conf](https://github.com/danielperna84/hass-poc-configurator/blob/master/settings.conf) whereever you like and append the full path to the file to the command when starting the configurator. E.g. `sudo .configurator.py /home/hass/.homeassistant/mysettings.conf`. This file is in JSON format. So make sure it has a valid syntax (you can set the editor to JSON to get syntax highlighting for the settings). The major difference to the settings in the py-file is, that `None` becomes `null`.
 
 ####LISTENIP (string)
 The IP the service is listening on. By default it's binding to `0.0.0.0`, which is every interface on the system.
@@ -52,9 +51,9 @@ List of statically banned IP addresses, e.g. `BANNED_IPS = ["1.1.1.1", "2.2.2.2"
 ####BANLIMIT (integer)
 Ban IPs after n failed login attempts. Restart service to reset banning. The default of `0` disables this feature. `CREDENTIALS` has to be set for this to work.
 ####EXTENSIONS (list)
-File extensions the file browser should include.
+File extensions the file browser should include. Useful if you have html files in the www folder etc.
 ####EXCLUDE_DIRS (list)
-Directories to exclude from the file browser.
+Directories to exclude from the file browser. This is important. Especially the `deps`-folder contains a gazillion files, which takes forever to load. That's why it's excluded by default. The same goes for a possible `.git` directory. The directory names have to start with a `/`. So `mydir` becomes `/mydir`.
 
 __Note regarding `ALLOWED_NETWORKS`, `BANNED_IPS` and `BANLIMIT`__:  
 The way this is implemented works in the following order:
