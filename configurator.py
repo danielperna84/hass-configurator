@@ -44,7 +44,7 @@ EXCLUDE_DIRS = ['/deps', '/.git']
 ### End of options
 
 RELEASEURL = "https://api.github.com/repos/danielperna84/hass-poc-configurator/releases/latest"
-VERSION = "0.0.7"
+VERSION = "0.0.8"
 BASEDIR = "."
 DEV = False
 HTTPD = None
