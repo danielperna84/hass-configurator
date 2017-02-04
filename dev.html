@@ -1,68 +1,31 @@
 <!DOCTYPE html>
 <html>
+
+<head>
+    <!DOCTYPE html>
+    <html>
+
     <head>
-        <title>HASS-PoC-Configurator</title>
-        <meta charset="UTF-8">
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0" />
+        <title>Configurator</title>
+        <!-- CSS  -->
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/css/materialize.min.css" type="text/css" rel="stylesheet" media="screen,projection" />
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.1/jquery.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/simplemodal/1.4.4/jquery.simplemodal.min.js"></script>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.3/themes/default/style.min.css" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.3/jstree.min.js"></script>
         <style type="text/css" media="screen">
             body {
                 margin: 0;
                 padding: 0;
-                font-family: monospace;
             }
             
-            #menu {
-                position:relative;
-                width: 20%;
-                float: left;
-                font-size: 9pt;
-            }
-            
-            #buttons {
-                position: absolute;
-                top: 0;
-                right: 0;
-            }
-            
-            #release {
-                float: right;
-                padding: 2px;
-            }
-            
-            #toolbar {
-                position: relative;
-                height: 22px;
-            }
-
-            #editor { 
-                position: absolute;
-                top: 22px;
+            #editor {
+                position: fixed;
+                top: 68px;
                 right: 0;
                 bottom: 0;
-                left: 20%;
-            }
-            
-            #triggers {
-                max-width: 100%;
-            }
-            
-            #events {
-                max-width: 100%;
-            }
-            
-            #entities {
-                max-width: 100%;
-            }
-            
-            #conditions {
-                max-width: 100%;
-            }
-            
-            #services {
-                max-width: 100%;
             }
             
             .green {
@@ -74,45 +37,207 @@
             }
         </style>
     </head>
+
     <body>
-        <div id="menu">
-            <div id="tree"></div><br />
-            <label for="triggers">Trigger platforms:</label><br />
-            <select id="triggers" onchange="insert(this.value)">
-                <option value="" disabled selected>...</option>
-                <option value="event">Event</option>
-                <option value="mqtt">MQTT</option>
-                <option value="numeric_state">Numeric state</option>
-                <option value="state">State</option>
-                <option value="sun">Sun</option>
-                <option value="template">Template</option>
-                <option value="time">Time</option>
-                <option value="zone">Zone</option>
-            </select><br /><br />
-            <label for="events">Events:</label><br />
-            <select id="events" onchange="insert(this.value)"></select><br /><br />
-            <label for="entities">Entities:</label><br />
-            <select id="entities" onchange="insert(this.value)"></select><br /><br />
-            <label for="conditions">Conditions:</label><br />
-            <select id="conditions" onchange="insert(this.value)">
-                <option value="" disabled selected>...</option>
-                <option value="numeric_state">Numeric state</option>
-                <option value="state">State</option>
-                <option value="sun">Sun</option>
-                <option value="template">Template</option>
-                <option value="time">Time</option>
-                <option value="zone">Zone</option>
-            </select><br /><br />
-            <label for="services">Services:</label><br />
-            <select id="services" onchange="insert(this.value)"></select>
+        <div class="navbar-fixed">
+            <nav class="light-blue">
+                <div class="nav-wrapper">
+                    <ul class="left">
+                        <li><a href="#" data-activates="slide-out" class="button-collapse show-on-large"><i class="material-icons">folder</i></a></li>
+                    </ul>
+                    <ul class="right">
+                        <li><a href="#modal_save"><i class="material-icons">save</i></a></li>
+                        <!-- Dropdown Trigger -->
+                        <li><a class="dropdown-button" href="#!" data-activates="dropdown_tools"><i class="material-icons right">more_vert</i></a></li>
+                    </ul>
+                </div>
+            </nav>
         </div>
-        <div id="toolbar">
-            <button id="savebutton" type="button" onclick="save_dialog()">Save</button><button id="acesettings" type="button" onclick="editor.execCommand('showSettingsMenu')">Editor settings</button><button id="aceshortcuts" type="button" onclick="window.open('https://github.com/ajaxorg/ace/wiki/Default-Keyboard-Shortcuts','_blank');">Editor keyboard shortcuts</button>
-            <button id="restart" type="button" onclick="restart_dialog()">HASS Restart</button><button id="help" type="button" onclick="window.open('https://home-assistant.io/getting-started/','_blank');">HASS Help</button><button id="components" type="button" onclick="window.open('https://home-assistant.io/components/','_blank');">HASS Components</button>
-            <a id="release" class="$versionclass" href="https://github.com/danielperna84/hass-poc-configurator/releases/latest" target="_blank">$current</a>
+        <ul id="dropdown_tools" class="dropdown-content">
+            <li><a onclick="toggle_whitespace()">Whitespace</a></li>
+            <li><a onclick="toggle_fold()">Fold</a></li>
+            <li><a onclick="toggle_highlightSelectedWord()">Highlight</a></li>
+            <li><a target="_blank" href="https://github.com/ajaxorg/ace/wiki/Default-Keyboard-Shortcuts">Keyboard Shortcuts</a></li>
+            <li><a target="_blank" href="https://home-assistant.io/help/">Need HASS Help?</a></li>
+            <li><a target="_blank" href="https://home-assistant.io/components/">HASS Components</a></li>
+            <li><a href="#modal_about">About</a></li>
+            <li class="divider"></li>
+            <li><a onclick="editor.execCommand('showSettingsMenu')">Settings</a></li>
+            <li><a href="#modal_restart">Restart HASS</a></li>
+        </ul>
+        <div id="modal_save" class="modal">
+            <div class="modal-content">
+                <h4>Save</h4>
+                <p>Do you really want to save?</p>
+            </div>
+            <div class="modal-footer"> <a href="#!" class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="save()" class=" modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
         </div>
-        <div id="editor"></div>
+        <div id="modal_restart" class="modal">
+            <div class="modal-content">
+                <h4>Restart</h4>
+                <p>Do you really want to restart HASS?</p>
+            </div>
+            <div class="modal-footer"> <a href="#!" class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="restart()" class=" modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
+        </div>
+        <div id="modal_about" class="modal">
+            <div class="modal-content">
+                <h4>About</h4>
+                <blockquote>
+                    <class="$versionclass2" href="https://github.com/danielperna84/hass-poc-configurator/releases/latest" target="_blank">Version: $current</p>
+                </blockquote>
+            </div>
+            <div class="modal-footer"> <a class=" modal-action modal-close waves-effect btn-flat">OK</a> </div>
+        </div>
+        <div class="row">
+            </br>
+            <div class="col s6 m3 l2 hide-on-small-only">
+                <div class="input-field col s12">
+                    <select onchange="insert(this.value)">
+                        <option value="" disabled selected>Choose your option</option>
+                        <option value="event">Event</option>
+                        <option value="mqtt">MQTT</option>
+                        <option value="numberic_state">Numeric State</option>
+                        <option value="state">State</option>
+                        <option value="sun">Sun</option>
+                        <option value="template">Template</option>
+                        <option value="time">Time</option>
+                        <option value="zone">Zone</option>
+                    </select>
+                    <label>Trigger Platform</label>
+                </div>
+                <div class="input-field col s12">
+                    <select id="events" onchange="insert(this.value)"> </select>
+                    <label>Events</label>
+                </div>
+                <div class="input-field col s12">
+                    <select id="entities" onchange="insert(this.value)"> </select>
+                    <label>Entities</label>
+                </div>
+                <div class="input-field col s12">
+                    <select onchange="insert(this.value)">
+                        <option value="" disabled selected>Choose your option</option>
+                        <option value="numeric_state">Numeric state</option>
+                        <option value="state">State</option>
+                        <option value="sun">Sun</option>
+                        <option value="template">Template</option>
+                        <option value="time">Time</option>
+                        <option value="zone">Zone</option>
+                    </select>
+                    <label>Conditions</label>
+                </div>
+                <div class="input-field col s12">
+                    <select id="services" onchange="insert(this.value)"> </select>
+                    <label>Services</label>
+                </div>
+            </div>
+            <div class="col s12 m9 l10" id="editor"></div>
+        </div>
+        <div>
+            <ul id="slide-out" class="side-nav">
+                <li>
+                    <div class="userView">
+                        <div class="background"> <img src="https://raw.githubusercontent.com/Dogfalo/materialize/master/images/office.jpg"> </div>
+                        <a href="#!user"><img class="circle" src="https://home-assistant.io/images/components/alexa/alexa-512x512.png"></a> <a href="#!name"><span class="white-text name">John Doe</span></a> <a href="#!email"><span class="white-text email">someone@gmail.com</span></a> </div>
+                </li>
+                <li>
+                    <div id="tree"></div>
+                </li>
+                <li>
+                    <a class="subheader"></a>
+                </li>
+                <div class="row">
+                    <div class="hide-on-med-and-up">
+                        <div class="input-field col s12">
+                            <select onchange="insert(this.value)">
+                                <option value="" disabled selected>Choose your option</option>
+                                <option value="event">Event</option>
+                                <option value="mqtt">MQTT</option>
+                                <option value="numberic_state">Numeric State</option>
+                                <option value="state">State</option>
+                                <option value="sun">Sun</option>
+                                <option value="template">Template</option>
+                                <option value="time">Time</option>
+                                <option value="zone">Zone</option>
+                            </select>
+                            <label>Trigger Platform</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="hide-on-med-and-up">
+                        <div class="input-field col s12">
+                            <select id="events2" onchange="insert(this.value)"> </select>
+                            <label>Events</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="hide-on-med-and-up">
+                        <div class="input-field col s12">
+                            <select id="entities2" onchange="insert(this.value)"> </select>
+                            <label>Entities</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="hide-on-med-and-up">
+                        <div class="input-field col s12">
+                            <select onchange="insert(this.value)">
+                                <option value="" disabled selected>Choose your option</option>
+                                <option value="numeric_state">Numeric state</option>
+                                <option value="state">State</option>
+                                <option value="sun">Sun</option>
+                                <option value="template">Template</option>
+                                <option value="time">Time</option>
+                                <option value="zone">Zone</option>
+                            </select>
+                            <label>Conditions</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="hide-on-med-and-up">
+                        <div class="input-field col s12">
+                            <select id="services2" onchange="insert(this.value)"> </select>
+                            <label>Services</label>
+                        </div>
+                    </div>
+                </div>
+            </ul>
+        </div>
     </body>
+    <!--  Scripts-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('select').material_select();
+        });
+    </script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('.modal').modal();
+        });
+    </script>
+    <script type="text/javascript">
+        $('.dropdown-button').dropdown({
+            inDuration: 300
+            , outDuration: 225
+            , constrainWidth: false
+            , hover: true
+            , gutter: 00
+            , belowOrigin: true
+            , alignment: 'right'
+            , stopPropagation: false
+        });
+    </script>
+    <script type="text/javascript">
+        $('.button-collapse').sideNav({
+            menuWidth: 320
+            , edge: 'left'
+            , closeOnClick: true
+            , draggable: true
+        });
+    </script>
     <script>
         var bootstrap = $bootstrap;
         if (bootstrap.hasOwnProperty("events")) {
@@ -123,7 +248,13 @@
                 option.text = bootstrap.events[i].event;
                 events.add(option);
             }
-            
+            var events = document.getElementById("events2");
+            for (var i = 0; i < bootstrap.events.length; i++) {
+                var option = document.createElement("option");
+                option.value = bootstrap.events[i].event;
+                option.text = bootstrap.events[i].event;
+                events.add(option);
+            }
             var entities = document.getElementById("entities");
             for (var i = 0; i < bootstrap.states.length; i++) {
                 var option = document.createElement("option");
@@ -131,7 +262,13 @@
                 option.text = bootstrap.states[i].attributes.friendly_name + ' (' + bootstrap.states[i].entity_id + ')';
                 entities.add(option);
             }
-            
+            var entities = document.getElementById("entities2");
+            for (var i = 0; i < bootstrap.states.length; i++) {
+                var option = document.createElement("option");
+                option.value = bootstrap.states[i].entity_id;
+                option.text = bootstrap.states[i].attributes.friendly_name + ' (' + bootstrap.states[i].entity_id + ')';
+                entities.add(option);
+            }
             var services = document.getElementById("services");
             for (var i = 0; i < bootstrap.services.length; i++) {
                 for (var k in bootstrap.services[i].services) {
@@ -141,69 +278,97 @@
                     services.add(option);
                 }
             }
-            
+            var services = document.getElementById("services2");
+            for (var i = 0; i < bootstrap.services.length; i++) {
+                for (var k in bootstrap.services[i].services) {
+                    var option = document.createElement("option");
+                    option.value = bootstrap.services[i].domain + '.' + k;
+                    option.text = bootstrap.services[i].domain + '.' + k;
+                    services.add(option);
+                }
+            }
             var options = $('#events option');
-            var arr = options.map(function(_, o) { return { t: $(o).text(), v: o.value }; }).get();
-            arr.sort(function(o1, o2) {
-              var t1 = o1.t.toLowerCase(), t2 = o2.t.toLowerCase();
-            
-              return t1 > t2 ? 1 : t1 < t2 ? -1 : 0;
+            var arr = options.map(function (_, o) {
+                return {
+                    t: $(o).text()
+                    , v: o.value
+                };
+            }).get();
+            arr.sort(function (o1, o2) {
+                var t1 = o1.t.toLowerCase()
+                    , t2 = o2.t.toLowerCase();
+                return t1 > t2 ? 1 : t1 < t2 ? -1 : 0;
             });
-            options.each(function(i, o) {
-              o.value = arr[i].v;
-              $(o).text(arr[i].t);
+            options.each(function (i, o) {
+                o.value = arr[i].v;
+                $(o).text(arr[i].t);
             });
-            
             var options = $('#entities option');
-            var arr = options.map(function(_, o) { return { t: $(o).text(), v: o.value }; }).get();
-            arr.sort(function(o1, o2) {
-              var t1 = o1.t.toLowerCase(), t2 = o2.t.toLowerCase();
-            
-              return t1 > t2 ? 1 : t1 < t2 ? -1 : 0;
+            var arr = options.map(function (_, o) {
+                return {
+                    t: $(o).text()
+                    , v: o.value
+                };
+            }).get();
+            arr.sort(function (o1, o2) {
+                var t1 = o1.t.toLowerCase()
+                    , t2 = o2.t.toLowerCase();
+                return t1 > t2 ? 1 : t1 < t2 ? -1 : 0;
             });
-            options.each(function(i, o) {
-              o.value = arr[i].v;
-              $(o).text(arr[i].t);
+            options.each(function (i, o) {
+                o.value = arr[i].v;
+                $(o).text(arr[i].t);
             });
-            
             var options = $('#services option');
-            var arr = options.map(function(_, o) { return { t: $(o).text(), v: o.value }; }).get();
-            arr.sort(function(o1, o2) {
-              var t1 = o1.t.toLowerCase(), t2 = o2.t.toLowerCase();
-            
-              return t1 > t2 ? 1 : t1 < t2 ? -1 : 0;
+            var arr = options.map(function (_, o) {
+                return {
+                    t: $(o).text()
+                    , v: o.value
+                };
+            }).get();
+            arr.sort(function (o1, o2) {
+                var t1 = o1.t.toLowerCase()
+                    , t2 = o2.t.toLowerCase();
+                return t1 > t2 ? 1 : t1 < t2 ? -1 : 0;
             });
-            options.each(function(i, o) {
-              o.value = arr[i].v;
-              $(o).text(arr[i].t);
+            options.each(function (i, o) {
+                o.value = arr[i].v;
+                $(o).text(arr[i].t);
             });
         }
-        
-        $('#tree').jstree(
-        {
-          'core' : {
-            'data' : {
-              'url' : '/api/files'
+        $('#tree').jstree({
+            'core': {
+                'data': {
+                    'url': '/api/files'
+                }
             }
-          }
         });
-        $('#tree').on("select_node.jstree", function (e, data) { load(); });
-        
+        $('#tree').on("select_node.jstree", function (e, data) {
+            load();
+        });
         var whitespacestatus = false;
         var foldstatus = true;
         var highlightwords = true;
-        var modaloptions = {close: true, overlayClose: true, containerCss: {border: "1px solid #000", padding: "5px", background: "#fff"}};
-        
+        var modaloptions = {
+            close: true
+            , overlayClose: true
+            , containerCss: {
+                border: "1px solid #000"
+                , padding: "5px"
+                , background: "#fff"
+            }
+        };
+
         function toggle_highlightSelectedWord() {
             highlightwords = !highlightwords;
             editor.setOption("highlightSelectedWord", highlightwords);
         }
-        
+
         function toggle_whitespace() {
             whitespacestatus = !whitespacestatus;
             editor.setOption("showInvisibles", whitespacestatus);
         }
-        
+
         function toggle_fold() {
             if (foldstatus) {
                 editor.getSession().foldAll();
@@ -213,24 +378,20 @@
             }
             foldstatus = !foldstatus;
         }
-        
+
         function load() {
             var n = $("#tree").jstree("get_selected");
             if (n) {
-                $.get("api/file?filename=" + n[0], function( data ) {
-                  editor.setValue(data);
-                  editor.selection.selectFileStart();
-                  editor.focus();
+                $.get("api/file?filename=" + n[0], function (data) {
+                    editor.setValue(data);
+                    editor.selection.selectFileStart();
+                    editor.focus();
                 });
             }
         }
-        
-        function restart_dialog() {
-            $.modal("<div><h3>Do you really want to restart HASS?</h3><p><button type='button' class='simplemodal-close' onclick='restart()'>Yes</button>&nbsp;<button type='button' class='simplemodal-close'>No</button></p></div>", modaloptions);
-        }
-        
+
         function restart() {
-            $.get("api/restart", function( resp ) {
+            $.get("api/restart", function (resp) {
                 if (resp.length == 0) {
                     $.modal("<div><pre>Restarting HASS</pre></div>", modaloptions);
                 }
@@ -239,23 +400,16 @@
                 }
             });
         }
-        
-        function save_dialog() {
-            localStorage.pochass = JSON.stringify(editor.getOptions())
-            $.modal("<div><h3>Do you really want to save the changes?</h3><p><button type='button' class='simplemodal-close' onclick='save()'>Yes</button>&nbsp;<button type='button' class='simplemodal-close'>No</button></p></div>", modaloptions);
-        }
-        
+
         function save() {
             var n = $("#tree").jstree("get_selected");
             if (n) {
                 data = new Object();
                 data.filename = n[0];
                 data.text = editor.getValue()
-                $.post("api/save", data).done(
-                    function( resp ) {
-                        $.modal("<div><pre>" + resp + "</pre></div>", modaloptions);
-                  }
-                );
+                $.post("api/save", data).done(function (resp) {
+                    $.modal("<div><pre>" + resp + "</pre></div>", modaloptions);
+                });
             }
         }
     </script>
@@ -263,23 +417,340 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ext-modelist.js" type="text/javascript" charset="utf-8"></script>
     <script>
         var editor = ace.edit("editor");
-        if (localStorage.hasOwnProperty("pochass")) {
-            editor.setOptions(JSON.parse(localStorage.pochass));
-        }
-        else {
-            editor.getSession().setMode("ace/mode/yaml");
-            editor.setOption("showInvisibles", whitespacestatus);
-            editor.setOption("useSoftTabs", true);
-            editor.setOption("displayIndentGuides", true);
-            editor.setOption("highlightSelectedWord", highlightwords);
-            editor.$blockScrolling = Infinity;
-        }
-        
+        editor.getSession().setMode("ace/mode/yaml");
+        editor.setOption("showInvisibles", whitespacestatus);
+        editor.setOption("useSoftTabs", true);
+        editor.setOption("displayIndentGuides", true);
+        editor.setOption("highlightSelectedWord", highlightwords);
+        editor.$blockScrolling = Infinity;
+
         function insert(text) {
             var pos = editor.selection.getCursor();
             var end = editor.session.insert(pos, text);
-            editor.selection.setRange({start:pos, end:end});
+            editor.selection.setRange({
+                start: pos
+                , end: end
+            });
             editor.focus();
         }
     </script>
+
+    </html>
+    <title>HASS-PoC-Configurator</title>
+    <meta charset="UTF-8">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/simplemodal/1.4.4/jquery.simplemodal.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>
+    <style type="text/css" media="screen">
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: monospace;
+        }
+        
+        #menu {
+            position: relative;
+            width: 20%;
+            float: left;
+            font-size: 9pt;
+        }
+        
+        #buttons {
+            position: absolute;
+            top: 0;
+            right: 0;
+        }
+        
+        #release {
+            float: right;
+            padding: 2px;
+        }
+        
+        #toolbar {
+            position: relative;
+            height: 22px;
+        }
+        
+        #editor {
+            position: absolute;
+            top: 22px;
+            right: 0;
+            bottom: 0;
+            left: 20%;
+        }
+        
+        #triggers {
+            max-width: 100%;
+        }
+        
+        #events {
+            max-width: 100%;
+        }
+        
+        #entities {
+            max-width: 100%;
+        }
+        
+        #conditions {
+            max-width: 100%;
+        }
+        
+        #services {
+            max-width: 100%;
+        }
+        
+        .green {
+            color: #0f0;
+        }
+        
+        .red {
+            color: #f00;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="menu">
+        <div id="tree"></div>
+        <br />
+        <label for="triggers">Trigger platforms:</label>
+        <br />
+        <select id="triggers" onchange="insert(this.value)">
+            <option value="" disabled selected>...</option>
+            <option value="event">Event</option>
+            <option value="mqtt">MQTT</option>
+            <option value="numeric_state">Numeric state</option>
+            <option value="state">State</option>
+            <option value="sun">Sun</option>
+            <option value="template">Template</option>
+            <option value="time">Time</option>
+            <option value="zone">Zone</option>
+        </select>
+        <br />
+        <br />
+        <label for="events">Events:</label>
+        <br />
+        <select id="events" onchange="insert(this.value)"></select>
+        <br />
+        <br />
+        <label for="entities">Entities:</label>
+        <br />
+        <select id="entities" onchange="insert(this.value)"></select>
+        <br />
+        <br />
+        <label for="conditions">Conditions:</label>
+        <br />
+        <select id="conditions" onchange="insert(this.value)">
+            <option value="" disabled selected>...</option>
+            <option value="numeric_state">Numeric state</option>
+            <option value="state">State</option>
+            <option value="sun">Sun</option>
+            <option value="template">Template</option>
+            <option value="time">Time</option>
+            <option value="zone">Zone</option>
+        </select>
+        <br />
+        <br />
+        <label for="services">Services:</label>
+        <br />
+        <select id="services" onchange="insert(this.value)"></select>
+    </div>
+    <div id="toolbar">
+        <button id="savebutton" type="button" onclick="save_dialog()">Save</button>
+        <button id="acesettings" type="button" onclick="editor.execCommand('showSettingsMenu')">Editor settings</button>
+        <button id="aceshortcuts" type="button" onclick="window.open('https://github.com/ajaxorg/ace/wiki/Default-Keyboard-Shortcuts','_blank');">Editor keyboard shortcuts</button>
+        <button id="restart" type="button" onclick="restart_dialog()">HASS Restart</button>
+        <button id="help" type="button" onclick="window.open('https://home-assistant.io/getting-started/','_blank');">HASS Help</button>
+        <button id="components" type="button" onclick="window.open('https://home-assistant.io/components/','_blank');">HASS Components</button> <a id="release" class="$versionclass" href="https://github.com/danielperna84/hass-poc-configurator/releases/latest" target="_blank">$current</a> </div>
+    <div id="editor"></div>
+</body>
+<script>
+    var bootstrap = $bootstrap;
+    if (bootstrap.hasOwnProperty("events")) {
+        var events = document.getElementById("events");
+        for (var i = 0; i < bootstrap.events.length; i++) {
+            var option = document.createElement("option");
+            option.value = bootstrap.events[i].event;
+            option.text = bootstrap.events[i].event;
+            events.add(option);
+        }
+        var entities = document.getElementById("entities");
+        for (var i = 0; i < bootstrap.states.length; i++) {
+            var option = document.createElement("option");
+            option.value = bootstrap.states[i].entity_id;
+            option.text = bootstrap.states[i].attributes.friendly_name + ' (' + bootstrap.states[i].entity_id + ')';
+            entities.add(option);
+        }
+        var services = document.getElementById("services");
+        for (var i = 0; i < bootstrap.services.length; i++) {
+            for (var k in bootstrap.services[i].services) {
+                var option = document.createElement("option");
+                option.value = bootstrap.services[i].domain + '.' + k;
+                option.text = bootstrap.services[i].domain + '.' + k;
+                services.add(option);
+            }
+        }
+        var options = $('#events option');
+        var arr = options.map(function (_, o) {
+            return {
+                t: $(o).text()
+                , v: o.value
+            };
+        }).get();
+        arr.sort(function (o1, o2) {
+            var t1 = o1.t.toLowerCase()
+                , t2 = o2.t.toLowerCase();
+            return t1 > t2 ? 1 : t1 < t2 ? -1 : 0;
+        });
+        options.each(function (i, o) {
+            o.value = arr[i].v;
+            $(o).text(arr[i].t);
+        });
+        var options = $('#entities option');
+        var arr = options.map(function (_, o) {
+            return {
+                t: $(o).text()
+                , v: o.value
+            };
+        }).get();
+        arr.sort(function (o1, o2) {
+            var t1 = o1.t.toLowerCase()
+                , t2 = o2.t.toLowerCase();
+            return t1 > t2 ? 1 : t1 < t2 ? -1 : 0;
+        });
+        options.each(function (i, o) {
+            o.value = arr[i].v;
+            $(o).text(arr[i].t);
+        });
+        var options = $('#services option');
+        var arr = options.map(function (_, o) {
+            return {
+                t: $(o).text()
+                , v: o.value
+            };
+        }).get();
+        arr.sort(function (o1, o2) {
+            var t1 = o1.t.toLowerCase()
+                , t2 = o2.t.toLowerCase();
+            return t1 > t2 ? 1 : t1 < t2 ? -1 : 0;
+        });
+        options.each(function (i, o) {
+            o.value = arr[i].v;
+            $(o).text(arr[i].t);
+        });
+    }
+    $('#tree').jstree({
+        'core': {
+            'data': {
+                'url': '/api/files'
+            }
+        }
+    });
+    $('#tree').on("select_node.jstree", function (e, data) {
+        load();
+    });
+    var whitespacestatus = false;
+    var foldstatus = true;
+    var highlightwords = true;
+    var modaloptions = {
+        close: true
+        , overlayClose: true
+        , containerCss: {
+            border: "1px solid #000"
+            , padding: "5px"
+            , background: "#fff"
+        }
+    };
+
+    function toggle_highlightSelectedWord() {
+        highlightwords = !highlightwords;
+        editor.setOption("highlightSelectedWord", highlightwords);
+    }
+
+    function toggle_whitespace() {
+        whitespacestatus = !whitespacestatus;
+        editor.setOption("showInvisibles", whitespacestatus);
+    }
+
+    function toggle_fold() {
+        if (foldstatus) {
+            editor.getSession().foldAll();
+        }
+        else {
+            editor.getSession().unfold();
+        }
+        foldstatus = !foldstatus;
+    }
+
+    function load() {
+        var n = $("#tree").jstree("get_selected");
+        if (n) {
+            $.get("api/file?filename=" + n[0], function (data) {
+                editor.setValue(data);
+                editor.selection.selectFileStart();
+                editor.focus();
+            });
+        }
+    }
+
+    function restart_dialog() {
+        $.modal("<div><h3>Do you really want to restart HASS?</h3><p><button type='button' class='simplemodal-close' onclick='restart()'>Yes</button>&nbsp;<button type='button' class='simplemodal-close'>No</button></p></div>", modaloptions);
+    }
+
+    function restart() {
+        $.get("api/restart", function (resp) {
+            if (resp.length == 0) {
+                $.modal("<div><pre>Restarting HASS</pre></div>", modaloptions);
+            }
+            else {
+                $.modal("<div><pre>" + resp + "</pre></div>", modaloptions);
+            }
+        });
+    }
+
+    function save_dialog() {
+        localStorage.pochass = JSON.stringify(editor.getOptions())
+        $.modal("<div><h3>Do you really want to save the changes?</h3><p><button type='button' class='simplemodal-close' onclick='save()'>Yes</button>&nbsp;<button type='button' class='simplemodal-close'>No</button></p></div>", modaloptions);
+    }
+
+    function save() {
+        var n = $("#tree").jstree("get_selected");
+        if (n) {
+            data = new Object();
+            data.filename = n[0];
+            data.text = editor.getValue()
+            $.post("api/save", data).done(function (resp) {
+                $.modal("<div><pre>" + resp + "</pre></div>", modaloptions);
+            });
+        }
+    }
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ace.js" type="text/javascript" charset="utf-8"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ext-modelist.js" type="text/javascript" charset="utf-8"></script>
+<script>
+    var editor = ace.edit("editor");
+    if (localStorage.hasOwnProperty("pochass")) {
+        editor.setOptions(JSON.parse(localStorage.pochass));
+    }
+    else {
+        editor.getSession().setMode("ace/mode/yaml");
+        editor.setOption("showInvisibles", whitespacestatus);
+        editor.setOption("useSoftTabs", true);
+        editor.setOption("displayIndentGuides", true);
+        editor.setOption("highlightSelectedWord", highlightwords);
+        editor.$blockScrolling = Infinity;
+    }
+
+    function insert(text) {
+        var pos = editor.selection.getCursor();
+        var end = editor.session.insert(pos, text);
+        editor.selection.setRange({
+            start: pos
+            , end: end
+        });
+        editor.focus();
+    }
+</script>
+
 </html>
