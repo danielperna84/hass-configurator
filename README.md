@@ -14,7 +14,7 @@ Since there currently is no nice way to edit the yaml-files HASS is using throug
 - Modified editor settings are saved in your [browser](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage) when you press the save button
 
 ####Screenshot of the configurator embedded into HASS:
-![Screenshot](https://github.com/danielperna84/hass-poc-configurator/blob/master/hass-poc-configurator.png)
+![Screenshot](https://github.com/jmart518/hass-poc-configurator/blob/master/hass-poc-configurator.png)
 
 This isn't designed to be pretty or complete in any way. It is a workaround for people tired of SSH-ing into their machines. And maybe someone someday takes this as a reference and builds something like this directly into HASS, which would be totally awesome!
 If there's anything you want to have differently, feel free to fork and enhance. And if something is not working, create an issue here and I'll have a look at it.
