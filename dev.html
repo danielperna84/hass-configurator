@@ -58,7 +58,7 @@
         <li><a onclick="toggle_whitespace()">Whitespace</a></li>
         <li><a onclick="toggle_fold()">Fold</a></li>
         <li><a onclick="toggle_highlightSelectedWord()">Highlight</a></li>
-        <li><a target="_blank" href="https://github.com/ajaxorg/ace/wiki/Default-Keyboard-Shortcuts">Keyboard Shortcuts</a></li>
+        <li><a target="_blank" href="https://github.com/ajaxorg/ace/wiki/Default-Keyboard-Shortcuts">Ace Keyboard Shortcuts</a></li>
         <li><a target="_blank" href="https://home-assistant.io/help/">Need HASS Help?</a></li>
         <li><a target="_blank" href="https://home-assistant.io/components/">HASS Components</a></li>
         <li><a href="#modal_about">About</a></li>
@@ -238,33 +238,31 @@
 <!--  Scripts-->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js"></script>
 <script type="text/javascript">
-    $(document).ready(function () {
+    $(document).ready(function() {
         $('select').material_select();
-    });
-    $(document).ready(function () {
         $('.modal').modal();
-    });
-    $('.dropdown-button').dropdown({
-        inDuration: 300
-        , outDuration: 225
-        , constrainWidth: true
-        , hover: false
-        , gutter: 0
-        , belowOrigin: true
-        , alignment: 'right'
-        , stopPropagation: false
-    });
-    $('.button-collapse').sideNav({
-        menuWidth: 350
-        , edge: 'left'
-        , closeOnClick: true
-        , draggable: true
-    });
-    $('.ace_settings-collapse').sideNav({
-        menuWidth: 400, // Default is 300
-        edge: 'right', // Choose the horizontal origin
-        closeOnClick: true, // Closes side-nav on <a> clicks, useful for Angular/Meteor
-        draggable: true // Choose whether you can drag to open on touch screens
+        $('.dropdown-button').dropdown({
+            inDuration: 300,
+            outDuration: 225,
+            constrainWidth: true,
+            hover: false,
+            gutter: 0,
+            belowOrigin: true,
+            alignment: 'right',
+            stopPropagation: false
+        });
+        $('.button-collapse').sideNav({
+            menuWidth: 350,
+            edge: 'left',
+            closeOnClick: true,
+            draggable: true
+        });
+        $('.ace_settings-collapse').sideNav({
+            menuWidth: 400, // Default is 300
+            edge: 'right', // Choose the horizontal origin
+            closeOnClick: true, // Closes side-nav on <a> clicks, useful for Angular/Meteor
+            draggable: true // Choose whether you can drag to open on touch screens
+        });
     });
 </script>
 <script>
@@ -317,50 +315,50 @@
             }
         }
         var options = $('#events option');
-        var arr = options.map(function (_, o) {
+        var arr = options.map(function(_, o) {
             return {
-                t: $(o).text()
-                , v: o.value
+                t: $(o).text(),
+                v: o.value
             };
         }).get();
-        arr.sort(function (o1, o2) {
-            var t1 = o1.t.toLowerCase()
-                , t2 = o2.t.toLowerCase();
+        arr.sort(function(o1, o2) {
+            var t1 = o1.t.toLowerCase(),
+                t2 = o2.t.toLowerCase();
             return t1 > t2 ? 1 : t1 < t2 ? -1 : 0;
         });
-        options.each(function (i, o) {
+        options.each(function(i, o) {
             o.value = arr[i].v;
             $(o).text(arr[i].t);
         });
         var options = $('#entities option');
-        var arr = options.map(function (_, o) {
+        var arr = options.map(function(_, o) {
             return {
-                t: $(o).text()
-                , v: o.value
+                t: $(o).text(),
+                v: o.value
             };
         }).get();
-        arr.sort(function (o1, o2) {
-            var t1 = o1.t.toLowerCase()
-                , t2 = o2.t.toLowerCase();
+        arr.sort(function(o1, o2) {
+            var t1 = o1.t.toLowerCase(),
+                t2 = o2.t.toLowerCase();
             return t1 > t2 ? 1 : t1 < t2 ? -1 : 0;
         });
-        options.each(function (i, o) {
+        options.each(function(i, o) {
             o.value = arr[i].v;
             $(o).text(arr[i].t);
         });
         var options = $('#services option');
-        var arr = options.map(function (_, o) {
+        var arr = options.map(function(_, o) {
             return {
-                t: $(o).text()
-                , v: o.value
+                t: $(o).text(),
+                v: o.value
             };
         }).get();
-        arr.sort(function (o1, o2) {
-            var t1 = o1.t.toLowerCase()
-                , t2 = o2.t.toLowerCase();
+        arr.sort(function(o1, o2) {
+            var t1 = o1.t.toLowerCase(),
+                t2 = o2.t.toLowerCase();
             return t1 > t2 ? 1 : t1 < t2 ? -1 : 0;
         });
-        options.each(function (i, o) {
+        options.each(function(i, o) {
             o.value = arr[i].v;
             $(o).text(arr[i].t);
         });
@@ -372,7 +370,7 @@
             }
         }
     });
-    $('#tree').on("select_node.jstree", function (e, data) {
+    $('#tree').on("select_node.jstree", function(e, data) {
         load();
     });
     var whitespacestatus = false;
@@ -392,8 +390,7 @@
     function toggle_fold() {
         if (foldstatus) {
             editor.getSession().foldAll();
-        }
-        else {
+        } else {
             editor.getSession().unfold();
         }
         foldstatus = !foldstatus;
@@ -402,7 +399,7 @@
     function load() {
         var n = $("#tree").jstree("get_selected");
         if (n) {
-            $.get("api/file?filename=" + n[0], function (data) {
+            $.get("api/file?filename=" + n[0], function(data) {
                 editor.setValue(data);
                 editor.selection.selectFileStart();
                 editor.focus();
@@ -411,12 +408,11 @@
     }
 
     function restart() {
-        $.get("api/restart", function (resp) {
+        $.get("api/restart", function(resp) {
             if (resp.length == 0) {
                 var $toastContent = $("<div><pre>Restarting HASS</pre></div>");
                 Materialize.toast($toastContent, 2000);
-            }
-            else {
+            } else {
                 var $toastContent = $("<div><pre>" + resp + "</pre></div>");
                 Materialize.toast($toastContent, 2000);
             }
@@ -429,7 +425,7 @@
             data = new Object();
             data.filename = n[0];
             data.text = editor.getValue()
-            $.post("api/save", data).done(function (resp) {
+            $.post("api/save", data).done(function(resp) {
                 var $toastContent = $("<div><pre>" + resp + "</pre></div>");
                 Materialize.toast($toastContent, 2000);
             });
@@ -442,8 +438,7 @@
     var editor = ace.edit("editor");
     if (localStorage.hasOwnProperty("pochass")) {
         editor.setOptions(JSON.parse(localStorage.pochass));
-    }
-    else {
+    } else {
         editor.getSession().setMode("ace/mode/yaml");
         editor.setOption("showInvisibles", whitespacestatus);
         editor.setOption("useSoftTabs", true);
@@ -456,8 +451,8 @@
         var pos = editor.selection.getCursor();
         var end = editor.session.insert(pos, text);
         editor.selection.setRange({
-            start: pos
-            , end: end
+            start: pos,
+            end: end
         });
         editor.focus();
     }
