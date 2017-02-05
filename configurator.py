@@ -53,6 +53,8 @@ INDEX = Template("""<!DOCTYPE html>
 <html>
 
 <head>
+    <!--  Android Chrome Color-->
+    <meta name="theme-color" content="#EE6E73">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0" />
     <title>Configurator</title>
@@ -82,34 +84,37 @@ INDEX = Template("""<!DOCTYPE html>
         .red {
             color: #f00;
         }
+        
+        .dropdown-content {
+            min-width: 200px;
+        }
     </style>
 </head>
 
 <body>
     <div class="navbar-fixed">
-        <nav class="light-blue">
+        <nav class="light-blue hoverable">
             <div class="nav-wrapper">
                 <ul class="left">
-                    <li><a href="#" data-activates="slide-out" class="button-collapse show-on-large"><i class="material-icons">folder</i></a></li>
+                    <li><a href="#" data-activates="slide-out" class="waves-effect waves-light button-collapse show-on-large"><i class="material-icons">folder</i></a></li>
                 </ul>
                 <ul class="right">
-                    <li><a href="#modal_save"><i class="material-icons">save</i></a></li>
-                    <!-- Dropdown Trigger -->
-                    <li><a class="dropdown-button" href="#!" data-activates="dropdown_tools"><i class="material-icons right">more_vert</i></a></li>
+                    <li><a class="waves-effect waves-light" href="#modal_save"><i class="material-icons">save</i></a></li>
+                    <li><a class="waves-effect waves-light dropdown-button" href="#!" data-activates="dropdown_tools" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
                 </ul>
             </div>
         </nav>
     </div>
-    <ul id="dropdown_tools" class="dropdown-content">
+    <ul id="dropdown_tools" class="dropdown-content z-depth-4">
         <li><a onclick="toggle_whitespace()">Whitespace</a></li>
         <li><a onclick="toggle_fold()">Fold</a></li>
         <li><a onclick="toggle_highlightSelectedWord()">Highlight</a></li>
-        <li><a target="_blank" href="https://github.com/ajaxorg/ace/wiki/Default-Keyboard-Shortcuts">Keyboard Shortcuts</a></li>
+        <li><a target="_blank" href="https://github.com/ajaxorg/ace/wiki/Default-Keyboard-Shortcuts">Ace Keyboard Shortcuts</a></li>
         <li><a target="_blank" href="https://home-assistant.io/help/">Need HASS Help?</a></li>
         <li><a target="_blank" href="https://home-assistant.io/components/">HASS Components</a></li>
         <li><a href="#modal_about">About</a></li>
         <li class="divider"></li>
-        <li><a onclick="editor.execCommand('showSettingsMenu')">Settings</a></li>
+        <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Settings</a></li>
         <li><a href="#modal_restart">Restart HASS</a></li>
     </ul>
     <div id="modal_save" class="modal">
@@ -129,15 +134,13 @@ INDEX = Template("""<!DOCTYPE html>
     <div id="modal_about" class="modal">
         <div class="modal-content">
             <h4>About</h4>
-            <blockquote>
-                <class="$versionclass2" href="https://github.com/danielperna84/hass-poc-configurator/releases/latest" target="_blank">Version: $current</p>
-            </blockquote>
+            <p>Version: <a class="$versionclass" href="https://github.com/danielperna84/hass-poc-configurator/releases/latest" target="_blank">$current</a></p>
         </div>
         <div class="modal-footer"> <a class=" modal-action modal-close waves-effect btn-flat">OK</a> </div>
     </div>
     <div class="row">
-        </br>
-        <div class="col s6 m3 l2 hide-on-small-only">
+        <div class="col m4 l3 hide-on-small-only">
+            </br>
             <div class="input-field col s12">
                 <select onchange="insert(this.value)">
                     <option value="" disabled selected>Choose your option</option>
@@ -177,19 +180,17 @@ INDEX = Template("""<!DOCTYPE html>
                 <label>Services</label>
             </div>
         </div>
-        <div class="col s12 m9 l10" id="editor"></div>
+        <div class="col s12 m8 l9 z-depth-3 hoverable" id="editor"></div>
     </div>
     <div>
         <ul id="slide-out" class="side-nav">
-            <li>
-                <div class="userView">
-                    <div class="background"> <img src="https://raw.githubusercontent.com/Dogfalo/materialize/master/images/office.jpg"> </div>
-                    <a href="#!user"><img class="circle" src="https://home-assistant.io/images/components/alexa/alexa-512x512.png"></a> <a href="#!name"><span class="white-text name">John Doe</span></a> <a href="#!email"><span class="white-text email">someone@gmail.com</span></a> </div>
-            </li>
+            <li> <a class="subheader">Home Assistant Directory</a> </li>
             <li>
                 <div id="tree"></div>
             </li>
-            <li><a class="subheader"></a></li>
+            <li>
+                <a class="subheader"></a>
+            </li>
             <div class="row">
                 <div class="hide-on-med-and-up">
                     <div class="input-field col s12">
@@ -211,7 +212,7 @@ INDEX = Template("""<!DOCTYPE html>
             <div class="row">
                 <div class="hide-on-med-and-up">
                     <div class="input-field col s12">
-                        <select id="events2" onchange="insert(this.value)"> </select>
+                        <select id="events_side" onchange="insert(this.value)"> </select>
                         <label>Events</label>
                     </div>
                 </div>
@@ -219,7 +220,7 @@ INDEX = Template("""<!DOCTYPE html>
             <div class="row">
                 <div class="hide-on-med-and-up">
                     <div class="input-field col s12">
-                        <select id="entities2" onchange="insert(this.value)"> </select>
+                        <select id="entities_side" onchange="insert(this.value)"> </select>
                         <label>Entities</label>
                     </div>
                 </div>
@@ -243,44 +244,76 @@ INDEX = Template("""<!DOCTYPE html>
             <div class="row">
                 <div class="hide-on-med-and-up">
                     <div class="input-field col s12">
-                        <select id="services2" onchange="insert(this.value)"> </select>
+                        <select id="services_side" onchange="insert(this.value)"> </select>
                         <label>Services</label>
                     </div>
                 </div>
             </div>
+            </br>
+            </br>
+            </br>
+        </ul>
+    </div>
+    <div class="row center">
+        <ul id="ace_settings" class="side-nav">
+            <li><a onclick="Materialize.toast('¯\\_(ツ)_/¯', 2000)">Coming Soon . . .</a></li>
+            <form class="row center col s12" action="#">
+                <p>
+                    <input type="checkbox" id="test1" />
+                    <label for="test1">Animated Scroll</label>
+                </p>
+                <p>
+                    <input type="checkbox" id="test2" />
+                    <label for="test2">Behaviours Enabled</label>
+                </p>
+                <p>
+                    <input type="checkbox" id="test3" />
+                    <label for="test3">Display Indent Guides</label>
+                </p>
+            </form>
+            <div class="row">
+                <div class="input-field col s6">
+                    <input value="150" id="drag_delay" type="text" class="validate">
+                    <label class="active" for="drag_delay">Drag Delay</label>
+                </div>
+            </div>
+            <form class="col s12" action="#">
+                <p>
+                    <input type="checkbox" id="test4" />
+                    <label for="test4">Fade Fold Widgets</label>
+                </p>
+            </form>
         </ul>
     </div>
 </body>
 <!--  Scripts-->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js"></script>
 <script type="text/javascript">
-    $(document).ready(function () {
+    $(document).ready(function() {
         $('select').material_select();
-    });
-</script>
-<script type="text/javascript">
-    $(document).ready(function () {
         $('.modal').modal();
-    });
-</script>
-<script type="text/javascript">
-    $('.dropdown-button').dropdown({
-        inDuration: 300
-        , outDuration: 225
-        , constrainWidth: false
-        , hover: true
-        , gutter: 00
-        , belowOrigin: true
-        , alignment: 'right'
-        , stopPropagation: false
-    });
-</script>
-<script type="text/javascript">
-    $('.button-collapse').sideNav({
-        menuWidth: 320,
-        edge: 'left',
-        closeOnClick: true,
-        draggable: true
+        $('.dropdown-button').dropdown({
+            inDuration: 300,
+            outDuration: 225,
+            constrainWidth: true,
+            hover: false,
+            gutter: 0,
+            belowOrigin: true,
+            alignment: 'right',
+            stopPropagation: false
+        });
+        $('.button-collapse').sideNav({
+            menuWidth: 350,
+            edge: 'left',
+            closeOnClick: true,
+            draggable: true
+        });
+        $('.ace_settings-collapse').sideNav({
+            menuWidth: 400, // Default is 300
+            edge: 'right', // Choose the horizontal origin
+            closeOnClick: true, // Closes side-nav on <a> clicks, useful for Angular/Meteor
+            draggable: true // Choose whether you can drag to open on touch screens
+        });
     });
 </script>
 <script>
@@ -293,7 +326,7 @@ INDEX = Template("""<!DOCTYPE html>
             option.text = bootstrap.events[i].event;
             events.add(option);
         }
-        var events = document.getElementById("events2");
+        var events = document.getElementById("events_side");
         for (var i = 0; i < bootstrap.events.length; i++) {
             var option = document.createElement("option");
             option.value = bootstrap.events[i].event;
@@ -307,7 +340,7 @@ INDEX = Template("""<!DOCTYPE html>
             option.text = bootstrap.states[i].attributes.friendly_name + ' (' + bootstrap.states[i].entity_id + ')';
             entities.add(option);
         }
-        var entities = document.getElementById("entities2");
+        var entities = document.getElementById("entities_side");
         for (var i = 0; i < bootstrap.states.length; i++) {
             var option = document.createElement("option");
             option.value = bootstrap.states[i].entity_id;
@@ -323,7 +356,7 @@ INDEX = Template("""<!DOCTYPE html>
                 services.add(option);
             }
         }
-        var services = document.getElementById("services2");
+        var services = document.getElementById("services_side");
         for (var i = 0; i < bootstrap.services.length; i++) {
             for (var k in bootstrap.services[i].services) {
                 var option = document.createElement("option");
@@ -333,50 +366,50 @@ INDEX = Template("""<!DOCTYPE html>
             }
         }
         var options = $('#events option');
-        var arr = options.map(function (_, o) {
+        var arr = options.map(function(_, o) {
             return {
-                t: $(o).text()
-                , v: o.value
+                t: $(o).text(),
+                v: o.value
             };
         }).get();
-        arr.sort(function (o1, o2) {
-            var t1 = o1.t.toLowerCase()
-                , t2 = o2.t.toLowerCase();
+        arr.sort(function(o1, o2) {
+            var t1 = o1.t.toLowerCase(),
+                t2 = o2.t.toLowerCase();
             return t1 > t2 ? 1 : t1 < t2 ? -1 : 0;
         });
-        options.each(function (i, o) {
+        options.each(function(i, o) {
             o.value = arr[i].v;
             $(o).text(arr[i].t);
         });
         var options = $('#entities option');
-        var arr = options.map(function (_, o) {
+        var arr = options.map(function(_, o) {
             return {
-                t: $(o).text()
-                , v: o.value
+                t: $(o).text(),
+                v: o.value
             };
         }).get();
-        arr.sort(function (o1, o2) {
-            var t1 = o1.t.toLowerCase()
-                , t2 = o2.t.toLowerCase();
+        arr.sort(function(o1, o2) {
+            var t1 = o1.t.toLowerCase(),
+                t2 = o2.t.toLowerCase();
             return t1 > t2 ? 1 : t1 < t2 ? -1 : 0;
         });
-        options.each(function (i, o) {
+        options.each(function(i, o) {
             o.value = arr[i].v;
             $(o).text(arr[i].t);
         });
         var options = $('#services option');
-        var arr = options.map(function (_, o) {
+        var arr = options.map(function(_, o) {
             return {
-                t: $(o).text()
-                , v: o.value
+                t: $(o).text(),
+                v: o.value
             };
         }).get();
-        arr.sort(function (o1, o2) {
-            var t1 = o1.t.toLowerCase()
-                , t2 = o2.t.toLowerCase();
+        arr.sort(function(o1, o2) {
+            var t1 = o1.t.toLowerCase(),
+                t2 = o2.t.toLowerCase();
             return t1 > t2 ? 1 : t1 < t2 ? -1 : 0;
         });
-        options.each(function (i, o) {
+        options.each(function(i, o) {
             o.value = arr[i].v;
             $(o).text(arr[i].t);
         });
@@ -388,21 +421,12 @@ INDEX = Template("""<!DOCTYPE html>
             }
         }
     });
-    $('#tree').on("select_node.jstree", function (e, data) {
+    $('#tree').on("select_node.jstree", function(e, data) {
         load();
     });
     var whitespacestatus = false;
     var foldstatus = true;
     var highlightwords = true;
-    var modaloptions = {
-        close: true
-        , overlayClose: true
-        , containerCss: {
-            border: "1px solid #000"
-            , padding: "5px"
-            , background: "#fff"
-        }
-    };
 
     function toggle_highlightSelectedWord() {
         highlightwords = !highlightwords;
@@ -417,8 +441,7 @@ INDEX = Template("""<!DOCTYPE html>
     function toggle_fold() {
         if (foldstatus) {
             editor.getSession().foldAll();
-        }
-        else {
+        } else {
             editor.getSession().unfold();
         }
         foldstatus = !foldstatus;
@@ -427,19 +450,22 @@ INDEX = Template("""<!DOCTYPE html>
     function load() {
         var n = $("#tree").jstree("get_selected");
         if (n) {
-            $.get("api/file?filename=" + n[0], function (data) {
+            $.get("api/file?filename=" + n[0], function(data) {
                 editor.setValue(data);
+                editor.selection.selectFileStart();
+                editor.focus();
             });
         }
     }
 
     function restart() {
-        $.get("api/restart", function (resp) {
+        $.get("api/restart", function(resp) {
             if (resp.length == 0) {
-                $.modal("<div><pre>Restarting HASS</pre></div>", modaloptions);
-            }
-            else {
-                $.modal("<div><pre>" + resp + "</pre></div>", modaloptions);
+                var $toastContent = $("<div><pre>Restarting HASS</pre></div>");
+                Materialize.toast($toastContent, 2000);
+            } else {
+                var $toastContent = $("<div><pre>" + resp + "</pre></div>");
+                Materialize.toast($toastContent, 2000);
             }
         });
     }
@@ -450,8 +476,9 @@ INDEX = Template("""<!DOCTYPE html>
             data = new Object();
             data.filename = n[0];
             data.text = editor.getValue()
-            $.post("api/save", data).done(function (resp) {
-                $.modal("<div><pre>" + resp + "</pre></div>", modaloptions);
+            $.post("api/save", data).done(function(resp) {
+                var $toastContent = $("<div><pre>" + resp + "</pre></div>");
+                Materialize.toast($toastContent, 2000);
             });
         }
     }
@@ -460,19 +487,23 @@ INDEX = Template("""<!DOCTYPE html>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ext-modelist.js" type="text/javascript" charset="utf-8"></script>
 <script>
     var editor = ace.edit("editor");
-    editor.getSession().setMode("ace/mode/yaml");
-    editor.setOption("showInvisibles", whitespacestatus);
-    editor.setOption("useSoftTabs", true);
-    editor.setOption("displayIndentGuides", true);
-    editor.setOption("highlightSelectedWord", highlightwords);
-    editor.$blockScrolling = Infinity;
+    if (localStorage.hasOwnProperty("pochass")) {
+        editor.setOptions(JSON.parse(localStorage.pochass));
+    } else {
+        editor.getSession().setMode("ace/mode/yaml");
+        editor.setOption("showInvisibles", whitespacestatus);
+        editor.setOption("useSoftTabs", true);
+        editor.setOption("displayIndentGuides", true);
+        editor.setOption("highlightSelectedWord", highlightwords);
+        editor.$blockScrolling = Infinity;
+    }
 
     function insert(text) {
         var pos = editor.selection.getCursor();
         var end = editor.session.insert(pos, text);
         editor.selection.setRange({
-            start: pos
-            , end: end
+            start: pos,
+            end: end
         });
         editor.focus();
     }
