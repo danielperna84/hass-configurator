@@ -217,7 +217,7 @@
                     <Label for="indent_guides">Display Indent Guides</label>
                 </p class="col s12">
                 <div class="input-field col s12">
-                    <input value="150" id="drag_delay" type="text" class="validate">
+                    <input value="150" id="drag_delay" type="number">
                     <label class="active" for="drag_delay">Drag Delay</label>
                 </div>
                 <p class="col s12">
@@ -229,7 +229,7 @@
                     <Label for="fold_all">Fold All</label>
                 </p>
                 <div class="input-field col s12">
-                    <input value="12" id="ace_font" type="text" class="validate">
+                    <input value="12" id="ace_font" type="number">
                     <label class="active" for="ace_font">Font Size</label>
                 </div>
                 <p class="col s12">
@@ -409,7 +409,7 @@
                     <label>New Line Mode</label>
                 </div>
                 <div class="input-field col s12">
-                    <input value="undefined" id="ace_options" type="text" class="validate">
+                    <input value="undefined" id="ace_options" type="text">
                     <label class="active" for="ace_options">Options</label>
                 </div>
                 <p class="col s12">
@@ -417,7 +417,7 @@
                     <Label for="overwrite">Overwrite</label>
                 </p>
                 <div class="input-field col s12">
-                    <input value="80" id="print_margin" type="text" class="validate">
+                    <input value="80" id="print_margin" type="number">
                     <label class="active" for="print_margin">Print Margin Column</label>
                 </div>
                 <p class="col s12">
@@ -425,7 +425,7 @@
                     <Label for="read_only">Read Only</label>
                 </p>
                 <div class="input-field col s12">
-                    <input value="2" id="scroll_speed" type="text" class="validate">
+                    <input value="2" id="scroll_speed" type="number">
                     <label class="active" for="scroll_speed">Scroll Speed</label>
                 </div>
                 <p class="col s12">
@@ -449,7 +449,7 @@
                     <Label for="show_line_numbers">Show Line Numbers</label>
                 </p>
                 <div class="input-field col s12">
-                    <input value="4" id="tab_size" type="text" class="validate">
+                    <input value="4" id="tab_size" type="number">
                     <label class="active" for="tab_size">Tab Size</label>
                 </div>
                 <div class="input-field col s12">
@@ -517,7 +517,7 @@
                     <Label for="wrap_behav">Wrap Behaviours Enabled</label>
                 </p>
                 <div class="input-field col s12">
-                    <input value="80" id="wrap_limit" type="text" class="validate">
+                    <input value="80" id="wrap_limit" type="number">
                     <label class="active" for="wrap_limit">Wrap Limit</label>
                 </div>
                 <p class="center col s12"> Ace Editor 1.2.6 </p>
@@ -551,7 +551,7 @@
             , draggable: true
         });
         $('.ace_settings-collapse').sideNav({
-            menuWidth: 300, // Default is 300
+            menuWidth: 320, // Default is 300
             edge: 'right', // Choose the horizontal origin
             closeOnClick: true, // Closes side-nav on <a> clicks, useful for Angular/Meteor
             draggable: true // Choose whether you can drag to open on touch screens
