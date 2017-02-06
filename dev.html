@@ -43,7 +43,7 @@
 
 <body>
     <div class="navbar-fixed">
-        <nav class="light-blue hoverable">
+        <nav class="light-blue">
             <div class="nav-wrapper">
                 <ul class="left">
                     <li><a href="#" data-activates="slide-out" class="waves-effect waves-light button-collapse show-on-large"><i class="material-icons">folder</i></a></li>
@@ -56,12 +56,11 @@
         </nav>
     </div>
     <ul id="dropdown_tools" class="dropdown-content z-depth-4">
-        <li><a target="_blank" href="https://github.com/ajaxorg/ace/wiki/Default-Keyboard-Shortcuts">Ace Keyboard Shortcuts</a></li>
         <li><a target="_blank" href="https://home-assistant.io/help/">Need HASS Help?</a></li>
         <li><a target="_blank" href="https://home-assistant.io/components/">HASS Components</a></li>
-        <li><a href="#modal_about">About</a></li>
+        <li><a href="#modal_about">About PoC</a></li>
         <li class="divider"></li>
-        <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Settings</a></li>
+        <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Ace Settings</a></li>
         <li><a href="#modal_restart">Restart HASS</a></li>
     </ul>
     <div id="modal_save" class="modal">
@@ -80,7 +79,7 @@
     </div>
     <div id="modal_about" class="modal">
         <div class="modal-content">
-            <h4>About</h4>
+            <h4>About Configurator</h4>
             <p>Version: <a class="$versionclass" href="https://github.com/danielperna84/hass-poc-configurator/releases/latest" target="_blank">$current</a></p>
         </div>
         <div class="modal-footer"> <a class=" modal-action modal-close waves-effect btn-flat">OK</a> </div>
@@ -203,8 +202,9 @@
     </div>
     <div class="row">
         <ul id="ace_settings" class="side-nav">
-            <li><a class="center grey lighten-3 z-depth-1 subheader" onclick="Materialize.toast('¯\\_(ツ)_/¯', 2000)">Ace Editor Settings</a></li>
+            <li><a class="center grey lighten-3 z-depth-1 subheader">Ace Editor Settings</a></li>
             <form class="row col s12" action="#">
+                <a class="waves-effect waves-light btn light-blue" target="_blank" href="https://github.com/ajaxorg/ace/wiki/Default-Keyboard-Shortcuts">Ace Keyboard Shortcuts</a>
                 <p class="col s12">
                     <input type="checkbox" onclick="toggle_animatedscroll()" id="anim_scroll" />
                     <Label for="anim_scroll">Animated Scroll</label>
