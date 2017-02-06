@@ -19,24 +19,47 @@
             margin: 0;
             padding: 0;
         }
-
+        
         #editor {
             position: fixed;
             top: 68px;
             right: 0;
             bottom: 0;
         }
-
+        
         .green {
             color: #0f0;
         }
-
+        
         .red {
             color: #f00;
         }
-
+        
         .dropdown-content {
             min-width: 200px;
+        }
+        
+        .dropdown-content li > a,
+        .dropdown-content li > span {
+            color: #616161 !important;
+        }
+        
+        .blue_check:checked + label:before {
+            border-right: 2px solid #03a9f4;
+            /* You need to change the colour here */
+            border-bottom: 2px solid #03a9f4;
+            /* And here */
+        }
+        /* label focus color */
+        
+        .input-field input:focus + label {
+            color: #03a9f4 !important;
+        }
+        /* label underline focus color */
+        
+        .row .input-field input:focus {
+            border-bottom: 1px solid #03a9f4 !important;
+            box-shadow: 0 1px 0 0 #03a9f4 !important
         }
     </style>
 </head>
@@ -203,18 +226,17 @@
     <div class="row">
         <ul id="ace_settings" class="side-nav">
             <li><a class="center grey lighten-3 z-depth-1 subheader">Ace Editor Settings</a></li>
-            <form class="row col s12" action="#">
-                <a class="waves-effect waves-light btn light-blue" target="_blank" href="https://github.com/ajaxorg/ace/wiki/Default-Keyboard-Shortcuts">Ace Keyboard Shortcuts</a>
+            <form class="row col s12" action="#"> <a class="waves-effect waves-light btn light-blue" target="_blank" href="https://github.com/ajaxorg/ace/wiki/Default-Keyboard-Shortcuts">Ace Keyboard Shortcuts</a>
                 <p class="col s12">
-                    <input type="checkbox" onclick="toggle_animatedscroll()" id="anim_scroll" />
+                    <input type="checkbox" class="blue_check" onclick="toggle_animatedscroll()" id="anim_scroll" />
                     <Label for="anim_scroll">Animated Scroll</label>
                 </p>
                 <p class="col s12">
-                    <input type="checkbox" checked="checked" onclick="toggle_behavioursenabled()" id="behaviour_en" />
+                    <input type="checkbox" class="blue_check" checked="checked" onclick="toggle_behavioursenabled()" id="behaviour_en" />
                     <Label for="behaviour_en">Behaviour Enabled</label>
                 </p>
                 <p class="col s12">
-                    <input type="checkbox" checked="checked" onclick="toggle_displayindentguides()" id="indent_guides" />
+                    <input type="checkbox" class="blue_check" checked="checked" onclick="toggle_displayindentguides()" id="indent_guides" />
                     <Label for="indent_guides">Display Indent Guides</label>
                 </p class="col s12">
                 <div class="input-field col s12">
@@ -222,11 +244,11 @@
                     <label class="active" for="drag_delay">Drag Delay</label>
                 </div>
                 <p class="col s12">
-                    <input type="checkbox" onclick="toggle_fadefoldwidget()" id="fold" />
+                    <input type="checkbox" class="blue_check" onclick="toggle_fadefoldwidget()" id="fold" />
                     <Label for="fold">Fade Fold Widgets</label>
                 </p>
                 <p class="col s12">
-                    <input type="checkbox" onclick="toggle_fold()" id="fold_all" />
+                    <input type="checkbox" class="blue_check" onclick="toggle_fold()" id="fold_all" />
                     <Label for="fold_all">Fold All</label>
                 </p>
                 <div class="input-field col s12">
@@ -234,19 +256,19 @@
                     <label class="active" for="ace_font">Font Size</label>
                 </div>
                 <p class="col s12">
-                    <input type="checkbox" checked="checked" onclick="toggle_highlightactiveline()" id="highlight_line" />
+                    <input type="checkbox" class="blue_check" checked="checked" onclick="toggle_highlightactiveline()" id="highlight_line" />
                     <Label for="highlight_line">Hightlight Active Line</label>
                 </p>
                 <p class="col s12">
-                    <input type="checkbox" checked="checked" onclick="toggle_highlightgutterline()" id="highlight_gutter" />
+                    <input type="checkbox" class="blue_check" checked="checked" onclick="toggle_highlightgutterline()" id="highlight_gutter" />
                     <Label for="highlight_gutter">Hightlight Gutter Line</label>
                 </p>
                 <p class="col s12">
-                    <input type="checkbox" checked="checked" onclick="toggle_highlightSelectedWord()" id="highlight_word" />
+                    <input type="checkbox" class="blue_check" checked="checked" onclick="toggle_highlightSelectedWord()" id="highlight_word" />
                     <Label for="highlight_word">Hightlight Selected Word</label>
                 </p>
                 <p class="col s12">
-                    <input type="checkbox" onclick="toggle_hscrollbar()" id="hscroll_bar" />
+                    <input type="checkbox" class="blue_check" onclick="toggle_hscrollbar()" id="hscroll_bar" />
                     <Label for="hscroll_bar">H Scroll Bar Always Visible</label>
                 </p>
                 <div class="input-field col s12">
@@ -414,7 +436,7 @@
                     <label class="active" for="ace_options">Options</label>
                 </div>
                 <p class="col s12">
-                    <input type="checkbox" onclick="toggle_overwrite()" id="overwrite" />
+                    <input type="checkbox" class="blue_check" onclick="toggle_overwrite()" id="overwrite" />
                     <Label for="overwrite">Overwrite</label>
                 </p>
                 <div class="input-field col s12">
@@ -422,7 +444,7 @@
                     <label class="active" for="print_margin">Print Margin Column</label>
                 </div>
                 <p class="col s12">
-                    <input type="checkbox" onclick="toggle_readonly()" id="read_only" />
+                    <input type="checkbox" class="blue_check" onclick="toggle_readonly()" id="read_only" />
                     <Label for="read_only">Read Only</label>
                 </p>
                 <div class="input-field col s12">
@@ -430,23 +452,23 @@
                     <label class="active" for="scroll_speed">Scroll Speed</label>
                 </div>
                 <p class="col s12">
-                    <input type="checkbox" checked="checked" onclick="toggle_foldwidget()" id="shw_fold_wgt" />
+                    <input type="checkbox" class="blue_check" checked="checked" onclick="toggle_foldwidget()" id="shw_fold_wgt" />
                     <Label for="shw_fold_wgt">Show Fold Widgets</label>
                 </p>
                 <p class="col s12">
-                    <input type="checkbox" checked="checked" onclick="toggle_gutter()" id="show_gutter" />
+                    <input type="checkbox" class="blue_check" checked="checked" onclick="toggle_gutter()" id="show_gutter" />
                     <Label for="show_gutter">Show Gutter</label>
                 </p>
                 <p class="col s12">
-                    <input type="checkbox" onclick="toggle_whitespace()" id="invisibles" />
+                    <input type="checkbox" class="blue_check" onclick="toggle_whitespace()" id="invisibles" />
                     <Label for="invisibles">Show Invisibles</label>
                 </p>
                 <p class="col s12">
-                    <input type="checkbox" checked="checked" onclick="toggle_printmargin()" id="show_print_margin" />
+                    <input type="checkbox" class="blue_check" checked="checked" onclick="toggle_printmargin()" id="show_print_margin" />
                     <Label for="show_print_margin">Show Print Margin</label>
                 </p>
                 <p class="col s12">
-                    <input type="checkbox" checked="checked" onclick="toggle_linenumbers()" id="show_line_numbers" />
+                    <input type="checkbox" class="blue_check" checked="checked" onclick="toggle_linenumbers()" id="show_line_numbers" />
                     <Label for="show_line_numbers">Show Line Numbers</label>
                 </p>
                 <div class="input-field col s12">
@@ -498,23 +520,23 @@
                     <label>Theme</label>
                 </div>
                 <p class="col s12">
-                    <input type="checkbox" checked="checked" onclick="toggle_softtab()" id="soft_tabs" />
+                    <input type="checkbox" class="blue_check" checked="checked" onclick="toggle_softtab()" id="soft_tabs" />
                     <Label for="soft_tabs">Use Soft Tabs</label>
                 </p>
                 <p class="col s12">
-                    <input type="checkbox" checked="checked" onclick="toggle_worker()" id="use_worker" />
+                    <input type="checkbox" class="blue_check" checked="checked" onclick="toggle_worker()" id="use_worker" />
                     <Label for="use_worker">Use Worker</label>
                 </p>
                 <p class="col s12">
-                    <input type="checkbox" onclick="toggle_wrap()" id="wrap_mode" />
+                    <input type="checkbox" class="blue_check" onclick="toggle_wrap()" id="wrap_mode" />
                     <Label for="wrap_mode">Use Wrap Mode</label>
                 </p>
                 <p class="col s12">
-                    <input type="checkbox" onclick="toggle_vscrollbar()" id="v_scroll_always" />
+                    <input type="checkbox" class="blue_check" onclick="toggle_vscrollbar()" id="v_scroll_always" />
                     <Label for="v_scroll_always">V Scroll Bar Always Visible</label>
                 </p>
                 <p class="col s12">
-                    <input type="checkbox" checked="checked" onclick="toggle_wrapbehaviour()" id="wrap_behav" />
+                    <input type="checkbox" class="blue_check" checked="checked" onclick="toggle_wrapbehaviour()" id="wrap_behav" />
                     <Label for="wrap_behav">Wrap Behaviours Enabled</label>
                 </p>
                 <div class="input-field col s12">
