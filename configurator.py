@@ -91,6 +91,19 @@ INDEX = Template("""<!DOCTYPE html>
         .dropdown-content {
             min-width: 200px;
         }
+        
+        .ace_optionsMenuEntry input {
+            position: relative !important;
+            left: 0 !important;
+            opacity: 100 !important;
+        }
+        
+        .ace_optionsMenuEntry select {
+            position: relative !important;
+            left: 0 !important;
+            opacity: 100 !important;
+            display: block !important;
+        }
     </style>
 </head>
 
@@ -117,7 +130,8 @@ INDEX = Template("""<!DOCTYPE html>
         <li><a target="_blank" href="https://home-assistant.io/components/">HASS Components</a></li>
         <li><a href="#modal_about">About</a></li>
         <li class="divider"></li>
-        <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Settings</a></li>
+        <li><a href="#" class="ace_settings-collapse" onclick="settings()">Settings</a></li>
+        <!--<li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Settings</a></li>-->
         <li><a href="#modal_restart">Restart HASS</a></li>
     </ul>
     <div id="modal_save" class="modal">
@@ -531,6 +545,10 @@ INDEX = Template("""<!DOCTYPE html>
                 Materialize.toast($toastContent, 2000);
             });
         }
+    }
+    
+    function settings() {
+        editor.execCommand('showSettingsMenu');
     }
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ace.js" type="text/javascript" charset="utf-8"></script>
