@@ -14,7 +14,7 @@ import signal
 import urllib.request
 from string import Template
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import urlparse, parse_qs, unquote
 
 ### Some options for you to change
 LISTENIP = "0.0.0.0"
@@ -37,10 +37,6 @@ ALLOWED_NETWORKS = []
 BANNED_IPS = []
 # Ban IPs after n failed login attempts. Restart service to reset banning. The default of `0` disables this feature.
 BANLIMIT = 0
-# File extensions the file browser should include
-EXTENSIONS = ['yaml', 'conf']
-# Directories to exclude from the file browser
-EXCLUDE_DIRS = ['/deps', '/.git']
 ### End of options
 
 RELEASEURL = "https://api.github.com/repos/danielperna84/hass-poc-configurator/releases/latest"
@@ -51,7 +47,6 @@ HTTPD = None
 FAIL2BAN_IPS = {}
 INDEX = Template("""<!DOCTYPE html>
 <html>
-
 <head>
     <!--  Android Chrome Color-->
     <meta name="theme-color" content="#EE6E73">
@@ -75,6 +70,14 @@ INDEX = Template("""<!DOCTYPE html>
             top: 68px;
             right: 0;
             bottom: 0;
+        }
+        
+        #fbheader {
+            display: block;
+        }
+        
+        .filename {
+            margin-left: 10px;
         }
         
         .green {
@@ -184,13 +187,7 @@ INDEX = Template("""<!DOCTYPE html>
     </div>
     <div>
         <ul id="slide-out" class="side-nav">
-            <li> <a class="subheader">Home Assistant Directory</a> </li>
-            <li>
-                <div id="tree"></div>
-            </li>
-            <li>
-                <a class="subheader"></a>
-            </li>
+            <div id="filebrowser"></div>
             <div class="row">
                 <div class="hide-on-med-and-up">
                     <div class="input-field col s12">
@@ -285,6 +282,7 @@ INDEX = Template("""<!DOCTYPE html>
             </form>
         </ul>
     </div>
+    <input type="hidden" id="currentfile" value="" />
 </body>
 <!--  Scripts-->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js"></script>
@@ -305,7 +303,7 @@ INDEX = Template("""<!DOCTYPE html>
         $('.button-collapse').sideNav({
             menuWidth: 350,
             edge: 'left',
-            closeOnClick: true,
+            closeOnClick: false,
             draggable: true
         });
         $('.ace_settings-collapse').sideNav({
@@ -314,6 +312,7 @@ INDEX = Template("""<!DOCTYPE html>
             closeOnClick: true, // Closes side-nav on <a> clicks, useful for Angular/Meteor
             draggable: true // Choose whether you can drag to open on touch screens
         });
+        listdir('.');
     });
 </script>
 <script>
@@ -414,16 +413,69 @@ INDEX = Template("""<!DOCTYPE html>
             $(o).text(arr[i].t);
         });
     }
-    $('#tree').jstree({
-        'core': {
-            'data': {
-                'url': '/api/files'
-            }
+
+    function listdir(path) {
+        $.get(encodeURI("api/listdir?path=" + path), function(data) {
+            renderpath(data);
+        });
+    }
+    
+    function renderitem(itemdata) {
+        var item = document.createElement('a');
+        item.classList.add('collection-item');
+        item.href = '#';
+        var iicon = document.createElement('i');
+        iicon.classList.add('material-icons');
+        if (itemdata.type == 'dir') {
+            iicon.innerHTML = 'folder';
+            item.setAttribute("onclick", "listdir('" + encodeURI(itemdata.fullpath) + "')");
         }
-    });
-    $('#tree').on("select_node.jstree", function(e, data) {
-        load();
-    });
+        else {
+            iicon.innerHTML = 'insert_drive_file';
+            item.setAttribute("onclick", "loadfile('" + encodeURI(itemdata.fullpath) + "')");
+        }
+        item.appendChild(iicon);
+        var itext = document.createElement('span');
+        itext.innerHTML = itemdata.name;
+        itext.classList.add('filename');
+        item.appendChild(itext);
+        return item;
+    }
+    
+    function renderpath(dirdata) {
+        var filebrowser = document.getElementById("filebrowser");
+        while (filebrowser.firstChild) {
+            filebrowser.removeChild(filebrowser.firstChild);
+        }
+        var collection = document.createElement('div');
+        collection.classList.add('collection');
+        collection.classList.add('with-header');
+        var fbheader = document.createElement('span');
+        fbheader.innerHTML = dirdata.abspath;
+        fbheader.classList.add('collection-header');
+        fbheader.id = 'fbheader';
+        collection.appendChild(fbheader);
+        var up = document.createElement('a');
+        up.classList.add('collection-item');
+        up.href = '#';
+        up.id = "uplink";
+        up.setAttribute("onclick", "listdir('" + encodeURI(dirdata.parent) + "')")
+        var upicon = document.createElement('i');
+        upicon.classList.add('material-icons');
+        upicon.innerHTML = 'folder';
+        up.appendChild(upicon);
+        var uptext = document.createElement('span');
+        uptext.innerHTML = '..';
+        up.appendChild(uptext);
+        collection.appendChild(up);
+        
+        for (var i = 0; i < dirdata.content.length; i++) {
+            collection.appendChild(renderitem(dirdata.content[i]));
+        }
+        
+        filebrowser.appendChild(collection);
+    }
+    
     var whitespacestatus = false;
     var foldstatus = true;
     var highlightwords = true;
@@ -447,15 +499,13 @@ INDEX = Template("""<!DOCTYPE html>
         foldstatus = !foldstatus;
     }
 
-    function load() {
-        var n = $("#tree").jstree("get_selected");
-        if (n) {
-            $.get("api/file?filename=" + n[0], function(data) {
-                editor.setValue(data);
-                editor.selection.selectFileStart();
-                editor.focus();
-            });
-        }
+    function loadfile(filepath) {
+        $.get("api/file?filename=" + filepath, function(data) {
+            editor.setValue(data);
+            editor.selection.selectFileStart();
+            editor.focus();
+            document.getElementById('currentfile').value = filepath;
+        });
     }
 
     function restart() {
@@ -471,10 +521,10 @@ INDEX = Template("""<!DOCTYPE html>
     }
 
     function save() {
-        var n = $("#tree").jstree("get_selected");
-        if (n) {
+        var filepath = document.getElementById('currentfile').value;
+        if (filepath.length > 0) {
             data = new Object();
-            data.filename = n[0];
+            data.filename = filepath;
             data.text = editor.getValue()
             $.post("api/save", data).done(function(resp) {
                 var $toastContent = $("<div><pre>" + resp + "</pre></div>");
@@ -508,7 +558,6 @@ INDEX = Template("""<!DOCTYPE html>
         editor.focus();
     }
 </script>
-
 </html>
 """)
 
@@ -520,8 +569,7 @@ def signal_handler(signal, frame):
 
 def load_settings(settingsfile):
     global LISTENIP, LISTENPORT, BASEPATH, SSL_CERTIFICATE, SSL_KEY, HASS_API, \
-    HASS_API_PASSWORD, CREDENTIALS, ALLOWED_NETWORKS, BANNED_IPS, BANLIMIT, \
-    EXTENSIONS, EXCLUDE_DIRS
+    HASS_API_PASSWORD, CREDENTIALS, ALLOWED_NETWORKS, BANNED_IPS, BANLIMIT
     try:
         if os.path.isfile(settingsfile):
             with open(settingsfile) as fptr:
@@ -537,12 +585,22 @@ def load_settings(settingsfile):
                 ALLOWED_NETWORKS = settings.get("ALLOWED_NETWORKS", ALLOWED_NETWORKS)
                 BANNED_IPS = settings.get("BANNED_IPS", BANNED_IPS)
                 BANLIMIT = settings.get("BANLIMIT", BANLIMIT)
-                EXTENSIONS = settings.get("EXTENSIONS", EXTENSIONS)
-                EXCLUDE_DIRS = settings.get("EXCLUDE_DIRS", EXCLUDE_DIRS)
     except Exception as err:
         print(err)
         print("Not loading static settings")
     return False
+
+def get_dircontent(path):
+    dircontent = []
+    for e in sorted(os.listdir(path), key=lambda x: x.lower()):
+        edata = {}
+        edata['name'] = e
+        edata['dir'] = path
+        edata['fullpath'] = os.path.abspath(os.path.join(path, e))
+        edata['type'] = 'dir' if os.path.isdir(edata['fullpath']) else 'file'
+        dircontent.append(edata)
+
+    return dircontent
 
 def get_html():
     if DEV:
@@ -568,57 +626,6 @@ def check_access(clientip):
     BANNED_IPS.append(clientip)
     return False
 
-class Node:
-    def __init__(self, id, text, parent):
-        self.id = id
-        self.text = text
-        self.parent = parent
-        self.icon = 'jstree-folder'
-        self.state = {'opened': self.id == '.'}
-        if os.path.isfile(os.path.join(parent, text)):
-            self.icon = "jstree-file"
-
-    def is_equal(self, node):
-        return self.id == node.id
-
-    def as_json(self):
-        return dict(
-            id=self.id,
-            parent=self.parent,
-            text=self.text,
-            icon=self.icon,
-            state=self.state
-        )
-
-def get_nodes_from_path(path):
-    nodes = []
-    path_nodes = path.split(os.sep)
-    for idx, node_name in enumerate(path_nodes):
-        parent = None
-        node_id = os.sep.join(path_nodes[0:idx+1])
-        if idx != 0:
-            parent = os.sep.join(path_nodes[0:idx])
-            if os.path.isfile(os.path.join(parent, node_name)) and node_name.split('.')[-1] not in EXTENSIONS:
-                continue
-        else:
-            parent = "#"
-        
-        nodes.append(Node(node_id, node_name, parent))
-    return nodes
-
-def getdirs(searchpath):
-    unique_nodes = []
-    for root, dirs, files in os.walk(searchpath, topdown=True):
-        if [d for d in EXCLUDE_DIRS if d in root]:
-            continue
-        for name in files:
-            path = os.path.join(root, name)
-            nodes = get_nodes_from_path(path)
-            for node in nodes:
-                if not any(node.is_equal(unode) for unode in unique_nodes):
-                    unique_nodes.append(node)
-    return [node.as_json() for node in unique_nodes]
-
 class RequestHandler(BaseHTTPRequestHandler):
     def do_BLOCK(self):
         self.send_response(420)
@@ -632,22 +639,70 @@ class RequestHandler(BaseHTTPRequestHandler):
         req = urlparse(self.path)
         query = parse_qs(req.query)
         self.send_response(200)
-        if req.path == '/api/files':
-            self.send_header('Content-type','text/json')
-            self.end_headers()
-            dirs = sorted(getdirs(BASEDIR), key=lambda x: x["text"])
-            self.wfile.write(bytes(json.dumps(dirs), "utf8"))
-            return
-        elif req.path == '/api/file':
+        if req.path == '/api/file':
             content = ""
             self.send_header('Content-type','text/text')
             self.end_headers()
             filename = query.get('filename', None)
-            if filename:
-                if os.path.isfile(os.path.join(BASEDIR, filename[0])):
-                    with open(os.path.join(BASEDIR, filename[0])) as fptr:
-                        content += fptr.read()
+            try:
+                if filename:
+                    filename = unquote(filename[0]).encode('utf-8')
+                    print(filename)
+                    if os.path.isfile(os.path.join(BASEDIR.encode('utf-8'), filename)):
+                        with open(os.path.join(BASEDIR.encode('utf-8'), filename)) as fptr:
+                            content += fptr.read()
+                    else:
+                        content = "File not found"
+            except Exception as err:
+                print(err)
+                content = str(err)
             self.wfile.write(bytes(content, "utf8"))
+            return
+        elif req.path == '/api/listdir':
+            content = ""
+            self.send_header('Content-type','text/json')
+            self.end_headers()
+            dirpath = query.get('path', None)
+            try:
+                if dirpath:
+                    dirpath = unquote(dirpath[0]).encode('utf-8')
+                    if os.path.isdir(dirpath):
+                        dircontent = get_dircontent(dirpath.decode('utf-8'))
+                        filedata = {'content': dircontent,
+                            'abspath': os.path.abspath(dirpath).decode('utf-8'),
+                            'parent': os.path.dirname(os.path.abspath(dirpath)).decode('utf-8')
+                        }
+                        self.wfile.write(bytes(json.dumps(filedata), "utf8"))
+            except Exception as err:
+                print(err)
+                content = str(err)
+                self.wfile.write(bytes(content, "utf8"))
+            return
+        elif req.path == '/api/abspath':
+            content = ""
+            self.send_header('Content-type','text/text')
+            self.end_headers()
+            dirpath = query.get('path', None)
+            if dirpath:
+                dirpath = unquote(dirpath[0]).encode('utf-8')
+                print(dirpath)
+                absp = os.path.abspath(dirpath)
+                print(absp)
+                if os.path.isdir(dirpath):
+                    self.wfile.write(os.path.abspath(dirpath))
+            return
+        elif req.path == '/api/parent':
+            content = ""
+            self.send_header('Content-type','text/text')
+            self.end_headers()
+            dirpath = query.get('path', None)
+            if dirpath:
+                dirpath = unquote(dirpath[0]).encode('utf-8')
+                print(dirpath)
+                absp = os.path.abspath(dirpath)
+                print(absp)
+                if os.path.isdir(dirpath):
+                    self.wfile.write(os.path.abspath(os.path.dirname(dirpath)))
             return
         elif req.path == '/api/restart':
             print("/api/restart")
@@ -721,7 +776,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         if 'filename' in postvars.keys() and 'text' in postvars.keys():
             if postvars['filename'] and postvars['text']:
                 try:
-                    filename = postvars['filename'][0]
+                    filename = unquote(postvars['filename'][0])
                     with open(os.path.join(BASEDIR, filename), 'wb') as fptr:
                         fptr.write(bytes(postvars['text'][0], "utf-8"))
                     self.send_response(200)

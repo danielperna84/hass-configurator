@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <!--  Android Chrome Color-->
     <meta name="theme-color" content="#EE6E73">
@@ -24,6 +23,14 @@
             top: 68px;
             right: 0;
             bottom: 0;
+        }
+        
+        #fbheader {
+            display: block;
+        }
+        
+        .filename {
+            margin-left: 10px;
         }
         
         .green {
@@ -133,13 +140,7 @@
     </div>
     <div>
         <ul id="slide-out" class="side-nav">
-            <li> <a class="subheader">Home Assistant Directory</a> </li>
-            <li>
-                <div id="tree"></div>
-            </li>
-            <li>
-                <a class="subheader"></a>
-            </li>
+            <div id="filebrowser"></div>
             <div class="row">
                 <div class="hide-on-med-and-up">
                     <div class="input-field col s12">
@@ -234,6 +235,7 @@
             </form>
         </ul>
     </div>
+    <input type="hidden" id="currentfile" value="" />
 </body>
 <!--  Scripts-->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js"></script>
@@ -254,7 +256,7 @@
         $('.button-collapse').sideNav({
             menuWidth: 350,
             edge: 'left',
-            closeOnClick: true,
+            closeOnClick: false,
             draggable: true
         });
         $('.ace_settings-collapse').sideNav({
@@ -263,6 +265,7 @@
             closeOnClick: true, // Closes side-nav on <a> clicks, useful for Angular/Meteor
             draggable: true // Choose whether you can drag to open on touch screens
         });
+        listdir('.');
     });
 </script>
 <script>
@@ -363,16 +366,69 @@
             $(o).text(arr[i].t);
         });
     }
-    $('#tree').jstree({
-        'core': {
-            'data': {
-                'url': '/api/files'
-            }
+
+    function listdir(path) {
+        $.get(encodeURI("api/listdir?path=" + path), function(data) {
+            renderpath(data);
+        });
+    }
+    
+    function renderitem(itemdata) {
+        var item = document.createElement('a');
+        item.classList.add('collection-item');
+        item.href = '#';
+        var iicon = document.createElement('i');
+        iicon.classList.add('material-icons');
+        if (itemdata.type == 'dir') {
+            iicon.innerHTML = 'folder';
+            item.setAttribute("onclick", "listdir('" + encodeURI(itemdata.fullpath) + "')");
         }
-    });
-    $('#tree').on("select_node.jstree", function(e, data) {
-        load();
-    });
+        else {
+            iicon.innerHTML = 'insert_drive_file';
+            item.setAttribute("onclick", "loadfile('" + encodeURI(itemdata.fullpath) + "')");
+        }
+        item.appendChild(iicon);
+        var itext = document.createElement('span');
+        itext.innerHTML = itemdata.name;
+        itext.classList.add('filename');
+        item.appendChild(itext);
+        return item;
+    }
+    
+    function renderpath(dirdata) {
+        var filebrowser = document.getElementById("filebrowser");
+        while (filebrowser.firstChild) {
+            filebrowser.removeChild(filebrowser.firstChild);
+        }
+        var collection = document.createElement('div');
+        collection.classList.add('collection');
+        collection.classList.add('with-header');
+        var fbheader = document.createElement('span');
+        fbheader.innerHTML = dirdata.abspath;
+        fbheader.classList.add('collection-header');
+        fbheader.id = 'fbheader';
+        collection.appendChild(fbheader);
+        var up = document.createElement('a');
+        up.classList.add('collection-item');
+        up.href = '#';
+        up.id = "uplink";
+        up.setAttribute("onclick", "listdir('" + encodeURI(dirdata.parent) + "')")
+        var upicon = document.createElement('i');
+        upicon.classList.add('material-icons');
+        upicon.innerHTML = 'folder';
+        up.appendChild(upicon);
+        var uptext = document.createElement('span');
+        uptext.innerHTML = '..';
+        up.appendChild(uptext);
+        collection.appendChild(up);
+        
+        for (var i = 0; i < dirdata.content.length; i++) {
+            collection.appendChild(renderitem(dirdata.content[i]));
+        }
+        
+        filebrowser.appendChild(collection);
+    }
+    
     var whitespacestatus = false;
     var foldstatus = true;
     var highlightwords = true;
@@ -396,15 +452,13 @@
         foldstatus = !foldstatus;
     }
 
-    function load() {
-        var n = $("#tree").jstree("get_selected");
-        if (n) {
-            $.get("api/file?filename=" + n[0], function(data) {
-                editor.setValue(data);
-                editor.selection.selectFileStart();
-                editor.focus();
-            });
-        }
+    function loadfile(filepath) {
+        $.get("api/file?filename=" + filepath, function(data) {
+            editor.setValue(data);
+            editor.selection.selectFileStart();
+            editor.focus();
+            document.getElementById('currentfile').value = filepath;
+        });
     }
 
     function restart() {
@@ -420,10 +474,10 @@
     }
 
     function save() {
-        var n = $("#tree").jstree("get_selected");
-        if (n) {
+        var filepath = document.getElementById('currentfile').value;
+        if (filepath.length > 0) {
             data = new Object();
-            data.filename = n[0];
+            data.filename = filepath;
             data.text = editor.getValue()
             $.post("api/save", data).done(function(resp) {
                 var $toastContent = $("<div><pre>" + resp + "</pre></div>");
@@ -457,5 +511,4 @@
         editor.focus();
     }
 </script>
-
 </html>
