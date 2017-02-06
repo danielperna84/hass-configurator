@@ -9,7 +9,7 @@
     <title>Configurator</title>
     <!-- CSS  -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/css/materialize.min.css" type="text/css" rel="stylesheet" media="screen,projection" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/css/materialize.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.1/jquery.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.3/themes/default/style.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.3/jstree.min.js"></script>
@@ -18,22 +18,22 @@
             margin: 0;
             padding: 0;
         }
-        
+
         #editor {
             position: fixed;
             top: 68px;
             right: 0;
             bottom: 0;
         }
-        
+
         .green {
             color: #0f0;
         }
-        
+
         .red {
             color: #f00;
         }
-        
+
         .dropdown-content {
             min-width: 200px;
         }
@@ -55,9 +55,6 @@
         </nav>
     </div>
     <ul id="dropdown_tools" class="dropdown-content z-depth-4">
-        <li><a onclick="toggle_whitespace()">Whitespace</a></li>
-        <li><a onclick="toggle_fold()">Fold</a></li>
-        <li><a onclick="toggle_highlightSelectedWord()">Highlight</a></li>
         <li><a target="_blank" href="https://github.com/ajaxorg/ace/wiki/Default-Keyboard-Shortcuts">Ace Keyboard Shortcuts</a></li>
         <li><a target="_blank" href="https://home-assistant.io/help/">Need HASS Help?</a></li>
         <li><a target="_blank" href="https://home-assistant.io/components/">HASS Components</a></li>
@@ -203,33 +200,160 @@
             </br>
         </ul>
     </div>
-    <div class="row center">
+    <div class="row">
         <ul id="ace_settings" class="side-nav">
-            <li><a onclick="Materialize.toast('¯\\_(ツ)_/¯', 2000)">Coming Soon . . .</a></li>
-            <form class="row center col s12" action="#">
-                <p>
-                    <input type="checkbox" id="test1" />
-                    <label for="test1">Animated Scroll</label>
+            <li><a class="center grey lighten-3 z-depth-1 subheader" onclick="Materialize.toast('¯\\_(ツ)_/¯', 2000)">Ace Editor Settings</a></li>
+            <form class="row col s12" action="#">
+                <p class="col s12">
+                    <input type="checkbox" onclick="toggle_animatedscroll()" id="anim_scroll" />
+                    <Label for="anim_scroll">Animated Scroll</label>
                 </p>
-                <p>
-                    <input type="checkbox" id="test2" />
-                    <label for="test2">Behaviours Enabled</label>
+                <p class="col s12">
+                    <input type="checkbox" checked="checked" onclick="toggle_behavioursenabled()" id="behaviour_en" />
+                    <Label for="behaviour_en">Behaviour Enabled</label>
                 </p>
-                <p>
-                    <input type="checkbox" id="test3" />
-                    <label for="test3">Display Indent Guides</label>
-                </p>
-            </form>
-            <div class="row">
-                <div class="input-field col s6">
+                <p class="col s12">
+                    <input type="checkbox" checked="checked" onclick="toggle_displayindentguides()" id="indent_guides" />
+                    <Label for="indent_guides">Display Indent Guides</label>
+                </p class="col s12">
+                <div class="input-field col s12">
                     <input value="150" id="drag_delay" type="text" class="validate">
                     <label class="active" for="drag_delay">Drag Delay</label>
                 </div>
-            </div>
-            <form class="col s12" action="#">
-                <p>
-                    <input type="checkbox" id="test4" />
-                    <label for="test4">Fade Fold Widgets</label>
+                <p class="col s12">
+                    <input type="checkbox" onclick="toggle_fadefoldwidget()" id="fold" />
+                    <Label for="fold">Fade Fold Widgets</label>
+                </p>
+                <p class="col s12">
+                    <input type="checkbox" onclick="toggle_fold()" id="fold_all" />
+                    <Label for="fold_all">Fold All</label>
+                </p>
+                <div class="input-field col s12">
+                    <input value="12" id="ace_font" type="text" class="validate">
+                    <label class="active" for="ace_font">Font Size</label>
+                </div>
+                <p class="col s12">
+                    <input type="checkbox" checked="checked" onclick="toggle_highlightactiveline()" id="highlight_line" />
+                    <Label for="highlight_line">Hightlight Active Line</label>
+                </p>
+                <p class="col s12">
+                    <input type="checkbox" checked="checked" onclick="toggle_highlightgutterline()" id="highlight_gutter" />
+                    <Label for="highlight_gutter">Hightlight Gutter Line</label>
+                </p>
+                <p class="col s12">
+                    <input type="checkbox" checked="checked" onclick="toggle_highlightSelectedWord()" id="highlight_word" />
+                    <Label for="highlight_word">Hightlight Selected Word</label>
+                </p>
+                <p class="col s12">
+                    <input type="checkbox" onclick="toggle_hscrollbar()" id="hscroll_bar" />
+                    <Label for="hscroll_bar">H Scroll Bar Always Visible</label>
+                </p>
+                <div class="input-field col s12">
+                    <select onchange="insert(this.value)">
+                              <option value="" disabled selected>Ace</option>
+                              <option value="ace_keyboard">Ace</option>
+                              <option value="another_keyboard">Another</option>
+                              <option value="another2_keyboard">Another 2</option>
+                          </select>
+                    <label>Keyboard Handler</label>
+                </div>
+                <div class="input-field col s12">
+                    <select onchange="insert(this.value)">
+                              <option value="" disabled selected>yaml</option>
+                              <option class="yaml_mode" value="ace_keyboard">yaml</option>
+                              <option value="another_mode">Another</option>
+                              <option value="another2_mode">Another 2</option>
+                          </select>
+                    <label>Mode</label>
+                </div>
+                <div class="input-field col s12">
+                    <select onchange="insert(this.value)">
+                              <option value="" disabled selected>auto</option>
+                              <option class="yaml_mode" value="ace_keyboard">yaml</option>
+                              <option value="another_mode">Another</option>
+                              <option value="another2_mode">Another 2</option>
+                          </select>
+                    <label>New Line Mode</label>
+                </div>
+                <div class="input-field col s12">
+                    <input value="undefined" id="ace_options" type="text" class="validate">
+                    <label class="active" for="ace_options">Options</label>
+                </div>
+                <p class="col s12">
+                    <input type="checkbox" onclick="toggle_overwrite()" id="overwrite" />
+                    <Label for="overwrite">Overwrite</label>
+                </p>
+                <div class="input-field col s12">
+                    <input value="80" id="print_margin" type="text" class="validate">
+                    <label class="active" for="print_margin">Print Margin Column</label>
+                </div>
+                <p class="col s12">
+                    <input type="checkbox" onclick="toggle_readonly()" id="read_only" />
+                    <Label for="read_only">Read Only</label>
+                </p>
+                <div class="input-field col s12">
+                    <input value="2" id="scroll_speed" type="text" class="validate">
+                    <label class="active" for="scroll_speed">Scroll Speed</label>
+                </div>
+                <p class="col s12">
+                    <input type="checkbox" checked="checked" onclick="toggle_foldwidget()" id="shw_fold_wgt" />
+                    <Label for="shw_fold_wgt">Show Fold Widgets</label>
+                </p>
+                <p class="col s12">
+                    <input type="checkbox" checked="checked" onclick="toggle_gutter()" id="show_gutter" />
+                    <Label for="show_gutter">Show Gutter</label>
+                </p>
+                <p class="col s12">
+                    <input type="checkbox" onclick="toggle_whitespace()" id="invisibles" />
+                    <Label for="invisibles">Show Invisibles</label>
+                </p>
+                <p class="col s12">
+                    <input type="checkbox" checked="checked" onclick="toggle_printmargin()" id="show_print_margin" />
+                    <Label for="show_print_margin">Show Print Margin</label>
+                </p>
+                <p class="col s12">
+                    <input type="checkbox" checked="checked" onclick="toggle_linenumbers()" id="show_line_numbers" />
+                    <Label for="show_line_numbers">Show Line Numbers</label>
+                </p>
+                <div class="input-field col s12">
+                    <input value="4" id="tab_size" type="text" class="validate">
+                    <label class="active" for="tab_size">Tab Size</label>
+                </div>
+                <div class="input-field col s12">
+                    <select onchange="editor.setOption(this.value)">
+                                <option value="" disabled selected>Chrome</option>
+                                <option value="ace/theme/chrome">Chrome</option>
+                                <option value="ace/theme/github">GitHub</option>
+                                <option value="ace/theme/chaos">Chaos</option>
+                            </select>
+                    <label>Theme</label>
+                </div>
+                <p class="col s12">
+                    <input type="checkbox" checked="checked" onclick="toggle_softtab()" id="soft_tabs" />
+                    <Label for="soft_tabs">Use Soft Tabs</label>
+                </p>
+                <p class="col s12">
+                    <input type="checkbox" checked="checked" onclick="toggle_worker()" id="use_worker" />
+                    <Label for="use_worker">Use Worker</label>
+                </p>
+                <p class="col s12">
+                    <input type="checkbox" onclick="toggle_wrap()" id="wrap_mode" />
+                    <Label for="wrap_mode">Use Wrap Mode</label>
+                </p>
+                <p class="col s12">
+                    <input type="checkbox" onclick="toggle_vscrollbar()" id="v_scroll_always" />
+                    <Label for="v_scroll_always">V Scroll Bar Always Visible</label>
+                </p>
+                <p class="col s12">
+                    <input type="checkbox" checked="checked" onclick="toggle_wrapbehaviour()" id="wrap_behav" />
+                    <Label for="wrap_behav">Wrap Behaviours Enabled</label>
+                </p>
+                <div class="input-field col s12">
+                    <input value="80" id="wrap_limit" type="text" class="validate">
+                    <label class="active" for="wrap_limit">Wrap Limit</label>
+                </div>
+                <p class="center col s12">
+                  Ace Editor 1.2.6
                 </p>
             </form>
         </ul>
@@ -238,9 +362,12 @@
 <!--  Scripts-->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js"></script>
 <script type="text/javascript">
+</script>
+<script type="text/javascript">
     $(document).ready(function() {
         $('select').material_select();
         $('.modal').modal();
+        $('.collapsible').collapsible();
         $('.dropdown-button').dropdown({
             inDuration: 300,
             outDuration: 225,
@@ -258,7 +385,7 @@
             draggable: true
         });
         $('.ace_settings-collapse').sideNav({
-            menuWidth: 400, // Default is 300
+            menuWidth: 300, // Default is 300
             edge: 'right', // Choose the horizontal origin
             closeOnClick: true, // Closes side-nav on <a> clicks, useful for Angular/Meteor
             draggable: true // Choose whether you can drag to open on touch screens
@@ -373,18 +500,126 @@
     $('#tree').on("select_node.jstree", function(e, data) {
         load();
     });
-    var whitespacestatus = false;
-    var foldstatus = true;
+    var animatedscrollstatus = false;
+    var behaviourstatus = true;
+    var indentguidestatus = true;
+    var fadefoldwidgetstatus = false;
+    var highlightactivelinestatus = true;
+    var highlightgutterlinestatus = true;
     var highlightwords = true;
+    var hscrollbarstatus = false;
+    var overwritestatus = false;
+    var readonlystatus = false;
+    var foldwidgetstatus = true;
+    var gutterstatus = true;
+    var whitespacestatus = false;
+    var linenumberstatus = true;
+    var printmarginstatus = false;
+    var softtabstatus = true;
+    var workerstatus = true;
+    var wrapstatus = false;
+    var vscrollbarstatus = false;
+    var wrapbehaviourstatus = true;
+    var foldstatus = true;
+
+    function toggle_animatedscroll() {
+        animatedscrollstatus = !animatedscrollstatus;
+        editor.setOption("animatedScroll", animatedscrollstatus);
+    }
+
+    function toggle_behavioursenabled() {
+        behaviourstatus = !behaviourstatus;
+        editor.setOption("behavioursEnabled", behaviourstatus);
+    }
+
+    function toggle_displayindentguides() {
+        indentguidestatus = !indentguidestatus;
+        editor.setOption("displayIndentGuides", indentguidestatus);
+    }
+
+    function toggle_fadefoldwidget() {
+        fadefoldwidgetstatus = !fadefoldwidgetstatus;
+        editor.setOption("fadeFoldWidgets", fadefoldwidgetstatus);
+    }
+
+    function toggle_highlightactiveline() {
+        highlightactivelinestatus = !highlightactivelinestatus;
+        editor.setOption("highlightActiveLine", highlightactivelinestatus);
+    }
+
+    function toggle_highlightgutterline() {
+        highlightgutterlinestatus = !highlightgutterlinestatus;
+        editor.setOption("highlightGutterLine", highlightgutterlinestatus);
+    }
 
     function toggle_highlightSelectedWord() {
         highlightwords = !highlightwords;
         editor.setOption("highlightSelectedWord", highlightwords);
     }
 
+    function toggle_hscrollbar() {
+        hscrollbarstatus = !hscrollbarstatus;
+        editor.setOption("hScrollBarAlwaysVisible", hscrollbarstatus);
+    }
+
+    function toggle_overwrite() {
+        overwritestatus = !overwritestatus;
+        editor.setOption("overwrite", overwritestatus);
+    }
+
+    function toggle_readonly() {
+        readonlystatus = !readonlystatus;
+        editor.setOption("readOnly", readonlystatus);
+    }
+
+    function toggle_foldwidget() {
+        foldwidgetstatus = !foldwidgetstatus;
+        editor.setOption("showFoldWidgets", foldwidgetstatus);
+    }
+
     function toggle_whitespace() {
         whitespacestatus = !whitespacestatus;
         editor.setOption("showInvisibles", whitespacestatus);
+    }
+
+    function toggle_printmargin() {
+        printmarginstatus = !printmarginstatus;
+        editor.setOption("showPrintMargin", printmarginstatus);
+    }
+
+    function toggle_linenumbers() {
+        linenumberstatus = !linenumberstatus;
+        editor.setOption("showLineNumbers", linenumberstatus);
+    }
+
+    function toggle_softtab() {
+        softtabstatus = !softtabstatus;
+        editor.setOption("useSoftTabs", softtabstatus);
+    }
+
+    function toggle_worker() {
+        workerstatus = !workerstatus;
+        editor.setOption("useWorker", workerstatus);
+    }
+
+    function toggle_wrap() {
+        wrapstatus = !wrapstatus;
+        editor.setOption("wrap", wrapstatus);
+    }
+
+    function toggle_vscrollbar() {
+        vscrollbarstatus = !vscrollbarstatus;
+        editor.setOption("vScrollBarAlwaysVisible", vscrollbarstatus);
+    }
+
+    function toggle_wrapbehaviour() {
+        wrapbehaviourstatus = !wrapbehaviourstatus;
+        editor.setOption("wrapBehavioursEnabled", wrapbehaviourstatus);
+    }
+
+    function toggle_gutter() {
+        gutterstatus = !gutterstatus;
+        editor.setOption("showGutter", gutterstatus);
     }
 
     function toggle_fold() {
@@ -432,6 +667,7 @@
         }
     }
 </script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ace.js" type="text/javascript" charset="utf-8"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ext-modelist.js" type="text/javascript" charset="utf-8"></script>
 <script>
@@ -444,6 +680,7 @@
         editor.setOption("useSoftTabs", true);
         editor.setOption("displayIndentGuides", true);
         editor.setOption("highlightSelectedWord", highlightwords);
+
         editor.$blockScrolling = Infinity;
     }
 
