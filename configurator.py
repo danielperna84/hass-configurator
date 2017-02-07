@@ -84,7 +84,8 @@ def get_dircontent(path):
         edata['dir'] = path		
         edata['fullpath'] = os.path.abspath(os.path.join(path, e))		
         edata['type'] = 'dir' if os.path.isdir(edata['fullpath']) else 'file'		
-        dircontent.append(edata)		
+        dircontent.append(edata)
+
     return dircontent
 
 def get_html():
