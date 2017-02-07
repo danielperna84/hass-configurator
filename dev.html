@@ -11,8 +11,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/css/materialize.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.1/jquery.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.3/themes/default/style.min.css" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.3/jstree.min.js"></script>
     <style type="text/css" media="screen">
         body {
             margin: 0;
@@ -28,6 +26,13 @@
 
         #fbheader {
             display: block;
+            cursor: initial;
+            pointer-events: none;
+            color: rgba(0, 0, 0, 0.54);
+            font-size: 15px;
+            font-weight: 500;
+            line-height: 48px;
+            background-color: #eeeeee;
         }
         
         a.collection-item {
@@ -57,16 +62,12 @@
 
         .blue_check:checked + label:before {
             border-right: 2px solid #03a9f4;
-            /* You need to change the colour here */
             border-bottom: 2px solid #03a9f4;
-            /* And here */
         }
-        /* label focus color */
 
         .input-field input:focus + label {
             color: #03a9f4 !important;
         }
-        /* label underline focus color */
 
         .row .input-field input:focus {
             border-bottom: 1px solid #03a9f4 !important;
@@ -86,6 +87,9 @@
             display: block !important;
         }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ext-modelist.js" type="text/javascript" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
 </head>
 
 <body>
@@ -107,7 +111,7 @@
         <li><a target="_blank" href="https://home-assistant.io/components/">HASS Components</a></li>
         <li><a href="#modal_about">About PoC</a></li>
         <li class="divider"></li>
-        <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Ace Settings</a></li>
+        <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
         <li><a href="#modal_restart">Restart HASS</a></li>
     </ul>
     <div id="modal_save" class="modal">
@@ -243,54 +247,57 @@
     </div>
     <div class="row">
         <ul id="ace_settings" class="side-nav">
-            <li><a class="center grey lighten-3 z-depth-1 subheader">Ace Editor Settings [Under Construction]</a></li>
-            <form class="row col s12" action="#"> <a class="waves-effect waves-light btn light-blue" target="_blank" href="https://github.com/ajaxorg/ace/wiki/Default-Keyboard-Shortcuts">Keyboard Shortcuts</a>
+            <li><a class="center grey lighten-3 z-depth-1 subheader">Editor Settings</a></li>
+            <form class="row col s12" action="#">
                 <p class="col s12">
-                    <input type="checkbox" class="blue_check" onclick="toggle_animatedscroll()" id="anim_scroll" />
-                    <Label for="anim_scroll">Animated Scroll</label>
+                    <a class="waves-effect waves-light btn light-blue" target="_blank" href="https://github.com/ajaxorg/ace/wiki/Default-Keyboard-Shortcuts">Keyboard Shortcuts</a>
                 </p>
                 <p class="col s12">
-                    <input type="checkbox" class="blue_check" onclick="toggle_behavioursenabled()" id="behaviour_en" />
-                    <Label for="behaviour_en">Behaviour Enabled</label>
+                    <input type="checkbox" class="blue_check" onclick="editor.setOption('animatedScroll', !editor.getOptions().animatedScroll)" id="animatedScroll" />
+                    <Label for="animatedScroll">Animated Scroll</label>
                 </p>
                 <p class="col s12">
-                    <input type="checkbox" class="blue_check" onclick="toggle_displayindentguides()" id="indent_guides" />
-                    <Label for="indent_guides">Display Indent Guides</label>
+                    <input type="checkbox" class="blue_check" onclick="editor.setOption('behavioursEnabled', !editor.getOptions().behavioursEnabled)" id="behavioursEnabled" />
+                    <Label for="behavioursEnabled">Behaviour Enabled</label>
                 </p>
                 <p class="col s12">
-                    <input type="checkbox" class="blue_check" onclick="toggle_fadefoldwidget()" id="fold" />
-                    <Label for="fold">Fade Fold Widgets</label>
+                    <input type="checkbox" class="blue_check" onclick="editor.setOption('displayIndentGuides', !editor.getOptions().displayIndentGuides)" id="displayIndentGuides" />
+                    <Label for="displayIndentGuides">Display Indent Guides</label>
                 </p>
                 <p class="col s12">
-                    <input type="checkbox" class="blue_check" onclick="toggle_fold()" id="fold_all" />
-                    <Label for="fold_all">Fold All</label>
-                </p>
-                <p class="col s12">
-                    <input type="checkbox" class="blue_check" onclick="toggle_highlightactiveline()" id="highlight_line" />
-                    <Label for="highlight_line">Hightlight Active Line</label>
-                </p>
-                <p class="col s12">
-                    <input type="checkbox" class="blue_check" onclick="toggle_highlightgutterline()" id="highlight_gutter" />
-                    <Label for="highlight_gutter">Hightlight Gutter Line</label>
-                </p>
-                <p class="col s12">
-                    <input type="checkbox" class="blue_check" onclick="toggle_highlightSelectedWord()" id="highlight_word" />
-                    <Label for="highlight_word">Hightlight Selected Word</label>
-                </p>
-                <p class="col s12">
-                    <input type="checkbox" class="blue_check" onclick="toggle_hscrollbar()" id="hscroll_bar" />
-                    <Label for="hscroll_bar">H Scroll Bar Always Visible</label>
+                    <input type="checkbox" class="blue_check" onclick="editor.setOption('fadeFoldWidgets', !editor.getOptions().fadeFoldWidgets)" id="fadeFoldWidgets" />
+                    <Label for="fadeFoldWidgets">Fade Fold Widgets</label>
                 </p>
                 <div class="input-field col s12">
-                    <select onchange="editor.setKeyboardHandler(this.value)">
+                    <input type="number" onchange="editor.setOption('fontSize', parseInt(this.value))" min="6" id="fontSize">
+                    <label class="active" for="fontSize">Font Size</label>
+                </div>
+                <p class="col s12">
+                    <input type="checkbox" class="blue_check" onclick="editor.setOption('highlightActiveLine', !editor.getOptions().highlightActiveLine)" id="highlightActiveLine" />
+                    <Label for="highlightActiveLine">Hightlight Active Line</label>
+                </p>
+                <p class="col s12">
+                    <input type="checkbox" class="blue_check" onclick="editor.setOption('highlightGutterLine', !editor.getOptions().highlightGutterLine)" id="highlightGutterLine" />
+                    <Label for="highlightGutterLine">Hightlight Gutter Line</label>
+                </p>
+                <p class="col s12">
+                    <input type="checkbox" class="blue_check" onclick="editor.setOption('highlightSelectedWord', !editor.getOptions().highlightSelectedWord)" id="highlightSelectedWord" />
+                    <Label for="highlightSelectedWord">Hightlight Selected Word</label>
+                </p>
+                <p class="col s12">
+                    <input type="checkbox" class="blue_check" onclick="editor.setOption('hScrollBarAlwaysVisible', !editor.getOptions().hScrollBarAlwaysVisible)" id="hScrollBarAlwaysVisible" />
+                    <Label for="hScrollBarAlwaysVisible">H Scroll Bar Always Visible</label>
+                </p>
+                <div class="input-field col s12">
+                    <select onchange="editor.setKeyboardHandler(this.value)" id="setKeyboardHandler">
                         <option value="">ace</option>
                         <option value="ace/keyboard/vim">vim</option>
                         <option value="ace/keyboard/emacs">emacs</option>
                     </select>
-                    <label>Keyboard Handler</label>
+                    <label for="setKeyboardHandler">Keyboard Handler</label>
                 </div>
                 <div class="input-field col s12">
-                    <select onchange="editor.setOption('setMode', this.value)">
+                    <select onchange="editor.setOption('mode', this.value)" id="mode">
                         <option value="ace/mode/abap">abap</option>
                         <option value="ace/mode/abc">abc</option>
                         <option value="ace/mode/actionscript">actionscript</option>
@@ -429,54 +436,54 @@
                         <option value="ace/mode/xquery">xquery</option>
                         <option value="ace/mode/yaml">yaml</option>
                     </select>
-                    <label>Mode</label>
+                    <label for="mode">Mode</label>
                 </div>
                 <div class="input-field col s12">
-                    <select onchange="editor.newLineMode(this.value)">
+                    <select onchange="editor.setOption('newLineMode', this.value)" id="newLineMode">
                         <option value="auto">Auto</option>
                         <option value="windows">Windows</option>
                         <option value="unix">Unix</option>
                     </select>
-                    <label>New Line Mode</label>
+                    <label for="newLineMode">New Line Mode</label>
                 </div>
                 <p class="col s12">
-                    <input type="checkbox" class="blue_check" onclick="toggle_overwrite()" id="overwrite" />
+                    <input type="checkbox" class="blue_check" onclick="editor.setOption('overwrite', !editor.getOptions().overwrite)" id="overwrite" />
                     <Label for="overwrite">Overwrite</label>
                 </p>
                 <p class="col s12">
-                    <input type="checkbox" class="blue_check" onclick="toggle_readonly()" id="read_only" />
-                    <Label for="read_only">Read Only</label>
+                    <input type="checkbox" class="blue_check" onclick="editor.setOption('readOnly', !editor.getOptions().readOnly)" id="readOnly" />
+                    <Label for="readOnly">Read Only</label>
                 </p>
                 <div class="input-field col s12">
-                    <input value="2" id="scroll_speed" type="number" onchange="editor.setOption('scrollSpeed', this.value)">
-                    <label class="active" for="scroll_speed">Scroll Speed</label>
+                    <input value="2" type="number" onchange="editor.setOption('scrollSpeed', parseInt(this.value))" id="scrollSpeed">
+                    <label class="active" for="scrollSpeed">Scroll Speed</label>
                 </div>
                 <p class="col s12">
-                    <input type="checkbox" class="blue_check" onclick="toggle_foldwidget()" id="shw_fold_wgt" />
-                    <Label for="shw_fold_wgt">Show Fold Widgets</label>
+                    <input type="checkbox" class="blue_check" onclick="editor.setOption('showFoldWidgets', !editor.getOptions().showFoldWidgets)" id="showFoldWidgets" />
+                    <Label for="showFoldWidgets">Show Fold Widgets</label>
                 </p>
                 <p class="col s12">
-                    <input type="checkbox" class="blue_check" onclick="toggle_gutter()" id="show_gutter" />
-                    <Label for="show_gutter">Show Gutter</label>
+                    <input type="checkbox" class="blue_check" onclick="editor.setOption('showGutter', !editor.getOptions().showGutter)" id="showGutter" />
+                    <Label for="showGutter">Show Gutter</label>
                 </p>
                 <p class="col s12">
-                    <input type="checkbox" class="blue_check" onclick="toggle_whitespace()" id="invisibles" />
-                    <Label for="invisibles">Show Invisibles</label>
+                    <input type="checkbox" class="blue_check" onclick="editor.setOption('showInvisibles', !editor.getOptions().showInvisibles)" id="showInvisibles" />
+                    <Label for="showInvisibles">Show Invisibles</label>
                 </p>
                 <p class="col s12">
-                    <input type="checkbox" class="blue_check" onclick="toggle_printmargin()" id="show_print_margin" />
-                    <Label for="show_print_margin">Show Print Margin</label>
+                    <input type="checkbox" class="blue_check" onclick="editor.setOption('showPrintMargin', !editor.getOptions().showPrintMargin)" id="showPrintMargin" />
+                    <Label for="showPrintMargin">Show Print Margin</label>
                 </p>
                 <p class="col s12">
-                    <input type="checkbox" class="blue_check" onclick="toggle_linenumbers()" id="show_line_numbers" />
-                    <Label for="show_line_numbers">Show Line Numbers</label>
+                    <input type="checkbox" class="blue_check" onclick="editor.setOption('showLineNumbers', !editor.getOptions().showLineNumbers)" id="showLineNumbers" />
+                    <Label for="showLineNumbers">Show Line Numbers</label>
                 </p>
                 <div class="input-field col s12">
-                    <input id="tab_size" type="number" onchange="editor.setOption('tabSize', this.value)">
-                    <label class="active" for="tab_size">Tab Size</label>
+                    <input type="number" onchange="editor.setOption('tabSize', parseInt(this.value))" min="1" id="tabSize">
+                    <label class="active" for="tabSize">Tab Size</label>
                 </div>
                 <div class="input-field col s12">
-                    <select onchange="editor.setTheme(this.value)">
+                    <select onchange="editor.setTheme(this.value)" id="theme">
                         <optgroup label="Light Themes">
                             <option value="ace/theme/chrome">Chrome</option>
                             <option value="ace/theme/clouds">Clouds</option>
@@ -517,30 +524,30 @@
                             <option value="ace/theme/vibrant_ink">Vibrant Ink</option>
                         </optgroup>
                     </select>
-                    <label>Theme</label>
+                    <label for="theme">Theme</label>
                 </div>
                 <p class="col s12">
-                    <input type="checkbox" class="blue_check" onclick="toggle_softtab()" id="soft_tabs" />
-                    <Label for="soft_tabs">Use Soft Tabs</label>
+                    <input type="checkbox" class="blue_check" onclick="editor.setOption('useSoftTabs', !editor.getOptions().useSoftTabs)" id="useSoftTabs" />
+                    <Label for="useSoftTabs">Use Soft Tabs</label>
                 </p>
                 <p class="col s12">
-                    <input type="checkbox" class="blue_check" onclick="toggle_worker()" id="use_worker" />
-                    <Label for="use_worker">Use Worker</label>
+                    <input type="checkbox" class="blue_check" onclick="editor.setOption('useWorker', !editor.getOptions().useWorker)" id="useWorker" />
+                    <Label for="useWorker">Use Worker</label>
                 </p>
                 <p class="col s12">
-                    <input type="checkbox" class="blue_check" onclick="toggle_wrap()" id="wrap_mode" />
-                    <Label for="wrap_mode">Use Wrap Mode</label>
+                    <input type="checkbox" class="blue_check" onclick="editor.setOption('vScrollBarAlwaysVisible', !editor.getOptions().vScrollBarAlwaysVisible)" id="vScrollBarAlwaysVisible" />
+                    <Label for="vScrollBarAlwaysVisible">V Scroll Bar Always Visible</label>
                 </p>
                 <p class="col s12">
-                    <input type="checkbox" class="blue_check" onclick="toggle_vscrollbar()" id="v_scroll_always" />
-                    <Label for="v_scroll_always">V Scroll Bar Always Visible</label>
+                    <input type="checkbox" class="blue_check" onclick="editor.setOption('wrapBehavioursEnabled', !editor.getOptions().wrapBehavioursEnabled)" id="wrapBehavioursEnabled" />
+                    <Label for="wrapBehavioursEnabled">Wrap Behaviours Enabled</label>
                 </p>
                 <p class="col s12">
-                    <input type="checkbox" class="blue_check" onclick="toggle_wrapbehaviour()" id="wrap_behav" />
-                    <Label for="wrap_behav">Wrap Behaviours Enabled</label>
+                    <input type="checkbox" class="blue_check" onclick="editor.getSession().setUseWrapMode(!editor.getSession().getUseWrapMode());if(editor.getSession().getUseWrapMode()){document.getElementById('wrap_limit').focus();document.getElementById('wrap_limit').onchange();}" id="wrap" />
+                    <Label for="wrap">Wrap Mode</label>
                 </p>
                 <div class="input-field col s12">
-                    <input id="wrap_limit" type="number">
+                    <input id="wrap_limit" type="number" onchange="editor.setOption('wrap', parseInt(this.value))" min="1" value="80">
                     <label class="active" for="wrap_limit">Wrap Limit</label>
                 </div>
                 <a class="waves-effect waves-light btn light-blue" onclick="save_ace_settings()">Save Settings Locally</a>
@@ -742,137 +749,6 @@
         
         filebrowser.appendChild(collection);
     }
-    var animatedscrollstatus = false;
-    var behaviourstatus = true;
-    var indentguidestatus = true;
-    var fadefoldwidgetstatus = false;
-    var highlightactivelinestatus = true;
-    var highlightgutterlinestatus = true;
-    var highlightwords = true;
-    var hscrollbarstatus = false;
-    var overwritestatus = false;
-    var readonlystatus = false;
-    var foldwidgetstatus = true;
-    var gutterstatus = true;
-    var whitespacestatus = false;
-    var linenumberstatus = true;
-    var printmarginstatus = true;
-    var softtabstatus = true;
-    var workerstatus = true;
-    var wrapstatus = false;
-    var vscrollbarstatus = false;
-    var wrapbehaviourstatus = true;
-    var foldstatus = true;
-
-    function toggle_animatedscroll() {
-        animatedscrollstatus = !animatedscrollstatus;
-        editor.setOption("animatedScroll", animatedscrollstatus);
-    }
-
-    function toggle_behavioursenabled() {
-        behaviourstatus = !behaviourstatus;
-        editor.setOption("behavioursEnabled", behaviourstatus);
-    }
-
-    function toggle_displayindentguides() {
-        indentguidestatus = !indentguidestatus;
-        editor.setOption("displayIndentGuides", indentguidestatus);
-    }
-
-    function toggle_fadefoldwidget() {
-        fadefoldwidgetstatus = !fadefoldwidgetstatus;
-        editor.setOption("fadeFoldWidgets", fadefoldwidgetstatus);
-    }
-
-    function toggle_highlightactiveline() {
-        highlightactivelinestatus = !highlightactivelinestatus;
-        editor.setOption("highlightActiveLine", highlightactivelinestatus);
-    }
-
-    function toggle_highlightgutterline() {
-        highlightgutterlinestatus = !highlightgutterlinestatus;
-        editor.setOption("highlightGutterLine", highlightgutterlinestatus);
-    }
-
-    function toggle_highlightSelectedWord() {
-        highlightwords = !highlightwords;
-        editor.setOption("highlightSelectedWord", highlightwords);
-    }
-
-    function toggle_hscrollbar() {
-        hscrollbarstatus = !hscrollbarstatus;
-        editor.setOption("hScrollBarAlwaysVisible", hscrollbarstatus);
-    }
-
-    function toggle_overwrite() {
-        overwritestatus = !overwritestatus;
-        editor.setOption("overwrite", overwritestatus);
-    }
-
-    function toggle_readonly() {
-        readonlystatus = !readonlystatus;
-        editor.setOption("readOnly", readonlystatus);
-    }
-
-    function toggle_foldwidget() {
-        foldwidgetstatus = !foldwidgetstatus;
-        editor.setOption("showFoldWidgets", foldwidgetstatus);
-    }
-
-    function toggle_whitespace() {
-        whitespacestatus = !whitespacestatus;
-        editor.setOption("showInvisibles", whitespacestatus);
-    }
-
-    function toggle_printmargin() {
-        printmarginstatus = !printmarginstatus;
-        editor.setOption("showPrintMargin", printmarginstatus);
-    }
-
-    function toggle_linenumbers() {
-        linenumberstatus = !linenumberstatus;
-        editor.setOption("showLineNumbers", linenumberstatus);
-    }
-
-    function toggle_softtab() {
-        softtabstatus = !softtabstatus;
-        editor.setOption("useSoftTabs", softtabstatus);
-    }
-
-    function toggle_worker() {
-        workerstatus = !workerstatus;
-        editor.setOption("useWorker", workerstatus);
-    }
-
-    function toggle_wrap() {
-        wrapstatus = !wrapstatus;
-        editor.setOption("wrap", wrapstatus);
-    }
-
-    function toggle_vscrollbar() {
-        vscrollbarstatus = !vscrollbarstatus;
-        editor.setOption("vScrollBarAlwaysVisible", vscrollbarstatus);
-    }
-
-    function toggle_wrapbehaviour() {
-        wrapbehaviourstatus = !wrapbehaviourstatus;
-        editor.setOption("wrapBehavioursEnabled", wrapbehaviourstatus);
-    }
-
-    function toggle_gutter() {
-        gutterstatus = !gutterstatus;
-        editor.setOption("showGutter", gutterstatus);
-    }
-
-    function toggle_fold() {
-        if (foldstatus) {
-            editor.getSession().foldAll();
-        }
-        else {
-            editor.getSession().unfold();
-        }
-        foldstatus = !foldstatus;
-    }
 
     function loadfile(filepath) {
         $.get("api/file?filename=" + filepath, function(data) {
@@ -896,11 +772,6 @@
         });
     }
 
-    function save_ace_settings() {
-        localStorage.pochass = JSON.stringify(editor.getOptions())
-        Materialize.toast("Ace Settings Saved", 2000);
-    }
-
     function save() {
         var filepath = document.getElementById('currentfile').value;
         if (filepath.length > 0) {
@@ -913,23 +784,59 @@
             });
         }
     }
-    
-    function settings() {
-        editor.execCommand('showSettingsMenu');
-    }
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ace.js" type="text/javascript" charset="utf-8"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ext-modelist.js" type="text/javascript" charset="utf-8"></script>
 <script>
+    ace.require("ace/ext/language_tools");
     var editor = ace.edit("editor");
     if (localStorage.hasOwnProperty("pochass")) {
         editor.setOptions(JSON.parse(localStorage.pochass));
-        editor.getSession().setMode("ace/mode/yaml");
-        editor.setOption("showInvisibles", whitespacestatus);
-        editor.setOption("useSoftTabs", true);
-        editor.setOption("displayIndentGuides", true);
-        editor.setOption("highlightSelectedWord", highlightwords);
+        editor.setOptions({
+            enableBasicAutocompletion: true,
+            enableSnippets: true
+        })
         editor.$blockScrolling = Infinity;
+    }
+    else {
+        editor.getSession().setMode("ace/mode/yaml");
+        editor.setOptions({
+            showInvisibles: true,
+            useSoftTabs: true,
+            displayIndentGuides: true,
+            highlightSelectedWord: true,
+            enableBasicAutocompletion: true,
+            enableSnippets: true
+        })
+        editor.$blockScrolling = Infinity;
+    }
+
+    function apply_settings() {
+        var options = editor.getOptions();
+        for (var key in options) {
+            if (options.hasOwnProperty(key)) {
+                var target = document.getElementById(key);
+                if (target) {
+                    if (typeof(options[key]) == "boolean" && target.type === 'checkbox') {
+                        target.checked = options[key];
+                        target.setAttribute("checked", options[key]);
+                    }
+                    else if (typeof(options[key]) == "number" && target.type === 'number') {
+                        target.value = options[key];
+                    }
+                    else if (typeof(options[key]) == "string" && target.tagName == 'SELECT') {
+                        console.log(key);
+                        console.log(options[key]);
+                        target.value = options[key];
+                    }
+                }
+            }
+        }
+    }
+
+    apply_settings();
+
+    function save_ace_settings() {
+        localStorage.pochass = JSON.stringify(editor.getOptions())
+        Materialize.toast("Ace Settings Saved", 2000);
     }
 
     function insert(text) {
@@ -940,6 +847,23 @@
             end: end
         });
         editor.focus();
+    }
+    
+    var foldstatus = true;
+
+    function toggle_fold() {
+        // Not used for now. We'll put a few buttons on top of the editor -> Toolbar. (Search, folding etc.)
+        if (foldstatus) {
+            editor.getSession().foldAll();
+        }
+        else {
+            editor.getSession().unfold();
+        }
+        foldstatus = !foldstatus;
+    }
+    
+    function settings() {
+        editor.execCommand('showSettingsMenu');
     }
 </script>
 </html>
