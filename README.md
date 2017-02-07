@@ -50,10 +50,6 @@ Limit access to the configurator by adding allowed IP addresses / networks to th
 List of statically banned IP addresses, e.g. `BANNED_IPS = ["1.1.1.1", "2.2.2.2"]`
 ####BANLIMIT (integer)
 Ban IPs after n failed login attempts. Restart service to reset banning. The default of `0` disables this feature. `CREDENTIALS` has to be set for this to work.
-####EXTENSIONS (list)
-File extensions the file browser should include. Useful if you have html files in the www folder etc.
-####EXCLUDE_DIRS (list)
-Directories to exclude from the file browser. This is important. Especially the `deps`-folder contains a gazillion files, which takes forever to load. That's why it's excluded by default. The same goes for a possible `.git` directory. The directory names have to start with a `/`. So `mydir` becomes `/mydir`.
 
 __Note regarding `ALLOWED_NETWORKS`, `BANNED_IPS` and `BANLIMIT`__:  
 The way this is implemented works in the following order:

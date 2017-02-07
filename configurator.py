@@ -76,14 +76,14 @@ def load_settings(settingsfile):
         print("Not loading static settings")
     return False
 
-def get_dircontent(path):		
-    dircontent = []		
-    for e in sorted(os.listdir(path), key=lambda x: x.lower()):		
-        edata = {}		
-        edata['name'] = e		
-        edata['dir'] = path		
-        edata['fullpath'] = os.path.abspath(os.path.join(path, e))		
-        edata['type'] = 'dir' if os.path.isdir(edata['fullpath']) else 'file'		
+def get_dircontent(path):
+    dircontent = []
+    for e in sorted(os.listdir(path), key=lambda x: x.lower()):
+        edata = {}
+        edata['name'] = e
+        edata['dir'] = path
+        edata['fullpath'] = os.path.abspath(os.path.join(path, e))
+        edata['type'] = 'dir' if os.path.isdir(edata['fullpath']) else 'file'
         dircontent.append(edata)
 
     return dircontent
