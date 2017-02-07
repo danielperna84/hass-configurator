@@ -8,7 +8,8 @@
     <title>Configurator</title>
     <!-- CSS  -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/css/materialize.min.css" type="text/css" rel="stylesheet" media="screen,projection" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/css/materialize.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.1/jquery.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.3/themes/default/style.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.3/jstree.min.js"></script>
@@ -17,32 +18,55 @@
             margin: 0;
             padding: 0;
         }
-        
+
         #editor {
             position: fixed;
             top: 68px;
             right: 0;
             bottom: 0;
         }
-        
+
         #fbheader {
             display: block;
         }
-        
+      
         .filename {
             margin-left: 10px;
         }
-        
+      
         .green {
             color: #0f0;
         }
-        
+
         .red {
             color: #f00;
         }
-        
+
         .dropdown-content {
             min-width: 200px;
+        }
+
+        .dropdown-content li > a,
+        .dropdown-content li > span {
+            color: #616161 !important;
+        }
+
+        .blue_check:checked + label:before {
+            border-right: 2px solid #03a9f4;
+            /* You need to change the colour here */
+            border-bottom: 2px solid #03a9f4;
+            /* And here */
+        }
+        /* label focus color */
+
+        .input-field input:focus + label {
+            color: #03a9f4 !important;
+        }
+        /* label underline focus color */
+
+        .row .input-field input:focus {
+            border-bottom: 1px solid #03a9f4 !important;
+            box-shadow: 0 1px 0 0 #03a9f4 !important
         }
         
         .ace_optionsMenuEntry input {
@@ -62,7 +86,7 @@
 
 <body>
     <div class="navbar-fixed">
-        <nav class="light-blue hoverable">
+        <nav class="light-blue">
             <div class="nav-wrapper">
                 <ul class="left">
                     <li><a href="#" data-activates="slide-out" class="waves-effect waves-light button-collapse show-on-large"><i class="material-icons">folder</i></a></li>
@@ -75,16 +99,11 @@
         </nav>
     </div>
     <ul id="dropdown_tools" class="dropdown-content z-depth-4">
-        <li><a onclick="toggle_whitespace()">Whitespace</a></li>
-        <li><a onclick="toggle_fold()">Fold</a></li>
-        <li><a onclick="toggle_highlightSelectedWord()">Highlight</a></li>
-        <li><a target="_blank" href="https://github.com/ajaxorg/ace/wiki/Default-Keyboard-Shortcuts">Ace Keyboard Shortcuts</a></li>
         <li><a target="_blank" href="https://home-assistant.io/help/">Need HASS Help?</a></li>
         <li><a target="_blank" href="https://home-assistant.io/components/">HASS Components</a></li>
-        <li><a href="#modal_about">About</a></li>
+        <li><a href="#modal_about">About PoC</a></li>
         <li class="divider"></li>
-        <li><a href="#" class="ace_settings-collapse" onclick="settings()">Settings</a></li>
-        <!--<li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Settings</a></li>-->
+        <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Ace Settings</a></li>
         <li><a href="#modal_restart">Restart HASS</a></li>
     </ul>
     <div id="modal_save" class="modal">
@@ -103,7 +122,7 @@
     </div>
     <div id="modal_about" class="modal">
         <div class="modal-content">
-            <h4>About</h4>
+            <h4>About Configurator</h4>
             <p>Version: <a class="$versionclass" href="https://github.com/danielperna84/hass-poc-configurator/releases/latest" target="_blank">$current</a></p>
         </div>
         <div class="modal-footer"> <a class=" modal-action modal-close waves-effect btn-flat">OK</a> </div>
@@ -150,7 +169,7 @@
                 <label>Services</label>
             </div>
         </div>
-        <div class="col s12 m8 l9 z-depth-3 hoverable" id="editor"></div>
+        <div class="col s12 m8 l9 hoverable" id="editor"></div>
     </div>
     <div>
         <ul id="slide-out" class="side-nav">
@@ -218,34 +237,310 @@
             </br>
         </ul>
     </div>
-    <div class="row center">
+    <div class="row">
         <ul id="ace_settings" class="side-nav">
-            <li><a onclick="Materialize.toast('¯\\_(ツ)_/¯', 2000)">Coming Soon . . .</a></li>
-            <form class="row center col s12" action="#">
-                <p>
-                    <input type="checkbox" id="test1" />
-                    <label for="test1">Animated Scroll</label>
+            <li><a class="center grey lighten-3 z-depth-1 subheader">Ace Editor Settings [Under Construction]</a></li>
+            <form class="row col s12" action="#"> <a class="waves-effect waves-light btn light-blue" target="_blank" href="https://github.com/ajaxorg/ace/wiki/Default-Keyboard-Shortcuts">Keyboard Shortcuts</a>
+                <p class="col s12">
+                    <input type="checkbox" class="blue_check" onclick="toggle_animatedscroll()" id="anim_scroll" />
+                    <Label for="anim_scroll">Animated Scroll</label>
                 </p>
-                <p>
-                    <input type="checkbox" id="test2" />
-                    <label for="test2">Behaviours Enabled</label>
+                <p class="col s12">
+                    <input type="checkbox" class="blue_check" onclick="toggle_behavioursenabled()" id="behaviour_en" />
+                    <Label for="behaviour_en">Behaviour Enabled</label>
                 </p>
-                <p>
-                    <input type="checkbox" id="test3" />
-                    <label for="test3">Display Indent Guides</label>
+                <p class="col s12">
+                    <input type="checkbox" class="blue_check" onclick="toggle_displayindentguides()" id="indent_guides" />
+                    <Label for="indent_guides">Display Indent Guides</label>
                 </p>
-            </form>
-            <div class="row">
-                <div class="input-field col s6">
-                    <input value="150" id="drag_delay" type="text" class="validate">
-                    <label class="active" for="drag_delay">Drag Delay</label>
+                <p class="col s12">
+                    <input type="checkbox" class="blue_check" onclick="toggle_fadefoldwidget()" id="fold" />
+                    <Label for="fold">Fade Fold Widgets</label>
+                </p>
+                <p class="col s12">
+                    <input type="checkbox" class="blue_check" onclick="toggle_fold()" id="fold_all" />
+                    <Label for="fold_all">Fold All</label>
+                </p>
+                <p class="col s12">
+                    <input type="checkbox" class="blue_check" onclick="toggle_highlightactiveline()" id="highlight_line" />
+                    <Label for="highlight_line">Hightlight Active Line</label>
+                </p>
+                <p class="col s12">
+                    <input type="checkbox" class="blue_check" onclick="toggle_highlightgutterline()" id="highlight_gutter" />
+                    <Label for="highlight_gutter">Hightlight Gutter Line</label>
+                </p>
+                <p class="col s12">
+                    <input type="checkbox" class="blue_check" onclick="toggle_highlightSelectedWord()" id="highlight_word" />
+                    <Label for="highlight_word">Hightlight Selected Word</label>
+                </p>
+                <p class="col s12">
+                    <input type="checkbox" class="blue_check" onclick="toggle_hscrollbar()" id="hscroll_bar" />
+                    <Label for="hscroll_bar">H Scroll Bar Always Visible</label>
+                </p>
+                <div class="input-field col s12">
+                    <select onchange="editor.setKeyboardHandler(this.value)">
+                        <option value="">ace</option>
+                        <option value="ace/keyboard/vim">vim</option>
+                        <option value="ace/keyboard/emacs">emacs</option>
+                    </select>
+                    <label>Keyboard Handler</label>
                 </div>
-            </div>
-            <form class="col s12" action="#">
-                <p>
-                    <input type="checkbox" id="test4" />
-                    <label for="test4">Fade Fold Widgets</label>
+                <div class="input-field col s12">
+                    <select onchange="editor.setOption('setMode', this.value)">
+                        <option value="ace/mode/abap">abap</option>
+                        <option value="ace/mode/abc">abc</option>
+                        <option value="ace/mode/actionscript">actionscript</option>
+                        <option value="ace/mode/ada">ada</option>
+                        <option value="ace/mode/apache_conf">apache_conf</option>
+                        <option value="ace/mode/asciidoc">asciidoc</option>
+                        <option value="ace/mode/assembly_x86">assembly_x86</option>
+                        <option value="ace/mode/autohotkey">autohotkey</option>
+                        <option value="ace/mode/batchfile">batchfile</option>
+                        <option value="ace/mode/bro">bro</option>
+                        <option value="ace/mode/c_cpp">c_cpp</option>
+                        <option value="ace/mode/c9search">c9search</option>
+                        <option value="ace/mode/cirru">cirru</option>
+                        <option value="ace/mode/clojure">clojure</option>
+                        <option value="ace/mode/cobol">cobol</option>
+                        <option value="ace/mode/coffee">coffee</option>
+                        <option value="ace/mode/coldfusion">coldfusion</option>
+                        <option value="ace/mode/csharp">csharp</option>
+                        <option value="ace/mode/css">css</option>
+                        <option value="ace/mode/curly">curly</option>
+                        <option value="ace/mode/d">d</option>
+                        <option value="ace/mode/dart">dart</option>
+                        <option value="ace/mode/diff">diff</option>
+                        <option value="ace/mode/django">django</option>
+                        <option value="ace/mode/dockerfile">dockerfile</option>
+                        <option value="ace/mode/dot">dot</option>
+                        <option value="ace/mode/drools">drools</option>
+                        <option value="ace/mode/dummy">dummy</option>
+                        <option value="ace/mode/dummysyntax">dummysyntax</option>
+                        <option value="ace/mode/eiffel">eiffel</option>
+                        <option value="ace/mode/ejs">ejs</option>
+                        <option value="ace/mode/elixir">elixir</option>
+                        <option value="ace/mode/elm">elm</option>
+                        <option value="ace/mode/erlang">erlang</option>
+                        <option value="ace/mode/forth">forth</option>
+                        <option value="ace/mode/fortran">fortran</option>
+                        <option value="ace/mode/ftl">ftl</option>
+                        <option value="ace/mode/gcode">gcode</option>
+                        <option value="ace/mode/gherkin">gherkin</option>
+                        <option value="ace/mode/gitignore">gitignore</option>
+                        <option value="ace/mode/glsl">glsl</option>
+                        <option value="ace/mode/gobstones">gobstones</option>
+                        <option value="ace/mode/golang">golang</option>
+                        <option value="ace/mode/groovy">groovy</option>
+                        <option value="ace/mode/haml">haml</option>
+                        <option value="ace/mode/handlebars">handlebars</option>
+                        <option value="ace/mode/haskell">haskell</option>
+                        <option value="ace/mode/haskell_cabal">haskell_cabal</option>
+                        <option value="ace/mode/haxe">haxe</option>
+                        <option value="ace/mode/hjson">hjson</option>
+                        <option value="ace/mode/html">html</option>
+                        <option value="ace/mode/html_elixir">html_elixir</option>
+                        <option value="ace/mode/html_ruby">html_ruby</option>
+                        <option value="ace/mode/ini">ini</option>
+                        <option value="ace/mode/io">io</option>
+                        <option value="ace/mode/jack">jack</option>
+                        <option value="ace/mode/jade">jade</option>
+                        <option value="ace/mode/java">java</option>
+                        <option value="ace/mode/javascript">javascript</option>
+                        <option value="ace/mode/json">json</option>
+                        <option value="ace/mode/jsoniq">jsoniq</option>
+                        <option value="ace/mode/jsp">jsp</option>
+                        <option value="ace/mode/jsx">jsx</option>
+                        <option value="ace/mode/julia">julia</option>
+                        <option value="ace/mode/kotlin">kotlin</option>
+                        <option value="ace/mode/latex">latex</option>
+                        <option value="ace/mode/less">less</option>
+                        <option value="ace/mode/liquid">liquid</option>
+                        <option value="ace/mode/lisp">lisp</option>
+                        <option value="ace/mode/livescript">livescript</option>
+                        <option value="ace/mode/logiql">logiql</option>
+                        <option value="ace/mode/lsl">lsl</option>
+                        <option value="ace/mode/lua">lua</option>
+                        <option value="ace/mode/luapage">luapage</option>
+                        <option value="ace/mode/lucene">lucene</option>
+                        <option value="ace/mode/makefile">makefile</option>
+                        <option value="ace/mode/markdown">markdown</option>
+                        <option value="ace/mode/mask">mask</option>
+                        <option value="ace/mode/matlab">matlab</option>
+                        <option value="ace/mode/maze">maze</option>
+                        <option value="ace/mode/mel">mel</option>
+                        <option value="ace/mode/mushcode">mushcode</option>
+                        <option value="ace/mode/mysql">mysql</option>
+                        <option value="ace/mode/nix">nix</option>
+                        <option value="ace/mode/nsis">nsis</option>
+                        <option value="ace/mode/objectivec">objectivec</option>
+                        <option value="ace/mode/ocaml">ocaml</option>
+                        <option value="ace/mode/pascal">pascal</option>
+                        <option value="ace/mode/perl">perl</option>
+                        <option value="ace/mode/pgsql">pgsql</option>
+                        <option value="ace/mode/php">php</option>
+                        <option value="ace/mode/powershell">powershell</option>
+                        <option value="ace/mode/praat">praat</option>
+                        <option value="ace/mode/prolog">prolog</option>
+                        <option value="ace/mode/properties">properties</option>
+                        <option value="ace/mode/protobuf">protobuf</option>
+                        <option value="ace/mode/python">python</option>
+                        <option value="ace/mode/r">r</option>
+                        <option value="ace/mode/razor">razor</option>
+                        <option value="ace/mode/rdoc">rdoc</option>
+                        <option value="ace/mode/rhtml">rhtml</option>
+                        <option value="ace/mode/rst">rst</option>
+                        <option value="ace/mode/ruby">ruby</option>
+                        <option value="ace/mode/rust">rust</option>
+                        <option value="ace/mode/sass">sass</option>
+                        <option value="ace/mode/scad">scad</option>
+                        <option value="ace/mode/scala">scala</option>
+                        <option value="ace/mode/scheme">scheme</option>
+                        <option value="ace/mode/scss">scss</option>
+                        <option value="ace/mode/sh">sh</option>
+                        <option value="ace/mode/sjs">sjs</option>
+                        <option value="ace/mode/smarty">smarty</option>
+                        <option value="ace/mode/snippets">snippets</option>
+                        <option value="ace/mode/soy_template">soy_template</option>
+                        <option value="ace/mode/space">space</option>
+                        <option value="ace/mode/sql">sql</option>
+                        <option value="ace/mode/sqlserver">sqlserver</option>
+                        <option value="ace/mode/stylus">stylus</option>
+                        <option value="ace/mode/svg">svg</option>
+                        <option value="ace/mode/swift">swift</option>
+                        <option value="ace/mode/tcl">tcl</option>
+                        <option value="ace/mode/tex">tex</option>
+                        <option value="ace/mode/text">text</option>
+                        <option value="ace/mode/textile">textile</option>
+                        <option value="ace/mode/toml">toml</option>
+                        <option value="ace/mode/tsx">tsx</option>
+                        <option value="ace/mode/twig">twig</option>
+                        <option value="ace/mode/typescript">typescript</option>
+                        <option value="ace/mode/vala">vala</option>
+                        <option value="ace/mode/vbscript">vbscript</option>
+                        <option value="ace/mode/velocity">velocity</option>
+                        <option value="ace/mode/verilog">verilog</option>
+                        <option value="ace/mode/vhdl">vhdl</option>
+                        <option value="ace/mode/wollok">wollok</option>
+                        <option value="ace/mode/xml">xml</option>
+                        <option value="ace/mode/xquery">xquery</option>
+                        <option value="ace/mode/yaml">yaml</option>
+                    </select>
+                    <label>Mode</label>
+                </div>
+                <div class="input-field col s12">
+                    <select onchange="editor.newLineMode(this.value)">
+                        <option value="auto">Auto</option>
+                        <option value="windows">Windows</option>
+                        <option value="unix">Unix</option>
+                    </select>
+                    <label>New Line Mode</label>
+                </div>
+                <p class="col s12">
+                    <input type="checkbox" class="blue_check" onclick="toggle_overwrite()" id="overwrite" />
+                    <Label for="overwrite">Overwrite</label>
                 </p>
+                <p class="col s12">
+                    <input type="checkbox" class="blue_check" onclick="toggle_readonly()" id="read_only" />
+                    <Label for="read_only">Read Only</label>
+                </p>
+                <div class="input-field col s12">
+                    <input value="2" id="scroll_speed" type="number" onchange="editor.setOption('scrollSpeed', this.value)">
+                    <label class="active" for="scroll_speed">Scroll Speed</label>
+                </div>
+                <p class="col s12">
+                    <input type="checkbox" class="blue_check" onclick="toggle_foldwidget()" id="shw_fold_wgt" />
+                    <Label for="shw_fold_wgt">Show Fold Widgets</label>
+                </p>
+                <p class="col s12">
+                    <input type="checkbox" class="blue_check" onclick="toggle_gutter()" id="show_gutter" />
+                    <Label for="show_gutter">Show Gutter</label>
+                </p>
+                <p class="col s12">
+                    <input type="checkbox" class="blue_check" onclick="toggle_whitespace()" id="invisibles" />
+                    <Label for="invisibles">Show Invisibles</label>
+                </p>
+                <p class="col s12">
+                    <input type="checkbox" class="blue_check" onclick="toggle_printmargin()" id="show_print_margin" />
+                    <Label for="show_print_margin">Show Print Margin</label>
+                </p>
+                <p class="col s12">
+                    <input type="checkbox" class="blue_check" onclick="toggle_linenumbers()" id="show_line_numbers" />
+                    <Label for="show_line_numbers">Show Line Numbers</label>
+                </p>
+                <div class="input-field col s12">
+                    <input id="tab_size" type="number" onchange="editor.setOption('tabSize', this.value)">
+                    <label class="active" for="tab_size">Tab Size</label>
+                </div>
+                <div class="input-field col s12">
+                    <select onchange="editor.setTheme(this.value)">
+                        <optgroup label="Light Themes">
+                            <option value="ace/theme/chrome">Chrome</option>
+                            <option value="ace/theme/clouds">Clouds</option>
+                            <option value="ace/theme/crimson_editor">Crimson Editor</option>
+                            <option value="ace/theme/dawn">Dawn</option>
+                            <option value="ace/theme/dreamweaver">Dreamweaver</option>
+                            <option value="ace/theme/eclipse">Eclipse</option>
+                            <option value="ace/theme/github">GitHub</option>
+                            <option value="ace/theme/iplastic">IPlastic</option>
+                            <option value="ace/theme/solarized_light">Solarized Light</option>
+                            <option value="ace/theme/textmate">TextMate</option>
+                            <option value="ace/theme/tomorrow">Tomorrow</option>
+                            <option value="ace/theme/xcode">XCode</option>
+                            <option value="ace/theme/kuroir">Kuroir</option>
+                            <option value="ace/theme/katzenmilch">KatzenMilch</option>
+                            <option value="ace/theme/sqlserver">SQL Server</option>
+                        </optgroup>
+                        <optgroup label="Dark Themes">
+                            <option value="ace/theme/ambiance">Ambiance</option>
+                            <option value="ace/theme/chaos">Chaos</option>
+                            <option value="ace/theme/clouds_midnight">Clouds Midnight</option>
+                            <option value="ace/theme/cobalt">Cobalt</option>
+                            <option value="ace/theme/gruvbox">Gruvbox</option>
+                            <option value="ace/theme/idle_fingers">idle Fingers</option>
+                            <option value="ace/theme/kr_theme">krTheme</option>
+                            <option value="ace/theme/merbivore">Merbivore</option>
+                            <option value="ace/theme/merbivore_soft">Merbivore Soft</option>
+                            <option value="ace/theme/mono_industrial">Mono Industrial</option>
+                            <option value="ace/theme/monokai">Monokai</option>
+                            <option value="ace/theme/pastel_on_dark">Pastel on dark</option>
+                            <option value="ace/theme/solarized_dark">Solarized Dark</option>
+                            <option value="ace/theme/terminal">Terminal</option>
+                            <option value="ace/theme/tomorrow_night">Tomorrow Night</option>
+                            <option value="ace/theme/tomorrow_night_blue">Tomorrow Night Blue</option>
+                            <option value="ace/theme/tomorrow_night_bright">Tomorrow Night Bright</option>
+                            <option value="ace/theme/tomorrow_night_eighties">Tomorrow Night 80s</option>
+                            <option value="ace/theme/twilight">Twilight</option>
+                            <option value="ace/theme/vibrant_ink">Vibrant Ink</option>
+                        </optgroup>
+                    </select>
+                    <label>Theme</label>
+                </div>
+                <p class="col s12">
+                    <input type="checkbox" class="blue_check" onclick="toggle_softtab()" id="soft_tabs" />
+                    <Label for="soft_tabs">Use Soft Tabs</label>
+                </p>
+                <p class="col s12">
+                    <input type="checkbox" class="blue_check" onclick="toggle_worker()" id="use_worker" />
+                    <Label for="use_worker">Use Worker</label>
+                </p>
+                <p class="col s12">
+                    <input type="checkbox" class="blue_check" onclick="toggle_wrap()" id="wrap_mode" />
+                    <Label for="wrap_mode">Use Wrap Mode</label>
+                </p>
+                <p class="col s12">
+                    <input type="checkbox" class="blue_check" onclick="toggle_vscrollbar()" id="v_scroll_always" />
+                    <Label for="v_scroll_always">V Scroll Bar Always Visible</label>
+                </p>
+                <p class="col s12">
+                    <input type="checkbox" class="blue_check" onclick="toggle_wrapbehaviour()" id="wrap_behav" />
+                    <Label for="wrap_behav">Wrap Behaviours Enabled</label>
+                </p>
+                <div class="input-field col s12">
+                    <input id="wrap_limit" type="number">
+                    <label class="active" for="wrap_limit">Wrap Limit</label>
+                </div>
+                <a class="waves-effect waves-light btn light-blue" onclick="save_ace_settings()">Save Settings Locally</a>
+                <p class="center col s12"> Ace Editor 1.2.6 </p>
             </form>
         </ul>
     </div>
@@ -254,9 +549,10 @@
 <!--  Scripts-->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js"></script>
 <script type="text/javascript">
-    $(document).ready(function() {
+    $(document).ready(function () {
         $('select').material_select();
         $('.modal').modal();
+        $('.collapsible').collapsible();
         $('.dropdown-button').dropdown({
             inDuration: 300,
             outDuration: 225,
@@ -274,7 +570,7 @@
             draggable: true
         });
         $('.ace_settings-collapse').sideNav({
-            menuWidth: 400, // Default is 300
+            menuWidth: 320, // Default is 300
             edge: 'right', // Choose the horizontal origin
             closeOnClick: true, // Closes side-nav on <a> clicks, useful for Angular/Meteor
             draggable: true // Choose whether you can drag to open on touch screens
@@ -332,55 +628,54 @@
             }
         }
         var options = $('#events option');
-        var arr = options.map(function(_, o) {
+        var arr = options.map(function (_, o) {
             return {
-                t: $(o).text(),
-                v: o.value
+                t: $(o).text()
+                , v: o.value
             };
         }).get();
-        arr.sort(function(o1, o2) {
-            var t1 = o1.t.toLowerCase(),
-                t2 = o2.t.toLowerCase();
+        arr.sort(function (o1, o2) {
+            var t1 = o1.t.toLowerCase()
+                , t2 = o2.t.toLowerCase();
             return t1 > t2 ? 1 : t1 < t2 ? -1 : 0;
         });
-        options.each(function(i, o) {
+        options.each(function (i, o) {
             o.value = arr[i].v;
             $(o).text(arr[i].t);
         });
         var options = $('#entities option');
-        var arr = options.map(function(_, o) {
+        var arr = options.map(function (_, o) {
             return {
-                t: $(o).text(),
-                v: o.value
+                t: $(o).text()
+                , v: o.value
             };
         }).get();
-        arr.sort(function(o1, o2) {
-            var t1 = o1.t.toLowerCase(),
-                t2 = o2.t.toLowerCase();
+        arr.sort(function (o1, o2) {
+            var t1 = o1.t.toLowerCase()
+                , t2 = o2.t.toLowerCase();
             return t1 > t2 ? 1 : t1 < t2 ? -1 : 0;
         });
-        options.each(function(i, o) {
+        options.each(function (i, o) {
             o.value = arr[i].v;
             $(o).text(arr[i].t);
         });
         var options = $('#services option');
-        var arr = options.map(function(_, o) {
+        var arr = options.map(function (_, o) {
             return {
-                t: $(o).text(),
-                v: o.value
+                t: $(o).text()
+                , v: o.value
             };
         }).get();
-        arr.sort(function(o1, o2) {
-            var t1 = o1.t.toLowerCase(),
-                t2 = o2.t.toLowerCase();
+        arr.sort(function (o1, o2) {
+            var t1 = o1.t.toLowerCase()
+                , t2 = o2.t.toLowerCase();
             return t1 > t2 ? 1 : t1 < t2 ? -1 : 0;
         });
-        options.each(function(i, o) {
+        options.each(function (i, o) {
             o.value = arr[i].v;
             $(o).text(arr[i].t);
         });
     }
-
     function listdir(path) {
         $.get(encodeURI("api/listdir?path=" + path), function(data) {
             renderpath(data);
@@ -443,14 +738,81 @@
         
         filebrowser.appendChild(collection);
     }
-    
-    var whitespacestatus = false;
-    var foldstatus = true;
+    var animatedscrollstatus = false;
+    var behaviourstatus = true;
+    var indentguidestatus = true;
+    var fadefoldwidgetstatus = false;
+    var highlightactivelinestatus = true;
+    var highlightgutterlinestatus = true;
     var highlightwords = true;
+    var hscrollbarstatus = false;
+    var overwritestatus = false;
+    var readonlystatus = false;
+    var foldwidgetstatus = true;
+    var gutterstatus = true;
+    var whitespacestatus = false;
+    var linenumberstatus = true;
+    var printmarginstatus = true;
+    var softtabstatus = true;
+    var workerstatus = true;
+    var wrapstatus = false;
+    var vscrollbarstatus = false;
+    var wrapbehaviourstatus = true;
+    var foldstatus = true;
+
+    function toggle_animatedscroll() {
+        animatedscrollstatus = !animatedscrollstatus;
+        editor.setOption("animatedScroll", animatedscrollstatus);
+    }
+
+    function toggle_behavioursenabled() {
+        behaviourstatus = !behaviourstatus;
+        editor.setOption("behavioursEnabled", behaviourstatus);
+    }
+
+    function toggle_displayindentguides() {
+        indentguidestatus = !indentguidestatus;
+        editor.setOption("displayIndentGuides", indentguidestatus);
+    }
+
+    function toggle_fadefoldwidget() {
+        fadefoldwidgetstatus = !fadefoldwidgetstatus;
+        editor.setOption("fadeFoldWidgets", fadefoldwidgetstatus);
+    }
+
+    function toggle_highlightactiveline() {
+        highlightactivelinestatus = !highlightactivelinestatus;
+        editor.setOption("highlightActiveLine", highlightactivelinestatus);
+    }
+
+    function toggle_highlightgutterline() {
+        highlightgutterlinestatus = !highlightgutterlinestatus;
+        editor.setOption("highlightGutterLine", highlightgutterlinestatus);
+    }
 
     function toggle_highlightSelectedWord() {
         highlightwords = !highlightwords;
         editor.setOption("highlightSelectedWord", highlightwords);
+    }
+
+    function toggle_hscrollbar() {
+        hscrollbarstatus = !hscrollbarstatus;
+        editor.setOption("hScrollBarAlwaysVisible", hscrollbarstatus);
+    }
+
+    function toggle_overwrite() {
+        overwritestatus = !overwritestatus;
+        editor.setOption("overwrite", overwritestatus);
+    }
+
+    function toggle_readonly() {
+        readonlystatus = !readonlystatus;
+        editor.setOption("readOnly", readonlystatus);
+    }
+
+    function toggle_foldwidget() {
+        foldwidgetstatus = !foldwidgetstatus;
+        editor.setOption("showFoldWidgets", foldwidgetstatus);
     }
 
     function toggle_whitespace() {
@@ -458,10 +820,51 @@
         editor.setOption("showInvisibles", whitespacestatus);
     }
 
+    function toggle_printmargin() {
+        printmarginstatus = !printmarginstatus;
+        editor.setOption("showPrintMargin", printmarginstatus);
+    }
+
+    function toggle_linenumbers() {
+        linenumberstatus = !linenumberstatus;
+        editor.setOption("showLineNumbers", linenumberstatus);
+    }
+
+    function toggle_softtab() {
+        softtabstatus = !softtabstatus;
+        editor.setOption("useSoftTabs", softtabstatus);
+    }
+
+    function toggle_worker() {
+        workerstatus = !workerstatus;
+        editor.setOption("useWorker", workerstatus);
+    }
+
+    function toggle_wrap() {
+        wrapstatus = !wrapstatus;
+        editor.setOption("wrap", wrapstatus);
+    }
+
+    function toggle_vscrollbar() {
+        vscrollbarstatus = !vscrollbarstatus;
+        editor.setOption("vScrollBarAlwaysVisible", vscrollbarstatus);
+    }
+
+    function toggle_wrapbehaviour() {
+        wrapbehaviourstatus = !wrapbehaviourstatus;
+        editor.setOption("wrapBehavioursEnabled", wrapbehaviourstatus);
+    }
+
+    function toggle_gutter() {
+        gutterstatus = !gutterstatus;
+        editor.setOption("showGutter", gutterstatus);
+    }
+
     function toggle_fold() {
         if (foldstatus) {
             editor.getSession().foldAll();
-        } else {
+        }
+        else {
             editor.getSession().unfold();
         }
         foldstatus = !foldstatus;
@@ -477,15 +880,21 @@
     }
 
     function restart() {
-        $.get("api/restart", function(resp) {
+        $.get("api/restart", function (resp) {
             if (resp.length == 0) {
                 var $toastContent = $("<div><pre>Restarting HASS</pre></div>");
                 Materialize.toast($toastContent, 2000);
-            } else {
+            }
+            else {
                 var $toastContent = $("<div><pre>" + resp + "</pre></div>");
                 Materialize.toast($toastContent, 2000);
             }
         });
+    }
+
+    function save_ace_settings() {
+        localStorage.pochass = JSON.stringify(editor.getOptions())
+        Materialize.toast("Ace Settings Saved", 2000);
     }
 
     function save() {
@@ -511,7 +920,6 @@
     var editor = ace.edit("editor");
     if (localStorage.hasOwnProperty("pochass")) {
         editor.setOptions(JSON.parse(localStorage.pochass));
-    } else {
         editor.getSession().setMode("ace/mode/yaml");
         editor.setOption("showInvisibles", whitespacestatus);
         editor.setOption("useSoftTabs", true);
