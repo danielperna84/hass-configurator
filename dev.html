@@ -19,31 +19,31 @@
             margin: 0;
             padding: 0;
         }
-        
+
         #editor {
             position: fixed;
             top: 68px;
             right: 0;
             bottom: 0;
         }
-        
+
         .green {
             color: #0f0;
         }
-        
+
         .red {
             color: #f00;
         }
-        
+
         .dropdown-content {
             min-width: 200px;
         }
-        
+
         .dropdown-content li > a,
         .dropdown-content li > span {
             color: #616161 !important;
         }
-        
+
         .blue_check:checked + label:before {
             border-right: 2px solid #03a9f4;
             /* You need to change the colour here */
@@ -51,12 +51,12 @@
             /* And here */
         }
         /* label focus color */
-        
+
         .input-field input:focus + label {
             color: #03a9f4 !important;
         }
         /* label underline focus color */
-        
+
         .row .input-field input:focus {
             border-bottom: 1px solid #03a9f4 !important;
             box-shadow: 0 1px 0 0 #03a9f4 !important
@@ -225,7 +225,7 @@
     </div>
     <div class="row">
         <ul id="ace_settings" class="side-nav">
-            <li><a class="center grey lighten-3 z-depth-1 subheader">Ace Editor Settings</a></li>
+            <li><a class="center grey lighten-3 z-depth-1 subheader">Ace Editor Settings [Under Construction]</a></li>
             <form class="row col s12" action="#"> <a class="waves-effect waves-light btn light-blue" target="_blank" href="https://github.com/ajaxorg/ace/wiki/Default-Keyboard-Shortcuts">Keyboard Shortcuts</a>
                 <p class="col s12">
                     <input type="checkbox" class="blue_check" onclick="toggle_animatedscroll()" id="anim_scroll" />
@@ -524,7 +524,8 @@
                 <div class="input-field col s12">
                     <input id="wrap_limit" type="number">
                     <label class="active" for="wrap_limit">Wrap Limit</label>
-                </div> <a class="waves-effect waves-light btn light-blue" onclick="save_ace_settings()">Save Settings Locally</a>
+                </div>
+                <a class="waves-effect waves-light btn light-blue" onclick="save_ace_settings()">Save Settings Locally</a>
                 <p class="center col s12"> Ace Editor 1.2.6 </p>
             </form>
         </ul>
