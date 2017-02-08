@@ -6,11 +6,11 @@
     <title>HASS Configurator</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/css/materialize.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.1/jquery.min.js"></script>
     <style type="text/css" media="screen">
         body {
             margin: 0;
             padding: 0;
+            background-color: #fafafa;
         }
         
         #editor {
@@ -19,7 +19,7 @@
             right: 0;
             bottom: 0;
         }
-
+        
         #fbheader {
             display: block;
             cursor: initial;
@@ -36,35 +36,37 @@
         }
         
         .filename {
-            margin-left: 10px;
+            margin-left: 15px;
+            vertical-align: text-bottom;
+            font-weight: 400;
         }
-      
+        
         .green {
-            color: #0f0;
+            color: #fff;
         }
-
+        
         .red {
-            color: #f00;
+            color: #fff;
         }
-
+        
         .dropdown-content {
             min-width: 200px;
         }
-
-        .dropdown-content li > a,
-        .dropdown-content li > span {
+        
+        .dropdown-content li>a,
+        .dropdown-content li>span {
             color: #616161 !important;
         }
-
-        .blue_check:checked + label:before {
+        
+        .blue_check:checked+label:before {
             border-right: 2px solid #03a9f4;
             border-bottom: 2px solid #03a9f4;
         }
-
-        .input-field input:focus + label {
+        
+        .input-field input:focus+label {
             color: #03a9f4 !important;
         }
-
+        
         .row .input-field input:focus {
             border-bottom: 1px solid #03a9f4 !important;
             box-shadow: 0 1px 0 0 #03a9f4 !important
@@ -82,6 +84,39 @@
             opacity: 100 !important;
             display: block !important;
         }
+        
+        .collection {
+            margin: 0;
+        }
+        
+        .collection .collection-item {
+            border-bottom: 1px solid #eeeeee;
+        }
+        
+        .collection .collection-item i.material-icons {
+            vertical-align: text-bottom;
+        }
+        
+        .modal.bottom-sheet {
+            top: auto;
+            bottom: -100%;
+            margin: 0;
+            width: 96%;
+            max-height: 95%;
+            border-radius: 0;
+            will-change: bottom, opacity;
+            margin: auto;
+        }
+        
+        .modal .modal-content_nopad {
+            padding: 0;
+        }
+        
+        .btn-float {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ace.js" type="text/javascript" charset="utf-8"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ext-modelist.js" type="text/javascript" charset="utf-8"></script>
@@ -97,19 +132,39 @@
                 </ul>
                 <ul class="right">
                     <li><a class="waves-effect waves-light" href="#modal_save"><i class="material-icons">save</i></a></li>
-                    <li><a class="waves-effect waves-light dropdown-button" href="#!" data-activates="dropdown_tools" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
+                    <li><a class="waves-effect waves-light dropdown-button hide-on-small-only" href="#!" data-activates="dropdown_tools" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
+                    <li><a class="waves-effect waves-light dropdown-button hide-on-med-and-up" href="#!" data-activates="dropdown_tools_mobile" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
                 </ul>
             </div>
         </nav>
     </div>
     <ul id="dropdown_tools" class="dropdown-content z-depth-4">
-        <li><a target="_blank" href="https://home-assistant.io/help/">Need HASS Help?</a></li>
-        <li><a target="_blank" href="https://home-assistant.io/components/">HASS Components</a></li>
+        <li><a target="_blank" href="#modal_components">HASS Components</a></li>
+        <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
         <li><a href="#modal_about">About PoC</a></li>
         <li class="divider"></li>
-        <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
         <li><a href="#modal_restart">Restart HASS</a></li>
     </ul>
+    <ul id="dropdown_tools_mobile" class="dropdown-content z-depth-4">
+        <li><a target="_blank" href="https://home-assistant.io/help/">Need HASS Help?</a></li>
+        <li><a target="_blank" href="https://home-assistant.io/components/">HASS Components</a></li>
+        <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
+        <li><a href="#modal_about">About PoC</a></li>
+        <li class="divider"></li>
+        <li><a href="#modal_restart">Restart HASS</a></li>
+    </ul>
+    <div id="modal_components" class="modal bottom-sheet">
+        <div class="modal-content_nopad">
+            <iframe src="https://home-assistant.io/components/" width="100%" style="height: 100vh;"> </iframe>
+            <div class="btn-float"> <a href="#!" class=" modal-action modal-close waves-effect waves-green btn light-blue">Close</a> </div>
+        </div>
+    </div>
+    <div id="modal_acekeyboard" class="modal bottom-sheet">
+        <div class="modal-content_nopad">
+            <iframe src="https://github.com/ajaxorg/ace/wiki/Default-Keyboard-Shortcuts/" width="100%" style="height: 100vh;"> </iframe>
+            <div class="btn-float"> <a href="#!" class=" modal-action modal-close waves-effect waves-green btn light-blue">Close</a> </div>
+        </div>
+    </div>
     <div id="modal_save" class="modal">
         <div class="modal-content">
             <h4>Save</h4>
@@ -124,25 +179,27 @@
         </div>
         <div class="modal-footer"> <a href="#!" class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="restart()" class=" modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
     </div>
-    <div id="modal_about" class="modal">
+    <div id="modal_about" class="modal modal-fixed-footer">
         <div class="modal-content">
-            <h4><a href="https://github.com/danielperna84/hass-poc-configurator/" target="_blank">HASS Configurator</a></h4>
+            <h4><a class="black-text" href="https://github.com/danielperna84/hass-poc-configurator/" target="_blank">HASS Configurator</a></h4>
             <p>Version: <a class="$versionclass" href="https://github.com/danielperna84/hass-poc-configurator/releases/latest" target="_blank">$current</a></p>
-            <p>Web-based file editor designed to modify configuration files of <a href="https://home-assistant.io/" target="_blank">Home Assistant</a> or other textual files. Use at your own risk.</p>
+            <p>Web-based file editor designed to modify configuration files of <a class="light-blue-text" href="https://home-assistant.io/" target="_blank">Home Assistant</a> or other textual files. Use at your own risk.</p>
             <p>Published under the MIT license</p>
-            <p>Developed by:<br />
+            <p>Developed by:</p>
             <ul>
-                <li><a href="https://github.com/danielperna84" target="_blank">Daniel Perna</a></li>
-                <li><a href="https://github.com/jmart518" target="_blank">JT Martinez</a></li>
+                <li>
+                    <div class="chip"> <img src="https://avatars3.githubusercontent.com/u/7396998?v=3&s=400" alt="Contact Person"> <a class="black-text" href="https://github.com/danielperna84" target="_blank">Daniel Perna</a> </div>
+                </li>
+                <li>
+                    <div class="chip"> <img src="https://avatars2.githubusercontent.com/u/1509640?v=3&s=460" alt="Contact Person"> <a class="black-text" href="https://github.com/jmart518" target="_blank">JT Martinez</a> </div>
+                </li>
             </ul>
-            </p>
-            <p>Libraries used:<br />
-                <ul>
-                    <li><a href="https://ace.c9.io/" target="_blank">Ace</a></li>
-                    <li><a href="http://materializecss.com/" target="_blank">Materialize</a></li>
-                    <li><a href="https://jquery.com/" target="_blank">jQuery</a></li>
-                </ul>
-            </p>
+            <p>Libraries used:</p>
+            <ul>
+                <li><a class="light-blue-text" href="https://ace.c9.io/" target="_blank">Ace</a></li>
+                <li><a class="light-blue-text" href="http://materializecss.com/" target="_blank">MaterializeCSS</a></li>
+                <li><a class="light-blue-text" href="https://jquery.com/" target="_blank">jQuery</a></li>
+            </ul>
         </div>
         <div class="modal-footer"> <a class=" modal-action modal-close waves-effect btn-flat">OK</a> </div>
     </div>
@@ -260,9 +317,7 @@
         <ul id="ace_settings" class="side-nav">
             <li><a class="center grey lighten-3 z-depth-1 subheader">Editor Settings</a></li>
             <form class="row col s12" action="#">
-                <p class="col s12">
-                    <a class="waves-effect waves-light btn light-blue" target="_blank" href="https://github.com/ajaxorg/ace/wiki/Default-Keyboard-Shortcuts">Keyboard Shortcuts</a>
-                </p>
+                <p class="col s12"> <a class="waves-effect waves-light btn light-blue" href="#modal_acekeyboard">Keyboard Shortcuts</a> </p>
                 <p class="col s12">
                     <input type="checkbox" class="blue_check" onclick="editor.setOption('animatedScroll', !editor.getOptions().animatedScroll)" id="animatedScroll" />
                     <Label for="animatedScroll">Animated Scroll</label>
@@ -560,8 +615,7 @@
                 <div class="input-field col s12">
                     <input id="wrap_limit" type="number" onchange="editor.setOption('wrap', parseInt(this.value))" min="1" value="80">
                     <label class="active" for="wrap_limit">Wrap Limit</label>
-                </div>
-                <a class="waves-effect waves-light btn light-blue" onclick="save_ace_settings()">Save Settings Locally</a>
+                </div> <a class="waves-effect waves-light btn light-blue" onclick="save_ace_settings()">Save Settings Locally</a>
                 <p class="center col s12"> Ace Editor 1.2.6 </p>
             </form>
         </ul>
@@ -569,6 +623,7 @@
     <input type="hidden" id="currentfile" value="" />
 </body>
 <!--  Scripts-->
+<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js"></script>
 <script type="text/javascript">
     $(document).ready(function () {
