@@ -17,7 +17,8 @@ Thanks to the help of [JT Martinez](https://github.com/jmart518) this tool now p
 ####Screenshot of the configurator embedded into HASS:
 ![Screenshot](https://github.com/danielperna84/hass-poc-configurator/blob/master/hass-poc-configurator.png)
 
-If there's anything you want to have differently, feel free to fork and enhance. And if something is not working, create an issue here and I'll have a look at it.
+If there's anything you want to have differently, feel free to fork and enhance. And if something is not working, create an issue here and I'll have a look at it.  
+_WARNING_: This tool allows you to browse your filesystem and modify files. So be careful which files you edit, or you might break critical parts of your system.
 
 ###Installation
 There are no dependencies on Python modules that are not part of the standard library. And all the fancy JavaScript libraries are loaded from CDN (which means this doesn't work when you're offline).  
