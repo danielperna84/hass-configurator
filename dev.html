@@ -48,7 +48,7 @@
             color: #fff;
         }
 
-        .dropdown-content {
+        #dropdown_menu, #dropdown_menu_mobile {
             min-width: 200px;
         }
 
@@ -178,24 +178,35 @@
             <div class="nav-wrapper">
                 <ul class="left">
                     <li><a href="#" data-activates="slide-out" class="waves-effect waves-light button-collapse show-on-large"><i class="material-icons">folder</i></a></li>
+                    <li><a class="waves-effect waves-light" onclick="replace()"><i class="material-icons">search</i></a></li>
                 </ul>
                 <ul class="right">
-                    <li><a class="waves-effect waves-light" onclick="replace()"><i class="material-icons">search</i></a></li>
-                    <li><a class="waves-effect waves-light" href="#modal_save"><i class="material-icons">save</i></a></li>
-                    <li><a class="waves-effect waves-light dropdown-button hide-on-small-only" href="#!" data-activates="dropdown_tools" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
-                    <li><a class="waves-effect waves-light dropdown-button hide-on-med-and-up" href="#!" data-activates="dropdown_tools_mobile" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
+                    <!-- <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="New" onclick="Materialize.toast('¯\\_(ツ)_/¯ ', 2000)"><i class="material-icons">note_add</i></a></li> -->
+                    <li><a class="waves-effect waves-light hide-on-small-only" href="#modal_save"><i class="material-icons">save</i></a></li>
+                    <!-- <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Close" href="#modal_close"><i class="material-icons">close</i></a></li>
+                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Delete" href="#modal_delete"><i class="material-icons">delete</i></a></li>
+                    <li><a class="waves-effect waves-light dropdown-button hide-on-med-and-up" href="#!" data-activates="dropdown_tools_mobile" data-beloworigin="true"><i class="material-icons right">edit</i></a></li> -->
+                    <li><a class="waves-effect waves-light dropdown-button hide-on-small-only" href="#!" data-activates="dropdown_menu" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
+                    <li><a class="waves-effect waves-light dropdown-button hide-on-med-and-up" href="#!" data-activates="dropdown_menu_mobile" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
                 </ul>
             </div>
         </nav>
     </div>
-    <ul id="dropdown_tools" class="dropdown-content z-depth-4">
+    <ul id="dropdown_tools_mobile" class="dropdown-content z-depth-4">
+        <li><a onclick="Materialize.toast('¯\\_(ツ)_/¯ ', 2000)">New</a></li>
+        <li><a href="#modal_save">Save</a></li>
+        <li><a href="#modal_close">Close</a></li>
+        <li class="divider"></li>
+        <li><a href="#modal_delete">Delete</a></li>
+    </ul>
+    <ul id="dropdown_menu" class="dropdown-content z-depth-4">
         <li><a target="_blank" href="#modal_components">HASS Components</a></li>
         <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
         <li><a href="#modal_about">About PoC</a></li>
         <li class="divider"></li>
         <li><a href="#modal_restart">Restart HASS</a></li>
     </ul>
-    <ul id="dropdown_tools_mobile" class="dropdown-content z-depth-4">
+    <ul id="dropdown_menu_mobile" class="dropdown-content z-depth-4">
         <li><a target="_blank" href="https://home-assistant.io/help/">Need HASS Help?</a></li>
         <li><a target="_blank" href="https://home-assistant.io/components/">HASS Components</a></li>
         <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
@@ -588,7 +599,7 @@
             </div>
           </li>
           <li>
-            <div class="collapsible-header hoverable"><i class="material-icons">subdirectory_arrow_right</i>Folding</div>
+            <div class="collapsible-header hoverable"><i class="material-icons">all_out</i>Folding</div>
             <div class="collapsible-body">
               <table class="bordered highlight centered">
                 <thead>
@@ -727,6 +738,20 @@
         </div>
         <div class="modal-footer"> <a href="#!" class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="save()" class=" modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
     </div>
+    <div id="modal_close" class="modal">
+        <div class="modal-content">
+            <h4>Close File</h4>
+            <p>Are you sure you want to close the current file without saving?</p>
+        </div>
+        <div class="modal-footer"> <a href="#!" class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="Materialize.toast('¯\\_(ツ)_/¯ ', 2000)" class="modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
+    </div>
+    <div id="modal_delete" class="modal">
+        <div class="modal-content">
+            <h4>Delete</h4>
+            <p>Are you sure you want to delete this file?</p>
+        </div>
+        <div class="modal-footer"> <a href="#!" class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="Materialize.toast('¯\\_(ツ)_/¯ ', 2000)" class="modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
+    </div>
     <div id="modal_restart" class="modal">
         <div class="modal-content">
             <h4>Restart</h4>
@@ -861,10 +886,11 @@
     <i class="material-icons">edit</i>
   </a>
   <ul>
-    <li><a class="btn-floating red tooltipped" data-position="left" data-delay="50" data-tooltip="Undo" onclick="undo()"><i class="material-icons">undo</i></a></li>
-    <li><a class="btn-floating yellow tooltipped" data-position="left" data-delay="50" data-tooltip="Redo" onclick="redo()"><i class="material-icons">redo</i></a></li>
-    <li><a class="btn-floating green tooltipped" data-position="left" data-delay="50" data-tooltip="Indent" onclick="indent()"><i class="material-icons">format_indent_increase</i></a></li>
-    <li><a class="btn-floating blue tooltipped" data-position="left" data-delay="50" data-tooltip="Outdent" onclick="outdent()"><i class="material-icons">format_indent_decrease</i></a></li>
+    <li><a class="btn-floating yellow tooltipped" data-position="left" data-delay="50" data-tooltip="Undo" onclick="undo()"><i class="material-icons">undo</i></a></li>
+    <li><a class="btn-floating green tooltipped" data-position="left" data-delay="50" data-tooltip="Redo" onclick="redo()"><i class="material-icons">redo</i></a></li>
+    <li><a class="btn-floating blue tooltipped" data-position="left" data-delay="50" data-tooltip="Indent" onclick="indent()"><i class="material-icons">format_indent_increase</i></a></li>
+    <li><a class="btn-floating orange tooltipped" data-position="left" data-delay="50" data-tooltip="Outdent" onclick="outdent()"><i class="material-icons">format_indent_decrease</i></a></li>
+    <li><a class="btn-floating brown tooltipped" data-position="left" data-delay="50" data-tooltip="Fold" onclick="toggle_fold()"><i class="material-icons">all_out</i></a></li>
   </ul>
 </div>
 
