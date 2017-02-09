@@ -28,7 +28,6 @@
             font-size: 15px;
             font-weight: 500;
             line-height: 48px;
-            background-color: #eeeeee;
         }
 
         a.collection-item {
@@ -114,13 +113,66 @@
         .waves-effect.waves-blue .waves-ripple {
             background-color: #03a9f4;
         }
+
+        .preloader-background {
+	          display: flex;
+	          align-items: center;
+	          justify-content: center;
+	          background-color: #eee;
+            position: fixed;
+	          z-index: 10000;
+	          top: 0;
+	          left: 0;
+	          right: 0;
+	          bottom: 0;
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ace.js" type="text/javascript" charset="utf-8"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ext-modelist.js" type="text/javascript" charset="utf-8"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
 </head>
-
 <body>
+    <div class="preloader-background">
+      <div class="preloader-wrapper big active">
+      <div class="spinner-layer spinner-blue">
+        <div class="circle-clipper left">
+          <div class="circle"></div>
+        </div><div class="gap-patch">
+          <div class="circle"></div>
+        </div><div class="circle-clipper right">
+          <div class="circle"></div>
+        </div>
+      </div>
+      <div class="spinner-layer spinner-red">
+        <div class="circle-clipper left">
+          <div class="circle"></div>
+        </div><div class="gap-patch">
+          <div class="circle"></div>
+        </div><div class="circle-clipper right">
+          <div class="circle"></div>
+        </div>
+      </div>
+      <div class="spinner-layer spinner-yellow">
+        <div class="circle-clipper left">
+          <div class="circle"></div>
+        </div><div class="gap-patch">
+          <div class="circle"></div>
+        </div><div class="circle-clipper right">
+          <div class="circle"></div>
+        </div>
+      </div>
+      <div class="spinner-layer spinner-green">
+        <div class="circle-clipper left">
+          <div class="circle"></div>
+        </div><div class="gap-patch">
+          <div class="circle"></div>
+        </div><div class="circle-clipper right">
+          <div class="circle"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="main">
     <div class="navbar-fixed">
         <nav class="light-blue">
             <div class="nav-wrapper">
@@ -751,7 +803,7 @@
         <div class="col s12 m8 l9" id="editor"></div>
     </div>
     <div>
-        <ul id="slide-out" class="side-nav grey lighten-5">
+        <ul id="slide-out" class="side-nav grey lighten-4">
           <div class="z-depth-2" id="filebrowser"></div>
             <div class="row hide-on-med-and-up">
               </br>
@@ -1125,6 +1177,7 @@
         </ul>
     </div>
     <input type="hidden" id="currentfile" value="" />
+  </div>
 </body>
 <!--  Scripts-->
 <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
@@ -1157,6 +1210,15 @@
             draggable: true // Choose whether you can drag to open on touch screens
         });
         listdir('.');
+    });
+</script>
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function(){
+	     $('.preloader-background').delay(800).fadeOut('slow');
+
+	      $('.preloader-wrapper')
+		      .delay(800)
+		      .fadeOut('slow');
     });
 </script>
 <script>
