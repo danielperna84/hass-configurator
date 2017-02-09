@@ -18,7 +18,13 @@
             top: 68px;
             right: 0;
             bottom: 0;
-        }
+          }
+
+        @media only screen and (max-width: 600px) {
+          #editor {
+              top: 60px;
+            }
+          }
 
         #fbheader {
             display: block;
@@ -178,14 +184,15 @@
             <div class="nav-wrapper">
                 <ul class="left">
                     <li><a href="#" data-activates="slide-out" class="waves-effect waves-light button-collapse show-on-large"><i class="material-icons">folder</i></a></li>
+                    <li><a class="waves-effect waves-light hide-on-med-and-up" onclick="replace()"><i class="material-icons">search</i></a></li>
                 </ul>
                 <ul class="right">
-                    <li><a class="waves-effect waves-light" onclick="replace()"><i class="material-icons">search</i></a></li>
                     <li><a class="waves-effect waves-light"href="#modal_save"><i class="material-icons">save</i></a></li>
                     <!-- <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="New" onclick="Materialize.toast('¯\\_(ツ)_/¯ ', 2000)"><i class="material-icons">note_add</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Save" href="#modal_save"><i class="material-icons">save</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Close" href="#modal_close"><i class="material-icons">close</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Delete" href="#modal_delete"><i class="material-icons">delete</i></a></li>
+                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Search" onclick="replace()"><i class="material-icons">search</i></a></li>
                     <li><a class="waves-effect waves-light dropdown-button hide-on-med-and-up" href="#!" data-activates="dropdown_tools_mobile" data-beloworigin="true"><i class="material-icons right">edit</i></a></li> -->
                     <li><a class="waves-effect waves-light dropdown-button hide-on-small-only" href="#!" data-activates="dropdown_menu" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
                     <li><a class="waves-effect waves-light dropdown-button hide-on-med-and-up" href="#!" data-activates="dropdown_menu_mobile" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
@@ -826,7 +833,7 @@
                 <label>Services</label>
             </div>
         </div>
-        <div class="col s12 m8 l9" id="editor"></div>
+      <div class="col s12 m8 l9" id="editor"></div>
     </div>
     <div>
         <ul id="slide-out" class="side-nav grey lighten-4">
