@@ -11,6 +11,13 @@
             margin: 0;
             padding: 0;
             background-color: #fafafa;
+            display: flex;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+
+        main {
+            flex: 1 0 auto;
         }
 
         #editor {
@@ -23,6 +30,10 @@
         @media only screen and (max-width: 600px) {
           #editor {
               top: 60px;
+            }
+
+          #edit_float {
+              bottom: 100px;
             }
           }
 
@@ -55,7 +66,7 @@
         }
 
         #dropdown_menu, #dropdown_menu_mobile {
-            min-width: 200px;
+            min-width: 180px;
         }
 
         .dropdown-content li>a,
@@ -132,53 +143,127 @@
 	          right: 0;
 	          bottom: 0;
         }
+
+        .modal-content_nopad {
+          position: relative;
+        }
+
+        .modal-content_nopad .modal_btn {
+          position: absolute;
+          top: 2px;
+          right:0;
+        }
+
+        .ace_search {
+          background-color: #fafafa !important;
+          border-radius: 0;
+          border-bottom: 1px solid #03a9f4 !important;
+          box-shadow: 0 1px 0 0 #03a9f4 !important
+        }
+
+        .ace_search .right {
+          background-color: purple;
+        }
+
+        .ace_search_form {
+          background-color: red;
+        }
+
+        .ace_search_field {
+          background-color: blue;
+        }
+
+        .ace_replace_form {
+          background-color: green;
+        }
+
+        .ace_search_options {
+          background-color: blue;
+        }
+
+        .ace_searchbtn_close {
+          background-color: yellow;
+        }
+
+        .ace_searchbtn {
+          background-color: brown;
+        }
+
+        .prev {
+          background-color: blue;
+        }
+
+        .next {
+          background-color: black;
+        }
+
+        .ace_replacebtn {
+          background-color: green;
+        }
+
+        .ace_button {
+          background-color: red;
+        }
+
+        footer {
+          z-index: 10;
+        }
+
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ace.js" type="text/javascript" charset="utf-8"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ext-modelist.js" type="text/javascript" charset="utf-8"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
 </head>
 <body>
-    <div class="preloader-background">
-      <div class="preloader-wrapper big active">
+  <div class="preloader-background">
+    <div class="preloader-wrapper big active">
       <div class="spinner-layer spinner-blue">
         <div class="circle-clipper left">
           <div class="circle"></div>
-        </div><div class="gap-patch">
+        </div>
+        <div class="gap-patch">
           <div class="circle"></div>
-        </div><div class="circle-clipper right">
+        </div>
+        <div class="circle-clipper right">
           <div class="circle"></div>
         </div>
       </div>
       <div class="spinner-layer spinner-red">
         <div class="circle-clipper left">
           <div class="circle"></div>
-        </div><div class="gap-patch">
+        </div>
+        <div class="gap-patch">
           <div class="circle"></div>
-        </div><div class="circle-clipper right">
+        </div>
+        <div class="circle-clipper right">
           <div class="circle"></div>
         </div>
       </div>
       <div class="spinner-layer spinner-yellow">
         <div class="circle-clipper left">
           <div class="circle"></div>
-        </div><div class="gap-patch">
+        </div>
+        <div class="gap-patch">
           <div class="circle"></div>
-        </div><div class="circle-clipper right">
+        </div>
+        <div class="circle-clipper right">
           <div class="circle"></div>
         </div>
       </div>
       <div class="spinner-layer spinner-green">
         <div class="circle-clipper left">
           <div class="circle"></div>
-        </div><div class="gap-patch">
+        </div>
+        <div class="gap-patch">
           <div class="circle"></div>
-        </div><div class="circle-clipper right">
+        </div>
+        <div class="circle-clipper right">
           <div class="circle"></div>
         </div>
       </div>
     </div>
   </div>
-  <div class="main">
+  <header>
     <div class="navbar-fixed">
         <nav class="light-blue">
             <div class="nav-wrapper">
@@ -187,20 +272,22 @@
                     <li><a class="waves-effect waves-light hide-on-med-and-up" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
                 </ul>
                 <ul class="right">
-                    <li><a class="waves-effect waves-light"href="#modal_save"><i class="material-icons">save</i></a></li>
-                    <!-- <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="New" onclick="Materialize.toast('¯\\_(ツ)_/¯ ', 2000)"><i class="material-icons">note_add</i></a></li>
+                    <!-- <li><a class="waves-effect waves-light"href="#modal_save"><i class="material-icons">save</i></a></li>
+                    <li><a class="waves-effect waves-light hide-on-small-only" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li> -->
+                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="New" onclick="Materialize.toast('¯\\_(ツ)_/¯ ', 2000)"><i class="material-icons">note_add</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Save" href="#modal_save"><i class="material-icons">save</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Close" href="#modal_close"><i class="material-icons">close</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Delete" href="#modal_delete"><i class="material-icons">delete</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Search" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
-                    <li><a class="waves-effect waves-light dropdown-button hide-on-med-and-up" href="#!" data-activates="dropdown_tools_mobile" data-beloworigin="true"><i class="material-icons right">edit</i></a></li> -->
-                    <li><a class="waves-effect waves-light hide-on-small-only" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
+                    <!-- <li><a class="waves-effect waves-light dropdown-button hide-on-med-and-up" href="#!" data-activates="dropdown_tools_mobile" data-beloworigin="true"><i class="material-icons right">edit</i></a></li> -->
                     <li><a class="waves-effect waves-light dropdown-button hide-on-small-only" href="#!" data-activates="dropdown_menu" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
                     <li><a class="waves-effect waves-light dropdown-button hide-on-med-and-up" href="#!" data-activates="dropdown_menu_mobile" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
                 </ul>
             </div>
         </nav>
     </div>
+  </header>
+  <main>
     <ul id="dropdown_tools_mobile" class="dropdown-content z-depth-4">
         <li><a onclick="Materialize.toast('¯\\_(ツ)_/¯ ', 2000)">New</a></li>
         <li><a href="#modal_save">Save</a></li>
@@ -226,11 +313,11 @@
     <div id="modal_components" class="modal bottom-sheet modal-fixed-footer">
         <div class="modal-content_nopad">
             <iframe src="https://home-assistant.io/components/" width="100%" style="height: 90vh;"> </iframe>
+            <a target="_blank" href="https://home-assistant.io/components/" class="hide-on-med-and-down modal_btn waves-effect waves-blue btn-large btn-flat left"><i class="material-icons">launch</i></a>
         </div>
         <div class="modal-footer">
-            <a href="#!" class="modal-action modal-close waves-effect waves-blue btn-flat ">Close</a>
+            <a href="#!" class="modal-action modal-close waves-effect waves-blue btn-flat Right">Close</a>
         </div>
-      </div>
     </div>
     <div id="modal_acekeyboard" class="modal bottom-sheet modal-fixed-footer">
         <div class="modal-content centered">
@@ -890,19 +977,18 @@
               </div>
             </div>
         </ul>
-        <div class="fixed-action-btn vertical click-to-toggle">
-  <a class="btn-floating btn-large red hoverable">
-    <i class="material-icons">edit</i>
-  </a>
-  <ul>
-    <li><a class="btn-floating yellow tooltipped" data-position="left" data-delay="50" data-tooltip="Undo" onclick="editor.execCommand('undo')"><i class="material-icons">undo</i></a></li>
-    <li><a class="btn-floating green tooltipped" data-position="left" data-delay="50" data-tooltip="Redo" onclick="editor.execCommand('redo')"><i class="material-icons">redo</i></a></li>
-    <li><a class="btn-floating blue tooltipped" data-position="left" data-delay="50" data-tooltip="Indent" onclick="editor.execCommand('indent')"><i class="material-icons">format_indent_increase</i></a></li>
-    <li><a class="btn-floating orange tooltipped" data-position="left" data-delay="50" data-tooltip="Outdent" onclick="editor.execCommand('outdent')"><i class="material-icons">format_indent_decrease</i></a></li>
-    <li><a class="btn-floating brown tooltipped" data-position="left" data-delay="50" data-tooltip="Fold" onclick="toggle_fold()"><i class="material-icons">all_out</i></a></li>
-  </ul>
-</div>
-
+        <div id="edit_float" class="fixed-action-btn vertical click-to-toggle">
+          <a class="btn-floating btn-large red hoverable">
+            <i class="material-icons">edit</i>
+          </a>
+          <ul>
+            <li><a class="btn-floating yellow tooltipped" data-position="left" data-delay="50" data-tooltip="Undo" onclick="editor.execCommand('undo')"><i class="material-icons">undo</i></a></li>
+            <li><a class="btn-floating green tooltipped" data-position="left" data-delay="50" data-tooltip="Redo" onclick="editor.execCommand('redo')"><i class="material-icons">redo</i></a></li>
+            <li><a class="btn-floating blue tooltipped" data-position="left" data-delay="50" data-tooltip="Indent" onclick="editor.execCommand('indent')"><i class="material-icons">format_indent_increase</i></a></li>
+            <li><a class="btn-floating orange tooltipped" data-position="left" data-delay="50" data-tooltip="Outdent" onclick="editor.execCommand('outdent')"><i class="material-icons">format_indent_decrease</i></a></li>
+            <li><a class="btn-floating brown tooltipped" data-position="left" data-delay="50" data-tooltip="Fold" onclick="toggle_fold()"><i class="material-icons">all_out</i></a></li>
+          </ul>
+        </div>
     </div>
     <div class="row">
         <ul id="ace_settings" class="side-nav">
@@ -1213,6 +1299,17 @@
     </div>
     <input type="hidden" id="currentfile" value="" />
   </div>
+</main>
+<footer class="page-footer grey lighten-3 hide-on-med-and-up z-depth-3">
+  <div class="container">
+    <div class="row center">
+      <div class="col s3"><a class="waves-effect waves-light grey-text text-darken-2" onclick="Materialize.toast('¯\\_(ツ)_/¯ ', 2000)"><i class="material-icons">note_add</i></a></div>
+      <div class="col s3"><a class="waves-effect waves-light grey-text text-darken-2" href="#modal_save"><i class="material-icons">save</i></a></div>
+      <div class="col s3"><a class="waves-effect waves-light grey-text text-darken-2" href="#modal_close"><i class="material-icons">close</i></a></div>
+      <div class="col s3"><a class="waves-effect waves-light grey-text text-darken-2" href="#modal_delete"><i class="material-icons">delete</i></a></div>
+    </div>
+  </div>
+</footer>
 </body>
 <!--  Scripts-->
 <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
