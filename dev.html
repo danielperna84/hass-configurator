@@ -30,10 +30,12 @@
         @media only screen and (max-width: 600px) {
           #editor {
               top: 60px;
+              bottom: 56px;
             }
 
           #edit_float {
-              bottom: 100px;
+              bottom: 85px;
+              z-index: 10;
             }
           }
 
@@ -114,13 +116,13 @@
         }
 
         #modal_acekeyboard, #modal_components {
-          top: auto;
-          bottom: -100%;
-          margin: 0;
-          width: 96%;
-          min-height: 95%;
-          border-radius: 0;
-          margin: auto;
+            top: auto;
+            bottom: -100%;
+            margin: 0;
+            width: 96%;
+            min-height: 95%;
+            border-radius: 0;
+            margin: auto;
         }
 
         .modal .modal-content_nopad {
@@ -145,68 +147,131 @@
         }
 
         .modal-content_nopad {
-          position: relative;
+            position: relative;
         }
 
         .modal-content_nopad .modal_btn {
-          position: absolute;
-          top: 2px;
-          right:0;
+            position: absolute;
+            top: 2px;
+            right:0;
         }
 
         .ace_search {
-          background-color: #fafafa !important;
-          border-radius: 0;
-          border-bottom: 1px solid #03a9f4 !important;
-          box-shadow: 0 1px 0 0 #03a9f4 !important
+            background-color: #eeeeee !important;
+            border-radius: 0 !important;
+            border: 0 !important;
+            box-shadow: 0;
+            box-shadow: 0 6px 10px 0 rgba(0, 0, 0, 0.14), 0 1px 18px 0 rgba(0, 0, 0, 0.12), 0 3px 5px -1px rgba(0, 0, 0, 0.3);
         }
 
         .ace_search .right {
-          background-color: purple;
+            background-color: purple;
         }
 
         .ace_search_form {
-          background-color: red;
+            background-color: #fafafa;
+            width: 300px;
+            border: 0 !important;
+            border-radius: 0 !important;
+            outline: none !important;
+            box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px !important;
+            margin-left: 8px !important;
+            color: #424242 !important;
         }
 
         .ace_search_field {
-          background-color: blue;
+            padding-left: 4px !important;
+            border: 10 !important;
+            margin-left: 10px !important;
+            max-width: 260px !important;
+            font-family: Roboto !important;
+            border-bottom: 1px solid #03a9f4 !important;
+            color: #424242 !important;
         }
 
         .ace_replace_form {
-          background-color: green;
+            background-color: #fafafa;
+            width: 300px;
+            border: 0 !important;
+            border-radius: 0 !important;
+            outline: none !important;
+            box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+            margin-bottom: 15px !important;
+            margin-left: 8px !important;
         }
 
         .ace_search_options {
-          background-color: blue;
+            background-color: #eeeeee;
+            border-radius: 0;
+            border: 0;
+            bottom: 0;
+            right: 0;
         }
 
         .ace_searchbtn_close {
-          background-color: yellow;
+            background-color: yellow;
         }
 
         .ace_searchbtn {
-          background-color: brown;
+            text-decoration: none !important;
+            min-width: 40px !important;
+            min-height: 30px !important;
+            color: #424242 !important;
+            text-align: center !important;
+            letter-spacing: .5px !important;
+            transition: .2s ease-out;
+            cursor: pointer;
+            font-family: Roboto !important;
+        }
+
+        .ace_searchbtn:hover {
+            background-color: #03a9f4;
         }
 
         .prev {
-          background-color: blue;
+
         }
 
         .next {
-          background-color: black;
+
         }
 
         .ace_replacebtn {
-          background-color: green;
+            text-decoration: none !important;
+            min-width: 40px !important;
+            min-height: 30px !important;
+            color: #424242 !important;
+            text-align: center !important;
+            letter-spacing: .5px !important;
+            transition: .2s ease-out;
+            cursor: pointer;
+            font-family: Roboto !important;
+        }
+
+        .ace_replacebtn:hover {
+            background-color: #03a9f4;
         }
 
         .ace_button {
-          background-color: red;
+            text-decoration: none;
+            min-width: 40px;
+            min-height: 30px;
+            color: #424242 !important;
+            background-color: #03a9f4;
+            text-align: center;
+            letter-spacing: .5px;
+            transition: .2s ease-out;
+            cursor: pointer;
+            font-family: Roboto !important;
         }
 
         footer {
-          z-index: 10;
+            z-index: 10;
+        }
+
+        .shadow {
+            height: 36px;
         }
 
     </style>
@@ -268,8 +333,7 @@
         <nav class="light-blue">
             <div class="nav-wrapper">
                 <ul class="left">
-                    <li><a href="#" data-activates="slide-out" class="waves-effect waves-light button-collapse show-on-large"><i class="material-icons">folder</i></a></li>
-                    <li><a class="waves-effect waves-light hide-on-med-and-up" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
+                    <li><a href="#" data-activates="slide-out" class="waves-effect waves-light files-collapse show-on-large"><i class="material-icons">folder</i></a></li>
                 </ul>
                 <ul class="right">
                     <!-- <li><a class="waves-effect waves-light"href="#modal_save"><i class="material-icons">save</i></a></li>
@@ -279,7 +343,7 @@
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Close" href="#modal_close"><i class="material-icons">close</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Delete" href="#modal_delete"><i class="material-icons">delete</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Search" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
-                    <!-- <li><a class="waves-effect waves-light dropdown-button hide-on-med-and-up" href="#!" data-activates="dropdown_tools_mobile" data-beloworigin="true"><i class="material-icons right">edit</i></a></li> -->
+                    <li><a class="waves-effect waves-light hide-on-med-and-up" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
                     <li><a class="waves-effect waves-light dropdown-button hide-on-small-only" href="#!" data-activates="dropdown_menu" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
                     <li><a class="waves-effect waves-light dropdown-button hide-on-med-and-up" href="#!" data-activates="dropdown_menu_mobile" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
                 </ul>
@@ -1300,14 +1364,16 @@
     <input type="hidden" id="currentfile" value="" />
   </div>
 </main>
-<footer class="page-footer grey lighten-3 hide-on-med-and-up z-depth-3">
-  <div class="container">
-    <div class="row center">
-      <div class="col s3"><a class="waves-effect waves-light grey-text text-darken-2" onclick="Materialize.toast('¯\\_(ツ)_/¯ ', 2000)"><i class="material-icons">note_add</i></a></div>
-      <div class="col s3"><a class="waves-effect waves-light grey-text text-darken-2" href="#modal_save"><i class="material-icons">save</i></a></div>
-      <div class="col s3"><a class="waves-effect waves-light grey-text text-darken-2" href="#modal_close"><i class="material-icons">close</i></a></div>
-      <div class="col s3"><a class="waves-effect waves-light grey-text text-darken-2" href="#modal_delete"><i class="material-icons">delete</i></a></div>
-    </div>
+<footer class="hide-on-med-and-up">
+<div class="shadow grey darken-4 row s12 z-depth-4"></div>
+  <div class="fixed-action-btn toolbar active grey lighten-4" data-origin-bottom="77" data-origin-left="984" data-origin-width="56" data-open="true" style="text-align: center; width: 100%; bottom: 0px; left: 0px; transition: transform 0.2s cubic-bezier(0.55, 0.085, 0.68, 0.53), background-color 0s linear 0.2s; overflow: hidden;">
+    <div class="fab-backdrop grey lighten-4" style=" transform: scale(26.575); "></div></a>
+    <ul>
+      <li class="waves-effect waves-light"><a href="#!" style="opacity: 1;" onclick="Materialize.toast('¯\\_(ツ)_/¯ ', 2000)"><i class="material-icons grey-text text-darken-2">note_add</i></a></li>
+      <li class="waves-effect waves-light"><a style="opacity: 1;" href="#modal_save"><i class="material-icons grey-text text-darken-2">save</i></a></li>
+      <li class="waves-effect waves-light"><a style="opacity: 1;" href="#modal_close"><i class="material-icons grey-text text-darken-2">close</i></a></li>
+      <li class="waves-effect waves-light"><a style="opacity: 1;" href="#modal_delete"><i class="material-icons grey-text text-darken-2">delete</i></a></li>
+    </ul>
   </div>
 </footer>
 </body>
@@ -1329,8 +1395,8 @@
             alignment: 'right',
             stopPropagation: false
         });
-        $('.button-collapse').sideNav({
-            menuWidth: 350,
+        $('.files-collapse').sideNav({
+            menuWidth: 320,
             edge: 'left',
             closeOnClick: false,
             draggable: true
