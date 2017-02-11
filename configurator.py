@@ -1821,7 +1821,37 @@ class RequestHandler(BaseHTTPRequestHandler):
                             delpath = unquote(postvars['path'][0])
                             response['path'] = delpath
                             try:
-                                os.unlink(delpath)
+                                if os.path.isdir(delpath):
+                                    os.rmdir(delpath)
+                                else:
+                                    os.unlink(delpath)
+                                self.send_response(200)
+                                self.send_header('Content-type','text/json')
+                                self.end_headers()
+                                response['error'] = False
+                                response['message'] = "Deletetion successful"
+                                self.wfile.write(bytes(json.dumps(response), "utf8"))
+                                return
+                            except Exception as err:
+                                print(err)
+                                response['error'] = True
+                                response['message'] = str(err)
+                              
+
+                        except Exception as err:
+                            response['message'] = "%s" % (str(err))
+                            print(err)
+                else:
+                    response['message'] = "Missing filename or text"
+            elif req.path == '/api/newfolder':
+                if 'path' in postvars.keys() and 'name' in postvars.keys():
+                    if postvars['path'] and postvars['name']:
+                        try:
+                            basepath = unquote(postvars['path'][0])
+                            name = unquote(postvars['name'][0])
+                            response['path'] = os.path.join(basepath, name)
+                            try:
+                                os.makedirs(response['path'])
                                 self.send_response(200)
                                 self.send_header('Content-type','text/json')
                                 self.end_headers()
