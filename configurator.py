@@ -1776,33 +1776,76 @@ class RequestHandler(BaseHTTPRequestHandler):
         if not check_access(self.client_address[0]):
             self.do_BLOCK()
             return
+        req = urlparse(self.path)
+        print(req)
         postvars = {}
-        response = "Failure"
+        response = {
+            "error": True,
+            "message": "Generic failure"
+        }
+        
         try:
             length = int(self.headers['content-length'])
             postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+            interror = False
         except Exception as err:
             print(err)
-            response = "%s" % (str(err))
+            response['message'] = "%s" % (str(err))
+            interror = True
 
-        if 'filename' in postvars.keys() and 'text' in postvars.keys():
-            if postvars['filename'] and postvars['text']:
-                try:
-                    filename = unquote(postvars['filename'][0])
-                    with open(os.path.join(BASEDIR, filename), 'wb') as fptr:
-                        fptr.write(bytes(postvars['text'][0], "utf-8"))
-                    self.send_response(200)
-                    self.end_headers()
-                    self.wfile.write(bytes("File saved successfully", "utf8"))
-                    return
-                except Exception as err:
-                    response = "%s" % (str(err))
-                    print(err)
-        else:
-            response = "Missing filename or text"
+        if not interror:
+            if req.path == '/api/save':
+                if 'filename' in postvars.keys() and 'text' in postvars.keys():
+                    if postvars['filename'] and postvars['text']:
+                        try:
+                            filename = unquote(postvars['filename'][0])
+                            response['file'] = filename
+                            with open(filename, 'wb') as fptr:
+                                fptr.write(bytes(postvars['text'][0], "utf-8"))
+                            self.send_response(200)
+                            self.send_header('Content-type','text/json')
+                            self.end_headers()
+                            response['error'] = False
+                            response['message'] = "File saved successfully"
+                            self.wfile.write(bytes(json.dumps(response), "utf8"))
+                            return
+                        except Exception as err:
+                            response['message'] = "%s" % (str(err))
+                            print(err)
+                else:
+                    response['message'] = "Missing filename or text"
+            elif req.path == '/api/delete':
+                if 'path' in postvars.keys():
+                    if postvars['path']:
+                        try:
+                            delpath = unquote(postvars['path'][0])
+                            response['path'] = delpath
+                            try:
+                                os.unlink(delpath)
+                                self.send_response(200)
+                                self.send_header('Content-type','text/json')
+                                self.end_headers()
+                                response['error'] = False
+                                response['message'] = "Deletetion successful"
+                                self.wfile.write(bytes(json.dumps(response), "utf8"))
+                                return
+                            except Exception as err:
+                                print(err)
+                                response['error'] = True
+                                response['message'] = str(err)
+                              
+
+                        except Exception as err:
+                            response['message'] = "%s" % (str(err))
+                            print(err)
+                else:
+                    response['message'] = "Missing filename or text"
+            else:
+                response['message'] = "Invalid method"
         self.send_response(200)
+        self.send_header('Content-type','text/json')
         self.end_headers()
-        self.wfile.write(bytes(response, "utf8"))
+        self.wfile.write(bytes(json.dumps(response), "utf8"))
         return
 
 class AuthHandler(RequestHandler):
