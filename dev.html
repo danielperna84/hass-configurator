@@ -954,7 +954,7 @@
             <br>
             <div class="input-field col s12">
                 <select onchange="insert(this.value)">
-                    <option value="" disabled selected>Choose your option</option>
+                    <option value="" disabled selected>Select trigger platform</option>
                     <option value="event">Event</option>
                     <option value="mqtt">MQTT</option>
                     <option value="numberic_state">Numeric State</option>
@@ -964,19 +964,19 @@
                     <option value="time">Time</option>
                     <option value="zone">Zone</option>
                 </select>
-                <label>Trigger Platform</label>
+                <label>Trigger</label>
             </div>
             <div class="input-field col s12">
-                <select id="events" onchange="insert(this.value)"> </select>
+                <select id="events" onchange="insert(this.value)"></select>
                 <label>Events</label>
             </div>
             <div class="input-field col s12">
-                <select id="entities" onchange="insert(this.value)"> </select>
+                <select id="entities" onchange="insert(this.value)"></select>
                 <label>Entities</label>
             </div>
             <div class="input-field col s12">
                 <select onchange="insert(this.value)">
-                    <option value="" disabled selected>Choose your option</option>
+                    <option value="" disabled selected>Select condition</option>
                     <option value="numeric_state">Numeric state</option>
                     <option value="state">State</option>
                     <option value="sun">Sun</option>
@@ -1005,7 +1005,7 @@
             <br>
             <div class="input-field col s12">
               <select onchange="insert(this.value)">
-                  <option value="" disabled selected>Choose your option</option>
+                  <option value="" disabled selected>Select trigger platform</option>
                   <option value="event">Event</option>
                   <option value="mqtt">MQTT</option>
                   <option value="numberic_state">Numeric State</option>
@@ -1020,20 +1020,20 @@
             </div>
             <div class="row hide-on-med-and-up">
               <div class="input-field col s12">
-                  <select id="events_side" onchange="insert(this.value)"> </select>
+                  <select id="events_side" onchange="insert(this.value)"></select>
                   <label>Events</label>
               </div>
             </div>
             <div class="row hide-on-med-and-up">
               <div class="input-field col s12">
-                  <select id="entities_side" onchange="insert(this.value)"> </select>
+                  <select id="entities_side" onchange="insert(this.value)"></select>
                   <label>Entities</label>
               </div>
             </div>
             <div class="row hide-on-med-and-up">
               <div class="input-field col s12">
                   <select onchange="insert(this.value)">
-                      <option value="" disabled selected>Choose your option</option>
+                      <option value="" disabled selected>Select condition</option>
                       <option value="numeric_state">Numeric state</option>
                       <option value="state">State</option>
                       <option value="sun">Sun</option>
@@ -1046,7 +1046,7 @@
             </div>
             <div class="row hide-on-med-and-up">
               <div class="input-field col s12">
-                  <select id="services_side" onchange="insert(this.value)"> </select>
+                  <select id="services_side" onchange="insert(this.value)"></select>
                   <label>Services</label>
               </div>
             </div>
@@ -1478,49 +1478,30 @@
                 services.add(option);
             }
         }
-        var options = $('#events option');
-        var arr = options.map(function (_, o) {
-            return {
-                t: $(o).text(), v: o.value
-            };
-        }).get();
-        arr.sort(function (o1, o2) {
-            var t1 = o1.t.toLowerCase(), t2 = o2.t.toLowerCase();
-            return t1 > t2 ? 1 : t1 < t2 ? -1 : 0;
-        });
-        options.each(function (i, o) {
-            o.value = arr[i].v;
-            $(o).text(arr[i].t);
-        });
-        var options = $('#entities option');
-        var arr = options.map(function (_, o) {
-            return {
-                t: $(o).text(), v: o.value
-            };
-        }).get();
-        arr.sort(function (o1, o2) {
-            var t1 = o1.t.toLowerCase(), t2 = o2.t.toLowerCase();
-            return t1 > t2 ? 1 : t1 < t2 ? -1 : 0;
-        });
-        options.each(function (i, o) {
-            o.value = arr[i].v;
-            $(o).text(arr[i].t);
-        });
-        var options = $('#services option');
-        var arr = options.map(function (_, o) {
-            return {
-                t: $(o).text(), v: o.value
-            };
-        }).get();
-        arr.sort(function (o1, o2) {
-            var t1 = o1.t.toLowerCase(),
-                t2 = o2.t.toLowerCase();
-            return t1 > t2 ? 1 : t1 < t2 ? -1 : 0;
-        });
-        options.each(function (i, o) {
-            o.value = arr[i].v;
-            $(o).text(arr[i].t);
-        });
+        
+        function sort_select(id) {
+            var options = $('#' + id + ' option');
+            var arr = options.map(function (_, o) {
+                return {
+                    t: $(o).text(), v: o.value
+                };
+            }).get();
+            arr.sort(function (o1, o2) {
+                var t1 = o1.t.toLowerCase(), t2 = o2.t.toLowerCase();
+                return t1 > t2 ? 1 : t1 < t2 ? -1 : 0;
+            });
+            options.each(function (i, o) {
+                o.value = arr[i].v;
+                $(o).text(arr[i].t);
+            });
+        }
+        
+        sort_select('events');
+        sort_select('events_side');
+        sort_select('entities');
+        sort_select('entities_side');
+        sort_select('services');
+        sort_select('services_side');
     }
     function listdir(path) {
         $.get(encodeURI("api/listdir?path=" + path), function(data) {
