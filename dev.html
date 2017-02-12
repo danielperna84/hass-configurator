@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0" />
@@ -22,14 +23,14 @@
 
         #editor {
             position: fixed;
-            top: 68px;
+            top: 155px;
             right: 0;
             bottom: 0;
           }
 
         @media only screen and (max-width: 600px) {
           #editor {
-              top: 60px;
+              top: 145px;
               bottom: 56px;
             }
 
@@ -46,7 +47,6 @@
             color: rgba(0, 0, 0, 0.54);
             font-size: 15px;
             font-weight: 500;
-            line-height: 48px;
         }
 
         a.collection-item {
@@ -93,13 +93,13 @@
         .ace_optionsMenuEntry input {
             position: relative !important;
             left: 0 !important;
-            opacity: 100 !important;
+            opacity: 1 !important;
         }
 
         .ace_optionsMenuEntry select {
             position: relative !important;
             left: 0 !important;
-            opacity: 100 !important;
+            opacity: 1 !important;
             display: block !important;
         }
 
@@ -160,7 +160,6 @@
             background-color: #eeeeee !important;
             border-radius: 0 !important;
             border: 0 !important;
-            box-shadow: 0;
             box-shadow: 0 6px 10px 0 rgba(0, 0, 0, 0.14), 0 1px 18px 0 rgba(0, 0, 0, 0.12), 0 3px 5px -1px rgba(0, 0, 0, 0.3);
         }
 
@@ -174,18 +173,17 @@
             border: 0 !important;
             border-radius: 0 !important;
             outline: none !important;
-            box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
-            margin-bottom: 20px !important;
+            box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 2px 1px -2px rgba(0, 0, 0, 0.2);
+            margin-bottom: 15px !important;
             margin-left: 8px !important;
             color: #424242 !important;
         }
 
         .ace_search_field {
             padding-left: 4px !important;
-            border: 10 !important;
             margin-left: 10px !important;
-            max-width: 260px !important;
-            font-family: Roboto !important;
+            max-width: 275px !important;
+            font-family: 'Roboto', sans-serif !important;
             border-bottom: 1px solid #03a9f4 !important;
             color: #424242 !important;
         }
@@ -196,21 +194,19 @@
             border: 0 !important;
             border-radius: 0 !important;
             outline: none !important;
-            box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 2px 1px -2px rgba(0, 0, 0, 0.2);
             margin-bottom: 15px !important;
             margin-left: 8px !important;
         }
 
         .ace_search_options {
             background-color: #eeeeee;
-            border-radius: 0;
-            border: 0;
-            bottom: 0;
-            right: 0;
-        }
-
-        .ace_searchbtn_close {
-            background-color: yellow;
+            text-align: left !important;
+            letter-spacing: .5px !important;
+            transition: .2s ease-out;
+            font-family: 'Roboto', sans-serif !important;
+            font-size: 130%;
+            top: 0 !important;
         }
 
         .ace_searchbtn {
@@ -222,19 +218,11 @@
             letter-spacing: .5px !important;
             transition: .2s ease-out;
             cursor: pointer;
-            font-family: Roboto !important;
+            font-family: 'Roboto', sans-serif !important;
         }
 
         .ace_searchbtn:hover {
             background-color: #03a9f4;
-        }
-
-        .prev {
-
-        }
-
-        .next {
-
         }
 
         .ace_replacebtn {
@@ -246,7 +234,7 @@
             letter-spacing: .5px !important;
             transition: .2s ease-out;
             cursor: pointer;
-            font-family: Roboto !important;
+            font-family: 'Roboto', sans-serif !important;
         }
 
         .ace_replacebtn:hover {
@@ -254,16 +242,23 @@
         }
 
         .ace_button {
-            text-decoration: none;
-            min-width: 40px;
-            min-height: 30px;
+            text-decoration: none !important;
+            min-width: 40px !important;
+            min-height: 30px !important;
+            border: 0 !important;
+            border-radius: 0 !important;
+            outline: none !important;
             color: #424242 !important;
-            background-color: #03a9f4;
+            background-color: #fafafa;
             text-align: center;
             letter-spacing: .5px;
             transition: .2s ease-out;
             cursor: pointer;
-            font-family: Roboto !important;
+            font-family: 'Roboto', sans-serif !important;
+        }
+
+        .ace_button:hover {
+            background-color: #03a9f4 !important;
         }
 
         footer {
@@ -336,16 +331,15 @@
                     <li><a href="#" data-activates="slide-out" class="waves-effect waves-light files-collapse show-on-large"><i class="material-icons">folder</i></a></li>
                 </ul>
                 <ul class="right">
-                    <!-- <li><a class="waves-effect waves-light"href="#modal_save"><i class="material-icons">save</i></a></li>
-                    <li><a class="waves-effect waves-light hide-on-small-only" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li> -->
-                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="New" onclick="Materialize.toast('¯\\_(ツ)_/¯ ', 2000)"><i class="material-icons">note_add</i></a></li>
+                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="New" onclick="editor.setValue('');document.getElementById('currentfile').value=document.getElementById('fbheader').innerHTML;document.getElementById('currentfile').focus()"><i class="material-icons">note_add</i></a></li>
+                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="New Folder" href="#modal_newfolder"><i class="material-icons">create_new_folder</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Save" href="#modal_save"><i class="material-icons">save</i></a></li>
-                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Close" href="#modal_close"><i class="material-icons">close</i></a></li>
+                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Close" href="#modal_close"><i class="material-icons">highlight_off</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Delete" href="#modal_delete"><i class="material-icons">delete</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Search" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
                     <li><a class="waves-effect waves-light hide-on-med-and-up" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
-                    <li><a class="waves-effect waves-light dropdown-button hide-on-small-only" href="#!" data-activates="dropdown_menu" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
-                    <li><a class="waves-effect waves-light dropdown-button hide-on-med-and-up" href="#!" data-activates="dropdown_menu_mobile" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
+                    <li><a class="waves-effect waves-light dropdown-button hide-on-small-only" data-activates="dropdown_menu" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
+                    <li><a class="waves-effect waves-light dropdown-button hide-on-med-and-up" data-activates="dropdown_menu_mobile" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
                 </ul>
             </div>
         </nav>
@@ -376,17 +370,17 @@
     </ul>
     <div id="modal_components" class="modal bottom-sheet modal-fixed-footer">
         <div class="modal-content_nopad">
-            <iframe src="https://home-assistant.io/components/" width="100%" style="height: 90vh;"> </iframe>
+            <iframe src="https://home-assistant.io/components/" style="height: 90vh; width: 100vw"> </iframe>
             <a target="_blank" href="https://home-assistant.io/components/" class="hide-on-med-and-down modal_btn waves-effect waves-blue btn-large btn-flat left"><i class="material-icons">launch</i></a>
         </div>
         <div class="modal-footer">
-            <a href="#!" class="modal-action modal-close waves-effect waves-blue btn-flat Right">Close</a>
+            <a class="modal-action modal-close waves-effect waves-blue btn-flat Right">Close</a>
         </div>
     </div>
     <div id="modal_acekeyboard" class="modal bottom-sheet modal-fixed-footer">
         <div class="modal-content centered">
         <h4>Ace Keyboard Shortcuts</h4>
-        </br>
+        <br>
         <ul class="collapsible popout" data-collapsible="expandable">
           <li>
             <div class="collapsible-header hoverable"><i class="material-icons">view_headline</i>Line Operations</div>
@@ -888,7 +882,7 @@
         </ul>
       </div>
       <div class="modal-footer">
-        <a href="#!" class="modal-action modal-close waves-effect waves-blue btn-flat ">Close</a>
+        <a class="modal-action modal-close waves-effect waves-blue btn-flat ">Close</a>
       </div>
     </div>
     <div id="modal_save" class="modal">
@@ -896,28 +890,41 @@
             <h4>Save</h4>
             <p>Do you really want to save?</p>
         </div>
-        <div class="modal-footer"> <a href="#!" class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="save()" class=" modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
+        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="save()" class=" modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
     </div>
     <div id="modal_close" class="modal">
         <div class="modal-content">
             <h4>Close File</h4>
             <p>Are you sure you want to close the current file without saving?</p>
         </div>
-        <div class="modal-footer"> <a href="#!" class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="Materialize.toast('¯\\_(ツ)_/¯ ', 2000)" class="modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
+        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="document.getElementById('currentfile').value='';editor.setValue('');" class="modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
     </div>
     <div id="modal_delete" class="modal">
         <div class="modal-content">
             <h4>Delete</h4>
             <p>Are you sure you want to delete this file?</p>
         </div>
-        <div class="modal-footer"> <a href="#!" class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="Materialize.toast('¯\\_(ツ)_/¯ ', 2000)" class="modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
+        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="delete_file()" class="modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
     </div>
     <div id="modal_restart" class="modal">
         <div class="modal-content">
             <h4>Restart</h4>
             <p>Do you really want to restart HASS?</p>
         </div>
-        <div class="modal-footer"> <a href="#!" class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="restart()" class=" modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
+        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="restart()" class=" modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
+    </div>
+    <div id="modal_newfolder" class="modal">
+        <div class="modal-content">
+            <h4>New Folder</h4>
+            <br>
+            <div class="row">
+                <div class="input-field col s12">
+                    <input type="text" onchange="newfolder('foldername', this.value)" id="newfolder">
+                    <label class="active" for="newfolder">New Folder Name</label>
+                </div>
+          </div>
+        </div>
+        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">Cancel</a> <a onclick="newfolder(foldername)" class=" modal-action modal-close waves-effect waves-green btn-flat">OK</a> </div>
     </div>
     <div id="modal_about" class="modal modal-fixed-footer">
         <div class="modal-content">
@@ -945,7 +952,7 @@
     </div>
     <div class="row">
         <div class="col m4 l3 hide-on-small-only">
-            </br>
+            <br>
             <div class="input-field col s12">
                 <select onchange="insert(this.value)">
                     <option value="" disabled selected>Choose your option</option>
@@ -985,27 +992,31 @@
                 <label>Services</label>
             </div>
         </div>
-      <div class="col s12 m8 l9" id="editor"></div>
-    </div>
-    <div>
+        <div class="col s12 m8 l9">
+          <div class="card input-field col s12 grey lighten-4 hoverable">
+              <input class="grey-text text-darken-3" value="" id="currentfile" type="text">
+          </div>
+        </div>
+      <div class="col s12 m8 l9 z-depth-2" id="editor"></div>
+      <div>
         <ul id="slide-out" class="side-nav grey lighten-4">
-          <div class="z-depth-1" id="filebrowser"></div>
-            <div class="row hide-on-med-and-up">
-              </br>
-              </br>
-                <div class="input-field col s12">
-                  <select onchange="insert(this.value)">
-                      <option value="" disabled selected>Choose your option</option>
-                      <option value="event">Event</option>
-                      <option value="mqtt">MQTT</option>
-                      <option value="numberic_state">Numeric State</option>
-                      <option value="state">State</option>
-                      <option value="sun">Sun</option>
-                      <option value="template">Template</option>
-                      <option value="time">Time</option>
-                      <option value="zone">Zone</option>
-                  </select>
-                  <label>Trigger Platform</label>
+          <li class="z-depth-1" id="filebrowser"></li>
+          <div class="row hide-on-med-and-up">
+            <br>
+            <br>
+            <div class="input-field col s12">
+              <select onchange="insert(this.value)">
+                  <option value="" disabled selected>Choose your option</option>
+                  <option value="event">Event</option>
+                  <option value="mqtt">MQTT</option>
+                  <option value="numberic_state">Numeric State</option>
+                  <option value="state">State</option>
+                  <option value="sun">Sun</option>
+                  <option value="template">Template</option>
+                  <option value="time">Time</option>
+                  <option value="zone">Zone</option>
+              </select>
+              <label>Trigger Platform</label>
               </div>
             </div>
             <div class="row hide-on-med-and-up">
@@ -1057,7 +1068,7 @@
     <div class="row">
         <ul id="ace_settings" class="side-nav">
             <li><a class="center grey lighten-3 z-depth-1 subheader">Editor Settings</a></li>
-            <form class="row col s12" action="#">
+            <div class="row col s12">
                 <p class="col s12"> <a class="waves-effect waves-light btn light-blue" href="#modal_acekeyboard">Keyboard Shortcuts</a> </p>
                 <p class="col s12">
                     <input type="checkbox" class="blue_check" onclick="editor.setOption('animatedScroll', !editor.getOptions().animatedScroll)" id="animatedScroll" />
@@ -1358,26 +1369,25 @@
                     <label class="active" for="wrap_limit">Wrap Limit</label>
                 </div> <a class="waves-effect waves-light btn light-blue" onclick="save_ace_settings()">Save Settings Locally</a>
                 <p class="center col s12"> Ace Editor 1.2.6 </p>
-            </form>
+            </div>
         </ul>
     </div>
-    <input type="hidden" id="currentfile" value="" />
   </div>
 </main>
 <footer class="hide-on-med-and-up">
 <div class="shadow grey darken-4 row s12 z-depth-4"></div>
   <div class="fixed-action-btn toolbar active grey lighten-4" data-origin-bottom="77" data-origin-left="984" data-origin-width="56" data-open="true" style="text-align: center; width: 100%; bottom: 0px; left: 0px; transition: transform 0.2s cubic-bezier(0.55, 0.085, 0.68, 0.53), background-color 0s linear 0.2s; overflow: hidden;">
-    <div class="fab-backdrop grey lighten-4" style=" transform: scale(26.575); "></div></a>
+    <div class="fab-backdrop grey lighten-4" style=" transform: scale(26.575); "></div>
     <ul>
-      <li class="waves-effect waves-light"><a href="#!" style="opacity: 1;" onclick="Materialize.toast('¯\\_(ツ)_/¯ ', 2000)"><i class="material-icons grey-text text-darken-2">note_add</i></a></li>
-      <li class="waves-effect waves-light"><a style="opacity: 1;" href="#modal_save"><i class="material-icons grey-text text-darken-2">save</i></a></li>
-      <li class="waves-effect waves-light"><a style="opacity: 1;" href="#modal_close"><i class="material-icons grey-text text-darken-2">close</i></a></li>
-      <li class="waves-effect waves-light"><a style="opacity: 1;" href="#modal_delete"><i class="material-icons grey-text text-darken-2">delete</i></a></li>
+      <li class="waves-effect waves-blue"><a style="opacity: 1;" onclick="editor.setValue('');document.getElementById('currentfile').value=document.getElementById('fbheader').innerHTML;document.getElementById('currentfile').focus()"><i class="material-icons grey-text text-darken-2">note_add</i></a></li>
+      <li class="waves-effect waves-blue"><a style="opacity: 1;" href="#modal_newfolder"><i class="material-icons grey-text text-darken-2">create_new_folder</i></a></li>
+      <li class="waves-effect waves-blue"><a style="opacity: 1;" href="#modal_save"><i class="material-icons grey-text text-darken-2">save</i></a></li>
+      <li class="waves-effect waves-blue"><a style="opacity: 1;" href="#modal_close"><i class="material-icons grey-text text-darken-2">highlight_off</i></a></li>
+      <li class="waves-effect waves-blue"><a style="opacity: 1;" href="#modal_delete"><i class="material-icons grey-text text-darken-2">delete</i></a></li>
     </ul>
   </div>
 </footer>
-</body>
-<!--  Scripts-->
+<!-- Scripts -->
 <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js"></script>
 <script type="text/javascript">
@@ -1604,11 +1614,41 @@
             data.filename = filepath;
             data.text = editor.getValue()
             $.post("api/save", data).done(function(resp) {
-                var $toastContent = $("<div><pre>" + resp + "</pre></div>");
+                var $toastContent = $("<div><pre>" + JSON.stringify(resp) + "</pre></div>");
                 Materialize.toast($toastContent, 2000);
+                listdir(document.getElementById('fbheader').innerHTML)
             });
         }
     }
+
+    function delete_file() {
+        var path= document.getElementById('currentfile').value;
+        if (path.length > 0) {
+            data = new Object();
+            data.path= path;
+            $.post("api/delete", data).done(function(resp) {
+                var $toastContent = $("<div><pre>" + JSON.stringify(resp) + "</pre></div>");
+                Materialize.toast($toastContent, 2000);
+                listdir(document.getElementById('fbheader').innerHTML)
+                document.getElementById('currentfile').value='';editor.setValue('');
+            });
+        }
+    }
+
+    function newfolder(foldername) {
+        var path = document.getElementById('fbheader').innerHTML;
+        if (path.length > 0 && foldername.length > 0) {
+            data = new Object();
+            data.path = path;
+            data.name = foldername;
+            $.post("api/newfolder", data).done(function(resp) {
+                var $toastContent = $("<div><pre>" + JSON.stringify(resp) + "</pre></div>");
+                Materialize.toast($toastContent, 2000);
+                listdir(document.getElementById('fbheader').innerHTML);
+            });
+        }
+    }
+
 </script>
 <script>
     ace.require("ace/ext/language_tools");
@@ -1686,4 +1726,5 @@
     }
 
 </script>
+</body>
 </html>
