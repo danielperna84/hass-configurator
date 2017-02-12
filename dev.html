@@ -61,12 +61,18 @@
         }
 
         .filename {
+            color: rgba(0, 0, 0, 0.54);
             vertical-align: text-bottom;
             font-weight: 400;
+            display: inline-block;
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         p.stats {
-            margin: 0 0 0 40px;
+            margin: -16px 0 0 40px;
             padding: 0 16px;
             font-size: 0.6em;
             color: rgba(0, 0, 0, 0.54);
@@ -1584,12 +1590,13 @@
             stats.innerHTML = "Modified: " + date.toUTCString() + "&nbsp;&nbsp;Size: " + itemdata.size;
         }
         item.appendChild(iicon);
-        var itext = document.createElement('span');
+        var itext = document.createElement('div');
         itext.innerHTML = itemdata.name;
         itext.classList.add('filename');
         item.appendChild(itext);
         li.appendChild(item);
         li.appendChild(stats);
+        li.setAttribute("title", itemdata.name)
         return li;
     }
 
