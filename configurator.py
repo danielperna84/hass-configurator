@@ -1610,9 +1610,13 @@ def get_dircontent(path):
         edata['dir'] = path
         edata['fullpath'] = os.path.abspath(os.path.join(path, e))
         edata['type'] = 'dir' if os.path.isdir(edata['fullpath']) else 'file'
-        stats = os.stat(os.path.join(path, e))
-        edata['size'] = stats.st_size
-        edata['modified'] = stats.st_mtime
+        try:
+            stats = os.stat(os.path.join(path, e))
+            edata['size'] = stats.st_size
+            edata['modified'] = stats.st_mtime
+        except Exception:
+            edata['size'] = 0
+            edata['modified'] = 0
         dircontent.append(edata)
 
     return dircontent
