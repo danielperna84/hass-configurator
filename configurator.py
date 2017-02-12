@@ -1,6 +1,7 @@
 #!/usr/bin/python3
+# -*- coding: utf-8 -*-
 """
-Proof of concept configurator for Home Assistant.
+Configurator for Home Assistant.
 https://github.com/danielperna84/hass-poc-configurator
 """
 import os
@@ -40,7 +41,7 @@ BANLIMIT = 0
 ### End of options
 
 RELEASEURL = "https://api.github.com/repos/danielperna84/hass-poc-configurator/releases/latest"
-VERSION = "0.1.0"
+VERSION = "0.1.1"
 BASEDIR = "."
 DEV = False
 HTTPD = None
@@ -53,19 +54,25 @@ INDEX = Template("""<!DOCTYPE html>
     <title>HASS Configurator</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/css/materialize.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.1/jquery.min.js"></script>
     <style type="text/css" media="screen">
         body {
             margin: 0;
             padding: 0;
+            background-color: #fafafa;
         }
-        
+
         #editor {
             position: fixed;
             top: 68px;
             right: 0;
             bottom: 0;
-        }
+          }
+
+        @media only screen and (max-width: 600px) {
+          #editor {
+              top: 60px;
+            }
+          }
 
         #fbheader {
             display: block;
@@ -75,40 +82,41 @@ INDEX = Template("""<!DOCTYPE html>
             font-size: 15px;
             font-weight: 500;
             line-height: 48px;
-            background-color: #eeeeee;
         }
-        
+
         a.collection-item {
             color: #616161 !important;
         }
-        
+
         .filename {
-            margin-left: 10px;
+            margin-left: 15px;
+            vertical-align: text-bottom;
+            font-weight: 400;
         }
-      
+
         .green {
-            color: #0f0;
+            color: #fff;
         }
 
         .red {
-            color: #f00;
+            color: #fff;
         }
 
-        .dropdown-content {
+        #dropdown_menu, #dropdown_menu_mobile {
             min-width: 200px;
         }
 
-        .dropdown-content li > a,
-        .dropdown-content li > span {
+        .dropdown-content li>a,
+        .dropdown-content li>span {
             color: #616161 !important;
         }
 
-        .blue_check:checked + label:before {
+        .blue_check:checked+label:before {
             border-right: 2px solid #03a9f4;
             border-bottom: 2px solid #03a9f4;
         }
 
-        .input-field input:focus + label {
+        .input-field input:focus+label {
             color: #03a9f4 !important;
         }
 
@@ -116,53 +124,690 @@ INDEX = Template("""<!DOCTYPE html>
             border-bottom: 1px solid #03a9f4 !important;
             box-shadow: 0 1px 0 0 #03a9f4 !important
         }
-        
+
         .ace_optionsMenuEntry input {
             position: relative !important;
             left: 0 !important;
             opacity: 100 !important;
         }
-        
+
         .ace_optionsMenuEntry select {
             position: relative !important;
             left: 0 !important;
             opacity: 100 !important;
             display: block !important;
         }
+
+        .collection {
+            margin: 0;
+        }
+
+        .collection .collection-item {
+            border-bottom: 1px solid #eeeeee;
+        }
+
+        .collection .collection-item i.material-icons {
+            vertical-align: text-bottom;
+        }
+
+        #modal_acekeyboard, #modal_components {
+          top: auto;
+          bottom: -100%;
+          margin: 0;
+          width: 96%;
+          min-height: 95%;
+          border-radius: 0;
+          margin: auto;
+        }
+
+        .modal .modal-content_nopad {
+            padding: 0;
+        }
+
+        .waves-effect.waves-blue .waves-ripple {
+            background-color: #03a9f4;
+        }
+
+        .preloader-background {
+	          display: flex;
+	          align-items: center;
+	          justify-content: center;
+	          background-color: #eee;
+            position: fixed;
+	          z-index: 10000;
+	          top: 0;
+	          left: 0;
+	          right: 0;
+	          bottom: 0;
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ace.js" type="text/javascript" charset="utf-8"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ext-modelist.js" type="text/javascript" charset="utf-8"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
 </head>
-
 <body>
+    <div class="preloader-background">
+      <div class="preloader-wrapper big active">
+      <div class="spinner-layer spinner-blue">
+        <div class="circle-clipper left">
+          <div class="circle"></div>
+        </div><div class="gap-patch">
+          <div class="circle"></div>
+        </div><div class="circle-clipper right">
+          <div class="circle"></div>
+        </div>
+      </div>
+      <div class="spinner-layer spinner-red">
+        <div class="circle-clipper left">
+          <div class="circle"></div>
+        </div><div class="gap-patch">
+          <div class="circle"></div>
+        </div><div class="circle-clipper right">
+          <div class="circle"></div>
+        </div>
+      </div>
+      <div class="spinner-layer spinner-yellow">
+        <div class="circle-clipper left">
+          <div class="circle"></div>
+        </div><div class="gap-patch">
+          <div class="circle"></div>
+        </div><div class="circle-clipper right">
+          <div class="circle"></div>
+        </div>
+      </div>
+      <div class="spinner-layer spinner-green">
+        <div class="circle-clipper left">
+          <div class="circle"></div>
+        </div><div class="gap-patch">
+          <div class="circle"></div>
+        </div><div class="circle-clipper right">
+          <div class="circle"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="main">
     <div class="navbar-fixed">
         <nav class="light-blue">
             <div class="nav-wrapper">
                 <ul class="left">
                     <li><a href="#" data-activates="slide-out" class="waves-effect waves-light button-collapse show-on-large"><i class="material-icons">folder</i></a></li>
+                    <li><a class="waves-effect waves-light hide-on-med-and-up" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
                 </ul>
                 <ul class="right">
-                    <li><a class="waves-effect waves-light" href="#modal_save"><i class="material-icons">save</i></a></li>
-                    <li><a class="waves-effect waves-light dropdown-button" href="#!" data-activates="dropdown_tools" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
+                    <li><a class="waves-effect waves-light"href="#modal_save"><i class="material-icons">save</i></a></li>
+                    <!-- <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="New" onclick="Materialize.toast('\_()_/ ', 2000)"><i class="material-icons">note_add</i></a></li>
+                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Save" href="#modal_save"><i class="material-icons">save</i></a></li>
+                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Close" href="#modal_close"><i class="material-icons">close</i></a></li>
+                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Delete" href="#modal_delete"><i class="material-icons">delete</i></a></li>
+                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Search" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
+                    <li><a class="waves-effect waves-light dropdown-button hide-on-med-and-up" href="#!" data-activates="dropdown_tools_mobile" data-beloworigin="true"><i class="material-icons right">edit</i></a></li> -->
+                    <li><a class="waves-effect waves-light hide-on-small-only" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
+                    <li><a class="waves-effect waves-light dropdown-button hide-on-small-only" href="#!" data-activates="dropdown_menu" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
+                    <li><a class="waves-effect waves-light dropdown-button hide-on-med-and-up" href="#!" data-activates="dropdown_menu_mobile" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
                 </ul>
             </div>
         </nav>
     </div>
-    <ul id="dropdown_tools" class="dropdown-content z-depth-4">
-        <li><a target="_blank" href="https://home-assistant.io/help/">Need HASS Help?</a></li>
-        <li><a target="_blank" href="https://home-assistant.io/components/">HASS Components</a></li>
+    <ul id="dropdown_tools_mobile" class="dropdown-content z-depth-4">
+        <li><a onclick="Materialize.toast('\_()_/ ', 2000)">New</a></li>
+        <li><a href="#modal_save">Save</a></li>
+        <li><a href="#modal_close">Close</a></li>
+        <li class="divider"></li>
+        <li><a href="#modal_delete">Delete</a></li>
+    </ul>
+    <ul id="dropdown_menu" class="dropdown-content z-depth-4">
+        <li><a target="_blank" href="#modal_components">HASS Components</a></li>
+        <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
         <li><a href="#modal_about">About PoC</a></li>
         <li class="divider"></li>
-        <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
         <li><a href="#modal_restart">Restart HASS</a></li>
     </ul>
+    <ul id="dropdown_menu_mobile" class="dropdown-content z-depth-4">
+        <li><a target="_blank" href="https://home-assistant.io/help/">Need HASS Help?</a></li>
+        <li><a target="_blank" href="https://home-assistant.io/components/">HASS Components</a></li>
+        <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
+        <li><a href="#modal_about">About PoC</a></li>
+        <li class="divider"></li>
+        <li><a href="#modal_restart">Restart HASS</a></li>
+    </ul>
+    <div id="modal_components" class="modal bottom-sheet modal-fixed-footer">
+        <div class="modal-content_nopad">
+            <iframe src="https://home-assistant.io/components/" width="100%" style="height: 90vh;"> </iframe>
+        </div>
+        <div class="modal-footer">
+            <a href="#!" class="modal-action modal-close waves-effect waves-blue btn-flat ">Close</a>
+        </div>
+      </div>
+    </div>
+    <div id="modal_acekeyboard" class="modal bottom-sheet modal-fixed-footer">
+        <div class="modal-content centered">
+        <h4>Ace Keyboard Shortcuts</h4>
+        </br>
+        <ul class="collapsible popout" data-collapsible="expandable">
+          <li>
+            <div class="collapsible-header hoverable"><i class="material-icons">view_headline</i>Line Operations</div>
+            <div class="collapsible-body">
+              <table class="bordered highlight centered">
+                <thead>
+                  <tr>
+                    <th>Windows/Linux</th>
+                    <th>Mac</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Ctrl-D</td>
+                    <td>Command-D</td>
+                    <td>Remove line</td>
+                  </tr>
+                  <tr>
+                    <td>Alt-Shift-Down</td>
+                    <td>Command-Option-Down</td>
+                    <td>Copy lines down</td>
+                  </tr>
+                  <tr>
+                    <td>Alt-Shift-Up</td>
+                    <td>Command-Option-Up</td>
+                    <td>Copy lines up</td>
+                  </tr>
+                  <tr>
+                    <td>Alt-Down</td>
+                    <td>Option-Down</td>
+                    <td>Move lines down</td>
+                  </tr>
+                  <tr>
+                    <td>Alt-Up</td>
+                    <td>Option-Up</td>
+                    <td>Move lines up</td>
+                  </tr>
+                  <tr>
+                    <td>Alt-Delete</td>
+                    <td>Ctrl-K</td>
+                    <td>Remove to line end</td>
+                  </tr>
+                  <tr>
+                    <td>Alt-Backspace</td>
+                    <td>Command-Backspace</td>
+                    <td>Remove to linestart</td>
+                  </tr>
+                  <tr>
+                    <td>Ctrl-Backspace</td>
+                    <td>Option-Backspace, Ctrl-Option-Backspace</td>
+                    <td>Remove word left</td>
+                  </tr>
+                  <tr>
+                    <td>Ctrl-Delete</td>
+                    <td>Option-Delete</td>
+                    <td>Remove word right</td>
+                  </tr>
+                  <tr>
+                    <td>---</td>
+                    <td>Ctrl-O</td>
+                    <td>Split line</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </li>
+          <li>
+            <div class="collapsible-header hoverable"><i class="material-icons">photo_size_select_small</i>Selection</div>
+            <div class="collapsible-body">
+              <table class="bordered highlight centered">
+                <thead>
+                  <tr>
+                    <th >Windows/Linux</th>
+                    <th >Mac</th>
+                    <th >Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td >Ctrl-A</td>
+                    <td >Command-A</td>
+                    <td >Select all</td>
+                  </tr>
+                  <tr>
+                    <td >Shift-Left</td>
+                    <td >Shift-Left</td>
+                    <td >Select left</td>
+                  </tr>
+                  <tr>
+                    <td >Shift-Right</td>
+                    <td >Shift-Right</td>
+                    <td >Select right</td>
+                  </tr>
+                  <tr>
+                    <td >Ctrl-Shift-Left</td>
+                    <td >Option-Shift-Left</td>
+                    <td >Select word left</td>
+                  </tr>
+                  <tr>
+                    <td >Ctrl-Shift-Right</td>
+                    <td >Option-Shift-Right</td>
+                    <td >Select word right</td>
+                  </tr>
+                  <tr>
+                    <td >Shift-Home</td>
+                    <td >Shift-Home</td>
+                    <td >Select line start</td>
+                  </tr>
+                  <tr>
+                    <td >Shift-End</td>
+                    <td >Shift-End</td>
+                    <td >Select line end</td>
+                  </tr>
+                  <tr>
+                    <td >Alt-Shift-Right</td>
+                    <td >Command-Shift-Right</td>
+                    <td >Select to line end</td>
+                  </tr>
+                  <tr>
+                    <td >Alt-Shift-Left</td>
+                    <td >Command-Shift-Left</td>
+                    <td >Select to line start</td>
+                  </tr>
+                  <tr>
+                    <td >Shift-Up</td>
+                    <td >Shift-Up</td>
+                    <td >Select up</td>
+                  </tr>
+                  <tr>
+                    <td >Shift-Down</td>
+                    <td >Shift-Down</td>
+                    <td >Select down</td>
+                  </tr>
+                  <tr>
+                    <td >Shift-PageUp</td>
+                    <td >Shift-PageUp</td>
+                    <td >Select page up</td>
+                  </tr>
+                  <tr>
+                    <td >Shift-PageDown</td>
+                    <td >Shift-PageDown</td>
+                    <td >Select page down</td>
+                  </tr>
+                  <tr>
+                    <td >Ctrl-Shift-Home</td>
+                    <td >Command-Shift-Up</td>
+                    <td >Select to start</td>
+                  </tr>
+                  <tr>
+                    <td >Ctrl-Shift-End</td>
+                    <td >Command-Shift-Down</td>
+                    <td >Select to end</td>
+                  </tr>
+                  <tr>
+                    <td >Ctrl-Shift-D</td>
+                    <td >Command-Shift-D</td>
+                    <td >Duplicate selection</td>
+                  </tr>
+                  <tr>
+                    <td >Ctrl-Shift-P</td>
+                    <td >---</td>
+                    <td >Select to matching bracket</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </li>
+          <li>
+            <div class="collapsible-header hoverable"><i class="material-icons">multiline_chart</i>Multicursor</div>
+            <div class="collapsible-body">
+              <table class="bordered highlight centered">
+                <thead>
+                  <tr>
+                    <th>Windows/Linux</th>
+                    <th>Mac</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Ctrl-Alt-Up</td>
+                    <td>Ctrl-Option-Up</td>
+                    <td>Add multi-cursor above</td>
+                  </tr>
+                  <tr>
+                    <td>Ctrl-Alt-Down</td>
+                    <td>Ctrl-Option-Down</td>
+                    <td>Add multi-cursor below</td>
+                  </tr>
+                  <tr>
+                    <td>Ctrl-Alt-Right</td>
+                    <td>Ctrl-Option-Right</td>
+                    <td>Add next occurrence to multi-selection</td>
+                  </tr>
+                  <tr>
+                    <td>Ctrl-Alt-Left</td>
+                    <td>Ctrl-Option-Left</td>
+                    <td>Add previous occurrence to multi-selection</td>
+                  </tr>
+                  <tr>
+                    <td>Ctrl-Alt-Shift-Up</td>
+                    <td>Ctrl-Option-Shift-Up</td>
+                    <td>Move multicursor from current line to the line above</td>
+                  </tr>
+                  <tr>
+                    <td>Ctrl-Alt-Shift-Down</td>
+                    <td>Ctrl-Option-Shift-Down</td>
+                    <td>Move multicursor from current line to the line below</td>
+                  </tr>
+                  <tr>
+                    <td>Ctrl-Alt-Shift-Right</td>
+                    <td>Ctrl-Option-Shift-Right</td>
+                    <td>Remove current occurrence from multi-selection and move to next</td>
+                  </tr>
+                  <tr>
+                    <td>Ctrl-Alt-Shift-Left</td>
+                    <td>Ctrl-Option-Shift-Left</td>
+                    <td>Remove current occurrence from multi-selection and move to previous</td>
+                  </tr>
+                  <tr>
+                    <td>Ctrl-Shift-L</td>
+                    <td>Ctrl-Shift-L</td>
+                    <td>Select all from multi-selection</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </li>
+          <li>
+            <div class="collapsible-header hoverable"><i class="material-icons">call_missed_outgoing</i>Go To</div>
+            <div class="collapsible-body">
+              <table class="bordered highlight centered">
+                <thead>
+                  <tr>
+                    <th>Windows/Linux</th>
+                    <th>Mac</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Left</td>
+                    <td>Left, Ctrl-B</td>
+                    <td>Go to left</td>
+                  </tr>
+                  <tr>
+                    <td>Right</td>
+                    <td>Right, Ctrl-F</td>
+                    <td>Go to right</td>
+                  </tr>
+                  <tr>
+                    <td>Ctrl-Left</td>
+                    <td>Option-Left</td>
+                    <td>Go to word left</td>
+                  </tr>
+                  <tr>
+                    <td>Ctrl-Right</td>
+                    <td>Option-Right</td>
+                    <td>Go to word right</td>
+                  </tr>
+                  <tr>
+                    <td>Up</td>
+                    <td>Up, Ctrl-P</td>
+                    <td>Go line up</td>
+                  </tr>
+                  <tr>
+                    <td>Down</td>
+                    <td>Down, Ctrl-N</td>
+                    <td>Go line down</td>
+                  </tr>
+                  <tr>
+                    <td>Alt-Left, Home</td>
+                    <td>Command-Left, Home, Ctrl-A</td>
+                    <td>Go to line start</td>
+                  </tr>
+                  <tr>
+                    <td>Alt-Right, End</td>
+                    <td>Command-Right, End, Ctrl-E</td>
+                    <td>Go to line end</td>
+                  </tr>
+                  <tr>
+                    <td>PageUp</td>
+                    <td>Option-PageUp</td>
+                    <td>Go to page up</td>
+                  </tr>
+                  <tr>
+                    <td>PageDown</td>
+                    <td>Option-PageDown, Ctrl-V</td>
+                    <td>Go to page down</td>
+                  </tr>
+                  <tr>
+                    <td>Ctrl-Home</td>
+                    <td>Command-Home, Command-Up</td>
+                    <td>Go to start</td>
+                  </tr>
+                  <tr>
+                    <td>Ctrl-End</td>
+                    <td>Command-End, Command-Down</td>
+                    <td>Go to end</td>
+                  </tr>
+                  <tr>
+                    <td>Ctrl-L</td>
+                    <td>Command-L</td>
+                    <td>Go to line</td>
+                  </tr>
+                  <tr>
+                    <td>Ctrl-Down</td>
+                    <td>Command-Down</td>
+                    <td>Scroll line down</td>
+                  </tr>
+                  <tr>
+                    <td>Ctrl-Up</td>
+                    <td>---</td>
+                    <td>Scroll line up</td>
+                  </tr>
+                  <tr>
+                    <td>Ctrl-P</td>
+                    <td>---</td>
+                    <td>Go to matching bracket</td>
+                  </tr>
+                  <tr>
+                    <td>---</td>
+                    <td>Option-PageDown</td>
+                    <td>Scroll page down</td>
+                  </tr>
+                  <tr>
+                    <td>---</td>
+                    <td>Option-PageUp</td>
+                    <td>Scroll page up</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </li>
+          <li>
+            <div class="collapsible-header hoverable"><i class="material-icons">find_replace</i>Find/Replace</div>
+            <div class="collapsible-body">
+              <table class="bordered highlight centered">
+                <thead>
+                  <tr>
+                    <th>Windows/Linux</th>
+                    <th>Mac</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Ctrl-F</td>
+                    <td>Command-F</td>
+                    <td>Find</td>
+                  </tr>
+                  <tr>
+                    <td>Ctrl-H</td>
+                    <td>Command-Option-F</td>
+                    <td>Replace</td>
+                  </tr>
+                  <tr>
+                    <td>Ctrl-K</td>
+                    <td>Command-G</td>
+                    <td>Find next</td>
+                  </tr>
+                  <tr>
+                    <td>Ctrl-Shift-K</td>
+                    <td>Command-Shift-G</td>
+                    <td>Find previous</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </li>
+          <li>
+            <div class="collapsible-header hoverable"><i class="material-icons">all_out</i>Folding</div>
+            <div class="collapsible-body">
+              <table class="bordered highlight centered">
+                <thead>
+                  <tr>
+                    <th>Windows/Linux</th>
+                    <th>Mac</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Alt-L, Ctrl-F1</td>
+                    <td>Command-Option-L, Command-F1</td>
+                    <td>Fold selection</td>
+                  </tr>
+                  <tr>
+                    <td>Alt-Shift-L, Ctrl-Shift-F1</td>
+                    <td>Command-Option-Shift-L, Command-Shift-F1</td>
+                    <td>Unfold</td>
+                  </tr>
+                  <tr>
+                    <td>Alt-0</td>
+                    <td>Command-Option-0</td>
+                    <td>Fold all</td>
+                  </tr>
+                  <tr>
+                    <td>Alt-Shift-0</td>
+                    <td>Command-Option-Shift-0</td>
+                    <td>Unfold all</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </li>
+          <li>
+            <div class="collapsible-header hoverable"><i class="material-icons">devices_other</i>Other</div>
+            <div class="collapsible-body">
+              <table class="bordered highlight centered">
+                <thead>
+                  <tr>
+                    <th>Windows/Linux</th>
+                    <th>Mac</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Tab</td>
+                    <td>Tab</td>
+                    <td>Indent</td>
+                  </tr>
+                  <tr>
+                    <td>Shift-Tab</td>
+                    <td>Shift-Tab</td>
+                    <td>Outdent</td>
+                  </tr>
+                  <tr>
+                    <td>Ctrl-Z</td>
+                    <td>Command-Z</td>
+                    <td>Undo</td>
+                  </tr>
+                  <tr>
+                    <td>Ctrl-Shift-Z, Ctrl-Y</td>
+                    <td>Command-Shift-Z, Command-Y</td>
+                    <td>Redo</td>
+                  </tr>
+                  <tr>
+                    <td>Ctrl-,</td>
+                    <td>Command-,</td>
+                    <td>Show the settings menu</td>
+                  </tr>
+                  <tr>
+                    <td>Ctrl-/</td>
+                    <td>Command-/</td>
+                    <td>Toggle comment</td>
+                  </tr>
+                  <tr>
+                    <td>Ctrl-T</td>
+                    <td>Ctrl-T</td>
+                    <td>Transpose letters</td>
+                  </tr>
+                  <tr>
+                    <td>Ctrl-Enter</td>
+                    <td>Command-Enter</td>
+                    <td>Enter full screen</td>
+                  </tr>
+                  <tr>
+                    <td>Ctrl-Shift-U</td>
+                    <td>Ctrl-Shift-U</td>
+                    <td>Change to lower case</td>
+                  </tr>
+                  <tr>
+                    <td>Ctrl-U</td>
+                    <td>Ctrl-U</td>
+                    <td>Change to upper case</td>
+                  </tr>
+                  <tr>
+                    <td>Insert</td>
+                    <td>Insert</td>
+                    <td>Overwrite</td>
+                  </tr>
+                  <tr>
+                    <td>Ctrl-Shift-E</td>
+                    <td>Command-Shift-E</td>
+                    <td>Macros replay</td>
+                  </tr>
+                  <tr>
+                    <td>Ctrl-Alt-E</td>
+                    <td>---</td>
+                    <td>Macros recording</td>
+                  </tr>
+                  <tr>
+                    <td>Delete</td>
+                    <td>---</td>
+                    <td>Delete</td>
+                  </tr>
+                  <tr>
+                    <td>---</td>
+                    <td>Ctrl-L</td>
+                    <td>Center selection</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <a href="#!" class="modal-action modal-close waves-effect waves-blue btn-flat ">Close</a>
+      </div>
+    </div>
     <div id="modal_save" class="modal">
         <div class="modal-content">
             <h4>Save</h4>
             <p>Do you really want to save?</p>
         </div>
         <div class="modal-footer"> <a href="#!" class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="save()" class=" modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
+    </div>
+    <div id="modal_close" class="modal">
+        <div class="modal-content">
+            <h4>Close File</h4>
+            <p>Are you sure you want to close the current file without saving?</p>
+        </div>
+        <div class="modal-footer"> <a href="#!" class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="Materialize.toast('\_()_/ ', 2000)" class="modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
+    </div>
+    <div id="modal_delete" class="modal">
+        <div class="modal-content">
+            <h4>Delete</h4>
+            <p>Are you sure you want to delete this file?</p>
+        </div>
+        <div class="modal-footer"> <a href="#!" class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="Materialize.toast('\_()_/ ', 2000)" class="modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
     </div>
     <div id="modal_restart" class="modal">
         <div class="modal-content">
@@ -171,25 +816,27 @@ INDEX = Template("""<!DOCTYPE html>
         </div>
         <div class="modal-footer"> <a href="#!" class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="restart()" class=" modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
     </div>
-    <div id="modal_about" class="modal">
+    <div id="modal_about" class="modal modal-fixed-footer">
         <div class="modal-content">
-            <h4><a href="https://github.com/danielperna84/hass-poc-configurator/" target="_blank">HASS Configurator</a></h4>
+            <h4><a class="black-text" href="https://github.com/danielperna84/hass-poc-configurator/" target="_blank">HASS Configurator</a></h4>
             <p>Version: <a class="$versionclass" href="https://github.com/danielperna84/hass-poc-configurator/releases/latest" target="_blank">$current</a></p>
-            <p>Web-based file editor designed to modify configuration files of <a href="https://home-assistant.io/" target="_blank">Home Assistant</a> or other textual files. Use at your own risk.</p>
+            <p>Web-based file editor designed to modify configuration files of <a class="light-blue-text" href="https://home-assistant.io/" target="_blank">Home Assistant</a> or other textual files. Use at your own risk.</p>
             <p>Published under the MIT license</p>
-            <p>Developed by:<br />
+            <p>Developed by:</p>
             <ul>
-                <li><a href="https://github.com/danielperna84" target="_blank">Daniel Perna</a></li>
-                <li><a href="https://github.com/jmart518" target="_blank">JT Martinez</a></li>
+                <li>
+                    <div class="chip"> <img src="https://avatars3.githubusercontent.com/u/7396998?v=3&s=400" alt="Contact Person"> <a class="black-text" href="https://github.com/danielperna84" target="_blank">Daniel Perna</a> </div>
+                </li>
+                <li>
+                    <div class="chip"> <img src="https://avatars2.githubusercontent.com/u/1509640?v=3&s=460" alt="Contact Person"> <a class="black-text" href="https://github.com/jmart518" target="_blank">JT Martinez</a> </div>
+                </li>
             </ul>
-            </p>
-            <p>Libraries used:<br />
-                <ul>
-                    <li><a href="https://ace.c9.io/" target="_blank">Ace</a></li>
-                    <li><a href="http://materializecss.com/" target="_blank">Materialize</a></li>
-                    <li><a href="https://jquery.com/" target="_blank">jQuery</a></li>
-                </ul>
-            </p>
+            <p>Libraries used:</p>
+            <ul>
+                <li><a class="light-blue-text" href="https://ace.c9.io/" target="_blank">Ace</a></li>
+                <li><a class="light-blue-text" href="http://materializecss.com/" target="_blank">MaterializeCSS</a></li>
+                <li><a class="light-blue-text" href="https://jquery.com/" target="_blank">jQuery</a></li>
+            </ul>
         </div>
         <div class="modal-footer"> <a class=" modal-action modal-close waves-effect btn-flat">OK</a> </div>
     </div>
@@ -235,81 +882,81 @@ INDEX = Template("""<!DOCTYPE html>
                 <label>Services</label>
             </div>
         </div>
-        <div class="col s12 m8 l9 hoverable" id="editor"></div>
+      <div class="col s12 m8 l9" id="editor"></div>
     </div>
     <div>
-        <ul id="slide-out" class="side-nav">
-            <div id="filebrowser"></div>
-            <div class="row">
-                <div class="hide-on-med-and-up">
-                    <div class="input-field col s12">
-                        <select onchange="insert(this.value)">
-                            <option value="" disabled selected>Choose your option</option>
-                            <option value="event">Event</option>
-                            <option value="mqtt">MQTT</option>
-                            <option value="numberic_state">Numeric State</option>
-                            <option value="state">State</option>
-                            <option value="sun">Sun</option>
-                            <option value="template">Template</option>
-                            <option value="time">Time</option>
-                            <option value="zone">Zone</option>
-                        </select>
-                        <label>Trigger Platform</label>
-                    </div>
-                </div>
+        <ul id="slide-out" class="side-nav grey lighten-4">
+          <div class="z-depth-1" id="filebrowser"></div>
+            <div class="row hide-on-med-and-up">
+              </br>
+              </br>
+                <div class="input-field col s12">
+                  <select onchange="insert(this.value)">
+                      <option value="" disabled selected>Choose your option</option>
+                      <option value="event">Event</option>
+                      <option value="mqtt">MQTT</option>
+                      <option value="numberic_state">Numeric State</option>
+                      <option value="state">State</option>
+                      <option value="sun">Sun</option>
+                      <option value="template">Template</option>
+                      <option value="time">Time</option>
+                      <option value="zone">Zone</option>
+                  </select>
+                  <label>Trigger Platform</label>
+              </div>
             </div>
-            <div class="row">
-                <div class="hide-on-med-and-up">
-                    <div class="input-field col s12">
-                        <select id="events_side" onchange="insert(this.value)"> </select>
-                        <label>Events</label>
-                    </div>
-                </div>
+            <div class="row hide-on-med-and-up">
+              <div class="input-field col s12">
+                  <select id="events_side" onchange="insert(this.value)"> </select>
+                  <label>Events</label>
+              </div>
             </div>
-            <div class="row">
-                <div class="hide-on-med-and-up">
-                    <div class="input-field col s12">
-                        <select id="entities_side" onchange="insert(this.value)"> </select>
-                        <label>Entities</label>
-                    </div>
-                </div>
+            <div class="row hide-on-med-and-up">
+              <div class="input-field col s12">
+                  <select id="entities_side" onchange="insert(this.value)"> </select>
+                  <label>Entities</label>
+              </div>
             </div>
-            <div class="row">
-                <div class="hide-on-med-and-up">
-                    <div class="input-field col s12">
-                        <select onchange="insert(this.value)">
-                            <option value="" disabled selected>Choose your option</option>
-                            <option value="numeric_state">Numeric state</option>
-                            <option value="state">State</option>
-                            <option value="sun">Sun</option>
-                            <option value="template">Template</option>
-                            <option value="time">Time</option>
-                            <option value="zone">Zone</option>
-                        </select>
-                        <label>Conditions</label>
-                    </div>
-                </div>
+            <div class="row hide-on-med-and-up">
+              <div class="input-field col s12">
+                  <select onchange="insert(this.value)">
+                      <option value="" disabled selected>Choose your option</option>
+                      <option value="numeric_state">Numeric state</option>
+                      <option value="state">State</option>
+                      <option value="sun">Sun</option>
+                      <option value="template">Template</option>
+                      <option value="time">Time</option>
+                      <option value="zone">Zone</option>
+                  </select>
+                  <label>Conditions</label>
+              </div>
             </div>
-            <div class="row">
-                <div class="hide-on-med-and-up">
-                    <div class="input-field col s12">
-                        <select id="services_side" onchange="insert(this.value)"> </select>
-                        <label>Services</label>
-                    </div>
-                </div>
+            <div class="row hide-on-med-and-up">
+              <div class="input-field col s12">
+                  <select id="services_side" onchange="insert(this.value)"> </select>
+                  <label>Services</label>
+              </div>
             </div>
-            </br>
-            </br>
-            </br>
         </ul>
+        <div class="fixed-action-btn vertical click-to-toggle">
+  <a class="btn-floating btn-large red hoverable">
+    <i class="material-icons">edit</i>
+  </a>
+  <ul>
+    <li><a class="btn-floating yellow tooltipped" data-position="left" data-delay="50" data-tooltip="Undo" onclick="editor.execCommand('undo')"><i class="material-icons">undo</i></a></li>
+    <li><a class="btn-floating green tooltipped" data-position="left" data-delay="50" data-tooltip="Redo" onclick="editor.execCommand('redo')"><i class="material-icons">redo</i></a></li>
+    <li><a class="btn-floating blue tooltipped" data-position="left" data-delay="50" data-tooltip="Indent" onclick="editor.execCommand('indent')"><i class="material-icons">format_indent_increase</i></a></li>
+    <li><a class="btn-floating orange tooltipped" data-position="left" data-delay="50" data-tooltip="Outdent" onclick="editor.execCommand('outdent')"><i class="material-icons">format_indent_decrease</i></a></li>
+    <li><a class="btn-floating brown tooltipped" data-position="left" data-delay="50" data-tooltip="Fold" onclick="toggle_fold()"><i class="material-icons">all_out</i></a></li>
+  </ul>
+</div>
+
     </div>
     <div class="row">
         <ul id="ace_settings" class="side-nav">
             <li><a class="center grey lighten-3 z-depth-1 subheader">Editor Settings</a></li>
             <form class="row col s12" action="#">
-                <p class="col s12">
-                    <a class="waves-effect waves-light btn light-blue" target="_blank" href="https://github.com/ajaxorg/ace/wiki/Default-Keyboard-Shortcuts">Keyboard Shortcuts</a>
-                </p>
+                <p class="col s12"> <a class="waves-effect waves-light btn light-blue" href="#modal_acekeyboard">Keyboard Shortcuts</a> </p>
                 <p class="col s12">
                     <input type="checkbox" class="blue_check" onclick="editor.setOption('animatedScroll', !editor.getOptions().animatedScroll)" id="animatedScroll" />
                     <Label for="animatedScroll">Animated Scroll</label>
@@ -607,15 +1254,16 @@ INDEX = Template("""<!DOCTYPE html>
                 <div class="input-field col s12">
                     <input id="wrap_limit" type="number" onchange="editor.setOption('wrap', parseInt(this.value))" min="1" value="80">
                     <label class="active" for="wrap_limit">Wrap Limit</label>
-                </div>
-                <a class="waves-effect waves-light btn light-blue" onclick="save_ace_settings()">Save Settings Locally</a>
+                </div> <a class="waves-effect waves-light btn light-blue" onclick="save_ace_settings()">Save Settings Locally</a>
                 <p class="center col s12"> Ace Editor 1.2.6 </p>
             </form>
         </ul>
     </div>
     <input type="hidden" id="currentfile" value="" />
+  </div>
 </body>
 <!--  Scripts-->
+<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js"></script>
 <script type="text/javascript">
     $(document).ready(function () {
@@ -645,6 +1293,15 @@ INDEX = Template("""<!DOCTYPE html>
             draggable: true // Choose whether you can drag to open on touch screens
         });
         listdir('.');
+    });
+</script>
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", function(){
+	     $('.preloader-background').delay(800).fadeOut('slow');
+
+	      $('.preloader-wrapper')
+		      .delay(800)
+		      .fadeOut('slow');
     });
 </script>
 <script>
@@ -699,13 +1356,11 @@ INDEX = Template("""<!DOCTYPE html>
         var options = $('#events option');
         var arr = options.map(function (_, o) {
             return {
-                t: $(o).text()
-                , v: o.value
+                t: $(o).text(), v: o.value
             };
         }).get();
         arr.sort(function (o1, o2) {
-            var t1 = o1.t.toLowerCase()
-                , t2 = o2.t.toLowerCase();
+            var t1 = o1.t.toLowerCase(), t2 = o2.t.toLowerCase();
             return t1 > t2 ? 1 : t1 < t2 ? -1 : 0;
         });
         options.each(function (i, o) {
@@ -715,13 +1370,11 @@ INDEX = Template("""<!DOCTYPE html>
         var options = $('#entities option');
         var arr = options.map(function (_, o) {
             return {
-                t: $(o).text()
-                , v: o.value
+                t: $(o).text(), v: o.value
             };
         }).get();
         arr.sort(function (o1, o2) {
-            var t1 = o1.t.toLowerCase()
-                , t2 = o2.t.toLowerCase();
+            var t1 = o1.t.toLowerCase(), t2 = o2.t.toLowerCase();
             return t1 > t2 ? 1 : t1 < t2 ? -1 : 0;
         });
         options.each(function (i, o) {
@@ -731,13 +1384,12 @@ INDEX = Template("""<!DOCTYPE html>
         var options = $('#services option');
         var arr = options.map(function (_, o) {
             return {
-                t: $(o).text()
-                , v: o.value
+                t: $(o).text(), v: o.value
             };
         }).get();
         arr.sort(function (o1, o2) {
-            var t1 = o1.t.toLowerCase()
-                , t2 = o2.t.toLowerCase();
+            var t1 = o1.t.toLowerCase(),
+                t2 = o2.t.toLowerCase();
             return t1 > t2 ? 1 : t1 < t2 ? -1 : 0;
         });
         options.each(function (i, o) {
@@ -750,7 +1402,7 @@ INDEX = Template("""<!DOCTYPE html>
             renderpath(data);
         });
     }
-    
+
     function renderitem(itemdata) {
         var item = document.createElement('a');
         item.classList.add('collection-item');
@@ -772,7 +1424,7 @@ INDEX = Template("""<!DOCTYPE html>
         item.appendChild(itext);
         return item;
     }
-    
+
     function renderpath(dirdata) {
         var filebrowser = document.getElementById("filebrowser");
         while (filebrowser.firstChild) {
@@ -800,11 +1452,11 @@ INDEX = Template("""<!DOCTYPE html>
         uptext.classList.add('filename');
         up.appendChild(uptext);
         collection.appendChild(up);
-        
+
         for (var i = 0; i < dirdata.content.length; i++) {
             collection.appendChild(renderitem(dirdata.content[i]));
         }
-        
+
         filebrowser.appendChild(collection);
     }
 
@@ -881,8 +1533,6 @@ INDEX = Template("""<!DOCTYPE html>
                         target.value = options[key];
                     }
                     else if (typeof(options[key]) == "string" && target.tagName == 'SELECT') {
-                        console.log(key);
-                        console.log(options[key]);
                         target.value = options[key];
                     }
                 }
@@ -906,7 +1556,7 @@ INDEX = Template("""<!DOCTYPE html>
         });
         editor.focus();
     }
-    
+
     var foldstatus = true;
 
     function toggle_fold() {
@@ -919,10 +1569,7 @@ INDEX = Template("""<!DOCTYPE html>
         }
         foldstatus = !foldstatus;
     }
-    
-    function settings() {
-        editor.execCommand('showSettingsMenu');
-    }
+
 </script>
 </html>""")
 
@@ -1117,7 +1764,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             except Exception as err:
                 print("Exception getting release")
                 print(err)
-            html = get_html().safe_substitute(bootstrap=boot, current=VERSION, versionclass=color)
+            html = get_html().safe_substitute(bootstrap=boot, current=VERSION, versionclass=color, separator="\%s" % os.sep if os.sep == "\\" else os.sep)
             self.wfile.write(bytes(html, "utf8"))
             return
         else:
@@ -1129,33 +1776,106 @@ class RequestHandler(BaseHTTPRequestHandler):
         if not check_access(self.client_address[0]):
             self.do_BLOCK()
             return
+        req = urlparse(self.path)
+        print(req)
         postvars = {}
-        response = "Failure"
+        response = {
+            "error": True,
+            "message": "Generic failure"
+        }
+        
         try:
             length = int(self.headers['content-length'])
             postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+            interror = False
         except Exception as err:
             print(err)
-            response = "%s" % (str(err))
+            response['message'] = "%s" % (str(err))
+            interror = True
 
-        if 'filename' in postvars.keys() and 'text' in postvars.keys():
-            if postvars['filename'] and postvars['text']:
-                try:
-                    filename = unquote(postvars['filename'][0])
-                    with open(os.path.join(BASEDIR, filename), 'wb') as fptr:
-                        fptr.write(bytes(postvars['text'][0], "utf-8"))
-                    self.send_response(200)
-                    self.end_headers()
-                    self.wfile.write(bytes("File saved successfully", "utf8"))
-                    return
-                except Exception as err:
-                    response = "%s" % (str(err))
-                    print(err)
-        else:
-            response = "Missing filename or text"
+        if not interror:
+            if req.path == '/api/save':
+                if 'filename' in postvars.keys() and 'text' in postvars.keys():
+                    if postvars['filename'] and postvars['text']:
+                        try:
+                            filename = unquote(postvars['filename'][0])
+                            response['file'] = filename
+                            with open(filename, 'wb') as fptr:
+                                fptr.write(bytes(postvars['text'][0], "utf-8"))
+                            self.send_response(200)
+                            self.send_header('Content-type','text/json')
+                            self.end_headers()
+                            response['error'] = False
+                            response['message'] = "File saved successfully"
+                            self.wfile.write(bytes(json.dumps(response), "utf8"))
+                            return
+                        except Exception as err:
+                            response['message'] = "%s" % (str(err))
+                            print(err)
+                else:
+                    response['message'] = "Missing filename or text"
+            elif req.path == '/api/delete':
+                if 'path' in postvars.keys():
+                    if postvars['path']:
+                        try:
+                            delpath = unquote(postvars['path'][0])
+                            response['path'] = delpath
+                            try:
+                                if os.path.isdir(delpath):
+                                    os.rmdir(delpath)
+                                else:
+                                    os.unlink(delpath)
+                                self.send_response(200)
+                                self.send_header('Content-type','text/json')
+                                self.end_headers()
+                                response['error'] = False
+                                response['message'] = "Deletetion successful"
+                                self.wfile.write(bytes(json.dumps(response), "utf8"))
+                                return
+                            except Exception as err:
+                                print(err)
+                                response['error'] = True
+                                response['message'] = str(err)
+                              
+
+                        except Exception as err:
+                            response['message'] = "%s" % (str(err))
+                            print(err)
+                else:
+                    response['message'] = "Missing filename or text"
+            elif req.path == '/api/newfolder':
+                if 'path' in postvars.keys() and 'name' in postvars.keys():
+                    if postvars['path'] and postvars['name']:
+                        try:
+                            basepath = unquote(postvars['path'][0])
+                            name = unquote(postvars['name'][0])
+                            response['path'] = os.path.join(basepath, name)
+                            try:
+                                os.makedirs(response['path'])
+                                self.send_response(200)
+                                self.send_header('Content-type','text/json')
+                                self.end_headers()
+                                response['error'] = False
+                                response['message'] = "Folder created"
+                                self.wfile.write(bytes(json.dumps(response), "utf8"))
+                                return
+                            except Exception as err:
+                                print(err)
+                                response['error'] = True
+                                response['message'] = str(err)
+                              
+
+                        except Exception as err:
+                            response['message'] = "%s" % (str(err))
+                            print(err)
+                else:
+                    response['message'] = "Missing filename or text"
+            else:
+                response['message'] = "Invalid method"
         self.send_response(200)
+        self.send_header('Content-type','text/json')
         self.end_headers()
-        self.wfile.write(bytes(response, "utf8"))
+        self.wfile.write(bytes(json.dumps(response), "utf8"))
         return
 
 class AuthHandler(RequestHandler):
