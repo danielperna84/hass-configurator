@@ -1777,7 +1777,6 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.do_BLOCK()
             return
         req = urlparse(self.path)
-        print(req)
         postvars = {}
         response = {
             "error": True,
