@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+# -*- coding: utf-8 -*-
 """
 Configurator for Home Assistant.
 https://github.com/danielperna84/hass-poc-configurator
@@ -235,7 +236,7 @@ INDEX = Template("""<!DOCTYPE html>
                 </ul>
                 <ul class="right">
                     <li><a class="waves-effect waves-light"href="#modal_save"><i class="material-icons">save</i></a></li>
-                    <!-- <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="New" onclick="Materialize.toast('¯\\_(ツ)_/¯ ', 2000)"><i class="material-icons">note_add</i></a></li>
+                    <!-- <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="New" onclick="Materialize.toast('\_()_/ ', 2000)"><i class="material-icons">note_add</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Save" href="#modal_save"><i class="material-icons">save</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Close" href="#modal_close"><i class="material-icons">close</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Delete" href="#modal_delete"><i class="material-icons">delete</i></a></li>
@@ -249,7 +250,7 @@ INDEX = Template("""<!DOCTYPE html>
         </nav>
     </div>
     <ul id="dropdown_tools_mobile" class="dropdown-content z-depth-4">
-        <li><a onclick="Materialize.toast('¯\\_(ツ)_/¯ ', 2000)">New</a></li>
+        <li><a onclick="Materialize.toast('\_()_/ ', 2000)">New</a></li>
         <li><a href="#modal_save">Save</a></li>
         <li><a href="#modal_close">Close</a></li>
         <li class="divider"></li>
@@ -799,14 +800,14 @@ INDEX = Template("""<!DOCTYPE html>
             <h4>Close File</h4>
             <p>Are you sure you want to close the current file without saving?</p>
         </div>
-        <div class="modal-footer"> <a href="#!" class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="Materialize.toast('¯\\_(ツ)_/¯ ', 2000)" class="modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
+        <div class="modal-footer"> <a href="#!" class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="Materialize.toast('\_()_/ ', 2000)" class="modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
     </div>
     <div id="modal_delete" class="modal">
         <div class="modal-content">
             <h4>Delete</h4>
             <p>Are you sure you want to delete this file?</p>
         </div>
-        <div class="modal-footer"> <a href="#!" class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="Materialize.toast('¯\\_(ツ)_/¯ ', 2000)" class="modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
+        <div class="modal-footer"> <a href="#!" class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="Materialize.toast('\_()_/ ', 2000)" class="modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
     </div>
     <div id="modal_restart" class="modal">
         <div class="modal-content">
@@ -1570,8 +1571,7 @@ INDEX = Template("""<!DOCTYPE html>
     }
 
 </script>
-</html>
-""")
+</html>""")
 
 def signal_handler(signal, frame):
     global HTTPD
@@ -1764,7 +1764,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             except Exception as err:
                 print("Exception getting release")
                 print(err)
-            html = get_html().safe_substitute(bootstrap=boot, current=VERSION, versionclass=color)
+            html = get_html().safe_substitute(bootstrap=boot, current=VERSION, versionclass=color, separator="\%s" % os.sep if os.sep == "\\" else os.sep)
             self.wfile.write(bytes(html, "utf8"))
             return
         else:
@@ -1856,7 +1856,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                                 self.send_header('Content-type','text/json')
                                 self.end_headers()
                                 response['error'] = False
-                                response['message'] = "Deletetion successful"
+                                response['message'] = "Folder created"
                                 self.wfile.write(bytes(json.dumps(response), "utf8"))
                                 return
                             except Exception as err:
