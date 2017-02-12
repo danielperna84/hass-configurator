@@ -52,6 +52,10 @@
             font-weight: 500;
         }
 
+        #fbelements {
+            margin: 0;
+        }
+
         a.collection-item {
             color: #616161 !important;
         }
@@ -59,6 +63,14 @@
         .filename {
             vertical-align: text-bottom;
             font-weight: 400;
+        }
+
+        p.stats {
+            margin: 0 0 0 40px;
+            padding: 0 16px;
+            font-size: 0.6em;
+            color: rgba(0, 0, 0, 0.54);
+            line-height: 16px;
         }
 
         .green {
@@ -99,6 +111,10 @@
 
         li.collection-item {
             border-bottom: 1px solid #eeeeee !important;
+        }
+
+        .side-nav li {
+            line-height: 36px;
         }
 
         .side-nav a {
@@ -1542,14 +1558,18 @@
 
     function renderitem(itemdata) {
         var li = document.createElement('li');
-        var item = document.createElement('a');
         li.classList.add('collection-item');
+        var item = document.createElement('a');
         item.href = '#';
         var iicon = document.createElement('i');
         iicon.classList.add('material-icons');
+        var stats = document.createElement('p');
+        date = new Date(itemdata.modified*1000);
+        stats.classList.add('stats');
         if (itemdata.type == 'dir') {
             iicon.innerHTML = 'folder';
             item.setAttribute("onclick", "listdir('" + encodeURI(itemdata.fullpath) + "')");
+            stats.innerHTML = "Modified: " + date.toUTCString();
         }
         else {
             nameparts = itemdata.name.split('.');
@@ -1561,6 +1581,7 @@
                 iicon.innerHTML = 'insert_drive_file';
             }
             item.setAttribute("onclick", "loadfile('" + encodeURI(itemdata.fullpath) + "')");
+            stats.innerHTML = "Modified: " + date.toUTCString() + "&nbsp;&nbsp;Size: " + itemdata.size;
         }
         item.appendChild(iicon);
         var itext = document.createElement('span');
@@ -1568,6 +1589,7 @@
         itext.classList.add('filename');
         item.appendChild(itext);
         li.appendChild(item);
+        li.appendChild(stats);
         return li;
     }
 
