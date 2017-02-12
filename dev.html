@@ -39,6 +39,10 @@
             }
           }
 
+        #filebrowser {
+            background-color: #fff;
+        }
+
         #fbheader {
             display: block;
             cursor: initial;
@@ -53,7 +57,6 @@
         }
 
         .filename {
-            margin-left: 15px;
             vertical-align: text-bottom;
             font-weight: 400;
         }
@@ -89,25 +92,21 @@
             box-shadow: 0 1px 0 0 #03a9f4 !important
         }
 
-        .ace_optionsMenuEntry input {
-            position: relative !important;
-            left: 0 !important;
-            opacity: 1 !important;
-        }
-
-        .ace_optionsMenuEntry select {
-            position: relative !important;
-            left: 0 !important;
-            opacity: 1 !important;
-            display: block !important;
-        }
-
         .collection {
             margin: 0;
+            background-color: #fff;
         }
 
-        .collection .collection-item {
-            border-bottom: 1px solid #eeeeee;
+        li.collection-item {
+            border-bottom: 1px solid #eeeeee !important;
+        }
+
+        .side-nav a {
+            padding: 0 16px;
+        }
+
+        .side-nav li>a>i {
+            margin-right: 16px !important;
         }
 
         .collection .collection-item i.material-icons {
@@ -153,6 +152,27 @@
             position: absolute;
             top: 2px;
             right:0;
+        }
+
+        footer {
+            z-index: 10;
+        }
+
+        .shadow {
+            height: 36px;
+        }
+
+        .ace_optionsMenuEntry input {
+            position: relative !important;
+            left: 0 !important;
+            opacity: 1 !important;
+        }
+
+        .ace_optionsMenuEntry select {
+            position: relative !important;
+            left: 0 !important;
+            opacity: 1 !important;
+            display: block !important;
         }
 
         .ace_search {
@@ -258,14 +278,6 @@
 
         .ace_button:hover {
             background-color: #03a9f4 !important;
-        }
-
-        footer {
-            z-index: 10;
-        }
-
-        .shadow {
-            height: 36px;
         }
 
     </style>
@@ -1003,11 +1015,10 @@
               <ul class="collection with-header">
                   <li id="fbheader" class="collection-header"></li>
               </ul>
-              <div id="fbelements"></div>
+              <ul id="fbelements"></ul>
           </div>
           <div class="row hide-on-med-and-up">
-            <br>
-            <br>
+            <br />
             <div class="input-field col s12">
               <select onchange="insert(this.value)">
                   <option value="" disabled selected>Select trigger platform</option>
@@ -1434,6 +1445,21 @@
     });
 </script>
 <script>
+    var modemapping = new Object();
+    modemapping['c'] = 'ace/mode/c_cpp';
+    modemapping['cpp'] = 'ace/mode/c_cpp';
+    modemapping['css'] = 'ace/mode/css';
+    modemapping['gitignore'] = 'ace/mode/gitignore';
+    modemapping['htm'] = 'ace/mode/html';
+    modemapping['html'] = 'ace/mode/html';
+    modemapping['js'] = 'ace/mode/javascript';
+    modemapping['php'] = 'ace/mode/php';
+    modemapping['py'] = 'ace/mode/python';
+    modemapping['sh'] = 'ace/mode/sh';
+    modemapping['sql'] = 'ace/mode/sql';
+    modemapping['txt'] = 'ace/mode/text';
+    modemapping['xml'] = 'ace/mode/xml';
+    modemapping['yaml'] = 'ace/mode/yaml';
     var separator = '$separator';
     var bootstrap = $bootstrap;
     if (bootstrap.hasOwnProperty("events")) {
@@ -1515,8 +1541,9 @@
     }
 
     function renderitem(itemdata) {
+        var li = document.createElement('li');
         var item = document.createElement('a');
-        item.classList.add('collection-item');
+        li.classList.add('collection-item');
         item.href = '#';
         var iicon = document.createElement('i');
         iicon.classList.add('material-icons');
@@ -1525,7 +1552,14 @@
             item.setAttribute("onclick", "listdir('" + encodeURI(itemdata.fullpath) + "')");
         }
         else {
-            iicon.innerHTML = 'insert_drive_file';
+            nameparts = itemdata.name.split('.');
+            extension = nameparts[nameparts.length -1];
+            if (['c', 'cpp', 'css', 'htm', 'html', 'js', 'php', 'py', 'sh', 'sql', 'xml', 'yaml'].indexOf(extension) > +1 ) {
+                iicon.innerHTML = 'code';
+            }
+            else {
+                iicon.innerHTML = 'insert_drive_file';
+            }
             item.setAttribute("onclick", "loadfile('" + encodeURI(itemdata.fullpath) + "')");
         }
         item.appendChild(iicon);
@@ -1533,7 +1567,8 @@
         itext.innerHTML = itemdata.name;
         itext.classList.add('filename');
         item.appendChild(itext);
-        return item;
+        li.appendChild(item);
+        return li;
     }
 
     function renderpath(dirdata) {
@@ -1541,12 +1576,11 @@
         while (fbelements.firstChild) {
             fbelements.removeChild(fbelements.firstChild);
         }
-        var collection = document.createElement('div');
-        collection.classList.add('collection');
         var fbheader = document.getElementById('fbheader');
         fbheader.innerHTML = dirdata.abspath;
+        var upli = document.createElement('li');
         var up = document.createElement('a');
-        up.classList.add('collection-item');
+        upli.classList.add('collection-item');
         up.href = '#';
         up.id = "uplink";
         up.setAttribute("onclick", "listdir('" + encodeURI(dirdata.parent) + "')")
@@ -1558,17 +1592,24 @@
         uptext.innerHTML = '..';
         uptext.classList.add('filename');
         up.appendChild(uptext);
-        collection.appendChild(up);
+        upli.appendChild(up);
+        fbelements.appendChild(upli);
 
         for (var i = 0; i < dirdata.content.length; i++) {
-            collection.appendChild(renderitem(dirdata.content[i]));
+            fbelements.appendChild(renderitem(dirdata.content[i]));
         }
-
-        fbelements.appendChild(collection);
     }
 
     function loadfile(filepath) {
         $.get("api/file?filename=" + filepath, function(data) {
+            fileparts = filepath.split('.');
+            extension = fileparts[fileparts.length -1];
+            if (modemapping.hasOwnProperty(extension)) {
+                editor.setOption('mode', modemapping[extension]);
+            }
+            else {
+                editor.setOption('mode', "ace/mode/text");
+            }
             editor.setValue(data);
             editor.selection.selectFileStart();
             editor.focus();
