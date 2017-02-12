@@ -1475,6 +1475,7 @@
     modemapping['htm'] = 'ace/mode/html';
     modemapping['html'] = 'ace/mode/html';
     modemapping['js'] = 'ace/mode/javascript';
+    modemapping['json'] = 'ace/mode/json';
     modemapping['php'] = 'ace/mode/php';
     modemapping['py'] = 'ace/mode/python';
     modemapping['sh'] = 'ace/mode/sh';
@@ -1580,14 +1581,23 @@
         else {
             nameparts = itemdata.name.split('.');
             extension = nameparts[nameparts.length -1];
-            if (['c', 'cpp', 'css', 'htm', 'html', 'js', 'php', 'py', 'sh', 'sql', 'xml', 'yaml'].indexOf(extension) > +1 ) {
+            if (['c', 'cpp', 'css', 'htm', 'html', 'js', 'json', 'php', 'py', 'sh', 'sql', 'xml', 'yaml'].indexOf(extension.toLocaleLowerCase()) > +1 ) {
                 iicon.innerHTML = 'code';
+            }
+            else if (['bmp', 'gif', 'jpg', 'jpeg', 'png', 'tif', 'webp'].indexOf(extension.toLocaleLowerCase()) > -1 ) {
+                iicon.innerHTML = 'image';
+            }
+            else if (['mp3', 'ogg', 'wav'].indexOf(extension) > -1 ) {
+                iicon.innerHTML = 'audiotrack';
+            }
+            else if (['avi', 'flv', 'mkv', 'mp4', 'mpg', 'mpeg', 'webm'].indexOf(extension.toLocaleLowerCase()) > -1 ) {
+                iicon.innerHTML = 'video_label';
             }
             else {
                 iicon.innerHTML = 'insert_drive_file';
             }
             item.setAttribute("onclick", "loadfile('" + encodeURI(itemdata.fullpath) + "')");
-            stats.innerHTML = "Modified: " + date.toUTCString() + "&nbsp;&nbsp;Size: " + itemdata.size;
+            stats.innerHTML = "Mod.: " + date.toUTCString() + "&nbsp;&nbsp;Size: " + (itemdata.size/1024).toFixed(1) + " KiB";
         }
         item.appendChild(iicon);
         var itext = document.createElement('div');
