@@ -41,7 +41,7 @@ BANLIMIT = 0
 ### End of options
 
 RELEASEURL = "https://api.github.com/repos/danielperna84/hass-poc-configurator/releases/latest"
-VERSION = "0.1.2
+VERSION = "0.1.2"
 BASEDIR = "."
 DEV = False
 HTTPD = None
