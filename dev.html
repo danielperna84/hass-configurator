@@ -71,7 +71,7 @@
             vertical-align: text-bottom;
             font-weight: 400;
             display: inline-block;
-            width: 202px;
+            width: 185px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -80,7 +80,7 @@
         p.stats {
             margin: -26px 0 0 40px;
             padding: 0 16px;
-            font-size: 0.6em;
+            font-size: 0.5em;
             color: rgba(0, 0, 0, 0.54);
             line-height: 16px;
         }
@@ -1588,7 +1588,7 @@
         if (itemdata.type == 'dir') {
             iicon.innerHTML = 'folder';
             item.setAttribute("onclick", "listdir('" + encodeURI(itemdata.fullpath) + "')");
-            stats.innerHTML = "Modified: " + date.toUTCString();
+            stats.innerHTML = "Mod.: " + date.toUTCString();
         }
         else {
             nameparts = itemdata.name.split('.');
@@ -1730,6 +1730,25 @@
 
     function delete_file() {
         var path= document.getElementById('currentfile').value;
+        if (path.length > 0) {
+            data = new Object();
+            data.path= path;
+            $.post("api/delete", data).done(function(resp) {
+                if (resp.error) {
+                    var $toastContent = $("<div><pre>" + resp.message + "\n" + resp.path + "</pre></div>");
+                    Materialize.toast($toastContent, 5000);
+                }
+                else {
+                    var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
+                    Materialize.toast($toastContent, 2000);
+                    listdir(document.getElementById('fbheader').innerHTML)
+                    document.getElementById('currentfile').value='';editor.setValue('');
+                }
+            });
+        }
+    }
+
+    function delete_element(path) {
         if (path.length > 0) {
             data = new Object();
             data.path= path;
