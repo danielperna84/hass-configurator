@@ -46,7 +46,7 @@ BASEDIR = "."
 DEV = False
 HTTPD = None
 FAIL2BAN_IPS = {}
-INDEX = Template("""<!DOCTYPE html>
+INDEX = Template(r"""<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
