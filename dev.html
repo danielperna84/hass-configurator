@@ -54,6 +54,7 @@
 
         #fbelements {
             margin: 0;
+            position: relative;
         }
 
         a.collection-item {
@@ -382,7 +383,7 @@
                 <ul class="right">
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Save" href="#modal_save"><i class="material-icons">save</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Close" href="#modal_close"><i class="material-icons">highlight_off</i></a></li>
-                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Delete" href="#modal_delete"><i class="material-icons">delete</i></a></li>
+                    <!--<li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Delete" href="#modal_delete"><i class="material-icons">delete</i></a></li>-->
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Search" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
                     <li><a class="waves-effect waves-light hide-on-med-and-up" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
                     <li><a class="waves-effect waves-light dropdown-button hide-on-small-only" data-activates="dropdown_menu" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
@@ -397,8 +398,8 @@
         <li><a href="#" onclick="editor.setValue('');document.getElementById('currentfile').value=document.getElementById('fbheader').innerHTML+separator+'newfile';document.getElementById('currentfile').setSelectionRange(document.getElementById('currentfile').value.length-7, document.getElementById('currentfile').value.length);document.getElementById('currentfile').focus()">New File</a></li>
         <li><a href="#modal_save">Save</a></li>
         <li><a href="#modal_close">Close</a></li>
-        <li class="divider"></li>
-        <li><a href="#modal_delete">Delete</a></li>
+        <!--<li class="divider"></li>
+        <li><a href="#modal_delete">Delete</a></li>-->
     </ul>
     <ul id="dropdown_menu" class="dropdown-content z-depth-4">
         <li><a target="_blank" href="#modal_components">HASS Components</a></li>
@@ -949,9 +950,9 @@
     <div id="modal_delete" class="modal">
         <div class="modal-content">
             <h4>Delete</h4>
-            <p>Are you sure you want to delete this file / folder?</p>
+            <p>Are you sure you want to delete <span class="fb_currentfile"></span>?</p>
         </div>
-        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="delete_file()" class="modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
+        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="delete_element()" class="modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
     </div>
     <div id="modal_restart" class="modal">
         <div class="modal-content">
@@ -1434,10 +1435,11 @@
       <li class="waves-effect"><a style="opacity: 1;" href="#modal_newfolder"><i class="material-icons grey-text text-darken-2">create_new_folder</i></a></li>
       <li class="waves-effect"><a style="opacity: 1;" href="#modal_save"><i class="material-icons grey-text text-darken-2">save</i></a></li>
       <li class="waves-effect"><a style="opacity: 1;" href="#modal_close"><i class="material-icons grey-text text-darken-2">highlight_off</i></a></li>
-      <li class="waves-effect"><a style="opacity: 1;" href="#modal_delete"><i class="material-icons grey-text text-darken-2">delete</i></a></li>
+      <!--<li class="waves-effect"><a style="opacity: 1;" href="#modal_delete"><i class="material-icons grey-text text-darken-2">delete</i></a></li>-->
     </ul>
   </div>
 </footer>
+<input type="hidden" id="fb_currentfile" value="" />
 <!-- Scripts -->
 <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/js/materialize.min.js"></script>
@@ -1634,12 +1636,12 @@
         menubutton.classList.add('waves-effect');
         menubutton.classList.add('dropdown-button');
         menubutton.setAttribute('data-activates', dropdown.id);
-        menubutton.setAttribute('data-beloworigin', true);
         menubutton.setAttribute('data-alignment', 'right');
         var menubuttonicon = document.createElement('i');
         menubutton.classList.add('material-icons');
         menubutton.classList.add('right');
         menubutton.innerHTML = 'more_vert';
+        menubutton.setAttribute('onclick', "document.getElementById('fb_currentfile').value='" + encodeURI(itemdata.fullpath) + "';$('span.fb_currentfile').html('" + itemdata.name + "')");
         li.appendChild(item);
         li.appendChild(menubutton);
         li.appendChild(stats);
@@ -1749,7 +1751,8 @@
         }
     }
 
-    function delete_element(path) {
+    function delete_element() {
+        var path = document.getElementById('fb_currentfile').value;
         if (path.length > 0) {
             data = new Object();
             data.path= path;
