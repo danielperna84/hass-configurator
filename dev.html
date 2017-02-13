@@ -130,8 +130,8 @@
         }
 
         .side-nav a {
-            padding: 0 16px;
-            display: inline-block;
+          padding: 0 16px;
+          display: inline-block;
         }
 
         .side-nav li>a>i {
@@ -309,6 +309,11 @@
             background-color: #03a9f4 !important;
         }
 
+        .collection-item #uplink {
+            background-color: #f5f5f5;
+            width: 320px !important;
+        }
+
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ace.js" type="text/javascript" charset="utf-8"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ext-modelist.js" type="text/javascript" charset="utf-8"></script>
@@ -411,10 +416,10 @@
     <div id="modal_components" class="modal bottom-sheet modal-fixed-footer">
         <div class="modal-content_nopad">
             <iframe src="https://home-assistant.io/components/" style="height: 90vh; width: 100vw"> </iframe>
-            <a target="_blank" href="https://home-assistant.io/components/" class="hide-on-med-and-down modal_btn waves-effect waves-blue btn-large btn-flat left"><i class="material-icons">launch</i></a>
+            <a target="_blank" href="https://home-assistant.io/components/" class="hide-on-med-and-down modal_btn waves-effect btn-large btn-flat left"><i class="material-icons">launch</i></a>
         </div>
         <div class="modal-footer">
-            <a class="modal-action modal-close waves-effect waves-blue btn-flat Right">Close</a>
+            <a class="modal-action modal-close waves-effect btn-flat Right">Close</a>
         </div>
     </div>
     <div id="modal_acekeyboard" class="modal bottom-sheet modal-fixed-footer">
@@ -922,7 +927,7 @@
         </ul>
       </div>
       <div class="modal-footer">
-        <a class="modal-action modal-close waves-effect waves-blue btn-flat ">Close</a>
+        <a class="modal-action modal-close waves-effect btn-flat ">Close</a>
       </div>
     </div>
     <div id="modal_save" class="modal">
@@ -1111,7 +1116,7 @@
     </div>
     <div class="row">
         <ul id="ace_settings" class="side-nav">
-            <li><a class="center grey lighten-3 z-depth-1 subheader">Editor Settings</a></li>
+            <li><a class="center s12 grey lighten-3 z-depth-1 subheader">Editor Settings</a></li>
             <div class="row col s12">
                 <p class="col s12"> <a class="waves-effect waves-light btn light-blue" href="#modal_acekeyboard">Keyboard Shortcuts</a> </p>
                 <p class="col s12">
@@ -1423,11 +1428,11 @@
   <div class="fixed-action-btn toolbar active grey lighten-4" data-origin-bottom="77" data-origin-left="984" data-origin-width="56" data-open="true" style="text-align: center; width: 100%; bottom: 0px; left: 0px; transition: transform 0.2s cubic-bezier(0.55, 0.085, 0.68, 0.53), background-color 0s linear 0.2s; overflow: hidden;">
     <div class="fab-backdrop grey lighten-4" style=" transform: scale(26.575); "></div>
     <ul>
-      <li class="waves-effect waves-blue"><a style="opacity: 1;" onclick="editor.setValue('');document.getElementById('currentfile').value=document.getElementById('fbheader').innerHTML+separator+'newfile';document.getElementById('currentfile').setSelectionRange(document.getElementById('currentfile').value.length-7, document.getElementById('currentfile').value.length);document.getElementById('currentfile').focus()"><i class="material-icons grey-text text-darken-2">note_add</i></a></li>
-      <li class="waves-effect waves-blue"><a style="opacity: 1;" href="#modal_newfolder"><i class="material-icons grey-text text-darken-2">create_new_folder</i></a></li>
-      <li class="waves-effect waves-blue"><a style="opacity: 1;" href="#modal_save"><i class="material-icons grey-text text-darken-2">save</i></a></li>
-      <li class="waves-effect waves-blue"><a style="opacity: 1;" href="#modal_close"><i class="material-icons grey-text text-darken-2">highlight_off</i></a></li>
-      <li class="waves-effect waves-blue"><a style="opacity: 1;" href="#modal_delete"><i class="material-icons grey-text text-darken-2">delete</i></a></li>
+      <li class="waves-effect"><a style="opacity: 1;" onclick="editor.setValue('');document.getElementById('currentfile').value=document.getElementById('fbheader').innerHTML+separator+'newfile';document.getElementById('currentfile').setSelectionRange(document.getElementById('currentfile').value.length-7, document.getElementById('currentfile').value.length);document.getElementById('currentfile').focus()"><i class="material-icons grey-text text-darken-2">note_add</i></a></li>
+      <li class="waves-effect"><a style="opacity: 1;" href="#modal_newfolder"><i class="material-icons grey-text text-darken-2">create_new_folder</i></a></li>
+      <li class="waves-effect"><a style="opacity: 1;" href="#modal_save"><i class="material-icons grey-text text-darken-2">save</i></a></li>
+      <li class="waves-effect"><a style="opacity: 1;" href="#modal_close"><i class="material-icons grey-text text-darken-2">highlight_off</i></a></li>
+      <li class="waves-effect"><a style="opacity: 1;" href="#modal_delete"><i class="material-icons grey-text text-darken-2">delete</i></a></li>
     </ul>
   </div>
 </footer>
@@ -1574,7 +1579,6 @@
         var li = document.createElement('li');
         li.classList.add('collection-item');
         var item = document.createElement('a');
-        item.href = '#';
         var iicon = document.createElement('i');
         iicon.classList.add('material-icons');
         var stats = document.createElement('p');
@@ -1611,32 +1615,25 @@
         itext.innerHTML = itemdata.name;
         itext.classList.add('filename');
         item.appendChild(itext);
-        
+
         var dropdown = document.createElement('ul');
         dropdown.id = 'fb_dropdown_' + index;
         dropdown.classList.add('dropdown-content');
         dropdown.classList.add('z-depth-4');
         var dd_delete = document.createElement('li');
         var dd_delete_a = document.createElement('a');
-        dd_delete_a.href = '#';
-        dd_delete_a.setAttribute('onclick', "alert()");
+        dd_delete_a.setAttribute('href', "#modal_delete");
         dd_delete_a.innerHTML = "Delete";
         dd_delete.appendChild(dd_delete_a);
         dropdown.appendChild(dd_delete);
-        /*<ul id="dropdown_menu" class="dropdown-content z-depth-4">
-            <li><a target="_blank" href="#modal_components">HASS Components</a></li>
-            <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
-            <li><a href="#modal_about">About PoC</a></li>
-            <li class="divider"></li>
-            <li><a href="#modal_restart">Restart HASS</a></li>
-        </ul>*/
-        //<a class="waves-effect waves-light dropdown-button hide-on-small-only" data-activates="dropdown_menu" data-beloworigin="true"><i class="material-icons right">more_vert</i></a>
+
         var menubutton = document.createElement('a');
         menubutton.classList.add('fbmenubutton');
         menubutton.classList.add('waves-effect');
-        menubutton.classList.add('waves-light');
         menubutton.classList.add('dropdown-button');
         menubutton.setAttribute('data-activates', dropdown.id);
+        menubutton.setAttribute('data-beloworigin', true);
+        menubutton.setAttribute('data-alignment', 'right');
         var menubuttonicon = document.createElement('i');
         menubutton.classList.add('material-icons');
         menubutton.classList.add('right');
@@ -1659,8 +1656,9 @@
         var upli = document.createElement('li');
         var up = document.createElement('a');
         upli.classList.add('collection-item');
-        up.href = '#';
+        upli.classList.add('cursor', 'pointer');
         up.id = "uplink";
+        up.classList.add('waves-effect');
         up.setAttribute("onclick", "listdir('" + encodeURI(dirdata.parent) + "')")
         var upicon = document.createElement('i');
         upicon.classList.add('material-icons');
