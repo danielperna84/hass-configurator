@@ -1,6 +1,8 @@
-Version 0.1.2 (2017-02-nn)
+Version 0.1.2 (2017-02-13)
 - Backend improvements @danielperna84
-- UI improvements @jmart518
+- Further UI improvements @jmart518
+- Add / delete files / folders
+- 
 
 Version 0.1.1 (2017-02-10)
 - Improved UI @jmart518
