@@ -1762,7 +1762,7 @@ INDEX = Template("""<!DOCTYPE html>
             data.text = editor.getValue()
             $.post("api/save", data).done(function(resp) {
                 if (resp.error) {
-                    var $toastContent = $("<div><pre>" + resp.message + "\n" + resp.path + "</pre></div>");
+                    var $toastContent = $("<div><pre>" + resp.message + "\\n" + resp.path + "</pre></div>");
                     Materialize.toast($toastContent, 5000);
                 }
                 else {
