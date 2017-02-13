@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+# -*- coding: utf-8 -*-
 """
 Configurator for Home Assistant.
 https://github.com/danielperna84/hass-poc-configurator
@@ -40,38 +41,55 @@ BANLIMIT = 0
 ### End of options
 
 RELEASEURL = "https://api.github.com/repos/danielperna84/hass-poc-configurator/releases/latest"
-VERSION = "0.1.1"
+VERSION = "0.1.2"
 BASEDIR = "."
 DEV = False
 HTTPD = None
 FAIL2BAN_IPS = {}
-INDEX = Template("""<!DOCTYPE html>
-<html>
+INDEX = Template(r"""<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0" />
     <title>HASS Configurator</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/css/materialize.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/css/materialize.min.css">
     <style type="text/css" media="screen">
         body {
             margin: 0;
             padding: 0;
             background-color: #fafafa;
+            display: flex;
+            min-height: 100vh;
+            flex-direction: column;
+        }
+
+        main {
+            flex: 1 0 auto;
         }
 
         #editor {
             position: fixed;
-            top: 68px;
+            top: 155px;
             right: 0;
             bottom: 0;
           }
 
         @media only screen and (max-width: 600px) {
           #editor {
-              top: 60px;
+              top: 145px;
+              bottom: 56px;
+            }
+
+          #edit_float {
+              bottom: 85px;
+              z-index: 10;
             }
           }
+
+        #filebrowser {
+            background-color: #fff;
+        }
 
         #fbheader {
             display: block;
@@ -80,17 +98,41 @@ INDEX = Template("""<!DOCTYPE html>
             color: rgba(0, 0, 0, 0.54);
             font-size: 15px;
             font-weight: 500;
-            line-height: 48px;
+        }
+
+        #fbelements {
+            margin: 0;
+            position: relative;
         }
 
         a.collection-item {
             color: #616161 !important;
         }
 
+        .fbmenubutton {
+            color: rgba(0, 0, 0, 0.54) !important;
+            display: inline-block;
+            float: right;
+        }
+
         .filename {
-            margin-left: 15px;
+            color: rgba(0, 0, 0, 0.54);
             vertical-align: text-bottom;
             font-weight: 400;
+            display: inline-block;
+            width: 185px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: pointer;
+        }
+
+        p.stats {
+            margin: -26px 0 0 40px;
+            padding: 0 16px;
+            font-size: 0.5em;
+            color: rgba(0, 0, 0, 0.54);
+            line-height: 16px;
         }
 
         .green {
@@ -102,7 +144,7 @@ INDEX = Template("""<!DOCTYPE html>
         }
 
         #dropdown_menu, #dropdown_menu_mobile {
-            min-width: 200px;
+            min-width: 180px;
         }
 
         .dropdown-content li>a,
@@ -124,25 +166,26 @@ INDEX = Template("""<!DOCTYPE html>
             box-shadow: 0 1px 0 0 #03a9f4 !important
         }
 
-        .ace_optionsMenuEntry input {
-            position: relative !important;
-            left: 0 !important;
-            opacity: 100 !important;
-        }
-
-        .ace_optionsMenuEntry select {
-            position: relative !important;
-            left: 0 !important;
-            opacity: 100 !important;
-            display: block !important;
-        }
-
         .collection {
             margin: 0;
+            background-color: #fff;
         }
 
-        .collection .collection-item {
-            border-bottom: 1px solid #eeeeee;
+        li.collection-item {
+            border-bottom: 1px solid #eeeeee !important;
+        }
+
+        .side-nav li {
+            line-height: 36px;
+        }
+
+        .fb_side-nav a {
+          padding: 0 16px;
+          display: inline-block;
+        }
+
+        .side-nav li>a>i {
+            margin-right: 16px !important;
         }
 
         .collection .collection-item i.material-icons {
@@ -150,13 +193,13 @@ INDEX = Template("""<!DOCTYPE html>
         }
 
         #modal_acekeyboard, #modal_components {
-          top: auto;
-          bottom: -100%;
-          margin: 0;
-          width: 96%;
-          min-height: 95%;
-          border-radius: 0;
-          margin: auto;
+            top: auto;
+            bottom: -100%;
+            margin: 0;
+            width: 96%;
+            min-height: 95%;
+            border-radius: 0;
+            margin: auto;
         }
 
         .modal .modal-content_nopad {
@@ -179,81 +222,227 @@ INDEX = Template("""<!DOCTYPE html>
 	          right: 0;
 	          bottom: 0;
         }
+
+        .modal-content_nopad {
+            position: relative;
+        }
+
+        .modal-content_nopad .modal_btn {
+            position: absolute;
+            top: 2px;
+            right:0;
+        }
+
+        footer {
+            z-index: 10;
+        }
+
+        .shadow {
+            height: 36px;
+        }
+
+        .ace_optionsMenuEntry input {
+            position: relative !important;
+            left: 0 !important;
+            opacity: 1 !important;
+        }
+
+        .ace_optionsMenuEntry select {
+            position: relative !important;
+            left: 0 !important;
+            opacity: 1 !important;
+            display: block !important;
+        }
+
+        .ace_search {
+            background-color: #eeeeee !important;
+            border-radius: 0 !important;
+            border: 0 !important;
+            box-shadow: 0 6px 10px 0 rgba(0, 0, 0, 0.14), 0 1px 18px 0 rgba(0, 0, 0, 0.12), 0 3px 5px -1px rgba(0, 0, 0, 0.3);
+        }
+
+        .ace_search_form {
+            background-color: #fafafa;
+            width: 300px;
+            border: 0 !important;
+            border-radius: 0 !important;
+            outline: none !important;
+            box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 2px 1px -2px rgba(0, 0, 0, 0.2);
+            margin-bottom: 15px !important;
+            margin-left: 8px !important;
+            color: #424242 !important;
+        }
+
+        .ace_search_field {
+            padding-left: 4px !important;
+            margin-left: 10px !important;
+            max-width: 275px !important;
+            font-family: 'Roboto', sans-serif !important;
+            border-bottom: 1px solid #03a9f4 !important;
+            color: #424242 !important;
+        }
+
+        .ace_replace_form {
+            background-color: #fafafa;
+            width: 300px;
+            border: 0 !important;
+            border-radius: 0 !important;
+            outline: none !important;
+            box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 2px 1px -2px rgba(0, 0, 0, 0.2);
+            margin-bottom: 15px !important;
+            margin-left: 8px !important;
+        }
+
+        .ace_search_options {
+            background-color: #eeeeee;
+            text-align: left !important;
+            letter-spacing: .5px !important;
+            transition: .2s ease-out;
+            font-family: 'Roboto', sans-serif !important;
+            font-size: 130%;
+            top: 0 !important;
+        }
+
+        .ace_searchbtn {
+            text-decoration: none !important;
+            min-width: 40px !important;
+            min-height: 30px !important;
+            color: #424242 !important;
+            text-align: center !important;
+            letter-spacing: .5px !important;
+            transition: .2s ease-out;
+            cursor: pointer;
+            font-family: 'Roboto', sans-serif !important;
+        }
+
+        .ace_searchbtn:hover {
+            background-color: #03a9f4;
+        }
+
+        .ace_replacebtn {
+            text-decoration: none !important;
+            min-width: 40px !important;
+            min-height: 30px !important;
+            color: #424242 !important;
+            text-align: center !important;
+            letter-spacing: .5px !important;
+            transition: .2s ease-out;
+            cursor: pointer;
+            font-family: 'Roboto', sans-serif !important;
+        }
+
+        .ace_replacebtn:hover {
+            background-color: #03a9f4;
+        }
+
+        .ace_button {
+            text-decoration: none !important;
+            min-width: 40px !important;
+            min-height: 30px !important;
+            border-radius: 0 !important;
+            outline: none !important;
+            color: #424242 !important;
+            background-color: #fafafa;
+            text-align: center;
+            letter-spacing: .5px;
+            transition: .2s ease-out;
+            cursor: pointer;
+            font-family: 'Roboto', sans-serif !important;
+        }
+
+        .ace_button:hover {
+            background-color: #03a9f4 !important;
+        }
+
+        .collection-item #uplink {
+            background-color: #f5f5f5;
+            width: 320px !important;
+        }
+
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ace.js" type="text/javascript" charset="utf-8"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ext-modelist.js" type="text/javascript" charset="utf-8"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
 </head>
 <body>
-    <div class="preloader-background">
-      <div class="preloader-wrapper big active">
+  <div class="preloader-background">
+    <div class="preloader-wrapper big active">
       <div class="spinner-layer spinner-blue">
         <div class="circle-clipper left">
           <div class="circle"></div>
-        </div><div class="gap-patch">
+        </div>
+        <div class="gap-patch">
           <div class="circle"></div>
-        </div><div class="circle-clipper right">
+        </div>
+        <div class="circle-clipper right">
           <div class="circle"></div>
         </div>
       </div>
       <div class="spinner-layer spinner-red">
         <div class="circle-clipper left">
           <div class="circle"></div>
-        </div><div class="gap-patch">
+        </div>
+        <div class="gap-patch">
           <div class="circle"></div>
-        </div><div class="circle-clipper right">
+        </div>
+        <div class="circle-clipper right">
           <div class="circle"></div>
         </div>
       </div>
       <div class="spinner-layer spinner-yellow">
         <div class="circle-clipper left">
           <div class="circle"></div>
-        </div><div class="gap-patch">
+        </div>
+        <div class="gap-patch">
           <div class="circle"></div>
-        </div><div class="circle-clipper right">
+        </div>
+        <div class="circle-clipper right">
           <div class="circle"></div>
         </div>
       </div>
       <div class="spinner-layer spinner-green">
         <div class="circle-clipper left">
           <div class="circle"></div>
-        </div><div class="gap-patch">
+        </div>
+        <div class="gap-patch">
           <div class="circle"></div>
-        </div><div class="circle-clipper right">
+        </div>
+        <div class="circle-clipper right">
           <div class="circle"></div>
         </div>
       </div>
     </div>
   </div>
-  <div class="main">
+  <header>
     <div class="navbar-fixed">
         <nav class="light-blue">
             <div class="nav-wrapper">
                 <ul class="left">
-                    <li><a href="#" data-activates="slide-out" class="waves-effect waves-light button-collapse show-on-large"><i class="material-icons">folder</i></a></li>
-                    <li><a class="waves-effect waves-light hide-on-med-and-up" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
+                    <li><a class="waves-effect waves-light tooltipped files-collapse hide-on-small-only" data-activates="slide-out" data-position="bottom" data-delay="50" data-tooltip="Browse Filesystem"><i class="material-icons">list</i></a></li>
+                    <li><a class="waves-effect waves-light files-collapse hide-on-med-and-up" data-activates="slide-out"><i class="material-icons">list</i></a></li>
+                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="New File" onclick="editor.setValue('');document.getElementById('currentfile').value=document.getElementById('fbheader').innerHTML+separator+'newfile';document.getElementById('currentfile').setSelectionRange(document.getElementById('currentfile').value.length-7, document.getElementById('currentfile').value.length);document.getElementById('currentfile').focus()"><i class="material-icons">note_add</i></a></li>
+                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="New Folder" href="#modal_newfolder"><i class="material-icons">create_new_folder</i></a></li>
                 </ul>
                 <ul class="right">
-                    <li><a class="waves-effect waves-light"href="#modal_save"><i class="material-icons">save</i></a></li>
-                    <!-- <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="New" onclick="Materialize.toast('¯\\_(ツ)_/¯ ', 2000)"><i class="material-icons">note_add</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Save" href="#modal_save"><i class="material-icons">save</i></a></li>
-                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Close" href="#modal_close"><i class="material-icons">close</i></a></li>
-                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Delete" href="#modal_delete"><i class="material-icons">delete</i></a></li>
+                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Close" href="#modal_close"><i class="material-icons">highlight_off</i></a></li>
+                    <!--<li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Delete" href="#modal_delete"><i class="material-icons">delete</i></a></li>-->
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Search" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
-                    <li><a class="waves-effect waves-light dropdown-button hide-on-med-and-up" href="#!" data-activates="dropdown_tools_mobile" data-beloworigin="true"><i class="material-icons right">edit</i></a></li> -->
-                    <li><a class="waves-effect waves-light hide-on-small-only" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
-                    <li><a class="waves-effect waves-light dropdown-button hide-on-small-only" href="#!" data-activates="dropdown_menu" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
-                    <li><a class="waves-effect waves-light dropdown-button hide-on-med-and-up" href="#!" data-activates="dropdown_menu_mobile" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
+                    <li><a class="waves-effect waves-light hide-on-med-and-up" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
+                    <li><a class="waves-effect waves-light dropdown-button hide-on-small-only" data-activates="dropdown_menu" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
+                    <li><a class="waves-effect waves-light dropdown-button hide-on-med-and-up" data-activates="dropdown_menu_mobile" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
                 </ul>
             </div>
         </nav>
     </div>
+  </header>
+  <main>
     <ul id="dropdown_tools_mobile" class="dropdown-content z-depth-4">
-        <li><a onclick="Materialize.toast('¯\\_(ツ)_/¯ ', 2000)">New</a></li>
+        <li><a href="#" onclick="editor.setValue('');document.getElementById('currentfile').value=document.getElementById('fbheader').innerHTML+separator+'newfile';document.getElementById('currentfile').setSelectionRange(document.getElementById('currentfile').value.length-7, document.getElementById('currentfile').value.length);document.getElementById('currentfile').focus()">New File</a></li>
         <li><a href="#modal_save">Save</a></li>
         <li><a href="#modal_close">Close</a></li>
-        <li class="divider"></li>
-        <li><a href="#modal_delete">Delete</a></li>
+        <!--<li class="divider"></li>
+        <li><a href="#modal_delete">Delete</a></li>-->
     </ul>
     <ul id="dropdown_menu" class="dropdown-content z-depth-4">
         <li><a target="_blank" href="#modal_components">HASS Components</a></li>
@@ -272,17 +461,17 @@ INDEX = Template("""<!DOCTYPE html>
     </ul>
     <div id="modal_components" class="modal bottom-sheet modal-fixed-footer">
         <div class="modal-content_nopad">
-            <iframe src="https://home-assistant.io/components/" width="100%" style="height: 90vh;"> </iframe>
+            <iframe src="https://home-assistant.io/components/" style="height: 90vh; width: 100vw"> </iframe>
+            <a target="_blank" href="https://home-assistant.io/components/" class="hide-on-med-and-down modal_btn waves-effect btn-large btn-flat left"><i class="material-icons">launch</i></a>
         </div>
         <div class="modal-footer">
-            <a href="#!" class="modal-action modal-close waves-effect waves-blue btn-flat ">Close</a>
+            <a class="modal-action modal-close waves-effect btn-flat Right">Close</a>
         </div>
-      </div>
     </div>
     <div id="modal_acekeyboard" class="modal bottom-sheet modal-fixed-footer">
         <div class="modal-content centered">
         <h4>Ace Keyboard Shortcuts</h4>
-        </br>
+        <br>
         <ul class="collapsible popout" data-collapsible="expandable">
           <li>
             <div class="collapsible-header hoverable"><i class="material-icons">view_headline</i>Line Operations</div>
@@ -784,7 +973,7 @@ INDEX = Template("""<!DOCTYPE html>
         </ul>
       </div>
       <div class="modal-footer">
-        <a href="#!" class="modal-action modal-close waves-effect waves-blue btn-flat ">Close</a>
+        <a class="modal-action modal-close waves-effect btn-flat ">Close</a>
       </div>
     </div>
     <div id="modal_save" class="modal">
@@ -792,28 +981,41 @@ INDEX = Template("""<!DOCTYPE html>
             <h4>Save</h4>
             <p>Do you really want to save?</p>
         </div>
-        <div class="modal-footer"> <a href="#!" class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="save()" class=" modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
+        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="save()" class=" modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
     </div>
     <div id="modal_close" class="modal">
         <div class="modal-content">
             <h4>Close File</h4>
-            <p>Are you sure you want to close the current file without saving?</p>
+            <p>Are you sure you want to close the current file? Unsaved changes will be lost.</p>
         </div>
-        <div class="modal-footer"> <a href="#!" class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="Materialize.toast('¯\\_(ツ)_/¯ ', 2000)" class="modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
+        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="document.getElementById('currentfile').value='';editor.setValue('');" class="modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
     </div>
     <div id="modal_delete" class="modal">
         <div class="modal-content">
             <h4>Delete</h4>
-            <p>Are you sure you want to delete this file?</p>
+            <p>Are you sure you want to delete <span class="fb_currentfile"></span>?</p>
         </div>
-        <div class="modal-footer"> <a href="#!" class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="Materialize.toast('¯\\_(ツ)_/¯ ', 2000)" class="modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
+        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="delete_element()" class="modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
     </div>
     <div id="modal_restart" class="modal">
         <div class="modal-content">
             <h4>Restart</h4>
-            <p>Do you really want to restart HASS?</p>
+            <p>Do you really want to restart Home Assistant?</p>
         </div>
-        <div class="modal-footer"> <a href="#!" class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="restart()" class=" modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
+        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="restart()" class=" modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
+    </div>
+    <div id="modal_newfolder" class="modal">
+        <div class="modal-content">
+            <h4>New Folder</h4>
+            <br>
+            <div class="row">
+                <div class="input-field col s12">
+                    <input type="text" id="newfoldername" id="newfolder">
+                    <label class="active" for="newfoldername">New Folder Name</label>
+                </div>
+          </div>
+        </div>
+        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">Cancel</a> <a onclick="newfolder(document.getElementById('newfoldername').value)" class=" modal-action modal-close waves-effect waves-green btn-flat">OK</a> </div>
     </div>
     <div id="modal_about" class="modal modal-fixed-footer">
         <div class="modal-content">
@@ -841,10 +1043,10 @@ INDEX = Template("""<!DOCTYPE html>
     </div>
     <div class="row">
         <div class="col m4 l3 hide-on-small-only">
-            </br>
+            <br>
             <div class="input-field col s12">
                 <select onchange="insert(this.value)">
-                    <option value="" disabled selected>Choose your option</option>
+                    <option value="" disabled selected>Select trigger platform</option>
                     <option value="event">Event</option>
                     <option value="mqtt">MQTT</option>
                     <option value="numberic_state">Numeric State</option>
@@ -854,19 +1056,19 @@ INDEX = Template("""<!DOCTYPE html>
                     <option value="time">Time</option>
                     <option value="zone">Zone</option>
                 </select>
-                <label>Trigger Platform</label>
+                <label>Trigger platforms</label>
             </div>
             <div class="input-field col s12">
-                <select id="events" onchange="insert(this.value)"> </select>
+                <select id="events" onchange="insert(this.value)"></select>
                 <label>Events</label>
             </div>
             <div class="input-field col s12">
-                <select id="entities" onchange="insert(this.value)"> </select>
+                <select id="entities" onchange="insert(this.value)"></select>
                 <label>Entities</label>
             </div>
             <div class="input-field col s12">
                 <select onchange="insert(this.value)">
-                    <option value="" disabled selected>Choose your option</option>
+                    <option value="" disabled selected>Select condition</option>
                     <option value="numeric_state">Numeric state</option>
                     <option value="state">State</option>
                     <option value="sun">Sun</option>
@@ -881,45 +1083,53 @@ INDEX = Template("""<!DOCTYPE html>
                 <label>Services</label>
             </div>
         </div>
-      <div class="col s12 m8 l9" id="editor"></div>
-    </div>
-    <div>
-        <ul id="slide-out" class="side-nav grey lighten-4">
-          <div class="z-depth-1" id="filebrowser"></div>
-            <div class="row hide-on-med-and-up">
-              </br>
-              </br>
-                <div class="input-field col s12">
-                  <select onchange="insert(this.value)">
-                      <option value="" disabled selected>Choose your option</option>
-                      <option value="event">Event</option>
-                      <option value="mqtt">MQTT</option>
-                      <option value="numberic_state">Numeric State</option>
-                      <option value="state">State</option>
-                      <option value="sun">Sun</option>
-                      <option value="template">Template</option>
-                      <option value="time">Time</option>
-                      <option value="zone">Zone</option>
-                  </select>
-                  <label>Trigger Platform</label>
+        <div class="col s12 m8 l9">
+          <div class="card input-field col s12 grey lighten-4 hoverable">
+              <input class="grey-text text-darken-3" value="" id="currentfile" type="text">
+          </div>
+        </div>
+      <div class="col s12 m8 l9 z-depth-2" id="editor"></div>
+      <div>
+        <div id="slide-out" class="fb_side-nav side-nav grey lighten-4">
+          <div class="z-depth-1" id="filebrowser" class="collection with-header">
+              <ul class="collection with-header">
+                  <li id="fbheader" class="collection-header"></li>
+              </ul>
+              <ul id="fbelements"></ul>
+          </div>
+          <div class="row hide-on-med-and-up">
+            <br />
+            <div class="input-field col s12">
+              <select onchange="insert(this.value)">
+                  <option value="" disabled selected>Select trigger platform</option>
+                  <option value="event">Event</option>
+                  <option value="mqtt">MQTT</option>
+                  <option value="numberic_state">Numeric State</option>
+                  <option value="state">State</option>
+                  <option value="sun">Sun</option>
+                  <option value="template">Template</option>
+                  <option value="time">Time</option>
+                  <option value="zone">Zone</option>
+              </select>
+              <label>Trigger Platforms</label>
               </div>
             </div>
             <div class="row hide-on-med-and-up">
               <div class="input-field col s12">
-                  <select id="events_side" onchange="insert(this.value)"> </select>
+                  <select id="events_side" onchange="insert(this.value)"></select>
                   <label>Events</label>
               </div>
             </div>
             <div class="row hide-on-med-and-up">
               <div class="input-field col s12">
-                  <select id="entities_side" onchange="insert(this.value)"> </select>
+                  <select id="entities_side" onchange="insert(this.value)"></select>
                   <label>Entities</label>
               </div>
             </div>
             <div class="row hide-on-med-and-up">
               <div class="input-field col s12">
                   <select onchange="insert(this.value)">
-                      <option value="" disabled selected>Choose your option</option>
+                      <option value="" disabled selected>Select condition</option>
                       <option value="numeric_state">Numeric state</option>
                       <option value="state">State</option>
                       <option value="sun">Sun</option>
@@ -932,29 +1142,28 @@ INDEX = Template("""<!DOCTYPE html>
             </div>
             <div class="row hide-on-med-and-up">
               <div class="input-field col s12">
-                  <select id="services_side" onchange="insert(this.value)"> </select>
+                  <select id="services_side" onchange="insert(this.value)"></select>
                   <label>Services</label>
               </div>
             </div>
-        </ul>
-        <div class="fixed-action-btn vertical click-to-toggle">
-  <a class="btn-floating btn-large red hoverable">
-    <i class="material-icons">edit</i>
-  </a>
-  <ul>
-    <li><a class="btn-floating yellow tooltipped" data-position="left" data-delay="50" data-tooltip="Undo" onclick="editor.execCommand('undo')"><i class="material-icons">undo</i></a></li>
-    <li><a class="btn-floating green tooltipped" data-position="left" data-delay="50" data-tooltip="Redo" onclick="editor.execCommand('redo')"><i class="material-icons">redo</i></a></li>
-    <li><a class="btn-floating blue tooltipped" data-position="left" data-delay="50" data-tooltip="Indent" onclick="editor.execCommand('indent')"><i class="material-icons">format_indent_increase</i></a></li>
-    <li><a class="btn-floating orange tooltipped" data-position="left" data-delay="50" data-tooltip="Outdent" onclick="editor.execCommand('outdent')"><i class="material-icons">format_indent_decrease</i></a></li>
-    <li><a class="btn-floating brown tooltipped" data-position="left" data-delay="50" data-tooltip="Fold" onclick="toggle_fold()"><i class="material-icons">all_out</i></a></li>
-  </ul>
-</div>
-
+        </div>
+        <div id="edit_float" class="fixed-action-btn vertical click-to-toggle">
+          <a class="btn-floating btn-large red hoverable">
+            <i class="material-icons">edit</i>
+          </a>
+          <ul>
+            <li><a class="btn-floating yellow tooltipped" data-position="left" data-delay="50" data-tooltip="Undo" onclick="editor.execCommand('undo')"><i class="material-icons">undo</i></a></li>
+            <li><a class="btn-floating green tooltipped" data-position="left" data-delay="50" data-tooltip="Redo" onclick="editor.execCommand('redo')"><i class="material-icons">redo</i></a></li>
+            <li><a class="btn-floating blue tooltipped" data-position="left" data-delay="50" data-tooltip="Indent" onclick="editor.execCommand('indent')"><i class="material-icons">format_indent_increase</i></a></li>
+            <li><a class="btn-floating orange tooltipped" data-position="left" data-delay="50" data-tooltip="Outdent" onclick="editor.execCommand('outdent')"><i class="material-icons">format_indent_decrease</i></a></li>
+            <li><a class="btn-floating brown tooltipped" data-position="left" data-delay="50" data-tooltip="Fold" onclick="toggle_fold()"><i class="material-icons">all_out</i></a></li>
+          </ul>
+        </div>
     </div>
     <div class="row">
         <ul id="ace_settings" class="side-nav">
-            <li><a class="center grey lighten-3 z-depth-1 subheader">Editor Settings</a></li>
-            <form class="row col s12" action="#">
+            <li><a class="center s12 grey lighten-3 z-depth-1 subheader">Editor Settings</a></li>
+            <div class="row col s12">
                 <p class="col s12"> <a class="waves-effect waves-light btn light-blue" href="#modal_acekeyboard">Keyboard Shortcuts</a> </p>
                 <p class="col s12">
                     <input type="checkbox" class="blue_check" onclick="editor.setOption('animatedScroll', !editor.getOptions().animatedScroll)" id="animatedScroll" />
@@ -1255,15 +1464,28 @@ INDEX = Template("""<!DOCTYPE html>
                     <label class="active" for="wrap_limit">Wrap Limit</label>
                 </div> <a class="waves-effect waves-light btn light-blue" onclick="save_ace_settings()">Save Settings Locally</a>
                 <p class="center col s12"> Ace Editor 1.2.6 </p>
-            </form>
+            </div>
         </ul>
     </div>
-    <input type="hidden" id="currentfile" value="" />
   </div>
-</body>
-<!--  Scripts-->
+</main>
+<footer class="hide-on-med-and-up">
+<div class="shadow grey darken-4 row s12 z-depth-4"></div>
+  <div class="fixed-action-btn toolbar active grey lighten-4" data-origin-bottom="77" data-origin-left="984" data-origin-width="56" data-open="true" style="text-align: center; width: 100%; bottom: 0px; left: 0px; transition: transform 0.2s cubic-bezier(0.55, 0.085, 0.68, 0.53), background-color 0s linear 0.2s; overflow: hidden;">
+    <div class="fab-backdrop grey lighten-4" style=" transform: scale(26.575); "></div>
+    <ul>
+      <li class="waves-effect"><a style="opacity: 1;" onclick="editor.setValue('');document.getElementById('currentfile').value=document.getElementById('fbheader').innerHTML+separator+'newfile';document.getElementById('currentfile').setSelectionRange(document.getElementById('currentfile').value.length-7, document.getElementById('currentfile').value.length);document.getElementById('currentfile').focus()"><i class="material-icons grey-text text-darken-2">note_add</i></a></li>
+      <li class="waves-effect"><a style="opacity: 1;" href="#modal_newfolder"><i class="material-icons grey-text text-darken-2">create_new_folder</i></a></li>
+      <li class="waves-effect"><a style="opacity: 1;" href="#modal_save"><i class="material-icons grey-text text-darken-2">save</i></a></li>
+      <li class="waves-effect"><a style="opacity: 1;" href="#modal_close"><i class="material-icons grey-text text-darken-2">highlight_off</i></a></li>
+      <!--<li class="waves-effect"><a style="opacity: 1;" href="#modal_delete"><i class="material-icons grey-text text-darken-2">delete</i></a></li>-->
+    </ul>
+  </div>
+</footer>
+<input type="hidden" id="fb_currentfile" value="" />
+<!-- Scripts -->
 <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.0/js/materialize.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/js/materialize.min.js"></script>
 <script type="text/javascript">
     $(document).ready(function () {
         $('select').material_select();
@@ -1279,8 +1501,8 @@ INDEX = Template("""<!DOCTYPE html>
             alignment: 'right',
             stopPropagation: false
         });
-        $('.button-collapse').sideNav({
-            menuWidth: 350,
+        $('.files-collapse').sideNav({
+            menuWidth: 320,
             edge: 'left',
             closeOnClick: false,
             draggable: true
@@ -1304,6 +1526,23 @@ INDEX = Template("""<!DOCTYPE html>
     });
 </script>
 <script>
+    var modemapping = new Object();
+    modemapping['c'] = 'ace/mode/c_cpp';
+    modemapping['cpp'] = 'ace/mode/c_cpp';
+    modemapping['css'] = 'ace/mode/css';
+    modemapping['gitignore'] = 'ace/mode/gitignore';
+    modemapping['htm'] = 'ace/mode/html';
+    modemapping['html'] = 'ace/mode/html';
+    modemapping['js'] = 'ace/mode/javascript';
+    modemapping['json'] = 'ace/mode/json';
+    modemapping['php'] = 'ace/mode/php';
+    modemapping['py'] = 'ace/mode/python';
+    modemapping['sh'] = 'ace/mode/sh';
+    modemapping['sql'] = 'ace/mode/sql';
+    modemapping['txt'] = 'ace/mode/text';
+    modemapping['xml'] = 'ace/mode/xml';
+    modemapping['yaml'] = 'ace/mode/yaml';
+    var separator = '$separator';
     var bootstrap = $bootstrap;
     if (bootstrap.hasOwnProperty("events")) {
         var events = document.getElementById("events");
@@ -1352,49 +1591,30 @@ INDEX = Template("""<!DOCTYPE html>
                 services.add(option);
             }
         }
-        var options = $('#events option');
-        var arr = options.map(function (_, o) {
-            return {
-                t: $(o).text(), v: o.value
-            };
-        }).get();
-        arr.sort(function (o1, o2) {
-            var t1 = o1.t.toLowerCase(), t2 = o2.t.toLowerCase();
-            return t1 > t2 ? 1 : t1 < t2 ? -1 : 0;
-        });
-        options.each(function (i, o) {
-            o.value = arr[i].v;
-            $(o).text(arr[i].t);
-        });
-        var options = $('#entities option');
-        var arr = options.map(function (_, o) {
-            return {
-                t: $(o).text(), v: o.value
-            };
-        }).get();
-        arr.sort(function (o1, o2) {
-            var t1 = o1.t.toLowerCase(), t2 = o2.t.toLowerCase();
-            return t1 > t2 ? 1 : t1 < t2 ? -1 : 0;
-        });
-        options.each(function (i, o) {
-            o.value = arr[i].v;
-            $(o).text(arr[i].t);
-        });
-        var options = $('#services option');
-        var arr = options.map(function (_, o) {
-            return {
-                t: $(o).text(), v: o.value
-            };
-        }).get();
-        arr.sort(function (o1, o2) {
-            var t1 = o1.t.toLowerCase(),
-                t2 = o2.t.toLowerCase();
-            return t1 > t2 ? 1 : t1 < t2 ? -1 : 0;
-        });
-        options.each(function (i, o) {
-            o.value = arr[i].v;
-            $(o).text(arr[i].t);
-        });
+
+        function sort_select(id) {
+            var options = $('#' + id + ' option');
+            var arr = options.map(function (_, o) {
+                return {
+                    t: $(o).text(), v: o.value
+                };
+            }).get();
+            arr.sort(function (o1, o2) {
+                var t1 = o1.t.toLowerCase(), t2 = o2.t.toLowerCase();
+                return t1 > t2 ? 1 : t1 < t2 ? -1 : 0;
+            });
+            options.each(function (i, o) {
+                o.value = arr[i].v;
+                $(o).text(arr[i].t);
+            });
+        }
+
+        sort_select('events');
+        sort_select('events_side');
+        sort_select('entities');
+        sort_select('entities_side');
+        sort_select('services');
+        sort_select('services_side');
     }
     function listdir(path) {
         $.get(encodeURI("api/listdir?path=" + path), function(data) {
@@ -1402,45 +1622,90 @@ INDEX = Template("""<!DOCTYPE html>
         });
     }
 
-    function renderitem(itemdata) {
+    function renderitem(itemdata, index) {
+        var li = document.createElement('li');
+        li.classList.add('collection-item');
         var item = document.createElement('a');
-        item.classList.add('collection-item');
-        item.href = '#';
         var iicon = document.createElement('i');
         iicon.classList.add('material-icons');
+        var stats = document.createElement('p');
+        date = new Date(itemdata.modified*1000);
+        stats.classList.add('stats');
         if (itemdata.type == 'dir') {
             iicon.innerHTML = 'folder';
             item.setAttribute("onclick", "listdir('" + encodeURI(itemdata.fullpath) + "')");
+            stats.innerHTML = "Mod.: " + date.toUTCString();
         }
         else {
-            iicon.innerHTML = 'insert_drive_file';
+            nameparts = itemdata.name.split('.');
+            extension = nameparts[nameparts.length -1];
+            if (['c', 'cpp', 'css', 'htm', 'html', 'js', 'json', 'php', 'py', 'sh', 'sql', 'xml', 'yaml'].indexOf(extension.toLocaleLowerCase()) > +1 ) {
+                iicon.innerHTML = 'code';
+            }
+            else if (['bmp', 'gif', 'jpg', 'jpeg', 'png', 'tif', 'webp'].indexOf(extension.toLocaleLowerCase()) > -1 ) {
+                iicon.innerHTML = 'image';
+            }
+            else if (['mp3', 'ogg', 'wav'].indexOf(extension) > -1 ) {
+                iicon.innerHTML = 'audiotrack';
+            }
+            else if (['avi', 'flv', 'mkv', 'mp4', 'mpg', 'mpeg', 'webm'].indexOf(extension.toLocaleLowerCase()) > -1 ) {
+                iicon.innerHTML = 'video_label';
+            }
+            else {
+                iicon.innerHTML = 'insert_drive_file';
+            }
             item.setAttribute("onclick", "loadfile('" + encodeURI(itemdata.fullpath) + "')");
+            stats.innerHTML = "Mod.: " + date.toUTCString() + "&nbsp;&nbsp;Size: " + (itemdata.size/1024).toFixed(1) + " KiB";
         }
         item.appendChild(iicon);
-        var itext = document.createElement('span');
+        var itext = document.createElement('div');
         itext.innerHTML = itemdata.name;
         itext.classList.add('filename');
         item.appendChild(itext);
-        return item;
+
+        var dropdown = document.createElement('ul');
+        dropdown.id = 'fb_dropdown_' + index;
+        dropdown.classList.add('dropdown-content');
+        dropdown.classList.add('z-depth-4');
+        var dd_delete = document.createElement('li');
+        var dd_delete_a = document.createElement('a');
+        dd_delete_a.setAttribute('href', "#modal_delete");
+        dd_delete_a.innerHTML = "Delete";
+        dd_delete.appendChild(dd_delete_a);
+        dropdown.appendChild(dd_delete);
+
+        var menubutton = document.createElement('a');
+        menubutton.classList.add('fbmenubutton');
+        menubutton.classList.add('waves-effect');
+        menubutton.classList.add('dropdown-button');
+        menubutton.setAttribute('data-activates', dropdown.id);
+        menubutton.setAttribute('data-alignment', 'right');
+        var menubuttonicon = document.createElement('i');
+        menubutton.classList.add('material-icons');
+        menubutton.classList.add('right');
+        menubutton.innerHTML = 'more_vert';
+        menubutton.setAttribute('onclick', "document.getElementById('fb_currentfile').value='" + encodeURI(itemdata.fullpath) + "';$('span.fb_currentfile').html('" + itemdata.name + "')");
+        li.appendChild(item);
+        li.appendChild(menubutton);
+        li.appendChild(stats);
+        li.setAttribute("title", itemdata.name)
+        li.appendChild(dropdown);
+        return li;
     }
 
     function renderpath(dirdata) {
-        var filebrowser = document.getElementById("filebrowser");
-        while (filebrowser.firstChild) {
-            filebrowser.removeChild(filebrowser.firstChild);
+        var fbelements = document.getElementById("fbelements");
+        while (fbelements.firstChild) {
+            fbelements.removeChild(fbelements.firstChild);
         }
-        var collection = document.createElement('div');
-        collection.classList.add('collection');
-        collection.classList.add('with-header');
-        var fbheader = document.createElement('span');
+        var fbheader = document.getElementById('fbheader');
         fbheader.innerHTML = dirdata.abspath;
-        fbheader.classList.add('collection-header');
-        fbheader.id = 'fbheader';
-        collection.appendChild(fbheader);
+        var upli = document.createElement('li');
         var up = document.createElement('a');
-        up.classList.add('collection-item');
-        up.href = '#';
+        upli.classList.add('collection-item');
+        upli.classList.add('cursor', 'pointer');
         up.id = "uplink";
+        up.classList.add('waves-effect');
         up.setAttribute("onclick", "listdir('" + encodeURI(dirdata.parent) + "')")
         var upicon = document.createElement('i');
         upicon.classList.add('material-icons');
@@ -1450,21 +1715,29 @@ INDEX = Template("""<!DOCTYPE html>
         uptext.innerHTML = '..';
         uptext.classList.add('filename');
         up.appendChild(uptext);
-        collection.appendChild(up);
+        upli.appendChild(up);
+        fbelements.appendChild(upli);
 
         for (var i = 0; i < dirdata.content.length; i++) {
-            collection.appendChild(renderitem(dirdata.content[i]));
+            fbelements.appendChild(renderitem(dirdata.content[i], i));
         }
-
-        filebrowser.appendChild(collection);
+        $(".dropdown-button").dropdown();
     }
 
     function loadfile(filepath) {
         $.get("api/file?filename=" + filepath, function(data) {
+            fileparts = filepath.split('.');
+            extension = fileparts[fileparts.length -1];
+            if (modemapping.hasOwnProperty(extension)) {
+                editor.setOption('mode', modemapping[extension]);
+            }
+            else {
+                editor.setOption('mode', "ace/mode/text");
+            }
             editor.setValue(data);
             editor.selection.selectFileStart();
             editor.focus();
-            document.getElementById('currentfile').value = filepath;
+            document.getElementById('currentfile').value = decodeURI(filepath);
         });
     }
 
@@ -1488,11 +1761,80 @@ INDEX = Template("""<!DOCTYPE html>
             data.filename = filepath;
             data.text = editor.getValue()
             $.post("api/save", data).done(function(resp) {
-                var $toastContent = $("<div><pre>" + resp + "</pre></div>");
-                Materialize.toast($toastContent, 2000);
+                if (resp.error) {
+                    var $toastContent = $("<div><pre>" + resp.message + "\\n" + resp.path + "</pre></div>");
+                    Materialize.toast($toastContent, 5000);
+                }
+                else {
+                    var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
+                    Materialize.toast($toastContent, 2000);
+                    listdir(document.getElementById('fbheader').innerHTML);
+                }
             });
         }
     }
+
+    function delete_file() {
+        var path= document.getElementById('currentfile').value;
+        if (path.length > 0) {
+            data = new Object();
+            data.path= path;
+            $.post("api/delete", data).done(function(resp) {
+                if (resp.error) {
+                    var $toastContent = $("<div><pre>" + resp.message + "\n" + resp.path + "</pre></div>");
+                    Materialize.toast($toastContent, 5000);
+                }
+                else {
+                    var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
+                    Materialize.toast($toastContent, 2000);
+                    listdir(document.getElementById('fbheader').innerHTML)
+                    document.getElementById('currentfile').value='';editor.setValue('');
+                }
+            });
+        }
+    }
+
+    function delete_element() {
+        var path = document.getElementById('fb_currentfile').value;
+        if (path.length > 0) {
+            data = new Object();
+            data.path= path;
+            $.post("api/delete", data).done(function(resp) {
+                if (resp.error) {
+                    var $toastContent = $("<div><pre>" + resp.message + "\n" + resp.path + "</pre></div>");
+                    Materialize.toast($toastContent, 5000);
+                }
+                else {
+                    var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
+                    Materialize.toast($toastContent, 2000);
+                    listdir(document.getElementById('fbheader').innerHTML)
+                    document.getElementById('currentfile').value='';editor.setValue('');
+                }
+            });
+        }
+    }
+
+    function newfolder(foldername) {
+        var path = document.getElementById('fbheader').innerHTML;
+        if (path.length > 0 && foldername.length > 0) {
+            data = new Object();
+            data.path = path;
+            data.name = foldername;
+            $.post("api/newfolder", data).done(function(resp) {
+                if (resp.error) {
+                    var $toastContent = $("<div><pre>" + resp.message + "\n" + resp.path + "</pre></div>");
+                    Materialize.toast($toastContent, 5000);
+                }
+                else {
+                    var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
+                    Materialize.toast($toastContent, 2000);
+                }
+                listdir(document.getElementById('fbheader').innerHTML);
+                document.getElementById('newfoldername').value = '';
+            });
+        }
+    }
+
 </script>
 <script>
     ace.require("ace/ext/language_tools");
@@ -1570,8 +1912,8 @@ INDEX = Template("""<!DOCTYPE html>
     }
 
 </script>
-</html>
-""")
+</body>
+</html>""")
 
 def signal_handler(signal, frame):
     global HTTPD
@@ -1610,6 +1952,13 @@ def get_dircontent(path):
         edata['dir'] = path
         edata['fullpath'] = os.path.abspath(os.path.join(path, e))
         edata['type'] = 'dir' if os.path.isdir(edata['fullpath']) else 'file'
+        try:
+            stats = os.stat(os.path.join(path, e))
+            edata['size'] = stats.st_size
+            edata['modified'] = stats.st_mtime
+        except Exception:
+            edata['size'] = 0
+            edata['modified'] = 0
         dircontent.append(edata)
 
     return dircontent
@@ -1764,7 +2113,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             except Exception as err:
                 print("Exception getting release")
                 print(err)
-            html = get_html().safe_substitute(bootstrap=boot, current=VERSION, versionclass=color)
+            html = get_html().safe_substitute(bootstrap=boot, current=VERSION, versionclass=color, separator="\%s" % os.sep if os.sep == "\\" else os.sep)
             self.wfile.write(bytes(html, "utf8"))
             return
         else:
@@ -1776,33 +2125,105 @@ class RequestHandler(BaseHTTPRequestHandler):
         if not check_access(self.client_address[0]):
             self.do_BLOCK()
             return
+        req = urlparse(self.path)
         postvars = {}
-        response = "Failure"
+        response = {
+            "error": True,
+            "message": "Generic failure"
+        }
+        
         try:
             length = int(self.headers['content-length'])
             postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+            interror = False
         except Exception as err:
             print(err)
-            response = "%s" % (str(err))
+            response['message'] = "%s" % (str(err))
+            interror = True
 
-        if 'filename' in postvars.keys() and 'text' in postvars.keys():
-            if postvars['filename'] and postvars['text']:
-                try:
-                    filename = unquote(postvars['filename'][0])
-                    with open(os.path.join(BASEDIR, filename), 'wb') as fptr:
-                        fptr.write(bytes(postvars['text'][0], "utf-8"))
-                    self.send_response(200)
-                    self.end_headers()
-                    self.wfile.write(bytes("File saved successfully", "utf8"))
-                    return
-                except Exception as err:
-                    response = "%s" % (str(err))
-                    print(err)
-        else:
-            response = "Missing filename or text"
+        if not interror:
+            if req.path == '/api/save':
+                if 'filename' in postvars.keys() and 'text' in postvars.keys():
+                    if postvars['filename'] and postvars['text']:
+                        try:
+                            filename = unquote(postvars['filename'][0])
+                            response['file'] = filename
+                            with open(filename, 'wb') as fptr:
+                                fptr.write(bytes(postvars['text'][0], "utf-8"))
+                            self.send_response(200)
+                            self.send_header('Content-type','text/json')
+                            self.end_headers()
+                            response['error'] = False
+                            response['message'] = "File saved successfully"
+                            self.wfile.write(bytes(json.dumps(response), "utf8"))
+                            return
+                        except Exception as err:
+                            response['message'] = "%s" % (str(err))
+                            print(err)
+                else:
+                    response['message'] = "Missing filename or text"
+            elif req.path == '/api/delete':
+                if 'path' in postvars.keys():
+                    if postvars['path']:
+                        try:
+                            delpath = unquote(postvars['path'][0])
+                            response['path'] = delpath
+                            try:
+                                if os.path.isdir(delpath):
+                                    os.rmdir(delpath)
+                                else:
+                                    os.unlink(delpath)
+                                self.send_response(200)
+                                self.send_header('Content-type','text/json')
+                                self.end_headers()
+                                response['error'] = False
+                                response['message'] = "Deletetion successful"
+                                self.wfile.write(bytes(json.dumps(response), "utf8"))
+                                return
+                            except Exception as err:
+                                print(err)
+                                response['error'] = True
+                                response['message'] = str(err)
+                              
+
+                        except Exception as err:
+                            response['message'] = "%s" % (str(err))
+                            print(err)
+                else:
+                    response['message'] = "Missing filename or text"
+            elif req.path == '/api/newfolder':
+                if 'path' in postvars.keys() and 'name' in postvars.keys():
+                    if postvars['path'] and postvars['name']:
+                        try:
+                            basepath = unquote(postvars['path'][0])
+                            name = unquote(postvars['name'][0])
+                            response['path'] = os.path.join(basepath, name)
+                            try:
+                                os.makedirs(response['path'])
+                                self.send_response(200)
+                                self.send_header('Content-type','text/json')
+                                self.end_headers()
+                                response['error'] = False
+                                response['message'] = "Folder created"
+                                self.wfile.write(bytes(json.dumps(response), "utf8"))
+                                return
+                            except Exception as err:
+                                print(err)
+                                response['error'] = True
+                                response['message'] = str(err)
+                              
+
+                        except Exception as err:
+                            response['message'] = "%s" % (str(err))
+                            print(err)
+                else:
+                    response['message'] = "Missing filename or text"
+            else:
+                response['message'] = "Invalid method"
         self.send_response(200)
+        self.send_header('Content-type','text/json')
         self.end_headers()
-        self.wfile.write(bytes(response, "utf8"))
+        self.wfile.write(bytes(json.dumps(response), "utf8"))
         return
 
 class AuthHandler(RequestHandler):
