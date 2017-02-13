@@ -60,19 +60,25 @@
             color: #616161 !important;
         }
 
+        .fbmenubutton {
+            color: rgba(0, 0, 0, 0.54) !important;
+            display: inline-block;
+            float: right;
+        }
+
         .filename {
             color: rgba(0, 0, 0, 0.54);
             vertical-align: text-bottom;
             font-weight: 400;
             display: inline-block;
-            max-width: 200px;
+            width: 202px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
         p.stats {
-            margin: -16px 0 0 40px;
+            margin: -26px 0 0 40px;
             padding: 0 16px;
             font-size: 0.6em;
             color: rgba(0, 0, 0, 0.54);
@@ -125,6 +131,7 @@
 
         .side-nav a {
             padding: 0 16px;
+            display: inline-block;
         }
 
         .side-nav li>a>i {
@@ -1563,7 +1570,7 @@
         });
     }
 
-    function renderitem(itemdata) {
+    function renderitem(itemdata, index) {
         var li = document.createElement('li');
         li.classList.add('collection-item');
         var item = document.createElement('a');
@@ -1604,9 +1611,41 @@
         itext.innerHTML = itemdata.name;
         itext.classList.add('filename');
         item.appendChild(itext);
+        
+        var dropdown = document.createElement('ul');
+        dropdown.id = 'fb_dropdown_' + i;
+        dropdown.classList.add('dropdown-content');
+        dropdown.classList.add('z-depth-4');
+        var dd_delete = document.createElement('li');
+        var dd_delete_a = document.createElement('a');
+        dd_delete_a.href = '#';
+        dd_delete_a.setAttribute('onclick', "alert()");
+        dd_delete_a.innerHTML = "Delete";
+        dd_delete.appendChild(dd_delete_a);
+        dropdown.appendChild(dd_delete);
+        /*<ul id="dropdown_menu" class="dropdown-content z-depth-4">
+            <li><a target="_blank" href="#modal_components">HASS Components</a></li>
+            <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
+            <li><a href="#modal_about">About PoC</a></li>
+            <li class="divider"></li>
+            <li><a href="#modal_restart">Restart HASS</a></li>
+        </ul>*/
+        //<a class="waves-effect waves-light dropdown-button hide-on-small-only" data-activates="dropdown_menu" data-beloworigin="true"><i class="material-icons right">more_vert</i></a>
+        var menubutton = document.createElement('a');
+        menubutton.classList.add('fbmenubutton');
+        menubutton.classList.add('waves-effect');
+        menubutton.classList.add('waves-light');
+        menubutton.classList.add('dropdown-button');
+        menubutton.setAttribute('data-activates', dropdown.id);
+        var menubuttonicon = document.createElement('i');
+        menubutton.classList.add('material-icons');
+        menubutton.classList.add('right');
+        menubutton.innerHTML = 'more_vert';
         li.appendChild(item);
+        li.appendChild(menubutton);
         li.appendChild(stats);
         li.setAttribute("title", itemdata.name)
+        li.appendChild(dropdown);
         return li;
     }
 
@@ -1635,7 +1674,7 @@
         fbelements.appendChild(upli);
 
         for (var i = 0; i < dirdata.content.length; i++) {
-            fbelements.appendChild(renderitem(dirdata.content[i]));
+            fbelements.appendChild(renderitem(dirdata.content[i], i));
         }
     }
 
