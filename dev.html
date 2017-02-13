@@ -373,7 +373,8 @@
         <nav class="light-blue">
             <div class="nav-wrapper">
                 <ul class="left">
-                    <li><a class="waves-effect waves-light tooltipped files-collapse show-on-large" data-activates="slide-out" data-position="bottom" data-delay="50" data-tooltip="Browse Filesystem"><i class="material-icons">list</i></a></li>
+                    <li><a class="waves-effect waves-light tooltipped files-collapse hide-on-small-only" data-activates="slide-out" data-position="bottom" data-delay="50" data-tooltip="Browse Filesystem"><i class="material-icons">list</i></a></li>
+                    <li><a class="waves-effect waves-light files-collapse hide-on-med-and-up" data-activates="slide-out"><i class="material-icons">list</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="New File" onclick="editor.setValue('');document.getElementById('currentfile').value=document.getElementById('fbheader').innerHTML+separator+'newfile';document.getElementById('currentfile').setSelectionRange(document.getElementById('currentfile').value.length-7, document.getElementById('currentfile').value.length);document.getElementById('currentfile').focus()"><i class="material-icons">note_add</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="New Folder" href="#modal_newfolder"><i class="material-icons">create_new_folder</i></a></li>
                 </ul>
