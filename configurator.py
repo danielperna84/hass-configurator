@@ -12,9 +12,9 @@ import socketserver
 import base64
 import ipaddress
 import signal
-import urllib.request
 from string import Template
 from http.server import BaseHTTPRequestHandler, HTTPServer
+import urllib.request
 from urllib.parse import urlparse, parse_qs, unquote
 
 ### Some options for you to change
@@ -1946,14 +1946,14 @@ def load_settings(settingsfile):
 
 def get_dircontent(path):
     dircontent = []
-    for e in sorted(os.listdir(path), key=lambda x: x.lower()):
+    for elem in sorted(os.listdir(path), key=lambda x: x.lower()):
         edata = {}
-        edata['name'] = e
+        edata['name'] = elem
         edata['dir'] = path
-        edata['fullpath'] = os.path.abspath(os.path.join(path, e))
+        edata['fullpath'] = os.path.abspath(os.path.join(path, elem))
         edata['type'] = 'dir' if os.path.isdir(edata['fullpath']) else 'file'
         try:
-            stats = os.stat(os.path.join(path, e))
+            stats = os.stat(os.path.join(path, elem))
             edata['size'] = stats.st_size
             edata['modified'] = stats.st_mtime
         except Exception:
@@ -2002,7 +2002,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         self.send_response(200)
         if req.path == '/api/file':
             content = ""
-            self.send_header('Content-type','text/text')
+            self.send_header('Content-type', 'text/text')
             self.end_headers()
             filename = query.get('filename', None)
             try:
@@ -2021,7 +2021,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             return
         elif req.path == '/api/listdir':
             content = ""
-            self.send_header('Content-type','text/json')
+            self.send_header('Content-type', 'text/json')
             self.end_headers()
             dirpath = query.get('path', None)
             try:
@@ -2030,9 +2030,9 @@ class RequestHandler(BaseHTTPRequestHandler):
                     if os.path.isdir(dirpath):
                         dircontent = get_dircontent(dirpath.decode('utf-8'))
                         filedata = {'content': dircontent,
-                            'abspath': os.path.abspath(dirpath).decode('utf-8'),
-                            'parent': os.path.dirname(os.path.abspath(dirpath)).decode('utf-8')
-                        }
+                                    'abspath': os.path.abspath(dirpath).decode('utf-8'),
+                                    'parent': os.path.dirname(os.path.abspath(dirpath)).decode('utf-8')
+                                   }
                         self.wfile.write(bytes(json.dumps(filedata), "utf8"))
             except Exception as err:
                 print(err)
@@ -2041,7 +2041,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             return
         elif req.path == '/api/abspath':
             content = ""
-            self.send_header('Content-type','text/text')
+            self.send_header('Content-type', 'text/text')
             self.end_headers()
             dirpath = query.get('path', None)
             if dirpath:
@@ -2054,7 +2054,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             return
         elif req.path == '/api/parent':
             content = ""
-            self.send_header('Content-type','text/text')
+            self.send_header('Content-type', 'text/text')
             self.end_headers()
             dirpath = query.get('path', None)
             if dirpath:
@@ -2067,7 +2067,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             return
         elif req.path == '/api/restart':
             print("/api/restart")
-            self.send_header('Content-type','text/json')
+            self.send_header('Content-type', 'text/json')
             self.end_headers()
             r = {"restart": False}
             try:
@@ -2086,9 +2086,9 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.wfile.write(bytes(json.dumps(r), "utf8"))
             return
         elif req.path == '/':
-            self.send_header('Content-type','text/html')
+            self.send_header('Content-type', 'text/html')
             self.end_headers()
-            
+
             boot = "{}"
             try:
                 headers = {
@@ -2099,11 +2099,11 @@ class RequestHandler(BaseHTTPRequestHandler):
                 req = urllib.request.Request("%sbootstrap" % HASS_API, headers=headers, method='GET')
                 with urllib.request.urlopen(req) as response:
                     boot = response.read().decode('utf-8')
-                
+
             except Exception as err:
                 print("Exception getting bootstrap")
                 print(err)
-    
+
             color = "green"
             try:
                 response = urllib.request.urlopen(RELEASEURL)
@@ -2131,7 +2131,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             "error": True,
             "message": "Generic failure"
         }
-        
+
         try:
             length = int(self.headers['content-length'])
             postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
@@ -2151,7 +2151,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                             with open(filename, 'wb') as fptr:
                                 fptr.write(bytes(postvars['text'][0], "utf-8"))
                             self.send_response(200)
-                            self.send_header('Content-type','text/json')
+                            self.send_header('Content-type', 'text/json')
                             self.end_headers()
                             response['error'] = False
                             response['message'] = "File saved successfully"
@@ -2174,7 +2174,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                                 else:
                                     os.unlink(delpath)
                                 self.send_response(200)
-                                self.send_header('Content-type','text/json')
+                                self.send_header('Content-type', 'text/json')
                                 self.end_headers()
                                 response['error'] = False
                                 response['message'] = "Deletetion successful"
@@ -2184,7 +2184,6 @@ class RequestHandler(BaseHTTPRequestHandler):
                                 print(err)
                                 response['error'] = True
                                 response['message'] = str(err)
-                              
 
                         except Exception as err:
                             response['message'] = "%s" % (str(err))
@@ -2201,7 +2200,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                             try:
                                 os.makedirs(response['path'])
                                 self.send_response(200)
-                                self.send_header('Content-type','text/json')
+                                self.send_header('Content-type', 'text/json')
                                 self.end_headers()
                                 response['error'] = False
                                 response['message'] = "Folder created"
@@ -2211,8 +2210,30 @@ class RequestHandler(BaseHTTPRequestHandler):
                                 print(err)
                                 response['error'] = True
                                 response['message'] = str(err)
-                              
-
+                        except Exception as err:
+                            response['message'] = "%s" % (str(err))
+                            print(err)
+            elif req.path == '/api/newfile':
+                if 'path' in postvars.keys() and 'name' in postvars.keys():
+                    if postvars['path'] and postvars['name']:
+                        try:
+                            basepath = unquote(postvars['path'][0])
+                            name = unquote(postvars['name'][0])
+                            response['path'] = os.path.join(basepath, name)
+                            try:
+                                with open(response['path'], 'w') as fptr:
+                                    fptr.write("")
+                                self.send_response(200)
+                                self.send_header('Content-type', 'text/json')
+                                self.end_headers()
+                                response['error'] = False
+                                response['message'] = "File created"
+                                self.wfile.write(bytes(json.dumps(response), "utf8"))
+                                return
+                            except Exception as err:
+                                print(err)
+                                response['error'] = True
+                                response['message'] = str(err)
                         except Exception as err:
                             response['message'] = "%s" % (str(err))
                             print(err)
@@ -2221,7 +2242,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             else:
                 response['message'] = "Invalid method"
         self.send_response(200)
-        self.send_header('Content-type','text/json')
+        self.send_header('Content-type', 'text/json')
         self.end_headers()
         self.wfile.write(bytes(json.dumps(response), "utf8"))
         return
