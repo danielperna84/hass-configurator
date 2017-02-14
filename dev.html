@@ -61,14 +61,18 @@
             color: #616161 !important;
         }
 
+        .fbtoolbarbutton {
+            color: #616161 !important;
+        }
+
         .fbmenubutton {
-            color: rgba(0, 0, 0, 0.54) !important;
+            color: #616161 !important;
             display: inline-block;
             float: right;
         }
 
         .filename {
-            color: rgba(0, 0, 0, 0.54);
+            color: #616161 !important;
             vertical-align: text-bottom;
             font-weight: 400;
             display: inline-block;
@@ -83,7 +87,7 @@
             margin: -26px 0 0 40px;
             padding: 0 16px;
             font-size: 0.5em;
-            color: rgba(0, 0, 0, 0.54);
+            color: #616161 !important;
             line-height: 16px;
         }
 
@@ -383,10 +387,10 @@
                 <ul class="left">
                     <li><a class="waves-effect waves-light tooltipped files-collapse hide-on-small-only" data-activates="slide-out" data-position="bottom" data-delay="50" data-tooltip="Browse Filesystem"><i class="material-icons">list</i></a></li>
                     <li><a class="waves-effect waves-light files-collapse hide-on-med-and-up" data-activates="slide-out"><i class="material-icons">list</i></a></li>
-                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="New File" onclick="editor.setValue('');document.getElementById('currentfile').value=document.getElementById('fbheader').innerHTML+separator+'newfile';document.getElementById('currentfile').setSelectionRange(document.getElementById('currentfile').value.length-7, document.getElementById('currentfile').value.length);document.getElementById('currentfile').focus()"><i class="material-icons">note_add</i></a></li>
+                    <!--<li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="New File" onclick="editor.setValue('');document.getElementById('currentfile').value=document.getElementById('fbheader').innerHTML+separator+'newfile';document.getElementById('currentfile').setSelectionRange(document.getElementById('currentfile').value.length-7, document.getElementById('currentfile').value.length);document.getElementById('currentfile').focus()"><i class="material-icons">note_add</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="New Folder" href="#modal_newfolder"><i class="material-icons">create_new_folder</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Upload" href="#modal_upload"><i class="material-icons">file_upload</i></a></li>
-                    <li><a class="waves-effect waves-light hide-on-med-and-up" href="#modal_upload"><i class="material-icons">file_upload</i></a></li>
+                    <li><a class="waves-effect waves-light hide-on-med-and-up" href="#modal_upload"><i class="material-icons">file_upload</i></a></li>-->
                 </ul>
                 <ul class="right">
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Save" href="#modal_save"><i class="material-icons">save</i></a></li>
@@ -992,6 +996,19 @@
         </div>
         <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">Cancel</a> <a onclick="newfolder(document.getElementById('newfoldername').value)" class=" modal-action modal-close waves-effect waves-green btn-flat">OK</a> </div>
     </div>
+    <div id="modal_newfile" class="modal">
+        <div class="modal-content">
+            <h4>New File</h4>
+            <br>
+            <div class="row">
+                <div class="input-field col s12">
+                    <input type="text" id="newfilename">
+                    <label class="active" for="newfilename">New File Name</label>
+                </div>
+          </div>
+        </div>
+        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">Cancel</a> <a onclick="newfile(document.getElementById('newfilename').value)" class=" modal-action modal-close waves-effect waves-green btn-flat">OK</a> </div>
+    </div>
     <div id="modal_about" class="modal modal-fixed-footer">
         <div class="modal-content">
             <h4><a class="black-text" href="https://github.com/danielperna84/hass-poc-configurator/" target="_blank">HASS Configurator</a></h4>
@@ -1067,9 +1084,9 @@
         <div>
           <div id="slide-out" class="fb_side-nav side-nav grey lighten-4">
             <div class="side_tools center">
-              <a class="col s4 waves-effect"><i class="material-icons">note_add</i></a>
-              <a class="col s4 waves-effect"><i class="material-icons">create_new_folder</i></a>
-              <a class="col s4 waves-effect"><i class="material-icons">file_upload</i></a>
+              <a class="col s4 waves-effect fbtoolbarbutton" href="#modal_newfile"><i class="material-icons">note_add</i></a>
+              <a class="col s4 waves-effect fbtoolbarbutton" href="#modal_newfolder"><i class="material-icons">create_new_folder</i></a>
+              <a class="col s4 waves-effect fbtoolbarbutton" href="#modal_upload"><i class="material-icons">file_upload</i></a>
           </div>
             <div id="filebrowser" class="z-depth-1">
               <ul class="collection with-header">
@@ -1812,6 +1829,27 @@
                 }
                 listdir(document.getElementById('fbheader').innerHTML);
                 document.getElementById('newfoldername').value = '';
+            });
+        }
+    }
+
+    function newfile(filename) {
+        var path = document.getElementById('fbheader').innerHTML;
+        if (path.length > 0 && filename.length > 0) {
+            data = new Object();
+            data.path = path;
+            data.name = filename;
+            $.post("api/newfile", data).done(function(resp) {
+                if (resp.error) {
+                    var $toastContent = $("<div><pre>" + resp.message + "\n" + resp.path + "</pre></div>");
+                    Materialize.toast($toastContent, 5000);
+                }
+                else {
+                    var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
+                    Materialize.toast($toastContent, 2000);
+                }
+                listdir(document.getElementById('fbheader').innerHTML);
+                document.getElementById('newfilename').value = '';
             });
         }
     }
