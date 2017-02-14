@@ -22,14 +22,14 @@
 
         #editor {
             position: fixed;
-            top: 155px;
+            top: 135px;
             right: 0;
             bottom: 0;
           }
 
         @media only screen and (max-width: 600px) {
           #editor {
-              top: 145px;
+              top: 125px;
               bottom: 56px;
             }
 
@@ -127,17 +127,18 @@
             border-bottom: 1px solid #eeeeee !important;
         }
 
-        .side-nav li {
+        .fb_side-nav li {
             line-height: 36px;
         }
 
         .fb_side-nav a {
           padding: 0 16px;
-          display: inline-block;
+          display: inline-block !important;
         }
 
-        .side-nav li>a>i {
+        .fb_side-nav li>a>i {
             margin-right: 16px !important;
+            cursor: pointer;
         }
 
         .collection .collection-item i.material-icons {
@@ -311,6 +312,16 @@
             width: 320px !important;
         }
 
+        input.currentfile_input {
+          margin-bottom: -1px;
+          margin-top: 0;
+          padding-left: 5px;
+        }
+
+        .side_tools {
+          vertical-align: middle;
+        }
+
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ace.js" type="text/javascript" charset="utf-8"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ext-modelist.js" type="text/javascript" charset="utf-8"></script>
@@ -374,11 +385,12 @@
                     <li><a class="waves-effect waves-light files-collapse hide-on-med-and-up" data-activates="slide-out"><i class="material-icons">list</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="New File" onclick="editor.setValue('');document.getElementById('currentfile').value=document.getElementById('fbheader').innerHTML+separator+'newfile';document.getElementById('currentfile').setSelectionRange(document.getElementById('currentfile').value.length-7, document.getElementById('currentfile').value.length);document.getElementById('currentfile').focus()"><i class="material-icons">note_add</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="New Folder" href="#modal_newfolder"><i class="material-icons">create_new_folder</i></a></li>
+                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Upload" href="#modal_upload"><i class="material-icons">file_upload</i></a></li>
+                    <li><a class="waves-effect waves-light hide-on-med-and-up" href="#modal_upload"><i class="material-icons">file_upload</i></a></li>
                 </ul>
                 <ul class="right">
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Save" href="#modal_save"><i class="material-icons">save</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Close" href="#modal_close"><i class="material-icons">highlight_off</i></a></li>
-                    <!--<li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Delete" href="#modal_delete"><i class="material-icons">delete</i></a></li>-->
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Search" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
                     <li><a class="waves-effect waves-light hide-on-med-and-up" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
                     <li><a class="waves-effect waves-light dropdown-button hide-on-small-only" data-activates="dropdown_menu" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
@@ -389,13 +401,6 @@
     </div>
   </header>
   <main>
-    <ul id="dropdown_tools_mobile" class="dropdown-content z-depth-4">
-        <li><a href="#" onclick="editor.setValue('');document.getElementById('currentfile').value=document.getElementById('fbheader').innerHTML+separator+'newfile';document.getElementById('currentfile').setSelectionRange(document.getElementById('currentfile').value.length-7, document.getElementById('currentfile').value.length);document.getElementById('currentfile').focus()">New File</a></li>
-        <li><a href="#modal_save">Save</a></li>
-        <li><a href="#modal_close">Close</a></li>
-        <!--<li class="divider"></li>
-        <li><a href="#modal_delete">Delete</a></li>-->
-    </ul>
     <ul id="dropdown_menu" class="dropdown-content z-depth-4">
         <li><a target="_blank" href="#modal_components">HASS Components</a></li>
         <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
@@ -935,6 +940,24 @@
         </div>
         <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="save()" class=" modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
     </div>
+    <div id="modal_upload" class="modal">
+        <div class="modal-content">
+            <h4>Upload File</h4>
+            <p>Please choose a file to upload</p>
+            <form action="#">
+              <div class="file-field input-field">
+                <div class="btn light-blue waves-effect">
+                  <span>File</span>
+                  <input type="file">
+                </div>
+                <div class="file-path-wrapper">
+                  <input class="file-path validate" type="text">
+                </div>
+              </div>
+            </form>
+        </div>
+        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">Cancel</a> <a onclick="" class="modal-action modal-close waves-effect waves-green btn-flat">OK</a> </div>
+    </div>
     <div id="modal_close" class="modal">
         <div class="modal-content">
             <h4>Close File</h4>
@@ -962,7 +985,7 @@
             <br>
             <div class="row">
                 <div class="input-field col s12">
-                    <input type="text" id="newfoldername" id="newfolder">
+                    <input type="text" id="newfoldername">
                     <label class="active" for="newfoldername">New Folder Name</label>
                 </div>
           </div>
@@ -1037,19 +1060,24 @@
         </div>
         <div class="col s12 m8 l9">
           <div class="card input-field col s12 grey lighten-4 hoverable">
-              <input class="grey-text text-darken-3" value="" id="currentfile" type="text">
+              <input class="currentfile_input" value="" id="currentfile" type="text">
           </div>
         </div>
-      <div class="col s12 m8 l9 z-depth-2" id="editor"></div>
-      <div>
-        <div id="slide-out" class="fb_side-nav side-nav grey lighten-4">
-          <div class="z-depth-1" id="filebrowser" class="collection with-header">
+        <div class="col s12 m8 l9 z-depth-2" id="editor"></div>
+        <div>
+          <div id="slide-out" class="fb_side-nav side-nav grey lighten-4">
+            <div class="side_tools center">
+              <a class="col s4 waves-effect"><i class="material-icons">note_add</i></a>
+              <a class="col s4 waves-effect"><i class="material-icons">create_new_folder</i></a>
+              <a class="col s4 waves-effect"><i class="material-icons">file_upload</i></a>
+          </div>
+            <div id="filebrowser" class="z-depth-1">
               <ul class="collection with-header">
                   <li id="fbheader" class="collection-header"></li>
               </ul>
               <ul id="fbelements"></ul>
-          </div>
-          <div class="row hide-on-med-and-up">
+            </div>
+            <div class="row hide-on-med-and-up">
             <br />
             <div class="input-field col s12">
               <select onchange="insert(this.value)">
@@ -1430,7 +1458,6 @@
       <li class="waves-effect"><a style="opacity: 1;" href="#modal_newfolder"><i class="material-icons grey-text text-darken-2">create_new_folder</i></a></li>
       <li class="waves-effect"><a style="opacity: 1;" href="#modal_save"><i class="material-icons grey-text text-darken-2">save</i></a></li>
       <li class="waves-effect"><a style="opacity: 1;" href="#modal_close"><i class="material-icons grey-text text-darken-2">highlight_off</i></a></li>
-      <!--<li class="waves-effect"><a style="opacity: 1;" href="#modal_delete"><i class="material-icons grey-text text-darken-2">delete</i></a></li>-->
     </ul>
   </div>
 </footer>
@@ -1476,6 +1503,7 @@
 		      .delay(800)
 		      .fadeOut('slow');
     });
+</script>
 </script>
 <script>
     var modemapping = new Object();
@@ -1621,6 +1649,7 @@
         dropdown.classList.add('z-depth-4');
         var dd_delete = document.createElement('li');
         var dd_delete_a = document.createElement('a');
+        dd_delete_a.classList.add('waves-effect');
         dd_delete_a.setAttribute('href', "#modal_delete");
         dd_delete_a.innerHTML = "Delete";
         dd_delete.appendChild(dd_delete_a);
