@@ -327,9 +327,8 @@
         }
 
         .fbtoolbarbutton_icon {
-          margin-top: 12px;
+           margin-top: 12px;
         }
-
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ace.js" type="text/javascript" charset="utf-8"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ext-modelist.js" type="text/javascript" charset="utf-8"></script>
@@ -956,7 +955,7 @@
               <div class="file-field input-field">
                 <div class="btn light-blue waves-effect">
                   <span>File</span>
-                  <input type="file">
+                  <input type="file" id="uploadfile" />
                 </div>
                 <div class="file-path-wrapper">
                   <input class="file-path validate" type="text">
@@ -964,7 +963,7 @@
               </div>
             </form>
         </div>
-        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">Cancel</a> <a onclick="" class="modal-action modal-close waves-effect waves-green btn-flat">OK</a> </div>
+        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">Cancel</a> <a onclick="upload()" class="modal-action modal-close waves-effect waves-green btn-flat">OK</a> </div>
     </div>
     <div id="modal_close" class="modal">
         <div class="modal-content">
@@ -1856,6 +1855,32 @@
                 document.getElementById('newfilename').value = '';
             });
         }
+    }
+
+    function upload() {
+        var file_data = $('#uploadfile').prop('files')[0];   
+        var form_data = new FormData();                  
+        form_data.append('file', file_data);
+        $.ajax({
+            url: 'api/upload',
+            dataType: 'json',
+            cache: false,
+            contentType: false,
+            processData: false,
+            data: form_data,                         
+            type: 'post',
+            success: function(resp){
+                if (resp.error) {
+                    var $toastContent = $("<div><pre>Error: " + resp.message + "</pre></div>");
+                    Materialize.toast($toastContent, 2000);
+                }
+                else {
+                    var $toastContent = $("<div><pre>Upload succesful</pre></div>");
+                    Materialize.toast($toastContent, 2000);
+                    listdir(document.getElementById('fbheader').innerHTML);
+                }
+            }
+        });
     }
 
 </script>
