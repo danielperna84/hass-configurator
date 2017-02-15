@@ -1916,15 +1916,15 @@ INDEX = Template(r"""<!DOCTYPE html>
 </body>
 </html>""")
 
-def signal_handler(signal, frame):
+def signal_handler(sig, frame):
     global HTTPD
-    print("Shutting down server")
+    print("Got signal: %s. Shutting down server" % str(sig))
     HTTPD.server_close()
     sys.exit(0)
 
 def load_settings(settingsfile):
     global LISTENIP, LISTENPORT, BASEPATH, SSL_CERTIFICATE, SSL_KEY, HASS_API, \
-    HASS_API_PASSWORD, CREDENTIALS, ALLOWED_NETWORKS, BANNED_IPS, BANLIMIT
+    HASS_API_PASSWORD, CREDENTIALS, ALLOWED_NETWORKS, BANNED_IPS, BANLIMIT, DEV
     try:
         if os.path.isfile(settingsfile):
             with open(settingsfile) as fptr:
@@ -1940,6 +1940,7 @@ def load_settings(settingsfile):
                 ALLOWED_NETWORKS = settings.get("ALLOWED_NETWORKS", ALLOWED_NETWORKS)
                 BANNED_IPS = settings.get("BANNED_IPS", BANNED_IPS)
                 BANLIMIT = settings.get("BANLIMIT", BANLIMIT)
+                DEV = settings.get("DEV", DEV)
     except Exception as err:
         print(err)
         print("Not loading static settings")
@@ -2070,7 +2071,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             print("/api/restart")
             self.send_header('Content-type', 'text/json')
             self.end_headers()
-            r = {"restart": False}
+            res = {"restart": False}
             try:
                 headers = {
                     "Content-Type": "application/json"
@@ -2079,12 +2080,12 @@ class RequestHandler(BaseHTTPRequestHandler):
                     headers["x-ha-access"] = HASS_API_PASSWORD
                 req = urllib.request.Request("%sservices/homeassistant/restart" % HASS_API, headers=headers, method='POST')
                 with urllib.request.urlopen(req) as response:
-                    r = json.loads(response.read().decode('utf-8'))
-                    print(r)
+                    res = json.loads(response.read().decode('utf-8'))
+                    print(res)
             except Exception as err:
                 print(err)
-                r['restart'] = str(err)
-            self.wfile.write(bytes(json.dumps(r), "utf8"))
+                res['restart'] = str(err)
+            self.wfile.write(bytes(json.dumps(res), "utf8"))
             return
         elif req.path == '/':
             self.send_header('Content-type', 'text/html')
@@ -2114,7 +2115,10 @@ class RequestHandler(BaseHTTPRequestHandler):
             except Exception as err:
                 print("Exception getting release")
                 print(err)
-            html = get_html().safe_substitute(bootstrap=boot, current=VERSION, versionclass=color, separator="\%s" % os.sep if os.sep == "\\" else os.sep)
+            html = get_html().safe_substitute(bootstrap=boot,
+                                              current=VERSION,
+                                              versionclass=color,
+                                              separator="\%s" % os.sep if os.sep == "\\" else os.sep)
             self.wfile.write(bytes(html, "utf8"))
             return
         else:
@@ -2177,11 +2181,12 @@ class RequestHandler(BaseHTTPRequestHandler):
                     fp=self.rfile,
                     headers=self.headers,
                     environ={'REQUEST_METHOD': 'POST',
-                                'CONTENT_TYPE': self.headers['Content-Type'],
+                             'CONTENT_TYPE': self.headers['Content-Type'],
                             })
                 filename = form['file'].filename
+                filepath = form['path'].file.read()
                 data = form['file'].file.read()
-                open("%s"%filename, "wb").write(data)
+                open("%s%s%s" % (filepath, os.sep, filename), "wb").write(data)
                 self.send_response(200)
                 self.send_header('Content-type', 'text/json')
                 self.end_headers()
@@ -2365,8 +2370,13 @@ def main(args):
         HTTPD = HTTPServer(server_address, Handler)
     else:
         HTTPD = socketserver.TCPServer(server_address, Handler)
-        HTTPD.socket = ssl.wrap_socket(HTTPD.socket, certfile=SSL_CERTIFICATE, keyfile=SSL_KEY, server_side=True)
-    print('Listening on: %s://%s:%i' % ('https' if SSL_CERTIFICATE else 'http', LISTENIP, LISTENPORT))
+        HTTPD.socket = ssl.wrap_socket(HTTPD.socket,
+                                       certfile=SSL_CERTIFICATE,
+                                       keyfile=SSL_KEY,
+                                       server_side=True)
+    print('Listening on: %s://%s:%i' % ('https' if SSL_CERTIFICATE else 'http',
+                                        LISTENIP,
+                                        LISTENPORT))
     if BASEPATH:
         os.chdir(BASEPATH)
     HTTPD.serve_forever()
