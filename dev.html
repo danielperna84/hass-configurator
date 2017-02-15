@@ -30,14 +30,12 @@
         @media only screen and (max-width: 600px) {
           #editor {
               top: 125px;
-              bottom: 56px;
-            }
-
-          #edit_float {
-              bottom: 85px;
-              z-index: 10;
-            }
           }
+        }
+
+        #edit_float {
+              z-index: 10;
+        }
 
         #filebrowser {
             background-color: #fff;
@@ -175,10 +173,8 @@
 
         #modal_acekeyboard, #modal_components {
             top: auto;
-            bottom: -100%;
-            margin: 0;
             width: 96%;
-            min-height: 95%;
+            min-height: 96%;
             border-radius: 0;
             margin: auto;
         }
@@ -401,8 +397,10 @@
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Save" href="#modal_save"><i class="material-icons">save</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Close" href="#modal_close"><i class="material-icons">highlight_off</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Search" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
-                    <li><a class="waves-effect waves-light hide-on-med-and-up" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
                     <li><a class="waves-effect waves-light dropdown-button hide-on-small-only" data-activates="dropdown_menu" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
+                    <li><a class="waves-effect waves-light hide-on-med-and-up" href="#modal_save"><i class="material-icons">save</i></a></li>
+                    <li><a class="waves-effect waves-light hide-on-med-and-up" href="#modal_close"><i class="material-icons">highlight_off</i></a></li>
+                    <li><a class="waves-effect waves-light hide-on-med-and-up" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
                     <li><a class="waves-effect waves-light dropdown-button hide-on-med-and-up" data-activates="dropdown_menu_mobile" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
                 </ul>
             </div>
@@ -1471,7 +1469,7 @@
     </div>
   </div>
 </main>
-<footer class="hide-on-med-and-up">
+<!-- <footer class="hide-on-med-and-up">
 <div class="shadow grey darken-4 row s12 z-depth-4"></div>
   <div class="fixed-action-btn toolbar active grey lighten-4" data-origin-bottom="77" data-origin-left="984" data-origin-width="56" data-open="true" style="text-align: center; width: 100%; bottom: 0px; left: 0px; transition: transform 0.2s cubic-bezier(0.55, 0.085, 0.68, 0.53), background-color 0s linear 0.2s; overflow: hidden;">
     <div class="fab-backdrop grey lighten-4" style=" transform: scale(26.575); "></div>
@@ -1482,7 +1480,7 @@
       <li class="waves-effect"><a style="opacity: 1;" href="#modal_close"><i class="material-icons grey-text text-darken-2">highlight_off</i></a></li>
     </ul>
   </div>
-</footer>
+</footer> -->
 <input type="hidden" id="fb_currentfile" value="" />
 <!-- Scripts -->
 <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
