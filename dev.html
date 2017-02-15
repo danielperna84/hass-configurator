@@ -1667,6 +1667,17 @@
         dropdown.id = 'fb_dropdown_' + index;
         dropdown.classList.add('dropdown-content');
         dropdown.classList.add('z-depth-4');
+
+        // Download button
+        var dd_download = document.createElement('li');
+        var dd_download_a = document.createElement('a');
+        dd_download_a.classList.add('waves-effect');
+        dd_download_a.setAttribute('onclick', "download_file('" + encodeURI(itemdata.fullpath) + "')");
+        dd_download_a.innerHTML = "Download";
+        dd_download.appendChild(dd_download_a);
+        dropdown.appendChild(dd_download);
+
+        // Delete button
         var dd_delete = document.createElement('li');
         var dd_delete_a = document.createElement('a');
         dd_delete_a.classList.add('waves-effect');
@@ -1773,6 +1784,10 @@
                 }
             });
         }
+    }
+
+    function download_file(filepath) {
+        window.open("/api/download?filename="+encodeURI(filepath));
     }
 
     function delete_file() {
