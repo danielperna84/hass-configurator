@@ -951,7 +951,7 @@
         <div class="modal-content">
             <h4>Upload File</h4>
             <p>Please choose a file to upload</p>
-            <form action="#">
+            <form action="#" id="uploadform">
               <div class="file-field input-field">
                 <div class="btn light-blue waves-effect">
                   <span>File</span>
@@ -1861,6 +1861,7 @@
         var file_data = $('#uploadfile').prop('files')[0];
         var form_data = new FormData();
         form_data.append('file', file_data);
+        form_data.append('path', document.getElementById('fbheader').innerHTML);
         $.ajax({
             url: 'api/upload',
             dataType: 'json',
@@ -1878,6 +1879,7 @@
                     var $toastContent = $("<div><pre>Upload succesful</pre></div>");
                     Materialize.toast($toastContent, 2000);
                     listdir(document.getElementById('fbheader').innerHTML);
+                    document.getElementById('uploadform').reset();
                 }
             }
         });
