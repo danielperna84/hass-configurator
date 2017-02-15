@@ -12,6 +12,7 @@ import socketserver
 import base64
 import ipaddress
 import signal
+import cgi
 from string import Template
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import urllib.request
@@ -2126,121 +2127,159 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.do_BLOCK()
             return
         req = urlparse(self.path)
-        postvars = {}
+
         response = {
             "error": True,
             "message": "Generic failure"
         }
 
-        try:
-            length = int(self.headers['content-length'])
-            postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
-            interror = False
-        except Exception as err:
-            print(err)
-            response['message'] = "%s" % (str(err))
-            interror = True
-
-        if not interror:
-            if req.path == '/api/save':
-                if 'filename' in postvars.keys() and 'text' in postvars.keys():
-                    if postvars['filename'] and postvars['text']:
+        length = int(self.headers['content-length'])
+        if req.path == '/api/save':
+            try:
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+            except Exception as err:
+                print(err)
+                response['message'] = "%s" % (str(err))
+                postvars = {}
+            if 'filename' in postvars.keys() and 'text' in postvars.keys():
+                if postvars['filename'] and postvars['text']:
+                    try:
+                        filename = unquote(postvars['filename'][0])
+                        response['file'] = filename
+                        with open(filename, 'wb') as fptr:
+                            fptr.write(bytes(postvars['text'][0], "utf-8"))
+                        self.send_response(200)
+                        self.send_header('Content-type', 'text/json')
+                        self.end_headers()
+                        response['error'] = False
+                        response['message'] = "File saved successfully"
+                        self.wfile.write(bytes(json.dumps(response), "utf8"))
+                        return
+                    except Exception as err:
+                        response['message'] = "%s" % (str(err))
+                        print(err)
+            else:
+                response['message'] = "Missing filename or text"
+        elif req.path == '/api/upload':
+            if length > 104857600: #100 MB for now
+                read = 0
+                while read < length:
+                    read += len(self.rfile.read(min(66556, length - read)))
+                response['error'] = True
+                response['message'] = "File too big: %i" % read 
+                self.wfile.write(bytes(json.dumps(response), "utf8"))
+                return
+            else:
+                form = cgi.FieldStorage(
+                    fp=self.rfile,
+                    headers=self.headers,
+                    environ={'REQUEST_METHOD': 'POST',
+                                'CONTENT_TYPE': self.headers['Content-Type'],
+                            })
+                filename = form['file'].filename
+                data = form['file'].file.read()
+                open("%s"%filename, "wb").write(data)
+                response['error'] = False
+                response['message'] = "Upload successful"
+                self.wfile.write(bytes(json.dumps(response), "utf8"))
+                return
+        elif req.path == '/api/delete':
+            try:
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+            except Exception as err:
+                print(err)
+                response['message'] = "%s" % (str(err))
+                postvars = {}
+            if 'path' in postvars.keys():
+                if postvars['path']:
+                    try:
+                        delpath = unquote(postvars['path'][0])
+                        response['path'] = delpath
                         try:
-                            filename = unquote(postvars['filename'][0])
-                            response['file'] = filename
-                            with open(filename, 'wb') as fptr:
-                                fptr.write(bytes(postvars['text'][0], "utf-8"))
+                            if os.path.isdir(delpath):
+                                os.rmdir(delpath)
+                            else:
+                                os.unlink(delpath)
                             self.send_response(200)
                             self.send_header('Content-type', 'text/json')
                             self.end_headers()
                             response['error'] = False
-                            response['message'] = "File saved successfully"
+                            response['message'] = "Deletetion successful"
                             self.wfile.write(bytes(json.dumps(response), "utf8"))
                             return
                         except Exception as err:
-                            response['message'] = "%s" % (str(err))
                             print(err)
-                else:
-                    response['message'] = "Missing filename or text"
-            elif req.path == '/api/delete':
-                if 'path' in postvars.keys():
-                    if postvars['path']:
-                        try:
-                            delpath = unquote(postvars['path'][0])
-                            response['path'] = delpath
-                            try:
-                                if os.path.isdir(delpath):
-                                    os.rmdir(delpath)
-                                else:
-                                    os.unlink(delpath)
-                                self.send_response(200)
-                                self.send_header('Content-type', 'text/json')
-                                self.end_headers()
-                                response['error'] = False
-                                response['message'] = "Deletetion successful"
-                                self.wfile.write(bytes(json.dumps(response), "utf8"))
-                                return
-                            except Exception as err:
-                                print(err)
-                                response['error'] = True
-                                response['message'] = str(err)
+                            response['error'] = True
+                            response['message'] = str(err)
 
-                        except Exception as err:
-                            response['message'] = "%s" % (str(err))
-                            print(err)
-                else:
-                    response['message'] = "Missing filename or text"
-            elif req.path == '/api/newfolder':
-                if 'path' in postvars.keys() and 'name' in postvars.keys():
-                    if postvars['path'] and postvars['name']:
-                        try:
-                            basepath = unquote(postvars['path'][0])
-                            name = unquote(postvars['name'][0])
-                            response['path'] = os.path.join(basepath, name)
-                            try:
-                                os.makedirs(response['path'])
-                                self.send_response(200)
-                                self.send_header('Content-type', 'text/json')
-                                self.end_headers()
-                                response['error'] = False
-                                response['message'] = "Folder created"
-                                self.wfile.write(bytes(json.dumps(response), "utf8"))
-                                return
-                            except Exception as err:
-                                print(err)
-                                response['error'] = True
-                                response['message'] = str(err)
-                        except Exception as err:
-                            response['message'] = "%s" % (str(err))
-                            print(err)
-            elif req.path == '/api/newfile':
-                if 'path' in postvars.keys() and 'name' in postvars.keys():
-                    if postvars['path'] and postvars['name']:
-                        try:
-                            basepath = unquote(postvars['path'][0])
-                            name = unquote(postvars['name'][0])
-                            response['path'] = os.path.join(basepath, name)
-                            try:
-                                with open(response['path'], 'w') as fptr:
-                                    fptr.write("")
-                                self.send_response(200)
-                                self.send_header('Content-type', 'text/json')
-                                self.end_headers()
-                                response['error'] = False
-                                response['message'] = "File created"
-                                self.wfile.write(bytes(json.dumps(response), "utf8"))
-                                return
-                            except Exception as err:
-                                print(err)
-                                response['error'] = True
-                                response['message'] = str(err)
-                        except Exception as err:
-                            response['message'] = "%s" % (str(err))
-                            print(err)
-                else:
-                    response['message'] = "Missing filename or text"
+                    except Exception as err:
+                        response['message'] = "%s" % (str(err))
+                        print(err)
             else:
-                response['message'] = "Invalid method"
+                response['message'] = "Missing filename or text"
+        elif req.path == '/api/newfolder':
+            try:
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+            except Exception as err:
+                print(err)
+                response['message'] = "%s" % (str(err))
+                postvars = {}
+            if 'path' in postvars.keys() and 'name' in postvars.keys():
+                if postvars['path'] and postvars['name']:
+                    try:
+                        basepath = unquote(postvars['path'][0])
+                        name = unquote(postvars['name'][0])
+                        response['path'] = os.path.join(basepath, name)
+                        try:
+                            os.makedirs(response['path'])
+                            self.send_response(200)
+                            self.send_header('Content-type', 'text/json')
+                            self.end_headers()
+                            response['error'] = False
+                            response['message'] = "Folder created"
+                            self.wfile.write(bytes(json.dumps(response), "utf8"))
+                            return
+                        except Exception as err:
+                            print(err)
+                            response['error'] = True
+                            response['message'] = str(err)
+                    except Exception as err:
+                        response['message'] = "%s" % (str(err))
+                        print(err)
+        elif req.path == '/api/newfile':
+            try:
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+            except Exception as err:
+                print(err)
+                response['message'] = "%s" % (str(err))
+                postvars = {}
+            if 'path' in postvars.keys() and 'name' in postvars.keys():
+                if postvars['path'] and postvars['name']:
+                    try:
+                        basepath = unquote(postvars['path'][0])
+                        name = unquote(postvars['name'][0])
+                        response['path'] = os.path.join(basepath, name)
+                        try:
+                            with open(response['path'], 'w') as fptr:
+                                fptr.write("")
+                            self.send_response(200)
+                            self.send_header('Content-type', 'text/json')
+                            self.end_headers()
+                            response['error'] = False
+                            response['message'] = "File created"
+                            self.wfile.write(bytes(json.dumps(response), "utf8"))
+                            return
+                        except Exception as err:
+                            print(err)
+                            response['error'] = True
+                            response['message'] = str(err)
+                    except Exception as err:
+                        response['message'] = "%s" % (str(err))
+                        print(err)
+            else:
+                response['message'] = "Missing filename or text"
+        else:
+            response['message'] = "Invalid method"
         self.send_response(200)
         self.send_header('Content-type', 'text/json')
         self.end_headers()
