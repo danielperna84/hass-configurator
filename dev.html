@@ -91,35 +91,23 @@
             line-height: 16px;
         }
 
-        .green {
-            color: #fff;
+        .collection-item #uplink {
+            background-color: #f5f5f5;
+            width: 320px !important;
         }
 
-        .red {
-            color: #fff;
+        input.currentfile_input {
+          margin-bottom: -1px;
+          margin-top: 0;
+          padding-left: 5px;
         }
 
-        #dropdown_menu, #dropdown_menu_mobile {
-            min-width: 180px;
+        .side_tools {
+          vertical-align: middle;
         }
 
-        .dropdown-content li>a,
-        .dropdown-content li>span {
-            color: #616161 !important;
-        }
-
-        .blue_check:checked+label:before {
-            border-right: 2px solid #03a9f4;
-            border-bottom: 2px solid #03a9f4;
-        }
-
-        .input-field input:focus+label {
-            color: #03a9f4 !important;
-        }
-
-        .row .input-field input:focus {
-            border-bottom: 1px solid #03a9f4 !important;
-            box-shadow: 0 1px 0 0 #03a9f4 !important
+        .fbtoolbarbutton_icon {
+           margin-top: 12px;
         }
 
         .collection {
@@ -147,6 +135,42 @@
 
         .collection .collection-item i.material-icons {
             vertical-align: text-bottom;
+        }
+
+        .green {
+            color: #fff;
+        }
+
+        .red {
+            color: #fff;
+        }
+
+        #dropdown_menu, #dropdown_menu_mobile {
+            min-width: 180px;
+        }
+
+        .dropdown-content li>a,
+        .dropdown-content li>span {
+            color: #616161 !important;
+        }
+
+        .blue_check:checked+label:before {
+            border-right: 2px solid #03a9f4;
+            border-bottom: 2px solid #03a9f4;
+        }
+
+        .input-field input:focus+label {
+            color: #03a9f4 !important;
+        }
+
+        .input-field input[type=text].valid {
+            border-bottom: 1px solid #03a9f4;;
+            box-shadow: 0 1px 0 0 #03a9f4;;
+        }
+
+        .row .input-field input:focus {
+            border-bottom: 1px solid #03a9f4 !important;
+            box-shadow: 0 1px 0 0 #03a9f4 !important
         }
 
         #modal_acekeyboard, #modal_components {
@@ -311,24 +335,6 @@
             background-color: #03a9f4 !important;
         }
 
-        .collection-item #uplink {
-            background-color: #f5f5f5;
-            width: 320px !important;
-        }
-
-        input.currentfile_input {
-          margin-bottom: -1px;
-          margin-top: 0;
-          padding-left: 5px;
-        }
-
-        .side_tools {
-          vertical-align: middle;
-        }
-
-        .fbtoolbarbutton_icon {
-           margin-top: 12px;
-        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ace.js" type="text/javascript" charset="utf-8"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ext-modelist.js" type="text/javascript" charset="utf-8"></script>
@@ -390,10 +396,6 @@
                 <ul class="left">
                     <li><a class="waves-effect waves-light tooltipped files-collapse hide-on-small-only" data-activates="slide-out" data-position="bottom" data-delay="50" data-tooltip="Browse Filesystem"><i class="material-icons">list</i></a></li>
                     <li><a class="waves-effect waves-light files-collapse hide-on-med-and-up" data-activates="slide-out"><i class="material-icons">list</i></a></li>
-                    <!--<li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="New File" onclick="editor.setValue('');document.getElementById('currentfile').value=document.getElementById('fbheader').innerHTML+separator+'newfile';document.getElementById('currentfile').setSelectionRange(document.getElementById('currentfile').value.length-7, document.getElementById('currentfile').value.length);document.getElementById('currentfile').focus()"><i class="material-icons">note_add</i></a></li>
-                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="New Folder" href="#modal_newfolder"><i class="material-icons">create_new_folder</i></a></li>
-                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Upload" href="#modal_upload"><i class="material-icons">file_upload</i></a></li>
-                    <li><a class="waves-effect waves-light hide-on-med-and-up" href="#modal_upload"><i class="material-icons">file_upload</i></a></li>-->
                 </ul>
                 <ul class="right">
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Save" href="#modal_save"><i class="material-icons">save</i></a></li>
@@ -1858,8 +1860,8 @@
     }
 
     function upload() {
-        var file_data = $('#uploadfile').prop('files')[0];   
-        var form_data = new FormData();                  
+        var file_data = $('#uploadfile').prop('files')[0];
+        var form_data = new FormData();
         form_data.append('file', file_data);
         $.ajax({
             url: 'api/upload',
@@ -1867,7 +1869,7 @@
             cache: false,
             contentType: false,
             processData: false,
-            data: form_data,                         
+            data: form_data,
             type: 'post',
             success: function(resp){
                 if (resp.error) {
