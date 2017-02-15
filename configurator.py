@@ -2165,8 +2165,11 @@ class RequestHandler(BaseHTTPRequestHandler):
                 read = 0
                 while read < length:
                     read += len(self.rfile.read(min(66556, length - read)))
+                self.send_response(200)
+                self.send_header('Content-type', 'text/json')
+                self.end_headers()
                 response['error'] = True
-                response['message'] = "File too big: %i" % read 
+                response['message'] = "File too big: %i" % read
                 self.wfile.write(bytes(json.dumps(response), "utf8"))
                 return
             else:
@@ -2179,6 +2182,9 @@ class RequestHandler(BaseHTTPRequestHandler):
                 filename = form['file'].filename
                 data = form['file'].file.read()
                 open("%s"%filename, "wb").write(data)
+                self.send_response(200)
+                self.send_header('Content-type', 'text/json')
+                self.end_headers()
                 response['error'] = False
                 response['message'] = "Upload successful"
                 self.wfile.write(bytes(json.dumps(response), "utf8"))
