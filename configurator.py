@@ -2021,6 +2021,28 @@ class RequestHandler(BaseHTTPRequestHandler):
                 content = str(err)
             self.wfile.write(bytes(content, "utf8"))
             return
+        elif req.path == '/api/download':
+            content = ""
+            filename = query.get('filename', None)
+            try:
+                if filename:
+                    filename = unquote(filename[0]).encode('utf-8')
+                    print(filename)
+                    if os.path.isfile(os.path.join(BASEDIR.encode('utf-8'), filename)):
+                        with open(os.path.join(BASEDIR.encode('utf-8'), filename), 'rb') as fptr:
+                            filecontent = fptr.read()
+                        self.send_header('Content-Disposition', 'attachment; filename=%s' % filename.decode('utf-8').split(os.sep)[-1])
+                        self.end_headers()
+                        self.wfile.write(filecontent)
+                        return
+                    else:
+                        content = "File not found"
+            except Exception as err:
+                print(err)
+                content = str(err)
+            self.send_header('Content-type', 'text/text')
+            self.wfile.write(bytes(content, "utf8"))
+            return
         elif req.path == '/api/listdir':
             content = ""
             self.send_header('Content-type', 'text/json')
