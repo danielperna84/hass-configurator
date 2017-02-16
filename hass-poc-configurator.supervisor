@@ -1,0 +1,8 @@
+; Example configuration for AIO installed systems. See http://supervisord.org on how to install the service.
+; This example has to be placed in a *.conf file in the conf.d-directory, commonly found at /etc/supervisor/conf.d
+; F. ex.: /etc/supervisor/conf.d/hass-configurator.conf
+; Modify the paths below to match your setup.
+[program:hass-configurator]
+directory = /home/hass/.homeassistant/
+command = sudo -u hass /home/hass/.homeassistant/configurator.py /home/hass/.homeassistant/settings.conf
+user = root
