@@ -89,11 +89,11 @@
             cursor: pointer;
         }
 
-        .gitstaged {
+        .text_darkgreen {
             color: darkgreen !important;
         }
 
-        .gitunstaged {
+        .text_darkred {
             color: darkred !important;
         }
 
@@ -1679,12 +1679,20 @@
         itext.innerHTML = itemdata.name;
         itext.classList.add('filename');
 
-        if(itemdata.gitstatus == 'unstaged') {
-            itext.classList.add('gitunstaged');
+        if (itemdata.gitstatus) {
+            if (itemdata.gittracked == 'untracked') {
+                itext.classList.add('text_darkred');
+            }
+            else {
+                if(itemdata.gitstatus == 'unstaged') {
+                    itext.classList.add('text_darkred');
+                }
+                else if (itemdata.gitstatus == 'staged') {
+                    itext.classList.add('text_darkgreen');
+                }
+            }
         }
-        else if (itemdata.gitstatus == 'staged') {
-            itext.classList.add('gitstaged');
-        }
+        
         item.appendChild(itext);
 
         var dropdown = document.createElement('ul');
