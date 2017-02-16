@@ -1956,15 +1956,25 @@ def load_settings(settingsfile):
 
 def get_dircontent(path, repo=None):
     dircontent = []
-    staged = {}
-    unstaged = {}
     if repo:
-        for element in repo.index.diff("HEAD"):
-            #print("Staged: %s %s" % (element.b_path, element.change_type))
-            staged[element.b_path.split('/')[-1]] = element.change_type
-        for element in repo.index.diff(None):
-            #print("Unstaged: %s %s" % (element.b_path, element.change_type))
-            unstaged[element.b_path.split('/')[-1]] = element.change_type
+        untracked = [
+            "%s%s%s"%(repo.working_dir, os.sep, e) for e in \
+            ["%s"%os.sep.join(f.split('/')) for f in repo.untracked_files]
+        ]
+        staged = {}
+        unstaged = {}
+        if repo:
+            try:
+                for element in repo.index.diff("HEAD"):
+                    staged["%s%s%s" % (repo.working_dir, os.sep, "%s"%os.sep.join(element.b_path.split('/')))] = element.change_type
+            except Exception as err:
+                print(err)
+            for element in repo.index.diff(None):
+                unstaged["%s%s%s" % (repo.working_dir, os.sep, "%s"%os.sep.join(element.b_path.split('/')))] = element.change_type
+    else:
+        untracked = []
+        staged = {}
+        unstaged = {}
 
     for elem in sorted(os.listdir(path), key=lambda x: x.lower()):
         edata = {}
@@ -1982,11 +1992,12 @@ def get_dircontent(path, repo=None):
             edata['modified'] = 0
             edata['created'] = 0
         edata['changetype'] = None
-        edata['gitstatus'] = None
-        if edata['name'] in unstaged:
+        edata['gitstatus'] = bool(repo)
+        edata['gittracked'] = 'untracked' if edata['fullpath'] in untracked else 'tracked'
+        if edata['fullpath'] in unstaged:
             edata['gitstatus'] = 'unstaged'
             edata['changetype'] = unstaged.get(edata['name'], None)
-        elif edata['name'] in staged:
+        elif edata['fullpath'] in staged:
             edata['gitstatus'] = 'staged'
             edata['changetype'] = staged.get(edata['name'], None)
         dircontent.append(edata)
