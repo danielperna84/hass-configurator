@@ -39,6 +39,8 @@ ALLOWED_NETWORKS = []
 BANNED_IPS = []
 # Ban IPs after n failed login attempts. Restart service to reset banning. The default of `0` disables this feature.
 BANLIMIT = 0
+# Enable git integration. GitPython (https://gitpython.readthedocs.io/en/stable/) has to be installed.
+GIT = True
 ### End of options
 
 RELEASEURL = "https://api.github.com/repos/danielperna84/hass-poc-configurator/releases/latest"
@@ -47,6 +49,12 @@ BASEDIR = "."
 DEV = False
 HTTPD = None
 FAIL2BAN_IPS = {}
+REPO = False
+if GIT:
+    try:
+        from git import Repo as REPO
+    except Exception:
+        print("Unable to import Git module")
 INDEX = Template(r"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1946,8 +1954,18 @@ def load_settings(settingsfile):
         print("Not loading static settings")
     return False
 
-def get_dircontent(path):
+def get_dircontent(path, repo=None):
     dircontent = []
+    staged = {}
+    unstaged = {}
+    if repo:
+        for element in repo.index.diff("HEAD"):
+            #print("Staged: %s %s" % (element.b_path, element.change_type))
+            staged[element.b_path.split('/')[-1]] = element.change_type
+        for element in repo.index.diff(None):
+            #print("Unstaged: %s %s" % (element.b_path, element.change_type))
+            unstaged[element.b_path.split('/')[-1]] = element.change_type
+
     for elem in sorted(os.listdir(path), key=lambda x: x.lower()):
         edata = {}
         edata['name'] = elem
@@ -1958,9 +1976,19 @@ def get_dircontent(path):
             stats = os.stat(os.path.join(path, elem))
             edata['size'] = stats.st_size
             edata['modified'] = stats.st_mtime
+            edata['created'] = stats.st_ctime
         except Exception:
             edata['size'] = 0
             edata['modified'] = 0
+            edata['created'] = 0
+        edata['changetype'] = None
+        edata['gitstatus'] = None
+        if edata['name'] in unstaged:
+            edata['gitstatus'] = 'unstaged'
+            edata['changetype'] = unstaged.get(edata['name'], None)
+        elif edata['name'] in staged:
+            edata['gitstatus'] = 'staged'
+            edata['changetype'] = staged.get(edata['name'], None)
         dircontent.append(edata)
 
     return dircontent
@@ -2052,10 +2080,26 @@ class RequestHandler(BaseHTTPRequestHandler):
                 if dirpath:
                     dirpath = unquote(dirpath[0]).encode('utf-8')
                     if os.path.isdir(dirpath):
-                        dircontent = get_dircontent(dirpath.decode('utf-8'))
+                        repo = None
+                        activebranch = None
+                        dirty = False
+                        branches = []
+                        if REPO:
+                            try:
+                                repo = REPO(dirpath.decode('utf-8'), search_parent_directories=True)
+                                activebranch = repo.active_branch.name
+                                dirty = repo.is_dirty()
+                                for branch in repo.branches:
+                                    branches.append(branch.name)
+                            except Exception as err:
+                                print(err)
+                        dircontent = get_dircontent(dirpath.decode('utf-8'), repo)
                         filedata = {'content': dircontent,
                                     'abspath': os.path.abspath(dirpath).decode('utf-8'),
-                                    'parent': os.path.dirname(os.path.abspath(dirpath)).decode('utf-8')
+                                    'parent': os.path.dirname(os.path.abspath(dirpath)).decode('utf-8'),
+                                    'branches': branches,
+                                    'activebranch': activebranch,
+                                    'dirty': dirty
                                    }
                         self.wfile.write(bytes(json.dumps(filedata), "utf8"))
             except Exception as err:
