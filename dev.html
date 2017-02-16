@@ -50,6 +50,14 @@
             font-size: .9em;
         }
 
+        #fbheaderbranch {
+            padding: 2px 18px !important;
+            display: none;
+            line-height: 0.7em;
+            font-weight: 400;
+            font-size: 0.7em;
+        }
+
         #fbelements {
             margin: 0;
             position: relative;
@@ -79,6 +87,14 @@
             overflow: hidden;
             text-overflow: ellipsis;
             cursor: pointer;
+        }
+
+        .gitstaged {
+            color: darkgreen !important;
+        }
+
+        .gitunstaged {
+            color: darkred !important;
         }
 
         p.stats {
@@ -1094,6 +1110,7 @@
             <div id="filebrowser" class="z-depth-1">
               <ul class="collection with-header">
                   <li id="fbheader" class="collection-header"></li>
+                  <li id="fbheaderbranch" class="collection-item"></li>
               </ul>
               <ul id="fbelements"></ul>
             </div>
@@ -1661,6 +1678,13 @@
         var itext = document.createElement('div');
         itext.innerHTML = itemdata.name;
         itext.classList.add('filename');
+
+        if(itemdata.gitstatus == 'unstaged') {
+            itext.classList.add('gitunstaged');
+        }
+        else if (itemdata.gitstatus == 'staged') {
+            itext.classList.add('gitstaged');
+        }
         item.appendChild(itext);
 
         var dropdown = document.createElement('ul');
@@ -1712,6 +1736,16 @@
         }
         var fbheader = document.getElementById('fbheader');
         fbheader.innerHTML = dirdata.abspath;
+        console.log(dirdata);
+        var fbheaderbranch = document.getElementById('fbheaderbranch');
+        if (dirdata.activebranch) {
+            fbheaderbranch.innerHTML = dirdata.activebranch;
+            fbheaderbranch.style.display = "list-item";
+        }
+        else {
+            fbheaderbranch.innerHTML = "";
+            fbheaderbranch.style.display = "";
+        }
         var upli = document.createElement('li');
         var up = document.createElement('a');
         upli.classList.add('collection-item');
