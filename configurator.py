@@ -2305,6 +2305,72 @@ class RequestHandler(BaseHTTPRequestHandler):
                         print(err)
             else:
                 response['message'] = "Missing filename or text"
+        elif req.path == '/api/gitadd':
+            try:
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+            except Exception as err:
+                print(err)
+                response['message'] = "%s" % (str(err))
+                postvars = {}
+            if 'path' in postvars.keys():
+                if postvars['path']:
+                    try:
+                        addpath = unquote(postvars['path'][0])
+                        repo = REPO(addpath, search_parent_directories=True)
+                        filepath = "/".join(addpath.split(os.sep)[len(repo.working_dir.split(os.sep)):])
+                        response['path'] = filepath
+                        try:
+                            repo.index.add([filepath])
+                            response['error'] = False
+                            response['message'] = "Added file to index"
+                            self.send_response(200)
+                            self.send_header('Content-type', 'text/json')
+                            self.end_headers()
+                            self.wfile.write(bytes(json.dumps(response), "utf8"))
+                            return
+                        except Exception as err:
+                            print(err)
+                            response['error'] = True
+                            response['message'] = str(err)
+
+                    except Exception as err:
+                        response['message'] = "%s" % (str(err))
+                        print(err)
+            else:
+                response['message'] = "Missing filename"
+        elif req.path == '/api/commit':
+            try:
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+            except Exception as err:
+                print(err)
+                response['message'] = "%s" % (str(err))
+                postvars = {}
+            if 'path' in postvars.keys() and 'message' in postvars.keys():
+                if postvars['path'] and postvars['message']:
+                    try:
+                        commitpath = unquote(postvars['path'][0])
+                        message = unquote(postvars['message'][0])
+                        repo = REPO(commitpath, search_parent_directories=True)
+                        response['path'] = commitpath
+                        try:
+                            repo.index.commit(message)
+                            response['error'] = False
+                            response['message'] = "Changes commited"
+                            self.send_response(200)
+                            self.send_header('Content-type', 'text/json')
+                            self.end_headers()
+                            self.wfile.write(bytes(json.dumps(response), "utf8"))
+                            return
+                        except Exception as err:
+                            print(err)
+                            response['error'] = True
+                            response['message'] = str(err)
+
+                    except Exception as err:
+                        response['message'] = "%s" % (str(err))
+                        print(err)
+            else:
+                response['message'] = "Missing path"
         elif req.path == '/api/newfolder':
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
