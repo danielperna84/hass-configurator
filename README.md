@@ -26,6 +26,7 @@ _WARNING_: This tool allows you to browse your filesystem and modify files. So b
 There are no dependencies on Python modules that are not part of the standard library. And all the fancy JavaScript libraries are loaded from CDN (which means this doesn't work when you're offline).  
 - Copy [configurator.py](https://github.com/danielperna84/hass-poc-configurator/blob/master/configurator.py) to your HASS configuration directory (e.g /home/hass/.homeassistant)
 - Make it executable (`sudo chmod 755 configurator.py`)
+- (Optional) Set the `GIT` variable in configurator.py to `True` if [GitPython](https://gitpython.readthedocs.io/) is installed on your system
 - Execute it (`sudo ./configurator.py`)
 - To terminate the process do the usual `CTRL+C`, maybe once or twice
 
