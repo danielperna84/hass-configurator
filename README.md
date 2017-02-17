@@ -7,6 +7,8 @@ Thanks to the help of [JT Martinez](https://github.com/jmart518) this tool now p
 ###Feature list:
 
 - Web-Based editor to modify your files with syntax highlighting
+- Upload and download files
+- Stage and commit changes in Git repositories
 - Lists of available triggers, events, entities, conditions and services. Selected element gets inserted into the editor at the last cursor position.
 - Restart HASS directly with the click of a button (API-password required)
 - SSL support
@@ -51,7 +53,10 @@ Limit access to the configurator by adding allowed IP addresses / networks to th
 List of statically banned IP addresses, e.g. `BANNED_IPS = ["1.1.1.1", "2.2.2.2"]`
 ####BANLIMIT (integer)
 Ban IPs after n failed login attempts. Restart service to reset banning. The default of `0` disables this feature. `CREDENTIALS` has to be set for this to work.
-
+#### GIT (bool)
+Set this variable to `True` to enable Git integration. This feature requires [GitPython](https://gitpython.readthedocs.io)
+ to be installed on the system that is running the configurator. For thechnical reasons this feature can't be enabled with a static configuration file.
+ 
 __Note regarding `ALLOWED_NETWORKS`, `BANNED_IPS` and `BANLIMIT`__:  
 The way this is implemented works in the following order:
 
