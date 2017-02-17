@@ -12,9 +12,10 @@ import socketserver
 import base64
 import ipaddress
 import signal
-import urllib.request
+import cgi
 from string import Template
 from http.server import BaseHTTPRequestHandler, HTTPServer
+import urllib.request
 from urllib.parse import urlparse, parse_qs, unquote
 
 ### Some options for you to change
@@ -38,6 +39,8 @@ ALLOWED_NETWORKS = []
 BANNED_IPS = []
 # Ban IPs after n failed login attempts. Restart service to reset banning. The default of `0` disables this feature.
 BANLIMIT = 0
+# Enable git integration. GitPython (https://gitpython.readthedocs.io/en/stable/) has to be installed.
+GIT = True
 ### End of options
 
 RELEASEURL = "https://api.github.com/repos/danielperna84/hass-poc-configurator/releases/latest"
@@ -46,6 +49,12 @@ BASEDIR = "."
 DEV = False
 HTTPD = None
 FAIL2BAN_IPS = {}
+REPO = False
+if GIT:
+    try:
+        from git import Repo as REPO
+    except Exception:
+        print("Unable to import Git module")
 INDEX = Template(r"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1915,15 +1924,15 @@ INDEX = Template(r"""<!DOCTYPE html>
 </body>
 </html>""")
 
-def signal_handler(signal, frame):
+def signal_handler(sig, frame):
     global HTTPD
-    print("Shutting down server")
+    print("Got signal: %s. Shutting down server" % str(sig))
     HTTPD.server_close()
     sys.exit(0)
 
 def load_settings(settingsfile):
     global LISTENIP, LISTENPORT, BASEPATH, SSL_CERTIFICATE, SSL_KEY, HASS_API, \
-    HASS_API_PASSWORD, CREDENTIALS, ALLOWED_NETWORKS, BANNED_IPS, BANLIMIT
+    HASS_API_PASSWORD, CREDENTIALS, ALLOWED_NETWORKS, BANNED_IPS, BANLIMIT, DEV
     try:
         if os.path.isfile(settingsfile):
             with open(settingsfile) as fptr:
@@ -1939,28 +1948,58 @@ def load_settings(settingsfile):
                 ALLOWED_NETWORKS = settings.get("ALLOWED_NETWORKS", ALLOWED_NETWORKS)
                 BANNED_IPS = settings.get("BANNED_IPS", BANNED_IPS)
                 BANLIMIT = settings.get("BANLIMIT", BANLIMIT)
+                DEV = settings.get("DEV", DEV)
     except Exception as err:
         print(err)
         print("Not loading static settings")
     return False
 
-def get_dircontent(path):
+def get_dircontent(path, repo=None):
     dircontent = []
-    for e in sorted(os.listdir(path), key=lambda x: x.lower()):
+    if repo:
+        untracked = [
+            "%s%s%s"%(repo.working_dir, os.sep, e) for e in \
+            ["%s"%os.sep.join(f.split('/')) for f in repo.untracked_files]
+        ]
+        staged = {}
+        unstaged = {}
+        try:
+            for element in repo.index.diff("HEAD"):
+                staged["%s%s%s" % (repo.working_dir, os.sep, "%s"%os.sep.join(element.b_path.split('/')))] = element.change_type
+        except Exception as err:
+            print("Exception: %s" % str(err))
+        for element in repo.index.diff(None):
+            unstaged["%s%s%s" % (repo.working_dir, os.sep, "%s"%os.sep.join(element.b_path.split('/')))] = element.change_type
+    else:
+        untracked = []
+        staged = {}
+        unstaged = {}
+
+    for elem in sorted(os.listdir(path), key=lambda x: x.lower()):
         edata = {}
-        edata['name'] = e
+        edata['name'] = elem
         edata['dir'] = path
-        edata['fullpath'] = os.path.abspath(os.path.join(path, e))
+        edata['fullpath'] = os.path.abspath(os.path.join(path, elem))
         edata['type'] = 'dir' if os.path.isdir(edata['fullpath']) else 'file'
         try:
-            stats = os.stat(os.path.join(path, e))
+            stats = os.stat(os.path.join(path, elem))
             edata['size'] = stats.st_size
             edata['modified'] = stats.st_mtime
+            edata['created'] = stats.st_ctime
         except Exception:
             edata['size'] = 0
             edata['modified'] = 0
+            edata['created'] = 0
+        edata['changetype'] = None
+        edata['gitstatus'] = bool(repo)
+        edata['gittracked'] = 'untracked' if edata['fullpath'] in untracked else 'tracked'
+        if edata['fullpath'] in unstaged:
+            edata['gitstatus'] = 'unstaged'
+            edata['changetype'] = unstaged.get(edata['name'], None)
+        elif edata['fullpath'] in staged:
+            edata['gitstatus'] = 'staged'
+            edata['changetype'] = staged.get(edata['name'], None)
         dircontent.append(edata)
-
     return dircontent
 
 def get_html():
@@ -2002,7 +2041,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         self.send_response(200)
         if req.path == '/api/file':
             content = ""
-            self.send_header('Content-type','text/text')
+            self.send_header('Content-type', 'text/text')
             self.end_headers()
             filename = query.get('filename', None)
             try:
@@ -2019,20 +2058,58 @@ class RequestHandler(BaseHTTPRequestHandler):
                 content = str(err)
             self.wfile.write(bytes(content, "utf8"))
             return
+        elif req.path == '/api/download':
+            content = ""
+            filename = query.get('filename', None)
+            try:
+                if filename:
+                    filename = unquote(filename[0]).encode('utf-8')
+                    print(filename)
+                    if os.path.isfile(os.path.join(BASEDIR.encode('utf-8'), filename)):
+                        with open(os.path.join(BASEDIR.encode('utf-8'), filename), 'rb') as fptr:
+                            filecontent = fptr.read()
+                        self.send_header('Content-Disposition', 'attachment; filename=%s' % filename.decode('utf-8').split(os.sep)[-1])
+                        self.end_headers()
+                        self.wfile.write(filecontent)
+                        return
+                    else:
+                        content = "File not found"
+            except Exception as err:
+                print(err)
+                content = str(err)
+            self.send_header('Content-type', 'text/text')
+            self.wfile.write(bytes(content, "utf8"))
+            return
         elif req.path == '/api/listdir':
             content = ""
-            self.send_header('Content-type','text/json')
+            self.send_header('Content-type', 'text/json')
             self.end_headers()
             dirpath = query.get('path', None)
             try:
                 if dirpath:
                     dirpath = unquote(dirpath[0]).encode('utf-8')
                     if os.path.isdir(dirpath):
-                        dircontent = get_dircontent(dirpath.decode('utf-8'))
+                        repo = None
+                        activebranch = None
+                        dirty = False
+                        branches = []
+                        if REPO:
+                            try:
+                                repo = REPO(dirpath.decode('utf-8'), search_parent_directories=True)
+                                activebranch = repo.active_branch.name
+                                dirty = repo.is_dirty()
+                                for branch in repo.branches:
+                                    branches.append(branch.name)
+                            except Exception as err:
+                                print("Exception (no repo): %s" % str(err))
+                        dircontent = get_dircontent(dirpath.decode('utf-8'), repo)
                         filedata = {'content': dircontent,
-                            'abspath': os.path.abspath(dirpath).decode('utf-8'),
-                            'parent': os.path.dirname(os.path.abspath(dirpath)).decode('utf-8')
-                        }
+                                    'abspath': os.path.abspath(dirpath).decode('utf-8'),
+                                    'parent': os.path.dirname(os.path.abspath(dirpath)).decode('utf-8'),
+                                    'branches': branches,
+                                    'activebranch': activebranch,
+                                    'dirty': dirty
+                                   }
                         self.wfile.write(bytes(json.dumps(filedata), "utf8"))
             except Exception as err:
                 print(err)
@@ -2041,7 +2118,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             return
         elif req.path == '/api/abspath':
             content = ""
-            self.send_header('Content-type','text/text')
+            self.send_header('Content-type', 'text/text')
             self.end_headers()
             dirpath = query.get('path', None)
             if dirpath:
@@ -2054,7 +2131,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             return
         elif req.path == '/api/parent':
             content = ""
-            self.send_header('Content-type','text/text')
+            self.send_header('Content-type', 'text/text')
             self.end_headers()
             dirpath = query.get('path', None)
             if dirpath:
@@ -2067,9 +2144,9 @@ class RequestHandler(BaseHTTPRequestHandler):
             return
         elif req.path == '/api/restart':
             print("/api/restart")
-            self.send_header('Content-type','text/json')
+            self.send_header('Content-type', 'text/json')
             self.end_headers()
-            r = {"restart": False}
+            res = {"restart": False}
             try:
                 headers = {
                     "Content-Type": "application/json"
@@ -2078,17 +2155,17 @@ class RequestHandler(BaseHTTPRequestHandler):
                     headers["x-ha-access"] = HASS_API_PASSWORD
                 req = urllib.request.Request("%sservices/homeassistant/restart" % HASS_API, headers=headers, method='POST')
                 with urllib.request.urlopen(req) as response:
-                    r = json.loads(response.read().decode('utf-8'))
-                    print(r)
+                    res = json.loads(response.read().decode('utf-8'))
+                    print(res)
             except Exception as err:
                 print(err)
-                r['restart'] = str(err)
-            self.wfile.write(bytes(json.dumps(r), "utf8"))
+                res['restart'] = str(err)
+            self.wfile.write(bytes(json.dumps(res), "utf8"))
             return
         elif req.path == '/':
-            self.send_header('Content-type','text/html')
+            self.send_header('Content-type', 'text/html')
             self.end_headers()
-            
+
             boot = "{}"
             try:
                 headers = {
@@ -2099,11 +2176,11 @@ class RequestHandler(BaseHTTPRequestHandler):
                 req = urllib.request.Request("%sbootstrap" % HASS_API, headers=headers, method='GET')
                 with urllib.request.urlopen(req) as response:
                     boot = response.read().decode('utf-8')
-                
+
             except Exception as err:
                 print("Exception getting bootstrap")
                 print(err)
-    
+
             color = "green"
             try:
                 response = urllib.request.urlopen(RELEASEURL)
@@ -2113,7 +2190,10 @@ class RequestHandler(BaseHTTPRequestHandler):
             except Exception as err:
                 print("Exception getting release")
                 print(err)
-            html = get_html().safe_substitute(bootstrap=boot, current=VERSION, versionclass=color, separator="\%s" % os.sep if os.sep == "\\" else os.sep)
+            html = get_html().safe_substitute(bootstrap=boot,
+                                              current=VERSION,
+                                              versionclass=color,
+                                              separator="\%s" % os.sep if os.sep == "\\" else os.sep)
             self.wfile.write(bytes(html, "utf8"))
             return
         else:
@@ -2126,102 +2206,234 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.do_BLOCK()
             return
         req = urlparse(self.path)
-        postvars = {}
+
         response = {
             "error": True,
             "message": "Generic failure"
         }
-        
-        try:
-            length = int(self.headers['content-length'])
-            postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
-            interror = False
-        except Exception as err:
-            print(err)
-            response['message'] = "%s" % (str(err))
-            interror = True
 
-        if not interror:
-            if req.path == '/api/save':
-                if 'filename' in postvars.keys() and 'text' in postvars.keys():
-                    if postvars['filename'] and postvars['text']:
+        length = int(self.headers['content-length'])
+        if req.path == '/api/save':
+            try:
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+            except Exception as err:
+                print(err)
+                response['message'] = "%s" % (str(err))
+                postvars = {}
+            if 'filename' in postvars.keys() and 'text' in postvars.keys():
+                if postvars['filename'] and postvars['text']:
+                    try:
+                        filename = unquote(postvars['filename'][0])
+                        response['file'] = filename
+                        with open(filename, 'wb') as fptr:
+                            fptr.write(bytes(postvars['text'][0], "utf-8"))
+                        self.send_response(200)
+                        self.send_header('Content-type', 'text/json')
+                        self.end_headers()
+                        response['error'] = False
+                        response['message'] = "File saved successfully"
+                        self.wfile.write(bytes(json.dumps(response), "utf8"))
+                        return
+                    except Exception as err:
+                        response['message'] = "%s" % (str(err))
+                        print(err)
+            else:
+                response['message'] = "Missing filename or text"
+        elif req.path == '/api/upload':
+            if length > 104857600: #100 MB for now
+                read = 0
+                while read < length:
+                    read += len(self.rfile.read(min(66556, length - read)))
+                self.send_response(200)
+                self.send_header('Content-type', 'text/json')
+                self.end_headers()
+                response['error'] = True
+                response['message'] = "File too big: %i" % read
+                self.wfile.write(bytes(json.dumps(response), "utf8"))
+                return
+            else:
+                form = cgi.FieldStorage(
+                    fp=self.rfile,
+                    headers=self.headers,
+                    environ={'REQUEST_METHOD': 'POST',
+                             'CONTENT_TYPE': self.headers['Content-Type'],
+                            })
+                filename = form['file'].filename
+                filepath = form['path'].file.read()
+                data = form['file'].file.read()
+                open("%s%s%s" % (filepath, os.sep, filename), "wb").write(data)
+                self.send_response(200)
+                self.send_header('Content-type', 'text/json')
+                self.end_headers()
+                response['error'] = False
+                response['message'] = "Upload successful"
+                self.wfile.write(bytes(json.dumps(response), "utf8"))
+                return
+        elif req.path == '/api/delete':
+            try:
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+            except Exception as err:
+                print(err)
+                response['message'] = "%s" % (str(err))
+                postvars = {}
+            if 'path' in postvars.keys():
+                if postvars['path']:
+                    try:
+                        delpath = unquote(postvars['path'][0])
+                        response['path'] = delpath
                         try:
-                            filename = unquote(postvars['filename'][0])
-                            response['file'] = filename
-                            with open(filename, 'wb') as fptr:
-                                fptr.write(bytes(postvars['text'][0], "utf-8"))
+                            if os.path.isdir(delpath):
+                                os.rmdir(delpath)
+                            else:
+                                os.unlink(delpath)
                             self.send_response(200)
-                            self.send_header('Content-type','text/json')
+                            self.send_header('Content-type', 'text/json')
                             self.end_headers()
                             response['error'] = False
-                            response['message'] = "File saved successfully"
+                            response['message'] = "Deletetion successful"
                             self.wfile.write(bytes(json.dumps(response), "utf8"))
                             return
                         except Exception as err:
-                            response['message'] = "%s" % (str(err))
                             print(err)
-                else:
-                    response['message'] = "Missing filename or text"
-            elif req.path == '/api/delete':
-                if 'path' in postvars.keys():
-                    if postvars['path']:
-                        try:
-                            delpath = unquote(postvars['path'][0])
-                            response['path'] = delpath
-                            try:
-                                if os.path.isdir(delpath):
-                                    os.rmdir(delpath)
-                                else:
-                                    os.unlink(delpath)
-                                self.send_response(200)
-                                self.send_header('Content-type','text/json')
-                                self.end_headers()
-                                response['error'] = False
-                                response['message'] = "Deletetion successful"
-                                self.wfile.write(bytes(json.dumps(response), "utf8"))
-                                return
-                            except Exception as err:
-                                print(err)
-                                response['error'] = True
-                                response['message'] = str(err)
-                              
+                            response['error'] = True
+                            response['message'] = str(err)
 
-                        except Exception as err:
-                            response['message'] = "%s" % (str(err))
-                            print(err)
-                else:
-                    response['message'] = "Missing filename or text"
-            elif req.path == '/api/newfolder':
-                if 'path' in postvars.keys() and 'name' in postvars.keys():
-                    if postvars['path'] and postvars['name']:
-                        try:
-                            basepath = unquote(postvars['path'][0])
-                            name = unquote(postvars['name'][0])
-                            response['path'] = os.path.join(basepath, name)
-                            try:
-                                os.makedirs(response['path'])
-                                self.send_response(200)
-                                self.send_header('Content-type','text/json')
-                                self.end_headers()
-                                response['error'] = False
-                                response['message'] = "Folder created"
-                                self.wfile.write(bytes(json.dumps(response), "utf8"))
-                                return
-                            except Exception as err:
-                                print(err)
-                                response['error'] = True
-                                response['message'] = str(err)
-                              
-
-                        except Exception as err:
-                            response['message'] = "%s" % (str(err))
-                            print(err)
-                else:
-                    response['message'] = "Missing filename or text"
+                    except Exception as err:
+                        response['message'] = "%s" % (str(err))
+                        print(err)
             else:
-                response['message'] = "Invalid method"
+                response['message'] = "Missing filename or text"
+        elif req.path == '/api/gitadd':
+            try:
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+            except Exception as err:
+                print(err)
+                response['message'] = "%s" % (str(err))
+                postvars = {}
+            if 'path' in postvars.keys():
+                if postvars['path']:
+                    try:
+                        addpath = unquote(postvars['path'][0])
+                        repo = REPO(addpath, search_parent_directories=True)
+                        filepath = "/".join(addpath.split(os.sep)[len(repo.working_dir.split(os.sep)):])
+                        response['path'] = filepath
+                        try:
+                            repo.index.add([filepath])
+                            response['error'] = False
+                            response['message'] = "Added file to index"
+                            self.send_response(200)
+                            self.send_header('Content-type', 'text/json')
+                            self.end_headers()
+                            self.wfile.write(bytes(json.dumps(response), "utf8"))
+                            return
+                        except Exception as err:
+                            print(err)
+                            response['error'] = True
+                            response['message'] = str(err)
+
+                    except Exception as err:
+                        response['message'] = "%s" % (str(err))
+                        print(err)
+            else:
+                response['message'] = "Missing filename"
+        elif req.path == '/api/commit':
+            try:
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+            except Exception as err:
+                print(err)
+                response['message'] = "%s" % (str(err))
+                postvars = {}
+            if 'path' in postvars.keys() and 'message' in postvars.keys():
+                if postvars['path'] and postvars['message']:
+                    try:
+                        commitpath = unquote(postvars['path'][0])
+                        response['path'] = commitpath
+                        message = unquote(postvars['message'][0])
+                        repo = REPO(commitpath, search_parent_directories=True)
+                        try:
+                            repo.index.commit(message)
+                            response['error'] = False
+                            response['message'] = "Changes commited"
+                            self.send_response(200)
+                            self.send_header('Content-type', 'text/json')
+                            self.end_headers()
+                            self.wfile.write(bytes(json.dumps(response), "utf8"))
+                            return
+                        except Exception as err:
+                            response['error'] = True
+                            response['message'] = str(err)
+                            print(response)
+
+                    except Exception as err:
+                        response['message'] = "Not a git repository" % (str(err))
+                        print("Exception (no repo): %s" % str(err))
+            else:
+                response['message'] = "Missing path"
+        elif req.path == '/api/newfolder':
+            try:
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+            except Exception as err:
+                print(err)
+                response['message'] = "%s" % (str(err))
+                postvars = {}
+            if 'path' in postvars.keys() and 'name' in postvars.keys():
+                if postvars['path'] and postvars['name']:
+                    try:
+                        basepath = unquote(postvars['path'][0])
+                        name = unquote(postvars['name'][0])
+                        response['path'] = os.path.join(basepath, name)
+                        try:
+                            os.makedirs(response['path'])
+                            self.send_response(200)
+                            self.send_header('Content-type', 'text/json')
+                            self.end_headers()
+                            response['error'] = False
+                            response['message'] = "Folder created"
+                            self.wfile.write(bytes(json.dumps(response), "utf8"))
+                            return
+                        except Exception as err:
+                            print(err)
+                            response['error'] = True
+                            response['message'] = str(err)
+                    except Exception as err:
+                        response['message'] = "%s" % (str(err))
+                        print(err)
+        elif req.path == '/api/newfile':
+            try:
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+            except Exception as err:
+                print(err)
+                response['message'] = "%s" % (str(err))
+                postvars = {}
+            if 'path' in postvars.keys() and 'name' in postvars.keys():
+                if postvars['path'] and postvars['name']:
+                    try:
+                        basepath = unquote(postvars['path'][0])
+                        name = unquote(postvars['name'][0])
+                        response['path'] = os.path.join(basepath, name)
+                        try:
+                            with open(response['path'], 'w') as fptr:
+                                fptr.write("")
+                            self.send_response(200)
+                            self.send_header('Content-type', 'text/json')
+                            self.end_headers()
+                            response['error'] = False
+                            response['message'] = "File created"
+                            self.wfile.write(bytes(json.dumps(response), "utf8"))
+                            return
+                        except Exception as err:
+                            print(err)
+                            response['error'] = True
+                            response['message'] = str(err)
+                    except Exception as err:
+                        response['message'] = "%s" % (str(err))
+                        print(err)
+            else:
+                response['message'] = "Missing filename or text"
+        else:
+            response['message'] = "Invalid method"
         self.send_response(200)
-        self.send_header('Content-type','text/json')
+        self.send_header('Content-type', 'text/json')
         self.end_headers()
         self.wfile.write(bytes(json.dumps(response), "utf8"))
         return
@@ -2299,8 +2511,13 @@ def main(args):
         HTTPD = HTTPServer(server_address, Handler)
     else:
         HTTPD = socketserver.TCPServer(server_address, Handler)
-        HTTPD.socket = ssl.wrap_socket(HTTPD.socket, certfile=SSL_CERTIFICATE, keyfile=SSL_KEY, server_side=True)
-    print('Listening on: %s://%s:%i' % ('https' if SSL_CERTIFICATE else 'http', LISTENIP, LISTENPORT))
+        HTTPD.socket = ssl.wrap_socket(HTTPD.socket,
+                                       certfile=SSL_CERTIFICATE,
+                                       keyfile=SSL_KEY,
+                                       server_side=True)
+    print('Listening on: %s://%s:%i' % ('https' if SSL_CERTIFICATE else 'http',
+                                        LISTENIP,
+                                        LISTENPORT))
     if BASEPATH:
         os.chdir(BASEPATH)
     HTTPD.serve_forever()
