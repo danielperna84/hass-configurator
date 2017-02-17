@@ -507,6 +507,9 @@ INDEX = Template(r"""<!DOCTYPE html>
     <ul id="dropdown_gitmenu" class="dropdown-content z-depth-4">
         <li><a href="#modal_commit" class="nowrap waves-effect">git commit</a></li>
     </ul>
+    <ul id="dropdown_gitmenu_mobile" class="dropdown-content z-depth-4">
+        <li><a href="#modal_commit" class="nowrap waves-effect">git commit</a></li>
+    </ul>
     <div id="modal_components" class="modal bottom-sheet modal-fixed-footer">
         <div class="modal-content_nopad">
             <iframe src="https://home-assistant.io/components/" style="height: 90vh; width: 100vw"> </iframe>
@@ -1200,7 +1203,7 @@ INDEX = Template(r"""<!DOCTYPE html>
               <a class="col s3 waves-effect fbtoolbarbutton grey lighten-4" href="#modal_newfile"><i class="material-icons fbtoolbarbutton_icon">note_add</i></a>
               <a class="col s3 waves-effect fbtoolbarbutton grey lighten-4" href="#modal_newfolder"><i class="material-icons fbtoolbarbutton_icon">create_new_folder</i></a>
               <a class="col s3 waves-effect fbtoolbarbutton grey lighten-4" href="#modal_upload"><i class="material-icons fbtoolbarbutton_icon">file_upload</i></a>
-              <a class="col s3 waves-effect fbtoolbarbutton grey lighten-4 dropdown-button" data-activates="dropdown_gitmenu" data-alignment='right' data-beloworigin='true'><i class="material-icons fbtoolbarbutton_icon">call_split</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton grey lighten-4 dropdown-button" data-activates="dropdown_gitmenu_mobile" data-alignment='right' data-beloworigin='true'><i class="material-icons fbtoolbarbutton_icon">call_split</i></a>
           </div>
             <div id="filebrowser" class="z-depth-1">
               <ul class="collection with-header">
