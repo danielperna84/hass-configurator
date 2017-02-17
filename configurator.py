@@ -12,9 +12,10 @@ import socketserver
 import base64
 import ipaddress
 import signal
-import urllib.request
+import cgi
 from string import Template
 from http.server import BaseHTTPRequestHandler, HTTPServer
+import urllib.request
 from urllib.parse import urlparse, parse_qs, unquote
 
 ### Some options for you to change
@@ -38,14 +39,22 @@ ALLOWED_NETWORKS = []
 BANNED_IPS = []
 # Ban IPs after n failed login attempts. Restart service to reset banning. The default of `0` disables this feature.
 BANLIMIT = 0
+# Enable git integration. GitPython (https://gitpython.readthedocs.io/en/stable/) has to be installed.
+GIT = False
 ### End of options
 
 RELEASEURL = "https://api.github.com/repos/danielperna84/hass-poc-configurator/releases/latest"
-VERSION = "0.1.2"
+VERSION = "0.1.3"
 BASEDIR = "."
 DEV = False
 HTTPD = None
 FAIL2BAN_IPS = {}
+REPO = False
+if GIT:
+    try:
+        from git import Repo as REPO
+    except Exception:
+        print("Unable to import Git module")
 INDEX = Template(r"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -70,22 +79,20 @@ INDEX = Template(r"""<!DOCTYPE html>
 
         #editor {
             position: fixed;
-            top: 155px;
+            top: 135px;
             right: 0;
             bottom: 0;
           }
 
         @media only screen and (max-width: 600px) {
           #editor {
-              top: 145px;
-              bottom: 56px;
-            }
-
-          #edit_float {
-              bottom: 85px;
-              z-index: 10;
-            }
+              top: 125px;
           }
+        }
+
+        #edit_float {
+              z-index: 10;
+        }
 
         #filebrowser {
             background-color: #fff;
@@ -95,9 +102,17 @@ INDEX = Template(r"""<!DOCTYPE html>
             display: block;
             cursor: initial;
             pointer-events: none;
-            color: rgba(0, 0, 0, 0.54);
-            font-size: 15px;
-            font-weight: 500;
+            color: #616161 !important;
+            font-weight: 400;
+            font-size: .9em;
+        }
+
+        #fbheaderbranch {
+            padding: 2px 18px !important;
+            display: none;
+            line-height: 0.7em;
+            font-weight: 400;
+            font-size: 0.7em;
         }
 
         #fbelements {
@@ -109,14 +124,18 @@ INDEX = Template(r"""<!DOCTYPE html>
             color: #616161 !important;
         }
 
+        .fbtoolbarbutton {
+            color: #757575 !important;
+        }
+
         .fbmenubutton {
-            color: rgba(0, 0, 0, 0.54) !important;
+            color: #616161 !important;
             display: inline-block;
             float: right;
         }
 
         .filename {
-            color: rgba(0, 0, 0, 0.54);
+            color: #616161 !important;
             vertical-align: text-bottom;
             font-weight: 400;
             display: inline-block;
@@ -127,12 +146,70 @@ INDEX = Template(r"""<!DOCTYPE html>
             cursor: pointer;
         }
 
+        .nowrap {
+            white-space: nowrap;
+        }
+
+        .text_darkgreen {
+            color: #1b5e20 !important;
+        }
+
+        .text_darkred {
+            color: #b71c1c !important;
+        }
+
         p.stats {
             margin: -26px 0 0 40px;
             padding: 0 16px;
             font-size: 0.5em;
-            color: rgba(0, 0, 0, 0.54);
+            color: #616161 !important;
             line-height: 16px;
+        }
+
+        .collection-item #uplink {
+            background-color: #f5f5f5;
+            width: 320px !important;
+        }
+
+        input.currentfile_input {
+          margin-bottom: -1px;
+          margin-top: 0;
+          padding-left: 5px;
+        }
+
+        .side_tools {
+          vertical-align: middle;
+        }
+
+        .fbtoolbarbutton_icon {
+           margin-top: 12px;
+        }
+
+        .collection {
+            margin: 0;
+            background-color: #fff;
+        }
+
+        li.collection-item {
+            border-bottom: 1px solid #eeeeee !important;
+        }
+
+        .fb_side-nav li {
+            line-height: 36px;
+        }
+
+        .fb_side-nav a {
+          padding: 0 16px;
+          display: inline-block !important;
+        }
+
+        .fb_side-nav li>a>i {
+            margin-right: 16px !important;
+            cursor: pointer;
+        }
+
+        .collection .collection-item i.material-icons {
+            vertical-align: text-bottom;
         }
 
         .green {
@@ -145,6 +222,10 @@ INDEX = Template(r"""<!DOCTYPE html>
 
         #dropdown_menu, #dropdown_menu_mobile {
             min-width: 180px;
+        }
+
+        #dropdown_gitmenu {
+            min-width: 110px;
         }
 
         .dropdown-content li>a,
@@ -161,43 +242,20 @@ INDEX = Template(r"""<!DOCTYPE html>
             color: #03a9f4 !important;
         }
 
+        .input-field input[type=text].valid {
+            border-bottom: 1px solid #03a9f4;;
+            box-shadow: 0 1px 0 0 #03a9f4;;
+        }
+
         .row .input-field input:focus {
             border-bottom: 1px solid #03a9f4 !important;
             box-shadow: 0 1px 0 0 #03a9f4 !important
         }
 
-        .collection {
-            margin: 0;
-            background-color: #fff;
-        }
-
-        li.collection-item {
-            border-bottom: 1px solid #eeeeee !important;
-        }
-
-        .side-nav li {
-            line-height: 36px;
-        }
-
-        .fb_side-nav a {
-          padding: 0 16px;
-          display: inline-block;
-        }
-
-        .side-nav li>a>i {
-            margin-right: 16px !important;
-        }
-
-        .collection .collection-item i.material-icons {
-            vertical-align: text-bottom;
-        }
-
         #modal_acekeyboard, #modal_components {
             top: auto;
-            bottom: -100%;
-            margin: 0;
             width: 96%;
-            min-height: 95%;
+            min-height: 96%;
             border-radius: 0;
             margin: auto;
         }
@@ -354,11 +412,6 @@ INDEX = Template(r"""<!DOCTYPE html>
             background-color: #03a9f4 !important;
         }
 
-        .collection-item #uplink {
-            background-color: #f5f5f5;
-            width: 320px !important;
-        }
-
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ace.js" type="text/javascript" charset="utf-8"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ext-modelist.js" type="text/javascript" charset="utf-8"></script>
@@ -418,18 +471,17 @@ INDEX = Template(r"""<!DOCTYPE html>
         <nav class="light-blue">
             <div class="nav-wrapper">
                 <ul class="left">
-                    <li><a class="waves-effect waves-light tooltipped files-collapse hide-on-small-only" data-activates="slide-out" data-position="bottom" data-delay="50" data-tooltip="Browse Filesystem"><i class="material-icons">list</i></a></li>
-                    <li><a class="waves-effect waves-light files-collapse hide-on-med-and-up" data-activates="slide-out"><i class="material-icons">list</i></a></li>
-                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="New File" onclick="editor.setValue('');document.getElementById('currentfile').value=document.getElementById('fbheader').innerHTML+separator+'newfile';document.getElementById('currentfile').setSelectionRange(document.getElementById('currentfile').value.length-7, document.getElementById('currentfile').value.length);document.getElementById('currentfile').focus()"><i class="material-icons">note_add</i></a></li>
-                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="New Folder" href="#modal_newfolder"><i class="material-icons">create_new_folder</i></a></li>
+                    <li><a class="waves-effect waves-light tooltipped files-collapse hide-on-small-only" data-activates="slide-out" data-position="bottom" data-delay="50" data-tooltip="Browse Filesystem"><i class="material-icons">folder</i></a></li>
+                    <li><a class="waves-effect waves-light files-collapse hide-on-med-and-up" data-activates="slide-out"><i class="material-icons">folder</i></a></li>
                 </ul>
                 <ul class="right">
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Save" href="#modal_save"><i class="material-icons">save</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Close" href="#modal_close"><i class="material-icons">highlight_off</i></a></li>
-                    <!--<li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Delete" href="#modal_delete"><i class="material-icons">delete</i></a></li>-->
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Search" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
-                    <li><a class="waves-effect waves-light hide-on-med-and-up" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
                     <li><a class="waves-effect waves-light dropdown-button hide-on-small-only" data-activates="dropdown_menu" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
+                    <li><a class="waves-effect waves-light hide-on-med-and-up" href="#modal_save"><i class="material-icons">save</i></a></li>
+                    <li><a class="waves-effect waves-light hide-on-med-and-up" href="#modal_close"><i class="material-icons">highlight_off</i></a></li>
+                    <li><a class="waves-effect waves-light hide-on-med-and-up" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
                     <li><a class="waves-effect waves-light dropdown-button hide-on-med-and-up" data-activates="dropdown_menu_mobile" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
                 </ul>
             </div>
@@ -437,13 +489,6 @@ INDEX = Template(r"""<!DOCTYPE html>
     </div>
   </header>
   <main>
-    <ul id="dropdown_tools_mobile" class="dropdown-content z-depth-4">
-        <li><a href="#" onclick="editor.setValue('');document.getElementById('currentfile').value=document.getElementById('fbheader').innerHTML+separator+'newfile';document.getElementById('currentfile').setSelectionRange(document.getElementById('currentfile').value.length-7, document.getElementById('currentfile').value.length);document.getElementById('currentfile').focus()">New File</a></li>
-        <li><a href="#modal_save">Save</a></li>
-        <li><a href="#modal_close">Close</a></li>
-        <!--<li class="divider"></li>
-        <li><a href="#modal_delete">Delete</a></li>-->
-    </ul>
     <ul id="dropdown_menu" class="dropdown-content z-depth-4">
         <li><a target="_blank" href="#modal_components">HASS Components</a></li>
         <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
@@ -458,6 +503,9 @@ INDEX = Template(r"""<!DOCTYPE html>
         <li><a href="#modal_about">About PoC</a></li>
         <li class="divider"></li>
         <li><a href="#modal_restart">Restart HASS</a></li>
+    </ul>
+    <ul id="dropdown_gitmenu" class="dropdown-content z-depth-4">
+        <li><a href="#modal_commit" class="nowrap waves-effect">git commit</a></li>
     </ul>
     <div id="modal_components" class="modal bottom-sheet modal-fixed-footer">
         <div class="modal-content_nopad">
@@ -983,6 +1031,37 @@ INDEX = Template(r"""<!DOCTYPE html>
         </div>
         <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="save()" class=" modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
     </div>
+    <div id="modal_upload" class="modal">
+        <div class="modal-content">
+            <h4>Upload File</h4>
+            <p>Please choose a file to upload</p>
+            <form action="#" id="uploadform">
+              <div class="file-field input-field">
+                <div class="btn light-blue waves-effect">
+                  <span>File</span>
+                  <input type="file" id="uploadfile" />
+                </div>
+                <div class="file-path-wrapper">
+                  <input class="file-path validate" type="text">
+                </div>
+              </div>
+            </form>
+        </div>
+        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">Cancel</a> <a onclick="upload()" class="modal-action modal-close waves-effect waves-green btn-flat">OK</a> </div>
+    </div>
+    <div id="modal_commit" class="modal">
+        <div class="modal-content">
+            <h4>git commit</h4>
+            <br>
+            <div class="row">
+                <div class="input-field col s12">
+                    <input type="text" id="commitmessage">
+                    <label class="active" for="commitmessage">Commit message</label>
+                </div>
+          </div>
+        </div>
+        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">Cancel</a> <a onclick="commit(document.getElementById('commitmessage').value)" class=" modal-action modal-close waves-effect waves-green btn-flat">OK</a> </div>
+    </div>
     <div id="modal_close" class="modal">
         <div class="modal-content">
             <h4>Close File</h4>
@@ -997,6 +1076,13 @@ INDEX = Template(r"""<!DOCTYPE html>
         </div>
         <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="delete_element()" class="modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
     </div>
+    <div id="modal_gitadd" class="modal">
+        <div class="modal-content">
+            <h4>git add</h4>
+            <p>Are you sure you want to add <span class="fb_currentfile"></span> to the index?</p>
+        </div>
+        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="gitadd()" class="modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
+    </div>
     <div id="modal_restart" class="modal">
         <div class="modal-content">
             <h4>Restart</h4>
@@ -1010,12 +1096,25 @@ INDEX = Template(r"""<!DOCTYPE html>
             <br>
             <div class="row">
                 <div class="input-field col s12">
-                    <input type="text" id="newfoldername" id="newfolder">
+                    <input type="text" id="newfoldername">
                     <label class="active" for="newfoldername">New Folder Name</label>
                 </div>
           </div>
         </div>
         <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">Cancel</a> <a onclick="newfolder(document.getElementById('newfoldername').value)" class=" modal-action modal-close waves-effect waves-green btn-flat">OK</a> </div>
+    </div>
+    <div id="modal_newfile" class="modal">
+        <div class="modal-content">
+            <h4>New File</h4>
+            <br>
+            <div class="row">
+                <div class="input-field col s12">
+                    <input type="text" id="newfilename">
+                    <label class="active" for="newfilename">New File Name</label>
+                </div>
+          </div>
+        </div>
+        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">Cancel</a> <a onclick="newfile(document.getElementById('newfilename').value)" class=" modal-action modal-close waves-effect waves-green btn-flat">OK</a> </div>
     </div>
     <div id="modal_about" class="modal modal-fixed-footer">
         <div class="modal-content">
@@ -1085,19 +1184,32 @@ INDEX = Template(r"""<!DOCTYPE html>
         </div>
         <div class="col s12 m8 l9">
           <div class="card input-field col s12 grey lighten-4 hoverable">
-              <input class="grey-text text-darken-3" value="" id="currentfile" type="text">
+              <input class="currentfile_input" value="" id="currentfile" type="text">
           </div>
         </div>
-      <div class="col s12 m8 l9 z-depth-2" id="editor"></div>
-      <div>
-        <div id="slide-out" class="fb_side-nav side-nav grey lighten-4">
-          <div class="z-depth-1" id="filebrowser" class="collection with-header">
+        <div class="col s12 m8 l9 z-depth-2" id="editor"></div>
+        <div>
+          <div id="slide-out" class="fb_side-nav side-nav grey lighten-4">
+            <div class="side_tools center hide-on-small-only">
+              <a class="col s3 waves-effect fbtoolbarbutton tooltipped grey lighten-4" href="#modal_newfile" data-position="bottom" data-delay="50" data-tooltip="New File"><i class="material-icons fbtoolbarbutton_icon">note_add</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton tooltipped grey lighten-4" href="#modal_newfolder" data-position="bottom" data-delay="50" data-tooltip="New Folder"><i class="material-icons fbtoolbarbutton_icon">create_new_folder</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton tooltipped grey lighten-4" href="#modal_upload" data-position="bottom" data-delay="50" data-tooltip="Upload File"><i class="material-icons fbtoolbarbutton_icon">file_upload</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton tooltipped grey lighten-4 dropdown-button" data-activates="dropdown_gitmenu" data-alignment='right' data-beloworigin='true' data-delay='50' data-position="bottom" data-tooltip="Git"><i class="material-icons fbtoolbarbutton_icon">call_split</i></a>
+            </div>
+            <div class="side_tools center hide-on-med-and-up">
+              <a class="col s3 waves-effect fbtoolbarbutton grey lighten-4" href="#modal_newfile"><i class="material-icons fbtoolbarbutton_icon">note_add</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton grey lighten-4" href="#modal_newfolder"><i class="material-icons fbtoolbarbutton_icon">create_new_folder</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton grey lighten-4" href="#modal_upload"><i class="material-icons fbtoolbarbutton_icon">file_upload</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton grey lighten-4 dropdown-button" data-activates="dropdown_gitmenu" data-alignment='right' data-beloworigin='true'><i class="material-icons fbtoolbarbutton_icon">call_split</i></a>
+          </div>
+            <div id="filebrowser" class="z-depth-1">
               <ul class="collection with-header">
                   <li id="fbheader" class="collection-header"></li>
+                  <li id="fbheaderbranch" class="collection-item"></li>
               </ul>
               <ul id="fbelements"></ul>
-          </div>
-          <div class="row hide-on-med-and-up">
+            </div>
+            <div class="row hide-on-med-and-up">
             <br />
             <div class="input-field col s12">
               <select onchange="insert(this.value)">
@@ -1469,7 +1581,7 @@ INDEX = Template(r"""<!DOCTYPE html>
     </div>
   </div>
 </main>
-<footer class="hide-on-med-and-up">
+<!-- <footer class="hide-on-med-and-up">
 <div class="shadow grey darken-4 row s12 z-depth-4"></div>
   <div class="fixed-action-btn toolbar active grey lighten-4" data-origin-bottom="77" data-origin-left="984" data-origin-width="56" data-open="true" style="text-align: center; width: 100%; bottom: 0px; left: 0px; transition: transform 0.2s cubic-bezier(0.55, 0.085, 0.68, 0.53), background-color 0s linear 0.2s; overflow: hidden;">
     <div class="fab-backdrop grey lighten-4" style=" transform: scale(26.575); "></div>
@@ -1478,10 +1590,9 @@ INDEX = Template(r"""<!DOCTYPE html>
       <li class="waves-effect"><a style="opacity: 1;" href="#modal_newfolder"><i class="material-icons grey-text text-darken-2">create_new_folder</i></a></li>
       <li class="waves-effect"><a style="opacity: 1;" href="#modal_save"><i class="material-icons grey-text text-darken-2">save</i></a></li>
       <li class="waves-effect"><a style="opacity: 1;" href="#modal_close"><i class="material-icons grey-text text-darken-2">highlight_off</i></a></li>
-      <!--<li class="waves-effect"><a style="opacity: 1;" href="#modal_delete"><i class="material-icons grey-text text-darken-2">delete</i></a></li>-->
     </ul>
   </div>
-</footer>
+</footer> -->
 <input type="hidden" id="fb_currentfile" value="" />
 <!-- Scripts -->
 <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
@@ -1508,7 +1619,7 @@ INDEX = Template(r"""<!DOCTYPE html>
             draggable: true
         });
         $('.ace_settings-collapse').sideNav({
-            menuWidth: 320, // Default is 300
+            menuWidth: 300, // Default is 300
             edge: 'right', // Choose the horizontal origin
             closeOnClick: true, // Closes side-nav on <a> clicks, useful for Angular/Meteor
             draggable: true // Choose whether you can drag to open on touch screens
@@ -1524,6 +1635,7 @@ INDEX = Template(r"""<!DOCTYPE html>
 		      .delay(800)
 		      .fadeOut('slow');
     });
+</script>
 </script>
 <script>
     var modemapping = new Object();
@@ -1661,18 +1773,64 @@ INDEX = Template(r"""<!DOCTYPE html>
         var itext = document.createElement('div');
         itext.innerHTML = itemdata.name;
         itext.classList.add('filename');
+
+        var hasgitadd = false;
+        if (itemdata.gitstatus) {
+            if (itemdata.gittracked == 'untracked') {
+                itext.classList.add('text_darkred');
+                hasgitadd = true;
+            }
+            else {
+                if(itemdata.gitstatus == 'unstaged') {
+                    itext.classList.add('text_darkred');
+                    hasgitadd = true;
+                }
+                else if (itemdata.gitstatus == 'staged') {
+                    itext.classList.add('text_darkgreen');
+                }
+            }
+        }
+
         item.appendChild(itext);
 
         var dropdown = document.createElement('ul');
         dropdown.id = 'fb_dropdown_' + index;
         dropdown.classList.add('dropdown-content');
         dropdown.classList.add('z-depth-4');
+
+        // Download button
+        var dd_download = document.createElement('li');
+        var dd_download_a = document.createElement('a');
+        dd_download_a.classList.add('waves-effect');
+        dd_download_a.setAttribute('onclick', "download_file('" + encodeURI(itemdata.fullpath) + "')");
+        dd_download_a.innerHTML = "Download";
+        dd_download.appendChild(dd_download_a);
+        dropdown.appendChild(dd_download);
+
+        // Delete button
         var dd_delete = document.createElement('li');
         var dd_delete_a = document.createElement('a');
+        dd_delete_a.classList.add('waves-effect');
         dd_delete_a.setAttribute('href', "#modal_delete");
         dd_delete_a.innerHTML = "Delete";
         dd_delete.appendChild(dd_delete_a);
         dropdown.appendChild(dd_delete);
+
+        if (itemdata.gitstatus) {
+            var divider = document.createElement('li');
+            divider.classList.add('divider');
+            dropdown.appendChild(divider);
+            if (hasgitadd) {
+                // git add button
+                var dd_gitadd = document.createElement('li');
+                var dd_gitadd_a = document.createElement('a');
+                dd_gitadd_a.classList.add('waves-effect');
+                dd_gitadd_a.setAttribute('href', "#modal_gitadd");
+                dd_gitadd_a.innerHTML = "git add";
+                dd_gitadd.appendChild(dd_gitadd_a);
+                dropdown.appendChild(dd_gitadd);
+            }
+        }
 
         var menubutton = document.createElement('a');
         menubutton.classList.add('fbmenubutton');
@@ -1700,6 +1858,16 @@ INDEX = Template(r"""<!DOCTYPE html>
         }
         var fbheader = document.getElementById('fbheader');
         fbheader.innerHTML = dirdata.abspath;
+        //console.log(dirdata);
+        var fbheaderbranch = document.getElementById('fbheaderbranch');
+        if (dirdata.activebranch) {
+            fbheaderbranch.innerHTML = dirdata.activebranch;
+            fbheaderbranch.style.display = "list-item";
+        }
+        else {
+            fbheaderbranch.innerHTML = "";
+            fbheaderbranch.style.display = "";
+        }
         var upli = document.createElement('li');
         var up = document.createElement('a');
         upli.classList.add('collection-item');
@@ -1762,7 +1930,7 @@ INDEX = Template(r"""<!DOCTYPE html>
             data.text = editor.getValue()
             $.post("api/save", data).done(function(resp) {
                 if (resp.error) {
-                    var $toastContent = $("<div><pre>" + resp.message + "\\n" + resp.path + "</pre></div>");
+                    var $toastContent = $("<div><pre>" + resp.message + "\n" + resp.path + "</pre></div>");
                     Materialize.toast($toastContent, 5000);
                 }
                 else {
@@ -1774,8 +1942,12 @@ INDEX = Template(r"""<!DOCTYPE html>
         }
     }
 
+    function download_file(filepath) {
+        window.open("/api/download?filename="+encodeURI(filepath));
+    }
+
     function delete_file() {
-        var path= document.getElementById('currentfile').value;
+        var path = document.getElementById('currentfile').value;
         if (path.length > 0) {
             data = new Object();
             data.path= path;
@@ -1788,7 +1960,8 @@ INDEX = Template(r"""<!DOCTYPE html>
                     var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
                     Materialize.toast($toastContent, 2000);
                     listdir(document.getElementById('fbheader').innerHTML)
-                    document.getElementById('currentfile').value='';editor.setValue('');
+                    document.getElementById('currentfile').value='';
+                    editor.setValue('');
                 }
             });
         }
@@ -1807,8 +1980,51 @@ INDEX = Template(r"""<!DOCTYPE html>
                 else {
                     var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
                     Materialize.toast($toastContent, 2000);
-                    listdir(document.getElementById('fbheader').innerHTML)
-                    document.getElementById('currentfile').value='';editor.setValue('');
+                    listdir(document.getElementById('fbheader').innerHTML);
+                    if (document.getElementById('currentfile').value == path) {
+                        document.getElementById('currentfile').value='';
+                        editor.setValue('');
+                    }
+                }
+            });
+        }
+    }
+
+    function gitadd() {
+        var path = document.getElementById('fb_currentfile').value;
+        if (path.length > 0) {
+            data = new Object();
+            data.path = path;
+            $.post("api/gitadd", data).done(function(resp) {
+                if (resp.error) {
+                    var $toastContent = $("<div><pre>" + resp.message + "\n" + resp.path + "</pre></div>");
+                    Materialize.toast($toastContent, 5000);
+                }
+                else {
+                    var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
+                    Materialize.toast($toastContent, 2000);
+                    listdir(document.getElementById('fbheader').innerHTML);
+                }
+            });
+        }
+    }
+
+    function commit(message) {
+        var path = document.getElementById("fbheader").innerHTML;
+        if (path.length > 0) {
+            data = new Object();
+            data.path = path;
+            data.message = message
+            $.post("api/commit", data).done(function(resp) {
+                if (resp.error) {
+                    var $toastContent = $("<div><pre>" + resp.message + "\n" + resp.path + "</pre></div>");
+                    Materialize.toast($toastContent, 5000);
+                }
+                else {
+                    var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
+                    Materialize.toast($toastContent, 2000);
+                    listdir(document.getElementById('fbheader').innerHTML);
+                    document.getElementById('commitmessage').value = "";
                 }
             });
         }
@@ -1833,6 +2049,55 @@ INDEX = Template(r"""<!DOCTYPE html>
                 document.getElementById('newfoldername').value = '';
             });
         }
+    }
+
+    function newfile(filename) {
+        var path = document.getElementById('fbheader').innerHTML;
+        if (path.length > 0 && filename.length > 0) {
+            data = new Object();
+            data.path = path;
+            data.name = filename;
+            $.post("api/newfile", data).done(function(resp) {
+                if (resp.error) {
+                    var $toastContent = $("<div><pre>" + resp.message + "\n" + resp.path + "</pre></div>");
+                    Materialize.toast($toastContent, 5000);
+                }
+                else {
+                    var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
+                    Materialize.toast($toastContent, 2000);
+                }
+                listdir(document.getElementById('fbheader').innerHTML);
+                document.getElementById('newfilename').value = '';
+            });
+        }
+    }
+
+    function upload() {
+        var file_data = $('#uploadfile').prop('files')[0];
+        var form_data = new FormData();
+        form_data.append('file', file_data);
+        form_data.append('path', document.getElementById('fbheader').innerHTML);
+        $.ajax({
+            url: 'api/upload',
+            dataType: 'json',
+            cache: false,
+            contentType: false,
+            processData: false,
+            data: form_data,
+            type: 'post',
+            success: function(resp){
+                if (resp.error) {
+                    var $toastContent = $("<div><pre>Error: " + resp.message + "</pre></div>");
+                    Materialize.toast($toastContent, 2000);
+                }
+                else {
+                    var $toastContent = $("<div><pre>Upload succesful</pre></div>");
+                    Materialize.toast($toastContent, 2000);
+                    listdir(document.getElementById('fbheader').innerHTML);
+                    document.getElementById('uploadform').reset();
+                }
+            }
+        });
     }
 
 </script>
@@ -1901,7 +2166,6 @@ INDEX = Template(r"""<!DOCTYPE html>
     var foldstatus = true;
 
     function toggle_fold() {
-        // Not used for now. We'll put a few buttons on top of the editor -> Toolbar. (Search, folding etc.)
         if (foldstatus) {
             editor.getSession().foldAll();
         }
@@ -1915,15 +2179,15 @@ INDEX = Template(r"""<!DOCTYPE html>
 </body>
 </html>""")
 
-def signal_handler(signal, frame):
+def signal_handler(sig, frame):
     global HTTPD
-    print("Shutting down server")
+    print("Got signal: %s. Shutting down server" % str(sig))
     HTTPD.server_close()
     sys.exit(0)
 
 def load_settings(settingsfile):
     global LISTENIP, LISTENPORT, BASEPATH, SSL_CERTIFICATE, SSL_KEY, HASS_API, \
-    HASS_API_PASSWORD, CREDENTIALS, ALLOWED_NETWORKS, BANNED_IPS, BANLIMIT
+    HASS_API_PASSWORD, CREDENTIALS, ALLOWED_NETWORKS, BANNED_IPS, BANLIMIT, DEV
     try:
         if os.path.isfile(settingsfile):
             with open(settingsfile) as fptr:
@@ -1939,28 +2203,58 @@ def load_settings(settingsfile):
                 ALLOWED_NETWORKS = settings.get("ALLOWED_NETWORKS", ALLOWED_NETWORKS)
                 BANNED_IPS = settings.get("BANNED_IPS", BANNED_IPS)
                 BANLIMIT = settings.get("BANLIMIT", BANLIMIT)
+                DEV = settings.get("DEV", DEV)
     except Exception as err:
         print(err)
         print("Not loading static settings")
     return False
 
-def get_dircontent(path):
+def get_dircontent(path, repo=None):
     dircontent = []
-    for e in sorted(os.listdir(path), key=lambda x: x.lower()):
+    if repo:
+        untracked = [
+            "%s%s%s"%(repo.working_dir, os.sep, e) for e in \
+            ["%s"%os.sep.join(f.split('/')) for f in repo.untracked_files]
+        ]
+        staged = {}
+        unstaged = {}
+        try:
+            for element in repo.index.diff("HEAD"):
+                staged["%s%s%s" % (repo.working_dir, os.sep, "%s"%os.sep.join(element.b_path.split('/')))] = element.change_type
+        except Exception as err:
+            print("Exception: %s" % str(err))
+        for element in repo.index.diff(None):
+            unstaged["%s%s%s" % (repo.working_dir, os.sep, "%s"%os.sep.join(element.b_path.split('/')))] = element.change_type
+    else:
+        untracked = []
+        staged = {}
+        unstaged = {}
+
+    for elem in sorted(os.listdir(path), key=lambda x: x.lower()):
         edata = {}
-        edata['name'] = e
+        edata['name'] = elem
         edata['dir'] = path
-        edata['fullpath'] = os.path.abspath(os.path.join(path, e))
+        edata['fullpath'] = os.path.abspath(os.path.join(path, elem))
         edata['type'] = 'dir' if os.path.isdir(edata['fullpath']) else 'file'
         try:
-            stats = os.stat(os.path.join(path, e))
+            stats = os.stat(os.path.join(path, elem))
             edata['size'] = stats.st_size
             edata['modified'] = stats.st_mtime
+            edata['created'] = stats.st_ctime
         except Exception:
             edata['size'] = 0
             edata['modified'] = 0
+            edata['created'] = 0
+        edata['changetype'] = None
+        edata['gitstatus'] = bool(repo)
+        edata['gittracked'] = 'untracked' if edata['fullpath'] in untracked else 'tracked'
+        if edata['fullpath'] in unstaged:
+            edata['gitstatus'] = 'unstaged'
+            edata['changetype'] = unstaged.get(edata['name'], None)
+        elif edata['fullpath'] in staged:
+            edata['gitstatus'] = 'staged'
+            edata['changetype'] = staged.get(edata['name'], None)
         dircontent.append(edata)
-
     return dircontent
 
 def get_html():
@@ -2002,7 +2296,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         self.send_response(200)
         if req.path == '/api/file':
             content = ""
-            self.send_header('Content-type','text/text')
+            self.send_header('Content-type', 'text/text')
             self.end_headers()
             filename = query.get('filename', None)
             try:
@@ -2019,20 +2313,58 @@ class RequestHandler(BaseHTTPRequestHandler):
                 content = str(err)
             self.wfile.write(bytes(content, "utf8"))
             return
+        elif req.path == '/api/download':
+            content = ""
+            filename = query.get('filename', None)
+            try:
+                if filename:
+                    filename = unquote(filename[0]).encode('utf-8')
+                    print(filename)
+                    if os.path.isfile(os.path.join(BASEDIR.encode('utf-8'), filename)):
+                        with open(os.path.join(BASEDIR.encode('utf-8'), filename), 'rb') as fptr:
+                            filecontent = fptr.read()
+                        self.send_header('Content-Disposition', 'attachment; filename=%s' % filename.decode('utf-8').split(os.sep)[-1])
+                        self.end_headers()
+                        self.wfile.write(filecontent)
+                        return
+                    else:
+                        content = "File not found"
+            except Exception as err:
+                print(err)
+                content = str(err)
+            self.send_header('Content-type', 'text/text')
+            self.wfile.write(bytes(content, "utf8"))
+            return
         elif req.path == '/api/listdir':
             content = ""
-            self.send_header('Content-type','text/json')
+            self.send_header('Content-type', 'text/json')
             self.end_headers()
             dirpath = query.get('path', None)
             try:
                 if dirpath:
                     dirpath = unquote(dirpath[0]).encode('utf-8')
                     if os.path.isdir(dirpath):
-                        dircontent = get_dircontent(dirpath.decode('utf-8'))
+                        repo = None
+                        activebranch = None
+                        dirty = False
+                        branches = []
+                        if REPO:
+                            try:
+                                repo = REPO(dirpath.decode('utf-8'), search_parent_directories=True)
+                                activebranch = repo.active_branch.name
+                                dirty = repo.is_dirty()
+                                for branch in repo.branches:
+                                    branches.append(branch.name)
+                            except Exception as err:
+                                print("Exception (no repo): %s" % str(err))
+                        dircontent = get_dircontent(dirpath.decode('utf-8'), repo)
                         filedata = {'content': dircontent,
-                            'abspath': os.path.abspath(dirpath).decode('utf-8'),
-                            'parent': os.path.dirname(os.path.abspath(dirpath)).decode('utf-8')
-                        }
+                                    'abspath': os.path.abspath(dirpath).decode('utf-8'),
+                                    'parent': os.path.dirname(os.path.abspath(dirpath)).decode('utf-8'),
+                                    'branches': branches,
+                                    'activebranch': activebranch,
+                                    'dirty': dirty
+                                   }
                         self.wfile.write(bytes(json.dumps(filedata), "utf8"))
             except Exception as err:
                 print(err)
@@ -2041,7 +2373,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             return
         elif req.path == '/api/abspath':
             content = ""
-            self.send_header('Content-type','text/text')
+            self.send_header('Content-type', 'text/text')
             self.end_headers()
             dirpath = query.get('path', None)
             if dirpath:
@@ -2054,7 +2386,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             return
         elif req.path == '/api/parent':
             content = ""
-            self.send_header('Content-type','text/text')
+            self.send_header('Content-type', 'text/text')
             self.end_headers()
             dirpath = query.get('path', None)
             if dirpath:
@@ -2067,9 +2399,9 @@ class RequestHandler(BaseHTTPRequestHandler):
             return
         elif req.path == '/api/restart':
             print("/api/restart")
-            self.send_header('Content-type','text/json')
+            self.send_header('Content-type', 'text/json')
             self.end_headers()
-            r = {"restart": False}
+            res = {"restart": False}
             try:
                 headers = {
                     "Content-Type": "application/json"
@@ -2078,17 +2410,17 @@ class RequestHandler(BaseHTTPRequestHandler):
                     headers["x-ha-access"] = HASS_API_PASSWORD
                 req = urllib.request.Request("%sservices/homeassistant/restart" % HASS_API, headers=headers, method='POST')
                 with urllib.request.urlopen(req) as response:
-                    r = json.loads(response.read().decode('utf-8'))
-                    print(r)
+                    res = json.loads(response.read().decode('utf-8'))
+                    print(res)
             except Exception as err:
                 print(err)
-                r['restart'] = str(err)
-            self.wfile.write(bytes(json.dumps(r), "utf8"))
+                res['restart'] = str(err)
+            self.wfile.write(bytes(json.dumps(res), "utf8"))
             return
         elif req.path == '/':
-            self.send_header('Content-type','text/html')
+            self.send_header('Content-type', 'text/html')
             self.end_headers()
-            
+
             boot = "{}"
             try:
                 headers = {
@@ -2099,11 +2431,11 @@ class RequestHandler(BaseHTTPRequestHandler):
                 req = urllib.request.Request("%sbootstrap" % HASS_API, headers=headers, method='GET')
                 with urllib.request.urlopen(req) as response:
                     boot = response.read().decode('utf-8')
-                
+
             except Exception as err:
                 print("Exception getting bootstrap")
                 print(err)
-    
+
             color = "green"
             try:
                 response = urllib.request.urlopen(RELEASEURL)
@@ -2113,7 +2445,10 @@ class RequestHandler(BaseHTTPRequestHandler):
             except Exception as err:
                 print("Exception getting release")
                 print(err)
-            html = get_html().safe_substitute(bootstrap=boot, current=VERSION, versionclass=color, separator="\%s" % os.sep if os.sep == "\\" else os.sep)
+            html = get_html().safe_substitute(bootstrap=boot,
+                                              current=VERSION,
+                                              versionclass=color,
+                                              separator="\%s" % os.sep if os.sep == "\\" else os.sep)
             self.wfile.write(bytes(html, "utf8"))
             return
         else:
@@ -2126,102 +2461,234 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.do_BLOCK()
             return
         req = urlparse(self.path)
-        postvars = {}
+
         response = {
             "error": True,
             "message": "Generic failure"
         }
-        
-        try:
-            length = int(self.headers['content-length'])
-            postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
-            interror = False
-        except Exception as err:
-            print(err)
-            response['message'] = "%s" % (str(err))
-            interror = True
 
-        if not interror:
-            if req.path == '/api/save':
-                if 'filename' in postvars.keys() and 'text' in postvars.keys():
-                    if postvars['filename'] and postvars['text']:
+        length = int(self.headers['content-length'])
+        if req.path == '/api/save':
+            try:
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+            except Exception as err:
+                print(err)
+                response['message'] = "%s" % (str(err))
+                postvars = {}
+            if 'filename' in postvars.keys() and 'text' in postvars.keys():
+                if postvars['filename'] and postvars['text']:
+                    try:
+                        filename = unquote(postvars['filename'][0])
+                        response['file'] = filename
+                        with open(filename, 'wb') as fptr:
+                            fptr.write(bytes(postvars['text'][0], "utf-8"))
+                        self.send_response(200)
+                        self.send_header('Content-type', 'text/json')
+                        self.end_headers()
+                        response['error'] = False
+                        response['message'] = "File saved successfully"
+                        self.wfile.write(bytes(json.dumps(response), "utf8"))
+                        return
+                    except Exception as err:
+                        response['message'] = "%s" % (str(err))
+                        print(err)
+            else:
+                response['message'] = "Missing filename or text"
+        elif req.path == '/api/upload':
+            if length > 104857600: #100 MB for now
+                read = 0
+                while read < length:
+                    read += len(self.rfile.read(min(66556, length - read)))
+                self.send_response(200)
+                self.send_header('Content-type', 'text/json')
+                self.end_headers()
+                response['error'] = True
+                response['message'] = "File too big: %i" % read
+                self.wfile.write(bytes(json.dumps(response), "utf8"))
+                return
+            else:
+                form = cgi.FieldStorage(
+                    fp=self.rfile,
+                    headers=self.headers,
+                    environ={'REQUEST_METHOD': 'POST',
+                             'CONTENT_TYPE': self.headers['Content-Type'],
+                            })
+                filename = form['file'].filename
+                filepath = form['path'].file.read()
+                data = form['file'].file.read()
+                open("%s%s%s" % (filepath, os.sep, filename), "wb").write(data)
+                self.send_response(200)
+                self.send_header('Content-type', 'text/json')
+                self.end_headers()
+                response['error'] = False
+                response['message'] = "Upload successful"
+                self.wfile.write(bytes(json.dumps(response), "utf8"))
+                return
+        elif req.path == '/api/delete':
+            try:
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+            except Exception as err:
+                print(err)
+                response['message'] = "%s" % (str(err))
+                postvars = {}
+            if 'path' in postvars.keys():
+                if postvars['path']:
+                    try:
+                        delpath = unquote(postvars['path'][0])
+                        response['path'] = delpath
                         try:
-                            filename = unquote(postvars['filename'][0])
-                            response['file'] = filename
-                            with open(filename, 'wb') as fptr:
-                                fptr.write(bytes(postvars['text'][0], "utf-8"))
+                            if os.path.isdir(delpath):
+                                os.rmdir(delpath)
+                            else:
+                                os.unlink(delpath)
                             self.send_response(200)
-                            self.send_header('Content-type','text/json')
+                            self.send_header('Content-type', 'text/json')
                             self.end_headers()
                             response['error'] = False
-                            response['message'] = "File saved successfully"
+                            response['message'] = "Deletetion successful"
                             self.wfile.write(bytes(json.dumps(response), "utf8"))
                             return
                         except Exception as err:
-                            response['message'] = "%s" % (str(err))
                             print(err)
-                else:
-                    response['message'] = "Missing filename or text"
-            elif req.path == '/api/delete':
-                if 'path' in postvars.keys():
-                    if postvars['path']:
-                        try:
-                            delpath = unquote(postvars['path'][0])
-                            response['path'] = delpath
-                            try:
-                                if os.path.isdir(delpath):
-                                    os.rmdir(delpath)
-                                else:
-                                    os.unlink(delpath)
-                                self.send_response(200)
-                                self.send_header('Content-type','text/json')
-                                self.end_headers()
-                                response['error'] = False
-                                response['message'] = "Deletetion successful"
-                                self.wfile.write(bytes(json.dumps(response), "utf8"))
-                                return
-                            except Exception as err:
-                                print(err)
-                                response['error'] = True
-                                response['message'] = str(err)
-                              
+                            response['error'] = True
+                            response['message'] = str(err)
 
-                        except Exception as err:
-                            response['message'] = "%s" % (str(err))
-                            print(err)
-                else:
-                    response['message'] = "Missing filename or text"
-            elif req.path == '/api/newfolder':
-                if 'path' in postvars.keys() and 'name' in postvars.keys():
-                    if postvars['path'] and postvars['name']:
-                        try:
-                            basepath = unquote(postvars['path'][0])
-                            name = unquote(postvars['name'][0])
-                            response['path'] = os.path.join(basepath, name)
-                            try:
-                                os.makedirs(response['path'])
-                                self.send_response(200)
-                                self.send_header('Content-type','text/json')
-                                self.end_headers()
-                                response['error'] = False
-                                response['message'] = "Folder created"
-                                self.wfile.write(bytes(json.dumps(response), "utf8"))
-                                return
-                            except Exception as err:
-                                print(err)
-                                response['error'] = True
-                                response['message'] = str(err)
-                              
-
-                        except Exception as err:
-                            response['message'] = "%s" % (str(err))
-                            print(err)
-                else:
-                    response['message'] = "Missing filename or text"
+                    except Exception as err:
+                        response['message'] = "%s" % (str(err))
+                        print(err)
             else:
-                response['message'] = "Invalid method"
+                response['message'] = "Missing filename or text"
+        elif req.path == '/api/gitadd':
+            try:
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+            except Exception as err:
+                print(err)
+                response['message'] = "%s" % (str(err))
+                postvars = {}
+            if 'path' in postvars.keys():
+                if postvars['path']:
+                    try:
+                        addpath = unquote(postvars['path'][0])
+                        repo = REPO(addpath, search_parent_directories=True)
+                        filepath = "/".join(addpath.split(os.sep)[len(repo.working_dir.split(os.sep)):])
+                        response['path'] = filepath
+                        try:
+                            repo.index.add([filepath])
+                            response['error'] = False
+                            response['message'] = "Added file to index"
+                            self.send_response(200)
+                            self.send_header('Content-type', 'text/json')
+                            self.end_headers()
+                            self.wfile.write(bytes(json.dumps(response), "utf8"))
+                            return
+                        except Exception as err:
+                            print(err)
+                            response['error'] = True
+                            response['message'] = str(err)
+
+                    except Exception as err:
+                        response['message'] = "%s" % (str(err))
+                        print(err)
+            else:
+                response['message'] = "Missing filename"
+        elif req.path == '/api/commit':
+            try:
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+            except Exception as err:
+                print(err)
+                response['message'] = "%s" % (str(err))
+                postvars = {}
+            if 'path' in postvars.keys() and 'message' in postvars.keys():
+                if postvars['path'] and postvars['message']:
+                    try:
+                        commitpath = unquote(postvars['path'][0])
+                        response['path'] = commitpath
+                        message = unquote(postvars['message'][0])
+                        repo = REPO(commitpath, search_parent_directories=True)
+                        try:
+                            repo.index.commit(message)
+                            response['error'] = False
+                            response['message'] = "Changes commited"
+                            self.send_response(200)
+                            self.send_header('Content-type', 'text/json')
+                            self.end_headers()
+                            self.wfile.write(bytes(json.dumps(response), "utf8"))
+                            return
+                        except Exception as err:
+                            response['error'] = True
+                            response['message'] = str(err)
+                            print(response)
+
+                    except Exception as err:
+                        response['message'] = "Not a git repository" % (str(err))
+                        print("Exception (no repo): %s" % str(err))
+            else:
+                response['message'] = "Missing path"
+        elif req.path == '/api/newfolder':
+            try:
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+            except Exception as err:
+                print(err)
+                response['message'] = "%s" % (str(err))
+                postvars = {}
+            if 'path' in postvars.keys() and 'name' in postvars.keys():
+                if postvars['path'] and postvars['name']:
+                    try:
+                        basepath = unquote(postvars['path'][0])
+                        name = unquote(postvars['name'][0])
+                        response['path'] = os.path.join(basepath, name)
+                        try:
+                            os.makedirs(response['path'])
+                            self.send_response(200)
+                            self.send_header('Content-type', 'text/json')
+                            self.end_headers()
+                            response['error'] = False
+                            response['message'] = "Folder created"
+                            self.wfile.write(bytes(json.dumps(response), "utf8"))
+                            return
+                        except Exception as err:
+                            print(err)
+                            response['error'] = True
+                            response['message'] = str(err)
+                    except Exception as err:
+                        response['message'] = "%s" % (str(err))
+                        print(err)
+        elif req.path == '/api/newfile':
+            try:
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+            except Exception as err:
+                print(err)
+                response['message'] = "%s" % (str(err))
+                postvars = {}
+            if 'path' in postvars.keys() and 'name' in postvars.keys():
+                if postvars['path'] and postvars['name']:
+                    try:
+                        basepath = unquote(postvars['path'][0])
+                        name = unquote(postvars['name'][0])
+                        response['path'] = os.path.join(basepath, name)
+                        try:
+                            with open(response['path'], 'w') as fptr:
+                                fptr.write("")
+                            self.send_response(200)
+                            self.send_header('Content-type', 'text/json')
+                            self.end_headers()
+                            response['error'] = False
+                            response['message'] = "File created"
+                            self.wfile.write(bytes(json.dumps(response), "utf8"))
+                            return
+                        except Exception as err:
+                            print(err)
+                            response['error'] = True
+                            response['message'] = str(err)
+                    except Exception as err:
+                        response['message'] = "%s" % (str(err))
+                        print(err)
+            else:
+                response['message'] = "Missing filename or text"
+        else:
+            response['message'] = "Invalid method"
         self.send_response(200)
-        self.send_header('Content-type','text/json')
+        self.send_header('Content-type', 'text/json')
         self.end_headers()
         self.wfile.write(bytes(json.dumps(response), "utf8"))
         return
@@ -2299,8 +2766,13 @@ def main(args):
         HTTPD = HTTPServer(server_address, Handler)
     else:
         HTTPD = socketserver.TCPServer(server_address, Handler)
-        HTTPD.socket = ssl.wrap_socket(HTTPD.socket, certfile=SSL_CERTIFICATE, keyfile=SSL_KEY, server_side=True)
-    print('Listening on: %s://%s:%i' % ('https' if SSL_CERTIFICATE else 'http', LISTENIP, LISTENPORT))
+        HTTPD.socket = ssl.wrap_socket(HTTPD.socket,
+                                       certfile=SSL_CERTIFICATE,
+                                       keyfile=SSL_KEY,
+                                       server_side=True)
+    print('Listening on: %s://%s:%i' % ('https' if SSL_CERTIFICATE else 'http',
+                                        LISTENIP,
+                                        LISTENPORT))
     if BASEPATH:
         os.chdir(BASEPATH)
     HTTPD.serve_forever()
