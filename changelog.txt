@@ -1,8 +1,12 @@
+Version 0.1.3 (2017-02-17)
+- Upload and download files
+- Basic Git integration
+- Minor UI changes and fixes
+
 Version 0.1.2 (2017-02-13)
 - Backend improvements @danielperna84
 - Further UI improvements @jmart518
 - Add / delete files / folders
-- 
 
 Version 0.1.1 (2017-02-10)
 - Improved UI @jmart518
