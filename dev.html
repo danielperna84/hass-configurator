@@ -94,11 +94,11 @@
         }
 
         .text_darkgreen {
-            color: darkgreen !important;
+            color: #1b5e20 !important;
         }
 
         .text_darkred {
-            color: darkred !important;
+            color: #b71c1c !important;
         }
 
         p.stats {
@@ -163,8 +163,12 @@
             color: #fff;
         }
 
-        #dropdown_menu, #dropdown_menu_mobile, dropdown_gitmenu {
+        #dropdown_menu, #dropdown_menu_mobile {
             min-width: 180px;
+        }
+
+        #dropdown_gitmenu {
+            min-width: 110px;
         }
 
         .dropdown-content li>a,
@@ -410,8 +414,8 @@
         <nav class="light-blue">
             <div class="nav-wrapper">
                 <ul class="left">
-                    <li><a class="waves-effect waves-light tooltipped files-collapse hide-on-small-only" data-activates="slide-out" data-position="bottom" data-delay="50" data-tooltip="Browse Filesystem"><i class="material-icons">list</i></a></li>
-                    <li><a class="waves-effect waves-light files-collapse hide-on-med-and-up" data-activates="slide-out"><i class="material-icons">list</i></a></li>
+                    <li><a class="waves-effect waves-light tooltipped files-collapse hide-on-small-only" data-activates="slide-out" data-position="bottom" data-delay="50" data-tooltip="Browse Filesystem"><i class="material-icons">folder</i></a></li>
+                    <li><a class="waves-effect waves-light files-collapse hide-on-med-and-up" data-activates="slide-out"><i class="material-icons">folder</i></a></li>
                 </ul>
                 <ul class="right">
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Save" href="#modal_save"><i class="material-icons">save</i></a></li>
@@ -444,7 +448,7 @@
         <li><a href="#modal_restart">Restart HASS</a></li>
     </ul>
     <ul id="dropdown_gitmenu" class="dropdown-content z-depth-4">
-        <li><a href="#modal_commit" class="nowrap">git commit</a></li>
+        <li><a href="#modal_commit" class="nowrap waves-effect">git commit</a></li>
     </ul>
     <div id="modal_components" class="modal bottom-sheet modal-fixed-footer">
         <div class="modal-content_nopad">
@@ -1130,10 +1134,10 @@
         <div>
           <div id="slide-out" class="fb_side-nav side-nav grey lighten-4">
             <div class="side_tools center">
-              <a class="col s3 waves-effect fbtoolbarbutton tooltipped" href="#modal_newfile" data-position="bottom" data-delay="50" data-tooltip="New File"><i class="material-icons fbtoolbarbutton_icon">note_add</i></a>
-              <a class="col s3 waves-effect fbtoolbarbutton tooltipped" href="#modal_newfolder" data-position="bottom" data-delay="50" data-tooltip="New Folder"><i class="material-icons fbtoolbarbutton_icon">create_new_folder</i></a>
-              <a class="col s3 waves-effect fbtoolbarbutton tooltipped" href="#modal_upload" data-position="bottom" data-delay="50" data-tooltip="Upload File"><i class="material-icons fbtoolbarbutton_icon">file_upload</i></a>
-              <a class="col s3 waves-effect fbtoolbarbutton tooltipped dropdown-button" href="#dropdown_gitmenu"  data-activates="dropdown_gitmenu" data-beloworigin="true" data-position="bottom" data-delay="50" data-tooltip="Git"><i class="material-icons fbtoolbarbutton_icon">call_split</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton tooltipped grey lighten-4" href="#modal_newfile" data-position="bottom" data-delay="50" data-tooltip="New File"><i class="material-icons fbtoolbarbutton_icon">note_add</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton tooltipped grey lighten-4" href="#modal_newfolder" data-position="bottom" data-delay="50" data-tooltip="New Folder"><i class="material-icons fbtoolbarbutton_icon">create_new_folder</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton tooltipped grey lighten-4" href="#modal_upload" data-position="bottom" data-delay="50" data-tooltip="Upload File"><i class="material-icons fbtoolbarbutton_icon">file_upload</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton tooltipped grey lighten-4 dropdown-button" data-activates="dropdown_gitmenu" data-alignment='right' data-beloworigin='true' data-delay='50' data-position="bottom" data-tooltip="Git"><i class="material-icons fbtoolbarbutton_icon">call_split</i></a>
           </div>
             <div id="filebrowser" class="z-depth-1">
               <ul class="collection with-header">
@@ -1545,6 +1549,16 @@
             alignment: 'right',
             stopPropagation: false
         });
+        $('.dropdown-button2').dropdown({
+            inDuration: 300,
+            outDuration: 225,
+            constrainWidth: true,
+            hover: true,
+            gutter: 0,
+            belowOrigin: true,
+            alignment: 'right',
+            stopPropagation: false
+        });
         $('.files-collapse').sideNav({
             menuWidth: 320,
             edge: 'left',
@@ -1723,7 +1737,7 @@
                 }
             }
         }
-        
+
         item.appendChild(itext);
 
         var dropdown = document.createElement('ul');
