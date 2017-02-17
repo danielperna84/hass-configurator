@@ -1963,14 +1963,13 @@ def get_dircontent(path, repo=None):
         ]
         staged = {}
         unstaged = {}
-        if repo:
-            try:
-                for element in repo.index.diff("HEAD"):
-                    staged["%s%s%s" % (repo.working_dir, os.sep, "%s"%os.sep.join(element.b_path.split('/')))] = element.change_type
-            except Exception as err:
-                print(err)
-            for element in repo.index.diff(None):
-                unstaged["%s%s%s" % (repo.working_dir, os.sep, "%s"%os.sep.join(element.b_path.split('/')))] = element.change_type
+        try:
+            for element in repo.index.diff("HEAD"):
+                staged["%s%s%s" % (repo.working_dir, os.sep, "%s"%os.sep.join(element.b_path.split('/')))] = element.change_type
+        except Exception as err:
+            print("Exception: %s" % str(err))
+        for element in repo.index.diff(None):
+            unstaged["%s%s%s" % (repo.working_dir, os.sep, "%s"%os.sep.join(element.b_path.split('/')))] = element.change_type
     else:
         untracked = []
         staged = {}
@@ -2001,7 +2000,6 @@ def get_dircontent(path, repo=None):
             edata['gitstatus'] = 'staged'
             edata['changetype'] = staged.get(edata['name'], None)
         dircontent.append(edata)
-
     return dircontent
 
 def get_html():
@@ -2103,7 +2101,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                                 for branch in repo.branches:
                                     branches.append(branch.name)
                             except Exception as err:
-                                print(err)
+                                print("Exception (no repo): %s" % str(err))
                         dircontent = get_dircontent(dirpath.decode('utf-8'), repo)
                         filedata = {'content': dircontent,
                                     'abspath': os.path.abspath(dirpath).decode('utf-8'),
@@ -2349,9 +2347,9 @@ class RequestHandler(BaseHTTPRequestHandler):
                 if postvars['path'] and postvars['message']:
                     try:
                         commitpath = unquote(postvars['path'][0])
+                        response['path'] = commitpath
                         message = unquote(postvars['message'][0])
                         repo = REPO(commitpath, search_parent_directories=True)
-                        response['path'] = commitpath
                         try:
                             repo.index.commit(message)
                             response['error'] = False
@@ -2362,13 +2360,13 @@ class RequestHandler(BaseHTTPRequestHandler):
                             self.wfile.write(bytes(json.dumps(response), "utf8"))
                             return
                         except Exception as err:
-                            print(err)
                             response['error'] = True
                             response['message'] = str(err)
+                            print(response)
 
                     except Exception as err:
-                        response['message'] = "%s" % (str(err))
-                        print(err)
+                        response['message'] = "Not a git repository" % (str(err))
+                        print("Exception (no repo): %s" % str(err))
             else:
                 response['message'] = "Missing path"
         elif req.path == '/api/newfolder':
