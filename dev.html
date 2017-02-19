@@ -53,9 +53,9 @@
         #fbheaderbranch {
             padding: 5px 18px !important;
             display: none;
-            line-height: 0.7em;
+            /*line-height: 0.7em;
             font-weight: 400;
-            font-size: 0.7em;
+            font-size: 0.7em;*/
         }
 
         #fbelements {
@@ -144,7 +144,7 @@
         }
 
         .fb_side-nav a {
-          padding: 0 16px 0 16px;
+          padding: 0 0 0 16px;
           display: inline-block !important;
         }
 
@@ -354,8 +354,8 @@
         }
 
         .fbicon_pad {
-          min-height: 64px;
-          min-width: 272px;
+            min-height: 64px;
+            min-width: 272px;
         }
 
         .fbmenuicon_pad {
@@ -1165,30 +1165,29 @@
                 <div style="white-space: nowrap; overflow: auto; max-width: 300px;">
                   <li id="fbheader" class="collection-header"></li>
                 </div>
-                <li id="fbheaderbranch" class="collection-item"></li>
                 <li class="no-padding">
                   <ul class="collapsible" data-collapsible="accordion">
                     <li>
-                      <div class="grey lighten-3 grey-text text-darken-2 collapsible-header" style="padding-top: 4px">Branch: master<i class="grey-text text-darken-2 right material-icons">arrow_drop_down</i></div>
-                      <div class="collapsible-body grey lighten-3">
+                      <div id="branchselector" class="grey lighten-3 grey-text text-darken-2 collapsible-header" style="padding-top: 4px">Branch: <span id="fbheaderbranch"></span><i class="grey-text text-darken-2 right material-icons">arrow_drop_down</i></div>
+                      <div id="branchdropdown" class="collapsible-body grey lighten-3">
                         <div class="col s12">
                           <div class="card input-field col s12 grey lighten-4">
-                            <input class="currentfile_input col s10 grey-text text-darken-2" value="Find or create a branch..." type="text">
-                            <i class="col s2 grey-text text-darken-2 right material-icons" style="padding-top: 10px; padding-left: 20px">search</i>
+                            <input class="currentfile_input col s12 grey-text text-darken-2" value="" type="text" placeholder="Create new branch">
+                            <!--<i class="col s2 grey-text text-darken-2 right material-icons" style="padding-top: 10px; padding-left: 20px">check</i>-->
                           </div>
                         </div>
-                      <ul class="tabs grey lighten-3 z-depth-1">
-                        <li class="tab col s6"><a class="grey-text text-darken-2" id="branch_tab" href="#branches">Branches</a></li>
+                      <!--<ul class="tabs grey lighten-3 z-depth-1">
+                        <li class="tab col s6"><a class="grey-text text-darken-2" id="branch_tab" href="branches">Branches</a></li>
                         <li class="tab col s6"><a class="grey-text text-darken-2" id="tag_tab" href="#tags">Tags</a></li>
                         <div class="indicator light-blue" style="z-index:1"></div>
-                      </ul>
+                      </ul>-->
                       <div class="grey lighten-3" id="branches" class="no-padding">
-                        <ul class="center">
+                        <ul class="center" id="branchlist">
                           <li>dev</li>
                           <li class="active">master</li>
                         </ul>
                       </div>
-                      <div id="tags" class="no-padding">
+                      <!--<div id="tags" class="no-padding">
                         <ul class="center">
                           <li>0.1.4</li>
                           <li class="active">0.1.3</li>
@@ -1200,7 +1199,7 @@
                           <li>0.0.6</li>
                           <li>0.0.5</li>
                         </ul>
-                      </div>
+                      </div>-->
                     </div>
                   </li>
                 </ul>
@@ -1631,69 +1630,6 @@
     });
 </script>
 <script>
-//Added to search
-var applySeachInList = function () {
-
-    var ul = $(this).closest('ul');
-    var searchValue = $(this).val();
-    var options = ul.find('li')
-      .find('span.filtrable');
-
-    options.each(function () {
-        if (typeof (this.outerText) == 'string') {
-            var liValue = this.outerText.toLowerCase();
-
-            if (liValue.indexOf(searchValue.toLowerCase()) === -1) {
-                $(this).hide();
-                $(this).parent().hide();
-            } else {
-                $(this).show();
-                $(this).parent().show();
-            }
-        }
-    });
-}
-
-//Added to search
-var setSearchableOption = function () {
-    var placeholder = $select.attr('searchable');
-    var element = $('<span><input type="text" class="search" style="margin: 5px 0px 16px 15px; width: 96%;" placeholder="' + placeholder + '"></span>');
-    options.append(element);
-    element.find('.search').keyup(applySeachInList);
-}
-
-//Added to search
-var searchable = $select.attr('searchable') ? true : false;
-
-//Added to search
-if (searchable) {
-    setSearchableOption();
-}
-
-$newSelect.on('blur', function () {
-
-    if (!multiple && !searchable) {
-        $(this).trigger('close');
-    }
-    options.find('li.selected').removeClass('selected');
-});
-
-//Added to search
-if (!multiple && searchable) {
-    options.find('li').on('click', function () {
-        $newSelect.trigger('close');
-    });
-}
-
-//Changed to search to treat search
-$(window).on({
-    'click': function () {
-        (multiple || searchable) && (optionsHover || $newSelect.trigger('close'));
-    }
-});
-
-</script>
-<script>
     var modemapping = new Object();
     modemapping['c'] = 'ace/mode/c_cpp';
     modemapping['cpp'] = 'ace/mode/c_cpp';
@@ -1784,6 +1720,7 @@ $(window).on({
         sort_select('services');
         sort_select('services_side');
     }
+
     function listdir(path) {
         $.get(encodeURI("api/listdir?path=" + path), function(data) {
             renderpath(data);
@@ -1916,15 +1853,32 @@ $(window).on({
         }
         var fbheader = document.getElementById('fbheader');
         fbheader.innerHTML = dirdata.abspath;
-        //console.log(dirdata);
+        var branchselector = document.getElementById('branchselector');
         var fbheaderbranch = document.getElementById('fbheaderbranch');
+        var branchlist = document.getElementById('branchlist');
+        while (branchlist.firstChild) {
+            branchlist.removeChild(branchlist.firstChild);
+        }
         if (dirdata.activebranch) {
             fbheaderbranch.innerHTML = dirdata.activebranch;
-            fbheaderbranch.style.display = "list-item";
+            fbheaderbranch.style.display = "inline";
+            branchselector.style.display = "block";
+            for (var i = 0; i < dirdata.branches.length; i++) {
+                var branch = document.createElement('li');
+                var link = document.createElement('a');
+                link.innerHTML = dirdata.branches[i];
+                link.href = '#';
+                branch.appendChild(link);
+                if (dirdata.branches[i] == dirdata.activebranch) {
+                    branch.classList.add('active');
+                }
+                branchlist.appendChild(branch);
+            }
         }
         else {
             fbheaderbranch.innerHTML = "";
             fbheaderbranch.style.display = "";
+            branchselector.style.display = "none";
         }
         var upli = document.createElement('li');
         var up = document.createElement('a');
