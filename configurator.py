@@ -40,7 +40,7 @@ BANNED_IPS = []
 # Ban IPs after n failed login attempts. Restart service to reset banning. The default of `0` disables this feature.
 BANLIMIT = 0
 # Enable git integration. GitPython (https://gitpython.readthedocs.io/en/stable/) has to be installed.
-GIT = False
+GIT = True
 ### End of options
 
 RELEASEURL = "https://api.github.com/repos/danielperna84/hass-poc-configurator/releases/latest"
@@ -2388,6 +2388,39 @@ class RequestHandler(BaseHTTPRequestHandler):
                             head.checkout()
                             response['error'] = False
                             response['message'] = "Checked out %s" % branch
+                            self.send_response(200)
+                            self.send_header('Content-type', 'text/json')
+                            self.end_headers()
+                            self.wfile.write(bytes(json.dumps(response), "utf8"))
+                            return
+                        except Exception as err:
+                            response['error'] = True
+                            response['message'] = str(err)
+                            print(response)
+
+                    except Exception as err:
+                        response['message'] = "Not a git repository: %s" % (str(err))
+                        print("Exception (no repo): %s" % str(err))
+            else:
+                response['message'] = "Missing path or branch"
+        elif req.path == '/api/newbranch':
+            try:
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+            except Exception as err:
+                print(err)
+                response['message'] = "%s" % (str(err))
+                postvars = {}
+            if 'path' in postvars.keys() and 'branch' in postvars.keys():
+                if postvars['path'] and postvars['branch']:
+                    try:
+                        branchpath = unquote(postvars['path'][0])
+                        response['path'] = branchpath
+                        branch = unquote(postvars['branch'][0])
+                        repo = REPO(branchpath, search_parent_directories=True)
+                        try:
+                            repo.git.checkout("HEAD", b=branch)
+                            response['error'] = False
+                            response['message'] = "Created and checked out %s" % branch
                             self.send_response(200)
                             self.send_header('Content-type', 'text/json')
                             self.end_headers()
