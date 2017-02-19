@@ -88,9 +88,9 @@
             padding-left: 20px !important;
         }
 
-        .newbranchbutton {
+        #newbranchbutton {
             color: #616161 !important;
-            display: inline-block;
+            display: none;
             float: right;
             min-height: 48px;
             padding-top: 0 !important;
@@ -1209,7 +1209,7 @@
                 <ul class="collapsible" data-collapsible="accordion">
                   <li class="col s12">
                     <div id="branchselector" class="col s10 grey lighten-3 grey-text text-darken-2 collapsible-header" style="min-height:48px; padding-top: 6px">Branch: <span id="fbheaderbranch"></span><i class="grey-text text-darken-2 right material-icons">arrow_drop_down</i></div>
-                    <a href="#modal_newbranch" class="newbranchbutton waves-effect col s2 material-icons grey lighten-3"><i class="grey-text text-darken-2 material-icons">add</i></a>
+                    <a href="#modal_newbranch" id="newbranchbutton" class="waves-effect col s2 material-icons grey lighten-3"><i class="grey-text text-darken-2 material-icons">add</i></a>
                     <div id="branchdropdown" class="collapsible-body">
                       <div class="grey lighten-4" id="branches" class="no-padding">
                         <ul class="center" id="branchlist"></ul>
@@ -1736,6 +1736,7 @@
         $.get(encodeURI("api/listdir?path=" + path), function(data) {
             renderpath(data);
         });
+        document.getElementById("slide-out").scrollTop = 0;
     }
 
     function renderitem(itemdata, index) {
@@ -1858,6 +1859,8 @@
     }
 
     function renderpath(dirdata) {
+        var newbranchbutton = document.getElementById('newbranchbutton');
+        newbranchbutton.style.cssText = "display: none !important"
         var fbelements = document.getElementById("fbelements");
         while (fbelements.firstChild) {
             fbelements.removeChild(fbelements.firstChild);
@@ -1871,6 +1874,7 @@
             branchlist.removeChild(branchlist.firstChild);
         }
         if (dirdata.activebranch) {
+            newbranchbutton.style.display = "inline-block";
             fbheaderbranch.innerHTML = dirdata.activebranch;
             fbheaderbranch.style.display = "inline";
             branchselector.style.display = "block";
@@ -1880,7 +1884,7 @@
                 link.classList.add("branch_select", "col", "s12", "no-padding");
                 link.innerHTML = dirdata.branches[i];
                 link.href = '#';
-                link.setAttribute('onclick', 'checkout("' + dirdata.branches[i] + '")')
+                link.setAttribute('onclick', 'checkout("' + dirdata.branches[i] + '");collapseAll()')
                 branch.appendChild(link);
                 if (dirdata.branches[i] == dirdata.activebranch) {
                     branch.classList.add('active');
@@ -1901,6 +1905,12 @@
             fbelements.appendChild(renderitem(dirdata.content[i], i));
         }
         $(".dropdown-button").dropdown();
+    }
+
+    function collapseAll() {
+        $(".collapsible-header").removeClass(function() { return "active"; });
+        $(".collapsible").collapsible({accordion: true});
+        $(".collapsible").collapsible({accordion: false});
     }
 
     function checkout(){
