@@ -88,6 +88,15 @@
             padding-left: 20px !important;
         }
 
+        .newbranchbutton {
+            color: #616161 !important;
+            display: inline-block;
+            float: right;
+            min-height: 48px;
+            padding-top: 0 !important;
+            padding-left: 15px !important;
+        }
+
         .filename {
             color: #616161 !important;
             font-weight: 400;
@@ -1086,6 +1095,19 @@
         </div>
         <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">Cancel</a> <a onclick="newfile(document.getElementById('newfilename').value)" class=" modal-action modal-close waves-effect waves-green btn-flat">OK</a> </div>
     </div>
+    <div id="modal_newbranch" class="modal">
+        <div class="modal-content">
+            <h4>New Branch</h4>
+            <br>
+            <div class="row">
+                <div class="input-field col s12">
+                    <input type="text" id="newbranch">
+                    <label class="active" for="newbranch">New Branch Name</label>
+                </div>
+          </div>
+        </div>
+        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">Cancel</a> <a onclick="" class=" modal-action modal-close waves-effect waves-green btn-flat">OK</a> </div>
+    </div>
     <div id="modal_about" class="modal modal-fixed-footer">
         <div class="modal-content">
             <h4><a class="black-text" href="https://github.com/danielperna84/hass-poc-configurator/" target="_blank">HASS Configurator</a></h4>
@@ -1182,24 +1204,20 @@
                     <div id="fbheader" class="collection-header2 leftellipsis" style="min-height: 64px; padding-top: 15px; margin-left: -5px;"></div>
                   </div>
                 </li>
-                <li class="no-padding col s12">
-                  <ul class="collapsible" data-collapsible="accordion">
-                    <li>
-                      <div id="branchselector" class="grey lighten-3 grey-text text-darken-2 collapsible-header" style="padding-top: 4px">Branch: <span id="fbheaderbranch"></span><i class="grey-text text-darken-2 right material-icons">arrow_drop_down</i></div>
-                      <div id="branchdropdown" class="collapsible-body">
-                        <div class="col s12">
-                          <div class="card input-field col s12">
-                            <input class="currentfile_input col s12 grey-text text-darken-2" value="" type="text" placeholder="Create new branch">
-                          </div>
-                        </div>
-                        <div class="grey lighten-3" id="branches" class="no-padding">
-                          <ul class="center" id="branchlist"></ul>
-                        </div>
-                      </div>
-                    </li>
-                  </ul>
-                </li>
               </ul>
+              <div class="no-padding col s12">
+                <ul class="collapsible" data-collapsible="accordion">
+                  <li class="col s12">
+                    <div id="branchselector" class="col s10 grey lighten-3 grey-text text-darken-2 collapsible-header" style="min-height:48px; padding-top: 6px">Branch: <span id="fbheaderbranch"></span><i class="grey-text text-darken-2 right material-icons">arrow_drop_down</i></div>
+                    <a href="#modal_newbranch" class="newbranchbutton waves-effect col s2 material-icons"><i class="grey-text text-darken-2 material-icons">add</i></a>
+                    <div id="branchdropdown" class="collapsible-body">
+                      <div class="grey lighten-4" id="branches" class="no-padding">
+                        <ul class="center" id="branchlist"></ul>
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+              </div>
               <ul id="fbelements"></ul>
             </div>
             <div class="row hide-on-med-and-up">
