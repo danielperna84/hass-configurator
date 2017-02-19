@@ -40,11 +40,11 @@ BANNED_IPS = []
 # Ban IPs after n failed login attempts. Restart service to reset banning. The default of `0` disables this feature.
 BANLIMIT = 0
 # Enable git integration. GitPython (https://gitpython.readthedocs.io/en/stable/) has to be installed.
-GIT = True
+GIT = False
 ### End of options
 
 RELEASEURL = "https://api.github.com/repos/danielperna84/hass-poc-configurator/releases/latest"
-VERSION = "0.1.2"
+VERSION = "0.1.4"
 BASEDIR = "."
 DEV = False
 HTTPD = None
@@ -1046,6 +1046,7 @@ INDEX = Template(r"""<!DOCTYPE html>
                 <li><a class="light-blue-text" href="https://ace.c9.io/" target="_blank">Ace</a></li>
                 <li><a class="light-blue-text" href="http://materializecss.com/" target="_blank">MaterializeCSS</a></li>
                 <li><a class="light-blue-text" href="https://jquery.com/" target="_blank">jQuery</a></li>
+		<li><a class="light-blue-text" href="https://gitpython.readthedocs.io" target="_blank">GitPython</a></li>
             </ul>
         </div>
         <div class="modal-footer"> <a class=" modal-action modal-close waves-effect btn-flat">OK</a> </div>
