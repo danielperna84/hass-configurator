@@ -2060,6 +2060,26 @@
         }
     }
 
+    function newbranch(branch) {
+        var path = document.getElementById("fbheader").innerHTML;
+        if (path.length > 0) {
+            data = new Object();
+            data.path = path;
+            data.branch = branch;
+            $.post("api/newbranch", data).done(function(resp) {
+                if (resp.error) {
+                    var $toastContent = $("<div><pre>" + resp.message + "\n" + resp.path + "</pre></div>");
+                    Materialize.toast($toastContent, 5000);
+                }
+                else {
+                    var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
+                    Materialize.toast($toastContent, 2000);
+                    listdir(document.getElementById('fbheader').innerHTML);
+                }
+            });
+        }
+    }
+
     function newfolder(foldername) {
         var path = document.getElementById('fbheader').innerHTML;
         if (path.length > 0 && foldername.length > 0) {
