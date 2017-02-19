@@ -1169,7 +1169,7 @@
               <ul class="collection with-header">
                 <li class="no-padding">
                   <div class="col s2 no-padding" style="min-height: 64px">
-                    <a class="col s12" style="min-height: 64px; padding-top: 15px;"><i class="grey-text text-darken-2 material-icons no-padding">arrow_back</i></a>
+                    <a class="col s12 waves-effect" style="min-height: 64px; padding-top: 15px; cursor: pointer;"><i class="grey-text text-darken-2 material-icons no-padding">arrow_back</i></a>
                   </div>
                   <div class="col s10" style="white-space: nowrap; overflow: auto; max-width: 250px; min-height: 64px">
                     <div id="fbheader" class="collection-header2" style="min-height: 64px; padding-top: 15px; margin-left: -5px;"></div>
@@ -1868,7 +1868,7 @@
             fbheaderbranch.style.display = "";
             branchselector.style.display = "none";
         }
-        var upli = document.createElement('li');
+        /* var upli = document.createElement('li');
         var up = document.createElement('a');
         upli.classList.add('collection-item');
         upli.classList.add('cursor', 'pointer');
@@ -1884,7 +1884,7 @@
         uptext.classList.add("filename");
         up.appendChild(uptext);
         upli.appendChild(up);
-        fbelements.appendChild(upli);
+        fbelements.appendChild(upli); */
 
         for (var i = 0; i < dirdata.content.length; i++) {
             fbelements.appendChild(renderitem(dirdata.content[i], i));
