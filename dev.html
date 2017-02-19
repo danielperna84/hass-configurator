@@ -1881,7 +1881,7 @@
             for (var i = 0; i < dirdata.branches.length; i++) {
                 var branch = document.createElement('li');
                 var link = document.createElement('a');
-                link.classList.add("branch_select", "col", "s12", "no-padding");
+                link.classList.add("branch_select", "col", "s12", "no-padding", "truncate");
                 link.innerHTML = dirdata.branches[i];
                 link.href = '#';
                 link.setAttribute('onclick', 'checkout("' + dirdata.branches[i] + '");collapseAll()')
