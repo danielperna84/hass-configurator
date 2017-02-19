@@ -1182,10 +1182,7 @@
                         <div class="indicator light-blue" style="z-index:1"></div>
                       </ul>-->
                       <div class="grey lighten-3" id="branches" class="no-padding">
-                        <ul class="center" id="branchlist">
-                          <li>dev</li>
-                          <li class="active">master</li>
-                        </ul>
+                        <ul class="center" id="branchlist"></ul>
                       </div>
                       <!--<div id="tags" class="no-padding">
                         <ul class="center">
@@ -1868,6 +1865,7 @@
                 var link = document.createElement('a');
                 link.innerHTML = dirdata.branches[i];
                 link.href = '#';
+                link.setAttribute('onclick', 'checkout("' + dirdata.branches[i] + '")')
                 branch.appendChild(link);
                 if (dirdata.branches[i] == dirdata.activebranch) {
                     branch.classList.add('active');
@@ -2026,7 +2024,7 @@
         if (path.length > 0) {
             data = new Object();
             data.path = path;
-            data.message = message
+            data.message = message;
             $.post("api/commit", data).done(function(resp) {
                 if (resp.error) {
                     var $toastContent = $("<div><pre>" + resp.message + "\n" + resp.path + "</pre></div>");
@@ -2037,6 +2035,26 @@
                     Materialize.toast($toastContent, 2000);
                     listdir(document.getElementById('fbheader').innerHTML);
                     document.getElementById('commitmessage').value = "";
+                }
+            });
+        }
+    }
+
+    function checkout(branch) {
+        var path = document.getElementById("fbheader").innerHTML;
+        if (path.length > 0) {
+            data = new Object();
+            data.path = path;
+            data.branch = branch;
+            $.post("api/checkout", data).done(function(resp) {
+                if (resp.error) {
+                    var $toastContent = $("<div><pre>" + resp.message + "\n" + resp.path + "</pre></div>");
+                    Materialize.toast($toastContent, 5000);
+                }
+                else {
+                    var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
+                    Materialize.toast($toastContent, 2000);
+                    listdir(document.getElementById('fbheader').innerHTML);
                 }
             });
         }
