@@ -103,12 +103,13 @@
             color: #b71c1c !important;
         }
 
-        p.stats {
-            margin: -26px 0 0 50px;
+        span.stats {
+            margin: -10px 0 0 0;
             padding: 0;
             font-size: 0.5em;
             color: #616161 !important;
             line-height: 16px;
+            display: inherit;
         }
 
         .collection-item #uplink {
@@ -1734,7 +1735,7 @@
         item.classList.add("waves-effect", "col", "s10", "fbicon_pad");
         var iicon = document.createElement('i');
         iicon.classList.add("material-icons", "fbmenuicon_pad");
-        var stats = document.createElement('p');
+        var stats = document.createElement('span');
         date = new Date(itemdata.modified*1000);
         stats.classList.add('stats');
         if (itemdata.type == 'dir') {
@@ -1786,6 +1787,7 @@
         }
 
         item.appendChild(itext);
+        item.appendChild(stats);
 
         var dropdown = document.createElement('ul');
         dropdown.id = 'fb_dropdown_' + index;
@@ -1840,7 +1842,6 @@
         menubutton.setAttribute('onclick', "document.getElementById('fb_currentfile').value='" + encodeURI(itemdata.fullpath) + "';$('span.fb_currentfile').html('" + itemdata.name + "')");
         li.appendChild(item);
         li.appendChild(menubutton);
-        li.appendChild(stats);
         li.setAttribute("title", itemdata.name)
         li.appendChild(dropdown);
         return li;
