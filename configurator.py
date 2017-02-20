@@ -44,7 +44,7 @@ GIT = False
 ### End of options
 
 RELEASEURL = "https://api.github.com/repos/danielperna84/hass-poc-configurator/releases/latest"
-VERSION = "0.1.3"
+VERSION = "0.1.4"
 BASEDIR = "."
 DEV = False
 HTTPD = None
@@ -90,6 +90,13 @@ INDEX = Template(r"""<!DOCTYPE html>
           }
         }
 
+        .leftellipsis {
+            overflow: hidden;
+            direction: rtl;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
         #edit_float {
               z-index: 10;
         }
@@ -108,11 +115,8 @@ INDEX = Template(r"""<!DOCTYPE html>
         }
 
         #fbheaderbranch {
-            padding: 2px 18px !important;
+            padding: 5px 18px !important;
             display: none;
-            line-height: 0.7em;
-            font-weight: 400;
-            font-size: 0.7em;
         }
 
         #fbelements {
@@ -126,22 +130,33 @@ INDEX = Template(r"""<!DOCTYPE html>
 
         .fbtoolbarbutton {
             color: #757575 !important;
+            min-height: 64px !important;
         }
 
         .fbmenubutton {
             color: #616161 !important;
             display: inline-block;
             float: right;
+            min-height: 64px;
+            padding-top: 8px !important;
+            padding-left: 20px !important;
+        }
+
+        #newbranchbutton {
+            color: #616161 !important;
+            display: none;
+            float: right;
+            min-height: 48px;
+            padding-top: 0 !important;
+            padding-left: 15px !important;
         }
 
         .filename {
             color: #616161 !important;
-            vertical-align: text-bottom;
             font-weight: 400;
             display: inline-block;
             width: 185px;
             white-space: nowrap;
-            overflow: hidden;
             text-overflow: ellipsis;
             cursor: pointer;
         }
@@ -158,17 +173,19 @@ INDEX = Template(r"""<!DOCTYPE html>
             color: #b71c1c !important;
         }
 
-        p.stats {
-            margin: -26px 0 0 40px;
-            padding: 0 16px;
+        span.stats {
+            margin: -10px 0 0 0;
+            padding: 0;
             font-size: 0.5em;
             color: #616161 !important;
             line-height: 16px;
+            display: inherit;
         }
 
         .collection-item #uplink {
             background-color: #f5f5f5;
-            width: 320px !important;
+            width: 323px !important;
+            margin-left: -3px !important;
         }
 
         input.currentfile_input {
@@ -182,7 +199,7 @@ INDEX = Template(r"""<!DOCTYPE html>
         }
 
         .fbtoolbarbutton_icon {
-           margin-top: 12px;
+           margin-top: 20px;
         }
 
         .collection {
@@ -199,17 +216,13 @@ INDEX = Template(r"""<!DOCTYPE html>
         }
 
         .fb_side-nav a {
-          padding: 0 16px;
+          padding: 0 0 0 16px;
           display: inline-block !important;
         }
 
         .fb_side-nav li>a>i {
             margin-right: 16px !important;
             cursor: pointer;
-        }
-
-        .collection .collection-item i.material-icons {
-            vertical-align: text-bottom;
         }
 
         .green {
@@ -412,6 +425,23 @@ INDEX = Template(r"""<!DOCTYPE html>
             background-color: #03a9f4 !important;
         }
 
+        .fbicon_pad {
+            min-height: 64px !important;
+        }
+
+        .fbmenuicon_pad {
+            min-height: 64px;
+            margin-top: 8px !important;
+        }
+
+        .no-padding {
+            padding:0 !important;
+        }
+
+        .branch_select {
+            min-width: 320px !important;
+        }
+
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ace.js" type="text/javascript" charset="utf-8"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ext-modelist.js" type="text/javascript" charset="utf-8"></script>
@@ -471,16 +501,16 @@ INDEX = Template(r"""<!DOCTYPE html>
         <nav class="light-blue">
             <div class="nav-wrapper">
                 <ul class="left">
-                    <li><a class="waves-effect waves-light tooltipped files-collapse hide-on-small-only" data-activates="slide-out" data-position="bottom" data-delay="50" data-tooltip="Browse Filesystem"><i class="material-icons">folder</i></a></li>
+                    <li><a class="waves-effect waves-light tooltipped files-collapse hide-on-small-only" data-activates="slide-out" data-position="bottom" data-delay="500" data-tooltip="Browse Filesystem"><i class="material-icons">folder</i></a></li>
                     <li><a class="waves-effect waves-light files-collapse hide-on-med-and-up" data-activates="slide-out"><i class="material-icons">folder</i></a></li>
                 </ul>
                 <ul class="right">
-                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Save" href="#modal_save"><i class="material-icons">save</i></a></li>
-                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Close" href="#modal_close"><i class="material-icons">highlight_off</i></a></li>
-                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Search" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
+                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="500" data-tooltip="Save" href="#modal_save"><i class="material-icons">save</i></a></li>
+                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="500" data-tooltip="Close" href="#modal_close"><i class="material-icons">close</i></a></li>
+                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="500" data-tooltip="Search" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
                     <li><a class="waves-effect waves-light dropdown-button hide-on-small-only" data-activates="dropdown_menu" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
                     <li><a class="waves-effect waves-light hide-on-med-and-up" href="#modal_save"><i class="material-icons">save</i></a></li>
-                    <li><a class="waves-effect waves-light hide-on-med-and-up" href="#modal_close"><i class="material-icons">highlight_off</i></a></li>
+                    <li><a class="waves-effect waves-light hide-on-med-and-up" href="#modal_close"><i class="material-icons">close</i></a></li>
                     <li><a class="waves-effect waves-light hide-on-med-and-up" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
                     <li><a class="waves-effect waves-light dropdown-button hide-on-med-and-up" data-activates="dropdown_menu_mobile" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
                 </ul>
@@ -1119,10 +1149,23 @@ INDEX = Template(r"""<!DOCTYPE html>
         </div>
         <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">Cancel</a> <a onclick="newfile(document.getElementById('newfilename').value)" class=" modal-action modal-close waves-effect waves-green btn-flat">OK</a> </div>
     </div>
+    <div id="modal_newbranch" class="modal">
+        <div class="modal-content">
+            <h4>New Branch</h4>
+            <br>
+            <div class="row">
+                <div class="input-field col s12">
+                    <input type="text" id="newbranch">
+                    <label class="active" for="newbranch">New Branch Name</label>
+                </div>
+          </div>
+        </div>
+        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">Cancel</a> <a onclick="newbranch(document.getElementById('newbranch').value)" class=" modal-action modal-close waves-effect waves-green btn-flat">OK</a> </div>
+    </div>
     <div id="modal_about" class="modal modal-fixed-footer">
         <div class="modal-content">
             <h4><a class="black-text" href="https://github.com/danielperna84/hass-poc-configurator/" target="_blank">HASS Configurator</a></h4>
-            <p>Version: <a class="$versionclass" href="https://github.com/danielperna84/hass-poc-configurator/releases/latest" target="_blank">$current</a></p>
+            <p>Version: <a class="$versionclass" href="https://github.com/danielperna84/hass-poc-configurator/releases/lafbicon_pad" target="_blank">$current</a></p>
             <p>Web-based file editor designed to modify configuration files of <a class="light-blue-text" href="https://home-assistant.io/" target="_blank">Home Assistant</a> or other textual files. Use at your own risk.</p>
             <p>Published under the MIT license</p>
             <p>Developed by:</p>
@@ -1139,6 +1182,7 @@ INDEX = Template(r"""<!DOCTYPE html>
                 <li><a class="light-blue-text" href="https://ace.c9.io/" target="_blank">Ace</a></li>
                 <li><a class="light-blue-text" href="http://materializecss.com/" target="_blank">MaterializeCSS</a></li>
                 <li><a class="light-blue-text" href="https://jquery.com/" target="_blank">jQuery</a></li>
+                <li><a class="light-blue-text" href="https://gitpython.readthedocs.io" target="_blank">GitPython</a></li>
             </ul>
         </div>
         <div class="modal-footer"> <a class=" modal-action modal-close waves-effect btn-flat">OK</a> </div>
@@ -1194,22 +1238,41 @@ INDEX = Template(r"""<!DOCTYPE html>
         <div>
           <div id="slide-out" class="fb_side-nav side-nav grey lighten-4">
             <div class="side_tools center hide-on-small-only">
-              <a class="col s3 waves-effect fbtoolbarbutton tooltipped grey lighten-4" href="#modal_newfile" data-position="bottom" data-delay="50" data-tooltip="New File"><i class="material-icons fbtoolbarbutton_icon">note_add</i></a>
-              <a class="col s3 waves-effect fbtoolbarbutton tooltipped grey lighten-4" href="#modal_newfolder" data-position="bottom" data-delay="50" data-tooltip="New Folder"><i class="material-icons fbtoolbarbutton_icon">create_new_folder</i></a>
-              <a class="col s3 waves-effect fbtoolbarbutton tooltipped grey lighten-4" href="#modal_upload" data-position="bottom" data-delay="50" data-tooltip="Upload File"><i class="material-icons fbtoolbarbutton_icon">file_upload</i></a>
-              <a class="col s3 waves-effect fbtoolbarbutton tooltipped grey lighten-4 dropdown-button" data-activates="dropdown_gitmenu" data-alignment='right' data-beloworigin='true' data-delay='50' data-position="bottom" data-tooltip="Git"><i class="material-icons fbtoolbarbutton_icon">call_split</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton tooltipped grey lighten-4" href="#modal_newfile" data-position="bottom" data-delay="500" data-tooltip="New File"><i class="material-icons fbtoolbarbutton_icon">note_add</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton tooltipped grey lighten-4" href="#modal_newfolder" data-position="bottom" data-delay="500" data-tooltip="New Folder"><i class="material-icons fbtoolbarbutton_icon">create_new_folder</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton tooltipped grey lighten-4" href="#modal_upload" data-position="bottom" data-delay="500" data-tooltip="Upload File"><i class="material-icons fbtoolbarbutton_icon">file_upload</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton tooltipped grey lighten-4 dropdown-button" data-activates="dropdown_gitmenu" data-alignment='right' data-beloworigin='true' data-delay='500' data-position="bottom" data-tooltip="Git"><i class="material-icons fbtoolbarbutton_icon">call_split</i></a>
             </div>
-            <div class="side_tools center hide-on-med-and-up">
+            <div class="side_tools center hide-on-med-and-up z-depth-1">
               <a class="col s3 waves-effect fbtoolbarbutton grey lighten-4" href="#modal_newfile"><i class="material-icons fbtoolbarbutton_icon">note_add</i></a>
               <a class="col s3 waves-effect fbtoolbarbutton grey lighten-4" href="#modal_newfolder"><i class="material-icons fbtoolbarbutton_icon">create_new_folder</i></a>
               <a class="col s3 waves-effect fbtoolbarbutton grey lighten-4" href="#modal_upload"><i class="material-icons fbtoolbarbutton_icon">file_upload</i></a>
               <a class="col s3 waves-effect fbtoolbarbutton grey lighten-4 dropdown-button" data-activates="dropdown_gitmenu_mobile" data-alignment='right' data-beloworigin='true'><i class="material-icons fbtoolbarbutton_icon">call_split</i></a>
-          </div>
-            <div id="filebrowser" class="z-depth-1">
+            </div>
+            <div id="filebrowser">
               <ul class="collection with-header">
-                  <li id="fbheader" class="collection-header"></li>
-                  <li id="fbheaderbranch" class="collection-item"></li>
+                <li class="no-padding">
+                  <div class="col s2 no-padding" style="min-height: 64px">
+                    <a id="uplink" class="col s12 waves-effect" style="min-height: 64px; padding-top: 15px; cursor: pointer;"><i class="grey-text text-darken-2 material-icons no-padding">arrow_back</i></a>
+                  </div>
+                  <div class="col s10" style="white-space: nowrap; overflow: auto; max-width: 250px; min-height: 64px">
+                    <div id="fbheader" class="collection-header2 leftellipsis" style="min-height: 64px; padding-top: 15px; margin-left: -5px;"></div>
+                  </div>
+                </li>
               </ul>
+              <div class="no-padding col s12">
+                <ul class="collapsible" data-collapsible="accordion">
+                  <li class="col s12">
+                    <div id="branchselector" class="col s10 grey lighten-3 grey-text text-darken-2 collapsible-header truncate" style="min-height:48px; padding-top: 6px"><i class="grey-text text-darken-2 left material-icons" style="margin-left: -10px; margin-right: 2px;">arrow_drop_down</i>Branch:<span id="fbheaderbranch"></span></div>
+                    <a href="#modal_newbranch" id="newbranchbutton" class="waves-effect col s2 material-icons grey lighten-3"><i class="grey-text text-darken-2 material-icons">add</i></a>
+                    <div id="branchdropdown" class="collapsible-body">
+                      <div class="grey lighten-4 no-padding" id="branches">
+                        <ul class="center" id="branchlist"></ul>
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+              </div>
               <ul id="fbelements"></ul>
             </div>
             <div class="row hide-on-med-and-up">
@@ -1584,18 +1647,6 @@ INDEX = Template(r"""<!DOCTYPE html>
     </div>
   </div>
 </main>
-<!-- <footer class="hide-on-med-and-up">
-<div class="shadow grey darken-4 row s12 z-depth-4"></div>
-  <div class="fixed-action-btn toolbar active grey lighten-4" data-origin-bottom="77" data-origin-left="984" data-origin-width="56" data-open="true" style="text-align: center; width: 100%; bottom: 0px; left: 0px; transition: transform 0.2s cubic-bezier(0.55, 0.085, 0.68, 0.53), background-color 0s linear 0.2s; overflow: hidden;">
-    <div class="fab-backdrop grey lighten-4" style=" transform: scale(26.575); "></div>
-    <ul>
-      <li class="waves-effect"><a style="opacity: 1;" onclick="editor.setValue('');document.getElementById('currentfile').value=document.getElementById('fbheader').innerHTML+separator+'newfile';document.getElementById('currentfile').setSelectionRange(document.getElementById('currentfile').value.length-7, document.getElementById('currentfile').value.length);document.getElementById('currentfile').focus()"><i class="material-icons grey-text text-darken-2">note_add</i></a></li>
-      <li class="waves-effect"><a style="opacity: 1;" href="#modal_newfolder"><i class="material-icons grey-text text-darken-2">create_new_folder</i></a></li>
-      <li class="waves-effect"><a style="opacity: 1;" href="#modal_save"><i class="material-icons grey-text text-darken-2">save</i></a></li>
-      <li class="waves-effect"><a style="opacity: 1;" href="#modal_close"><i class="material-icons grey-text text-darken-2">highlight_off</i></a></li>
-    </ul>
-  </div>
-</footer> -->
 <input type="hidden" id="fb_currentfile" value="" />
 <!-- Scripts -->
 <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
@@ -1604,7 +1655,12 @@ INDEX = Template(r"""<!DOCTYPE html>
     $(document).ready(function () {
         $('select').material_select();
         $('.modal').modal();
-        $('.collapsible').collapsible();
+        $('ul.tabs').tabs();
+        $('.collapsible').collapsible({
+          onOpen: function(el) {
+            $('#branch_tab').click();
+          },
+        });
         $('.dropdown-button').dropdown({
             inDuration: 300,
             outDuration: 225,
@@ -1638,7 +1694,6 @@ INDEX = Template(r"""<!DOCTYPE html>
 		      .delay(800)
 		      .fadeOut('slow');
     });
-</script>
 </script>
 <script>
     var modemapping = new Object();
@@ -1731,19 +1786,22 @@ INDEX = Template(r"""<!DOCTYPE html>
         sort_select('services');
         sort_select('services_side');
     }
+
     function listdir(path) {
         $.get(encodeURI("api/listdir?path=" + path), function(data) {
             renderpath(data);
         });
+        document.getElementById("slide-out").scrollTop = 0;
     }
 
     function renderitem(itemdata, index) {
         var li = document.createElement('li');
-        li.classList.add('collection-item');
+        li.classList.add("collection-item", "fbicon_pad", "col", "s12", "no-padding");
         var item = document.createElement('a');
+        item.classList.add("waves-effect", "col", "s10", "fbicon_pad");
         var iicon = document.createElement('i');
-        iicon.classList.add('material-icons');
-        var stats = document.createElement('p');
+        iicon.classList.add("material-icons", "fbmenuicon_pad");
+        var stats = document.createElement('span');
         date = new Date(itemdata.modified*1000);
         stats.classList.add('stats');
         if (itemdata.type == 'dir') {
@@ -1795,6 +1853,7 @@ INDEX = Template(r"""<!DOCTYPE html>
         }
 
         item.appendChild(itext);
+        item.appendChild(stats);
 
         var dropdown = document.createElement('ul');
         dropdown.id = 'fb_dropdown_' + index;
@@ -1812,8 +1871,8 @@ INDEX = Template(r"""<!DOCTYPE html>
 
         // Delete button
         var dd_delete = document.createElement('li');
+        dd_delete.classList.add("waves-effect");
         var dd_delete_a = document.createElement('a');
-        dd_delete_a.classList.add('waves-effect');
         dd_delete_a.setAttribute('href', "#modal_delete");
         dd_delete_a.innerHTML = "Delete";
         dd_delete.appendChild(dd_delete_a);
@@ -1836,63 +1895,85 @@ INDEX = Template(r"""<!DOCTYPE html>
         }
 
         var menubutton = document.createElement('a');
-        menubutton.classList.add('fbmenubutton');
+        menubutton.classList.add("fbmenubutton", "waves-effect", "dropdown-button", "col", "s2", "fbicon_pad");
         menubutton.classList.add('waves-effect');
         menubutton.classList.add('dropdown-button');
         menubutton.setAttribute('data-activates', dropdown.id);
         menubutton.setAttribute('data-alignment', 'right');
+
         var menubuttonicon = document.createElement('i');
         menubutton.classList.add('material-icons');
-        menubutton.classList.add('right');
+        menubutton.classList.add("right");
         menubutton.innerHTML = 'more_vert';
         menubutton.setAttribute('onclick', "document.getElementById('fb_currentfile').value='" + encodeURI(itemdata.fullpath) + "';$('span.fb_currentfile').html('" + itemdata.name + "')");
         li.appendChild(item);
         li.appendChild(menubutton);
-        li.appendChild(stats);
         li.setAttribute("title", itemdata.name)
         li.appendChild(dropdown);
         return li;
     }
 
     function renderpath(dirdata) {
+        var newbranchbutton = document.getElementById('newbranchbutton');
+        newbranchbutton.style.cssText = "display: none !important"
         var fbelements = document.getElementById("fbelements");
         while (fbelements.firstChild) {
             fbelements.removeChild(fbelements.firstChild);
         }
         var fbheader = document.getElementById('fbheader');
         fbheader.innerHTML = dirdata.abspath;
-        //console.log(dirdata);
+        var branchselector = document.getElementById('branchselector');
         var fbheaderbranch = document.getElementById('fbheaderbranch');
+        var branchlist = document.getElementById('branchlist');
+        while (branchlist.firstChild) {
+            branchlist.removeChild(branchlist.firstChild);
+        }
         if (dirdata.activebranch) {
+            newbranchbutton.style.display = "inline-block";
             fbheaderbranch.innerHTML = dirdata.activebranch;
-            fbheaderbranch.style.display = "list-item";
+            fbheaderbranch.style.display = "inline";
+            branchselector.style.display = "block";
+            for (var i = 0; i < dirdata.branches.length; i++) {
+                var branch = document.createElement('li');
+                var link = document.createElement('a');
+                link.classList.add("branch_select", "col", "s12", "no-padding", "truncate");
+                link.innerHTML = dirdata.branches[i];
+                link.href = '#';
+                link.setAttribute('onclick', 'checkout("' + dirdata.branches[i] + '");collapseAll()')
+                branch.appendChild(link);
+                if (dirdata.branches[i] == dirdata.activebranch) {
+                    branch.classList.add('active');
+                }
+                branchlist.appendChild(branch);
+            }
         }
         else {
             fbheaderbranch.innerHTML = "";
             fbheaderbranch.style.display = "";
+            branchselector.style.display = "none";
         }
-        var upli = document.createElement('li');
-        var up = document.createElement('a');
-        upli.classList.add('collection-item');
-        upli.classList.add('cursor', 'pointer');
-        up.id = "uplink";
-        up.classList.add('waves-effect');
-        up.setAttribute("onclick", "listdir('" + encodeURI(dirdata.parent) + "')")
-        var upicon = document.createElement('i');
-        upicon.classList.add('material-icons');
-        upicon.innerHTML = 'folder';
-        up.appendChild(upicon);
-        var uptext = document.createElement('span');
-        uptext.innerHTML = '..';
-        uptext.classList.add('filename');
-        up.appendChild(uptext);
-        upli.appendChild(up);
-        fbelements.appendChild(upli);
+
+        var uplink = document.getElementById('uplink');
+        uplink.setAttribute("onclick", "listdir('" + encodeURI(dirdata.parent) + "')")
 
         for (var i = 0; i < dirdata.content.length; i++) {
             fbelements.appendChild(renderitem(dirdata.content[i], i));
         }
         $(".dropdown-button").dropdown();
+    }
+
+    function collapseAll() {
+        $(".collapsible-header").removeClass(function() { return "active"; });
+        $(".collapsible").collapsible({accordion: true});
+        $(".collapsible").collapsible({accordion: false});
+    }
+
+    function checkout(){
+      $(".collapsible-header").removeClass(function(){
+        return "active";
+      });
+      $(".collapsible").collapsible({accordion: true});
+      $(".collapsible").collapsible({accordion: false});
     }
 
     function loadfile(filepath) {
@@ -2017,7 +2098,7 @@ INDEX = Template(r"""<!DOCTYPE html>
         if (path.length > 0) {
             data = new Object();
             data.path = path;
-            data.message = message
+            data.message = message;
             $.post("api/commit", data).done(function(resp) {
                 if (resp.error) {
                     var $toastContent = $("<div><pre>" + resp.message + "\n" + resp.path + "</pre></div>");
@@ -2028,6 +2109,46 @@ INDEX = Template(r"""<!DOCTYPE html>
                     Materialize.toast($toastContent, 2000);
                     listdir(document.getElementById('fbheader').innerHTML);
                     document.getElementById('commitmessage').value = "";
+                }
+            });
+        }
+    }
+
+    function checkout(branch) {
+        var path = document.getElementById("fbheader").innerHTML;
+        if (path.length > 0) {
+            data = new Object();
+            data.path = path;
+            data.branch = branch;
+            $.post("api/checkout", data).done(function(resp) {
+                if (resp.error) {
+                    var $toastContent = $("<div><pre>" + resp.message + "\n" + resp.path + "</pre></div>");
+                    Materialize.toast($toastContent, 5000);
+                }
+                else {
+                    var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
+                    Materialize.toast($toastContent, 2000);
+                    listdir(document.getElementById('fbheader').innerHTML);
+                }
+            });
+        }
+    }
+
+    function newbranch(branch) {
+        var path = document.getElementById("fbheader").innerHTML;
+        if (path.length > 0) {
+            data = new Object();
+            data.path = path;
+            data.branch = branch;
+            $.post("api/newbranch", data).done(function(resp) {
+                if (resp.error) {
+                    var $toastContent = $("<div><pre>" + resp.message + "\n" + resp.path + "</pre></div>");
+                    Materialize.toast($toastContent, 5000);
+                }
+                else {
+                    var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
+                    Materialize.toast($toastContent, 2000);
+                    listdir(document.getElementById('fbheader').innerHTML);
                 }
             });
         }
@@ -2623,10 +2744,77 @@ class RequestHandler(BaseHTTPRequestHandler):
                             print(response)
 
                     except Exception as err:
-                        response['message'] = "Not a git repository" % (str(err))
+                        response['message'] = "Not a git repository: %s" % (str(err))
                         print("Exception (no repo): %s" % str(err))
             else:
                 response['message'] = "Missing path"
+        elif req.path == '/api/checkout':
+            try:
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+            except Exception as err:
+                print(err)
+                response['message'] = "%s" % (str(err))
+                postvars = {}
+            if 'path' in postvars.keys() and 'branch' in postvars.keys():
+                if postvars['path'] and postvars['branch']:
+                    try:
+                        branchpath = unquote(postvars['path'][0])
+                        response['path'] = branchpath
+                        branch = unquote(postvars['branch'][0])
+                        repo = REPO(branchpath, search_parent_directories=True)
+                        try:
+                            head = [h for h in repo.heads if h.name == branch][0]
+                            head.checkout()
+                            response['error'] = False
+                            response['message'] = "Checked out %s" % branch
+                            self.send_response(200)
+                            self.send_header('Content-type', 'text/json')
+                            self.end_headers()
+                            self.wfile.write(bytes(json.dumps(response), "utf8"))
+                            return
+                        except Exception as err:
+                            response['error'] = True
+                            response['message'] = str(err)
+                            print(response)
+
+                    except Exception as err:
+                        response['message'] = "Not a git repository: %s" % (str(err))
+                        print("Exception (no repo): %s" % str(err))
+            else:
+                response['message'] = "Missing path or branch"
+        elif req.path == '/api/newbranch':
+            try:
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+            except Exception as err:
+                print(err)
+                response['message'] = "%s" % (str(err))
+                postvars = {}
+            if 'path' in postvars.keys() and 'branch' in postvars.keys():
+                if postvars['path'] and postvars['branch']:
+                    try:
+                        branchpath = unquote(postvars['path'][0])
+                        response['path'] = branchpath
+                        branch = unquote(postvars['branch'][0])
+                        repo = REPO(branchpath, search_parent_directories=True)
+                        try:
+                            repo.git.checkout("HEAD", b=branch)
+                            response['error'] = False
+                            response['message'] = "Created and checked out %s" % branch
+                            self.send_response(200)
+                            self.send_header('Content-type', 'text/json')
+                            self.end_headers()
+                            self.wfile.write(bytes(json.dumps(response), "utf8"))
+                            return
+                        except Exception as err:
+                            response['error'] = True
+                            response['message'] = str(err)
+                            print(response)
+
+                    except Exception as err:
+                        response['message'] = "Not a git repository: %s" % (str(err))
+                        print("Exception (no repo): %s" % str(err))
+            else:
+                response['message'] = "Missing path or branch"
         elif req.path == '/api/newfolder':
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
