@@ -8,7 +8,7 @@ Thanks to the help of [JT Martinez](https://github.com/jmart518) this tool now p
 
 - Web-Based editor to modify your files with syntax highlighting
 - Upload and download files
-- Stage and commit changes in Git repositories
+- Stage and commit changes in Git repositories, create and switch between branches
 - Lists of available triggers, events, entities, conditions and services. Selected element gets inserted into the editor at the last cursor position.
 - Restart HASS directly with the click of a button (API-password required)
 - SSL support
