@@ -79,22 +79,27 @@ INDEX = Template(r"""<!DOCTYPE html>
 
         #editor {
             position: fixed;
-            top: 155px;
+            top: 135px;
             right: 0;
             bottom: 0;
           }
 
         @media only screen and (max-width: 600px) {
           #editor {
-              top: 145px;
-              bottom: 56px;
-            }
-
-          #edit_float {
-              bottom: 85px;
-              z-index: 10;
-            }
+              top: 125px;
           }
+        }
+
+        .leftellipsis {
+            overflow: hidden;
+            direction: rtl;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        #edit_float {
+              z-index: 10;
+        }
 
         #filebrowser {
             background-color: #fff;
@@ -104,9 +109,14 @@ INDEX = Template(r"""<!DOCTYPE html>
             display: block;
             cursor: initial;
             pointer-events: none;
-            color: rgba(0, 0, 0, 0.54);
-            font-size: 15px;
-            font-weight: 500;
+            color: #616161 !important;
+            font-weight: 400;
+            font-size: .9em;
+        }
+
+        #fbheaderbranch {
+            padding: 5px 18px !important;
+            display: none;
         }
 
         #fbelements {
@@ -118,30 +128,101 @@ INDEX = Template(r"""<!DOCTYPE html>
             color: #616161 !important;
         }
 
+        .fbtoolbarbutton {
+            color: #757575 !important;
+            min-height: 64px !important;
+        }
+
         .fbmenubutton {
-            color: rgba(0, 0, 0, 0.54) !important;
+            color: #616161 !important;
             display: inline-block;
             float: right;
+            min-height: 64px;
+            padding-top: 8px !important;
+            padding-left: 20px !important;
+        }
+
+        #newbranchbutton {
+            color: #616161 !important;
+            display: none;
+            float: right;
+            min-height: 48px;
+            padding-top: 0 !important;
+            padding-left: 15px !important;
         }
 
         .filename {
-            color: rgba(0, 0, 0, 0.54);
-            vertical-align: text-bottom;
+            color: #616161 !important;
             font-weight: 400;
             display: inline-block;
             width: 185px;
             white-space: nowrap;
-            overflow: hidden;
             text-overflow: ellipsis;
             cursor: pointer;
         }
 
-        p.stats {
-            margin: -26px 0 0 40px;
-            padding: 0 16px;
+        .nowrap {
+            white-space: nowrap;
+        }
+
+        .text_darkgreen {
+            color: #1b5e20 !important;
+        }
+
+        .text_darkred {
+            color: #b71c1c !important;
+        }
+
+        span.stats {
+            margin: -10px 0 0 0;
+            padding: 0;
             font-size: 0.5em;
-            color: rgba(0, 0, 0, 0.54);
+            color: #616161 !important;
             line-height: 16px;
+            display: inherit;
+        }
+
+        .collection-item #uplink {
+            background-color: #f5f5f5;
+            width: 323px !important;
+            margin-left: -3px !important;
+        }
+
+        input.currentfile_input {
+          margin-bottom: -1px;
+          margin-top: 0;
+          padding-left: 5px;
+        }
+
+        .side_tools {
+          vertical-align: middle;
+        }
+
+        .fbtoolbarbutton_icon {
+           margin-top: 20px;
+        }
+
+        .collection {
+            margin: 0;
+            background-color: #fff;
+        }
+
+        li.collection-item {
+            border-bottom: 1px solid #eeeeee !important;
+        }
+
+        .fb_side-nav li {
+            line-height: 36px;
+        }
+
+        .fb_side-nav a {
+          padding: 0 0 0 16px;
+          display: inline-block !important;
+        }
+
+        .fb_side-nav li>a>i {
+            margin-right: 16px !important;
+            cursor: pointer;
         }
 
         .green {
@@ -154,6 +235,10 @@ INDEX = Template(r"""<!DOCTYPE html>
 
         #dropdown_menu, #dropdown_menu_mobile {
             min-width: 180px;
+        }
+
+        #dropdown_gitmenu {
+            min-width: 110px;
         }
 
         .dropdown-content li>a,
@@ -170,43 +255,20 @@ INDEX = Template(r"""<!DOCTYPE html>
             color: #03a9f4 !important;
         }
 
+        .input-field input[type=text].valid {
+            border-bottom: 1px solid #03a9f4;;
+            box-shadow: 0 1px 0 0 #03a9f4;;
+        }
+
         .row .input-field input:focus {
             border-bottom: 1px solid #03a9f4 !important;
             box-shadow: 0 1px 0 0 #03a9f4 !important
         }
 
-        .collection {
-            margin: 0;
-            background-color: #fff;
-        }
-
-        li.collection-item {
-            border-bottom: 1px solid #eeeeee !important;
-        }
-
-        .side-nav li {
-            line-height: 36px;
-        }
-
-        .fb_side-nav a {
-          padding: 0 16px;
-          display: inline-block;
-        }
-
-        .side-nav li>a>i {
-            margin-right: 16px !important;
-        }
-
-        .collection .collection-item i.material-icons {
-            vertical-align: text-bottom;
-        }
-
         #modal_acekeyboard, #modal_components {
             top: auto;
-            bottom: -100%;
-            margin: 0;
             width: 96%;
-            min-height: 95%;
+            min-height: 96%;
             border-radius: 0;
             margin: auto;
         }
@@ -363,9 +425,21 @@ INDEX = Template(r"""<!DOCTYPE html>
             background-color: #03a9f4 !important;
         }
 
-        .collection-item #uplink {
-            background-color: #f5f5f5;
-            width: 320px !important;
+        .fbicon_pad {
+            min-height: 64px !important;
+        }
+
+        .fbmenuicon_pad {
+            min-height: 64px;
+            margin-top: 8px !important;
+        }
+
+        .no-padding {
+            padding:0 !important;
+        }
+
+        .branch_select {
+            min-width: 320px !important;
         }
 
     </style>
@@ -427,18 +501,17 @@ INDEX = Template(r"""<!DOCTYPE html>
         <nav class="light-blue">
             <div class="nav-wrapper">
                 <ul class="left">
-                    <li><a class="waves-effect waves-light tooltipped files-collapse hide-on-small-only" data-activates="slide-out" data-position="bottom" data-delay="50" data-tooltip="Browse Filesystem"><i class="material-icons">list</i></a></li>
-                    <li><a class="waves-effect waves-light files-collapse hide-on-med-and-up" data-activates="slide-out"><i class="material-icons">list</i></a></li>
-                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="New File" onclick="editor.setValue('');document.getElementById('currentfile').value=document.getElementById('fbheader').innerHTML+separator+'newfile';document.getElementById('currentfile').setSelectionRange(document.getElementById('currentfile').value.length-7, document.getElementById('currentfile').value.length);document.getElementById('currentfile').focus()"><i class="material-icons">note_add</i></a></li>
-                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="New Folder" href="#modal_newfolder"><i class="material-icons">create_new_folder</i></a></li>
+                    <li><a class="waves-effect waves-light tooltipped files-collapse hide-on-small-only" data-activates="slide-out" data-position="bottom" data-delay="500" data-tooltip="Browse Filesystem"><i class="material-icons">folder</i></a></li>
+                    <li><a class="waves-effect waves-light files-collapse hide-on-med-and-up" data-activates="slide-out"><i class="material-icons">folder</i></a></li>
                 </ul>
                 <ul class="right">
-                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Save" href="#modal_save"><i class="material-icons">save</i></a></li>
-                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Close" href="#modal_close"><i class="material-icons">highlight_off</i></a></li>
-                    <!--<li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Delete" href="#modal_delete"><i class="material-icons">delete</i></a></li>-->
-                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="50" data-tooltip="Search" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
-                    <li><a class="waves-effect waves-light hide-on-med-and-up" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
+                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="500" data-tooltip="Save" href="#modal_save"><i class="material-icons">save</i></a></li>
+                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="500" data-tooltip="Close" href="#modal_close"><i class="material-icons">close</i></a></li>
+                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="500" data-tooltip="Search" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
                     <li><a class="waves-effect waves-light dropdown-button hide-on-small-only" data-activates="dropdown_menu" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
+                    <li><a class="waves-effect waves-light hide-on-med-and-up" href="#modal_save"><i class="material-icons">save</i></a></li>
+                    <li><a class="waves-effect waves-light hide-on-med-and-up" href="#modal_close"><i class="material-icons">close</i></a></li>
+                    <li><a class="waves-effect waves-light hide-on-med-and-up" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
                     <li><a class="waves-effect waves-light dropdown-button hide-on-med-and-up" data-activates="dropdown_menu_mobile" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
                 </ul>
             </div>
@@ -446,13 +519,6 @@ INDEX = Template(r"""<!DOCTYPE html>
     </div>
   </header>
   <main>
-    <ul id="dropdown_tools_mobile" class="dropdown-content z-depth-4">
-        <li><a href="#" onclick="editor.setValue('');document.getElementById('currentfile').value=document.getElementById('fbheader').innerHTML+separator+'newfile';document.getElementById('currentfile').setSelectionRange(document.getElementById('currentfile').value.length-7, document.getElementById('currentfile').value.length);document.getElementById('currentfile').focus()">New File</a></li>
-        <li><a href="#modal_save">Save</a></li>
-        <li><a href="#modal_close">Close</a></li>
-        <!--<li class="divider"></li>
-        <li><a href="#modal_delete">Delete</a></li>-->
-    </ul>
     <ul id="dropdown_menu" class="dropdown-content z-depth-4">
         <li><a target="_blank" href="#modal_components">HASS Components</a></li>
         <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
@@ -467,6 +533,12 @@ INDEX = Template(r"""<!DOCTYPE html>
         <li><a href="#modal_about">About PoC</a></li>
         <li class="divider"></li>
         <li><a href="#modal_restart">Restart HASS</a></li>
+    </ul>
+    <ul id="dropdown_gitmenu" class="dropdown-content z-depth-4">
+        <li><a href="#modal_commit" class="nowrap waves-effect">git commit</a></li>
+    </ul>
+    <ul id="dropdown_gitmenu_mobile" class="dropdown-content z-depth-4">
+        <li><a href="#modal_commit" class="nowrap waves-effect">git commit</a></li>
     </ul>
     <div id="modal_components" class="modal bottom-sheet modal-fixed-footer">
         <div class="modal-content_nopad">
@@ -992,6 +1064,37 @@ INDEX = Template(r"""<!DOCTYPE html>
         </div>
         <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="save()" class=" modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
     </div>
+    <div id="modal_upload" class="modal">
+        <div class="modal-content">
+            <h4>Upload File</h4>
+            <p>Please choose a file to upload</p>
+            <form action="#" id="uploadform">
+              <div class="file-field input-field">
+                <div class="btn light-blue waves-effect">
+                  <span>File</span>
+                  <input type="file" id="uploadfile" />
+                </div>
+                <div class="file-path-wrapper">
+                  <input class="file-path validate" type="text">
+                </div>
+              </div>
+            </form>
+        </div>
+        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">Cancel</a> <a onclick="upload()" class="modal-action modal-close waves-effect waves-green btn-flat">OK</a> </div>
+    </div>
+    <div id="modal_commit" class="modal">
+        <div class="modal-content">
+            <h4>git commit</h4>
+            <br>
+            <div class="row">
+                <div class="input-field col s12">
+                    <input type="text" id="commitmessage">
+                    <label class="active" for="commitmessage">Commit message</label>
+                </div>
+          </div>
+        </div>
+        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">Cancel</a> <a onclick="commit(document.getElementById('commitmessage').value)" class=" modal-action modal-close waves-effect waves-green btn-flat">OK</a> </div>
+    </div>
     <div id="modal_close" class="modal">
         <div class="modal-content">
             <h4>Close File</h4>
@@ -1006,6 +1109,13 @@ INDEX = Template(r"""<!DOCTYPE html>
         </div>
         <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="delete_element()" class="modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
     </div>
+    <div id="modal_gitadd" class="modal">
+        <div class="modal-content">
+            <h4>git add</h4>
+            <p>Are you sure you want to add <span class="fb_currentfile"></span> to the index?</p>
+        </div>
+        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="gitadd()" class="modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
+    </div>
     <div id="modal_restart" class="modal">
         <div class="modal-content">
             <h4>Restart</h4>
@@ -1019,17 +1129,43 @@ INDEX = Template(r"""<!DOCTYPE html>
             <br>
             <div class="row">
                 <div class="input-field col s12">
-                    <input type="text" id="newfoldername" id="newfolder">
+                    <input type="text" id="newfoldername">
                     <label class="active" for="newfoldername">New Folder Name</label>
                 </div>
           </div>
         </div>
         <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">Cancel</a> <a onclick="newfolder(document.getElementById('newfoldername').value)" class=" modal-action modal-close waves-effect waves-green btn-flat">OK</a> </div>
     </div>
+    <div id="modal_newfile" class="modal">
+        <div class="modal-content">
+            <h4>New File</h4>
+            <br>
+            <div class="row">
+                <div class="input-field col s12">
+                    <input type="text" id="newfilename">
+                    <label class="active" for="newfilename">New File Name</label>
+                </div>
+          </div>
+        </div>
+        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">Cancel</a> <a onclick="newfile(document.getElementById('newfilename').value)" class=" modal-action modal-close waves-effect waves-green btn-flat">OK</a> </div>
+    </div>
+    <div id="modal_newbranch" class="modal">
+        <div class="modal-content">
+            <h4>New Branch</h4>
+            <br>
+            <div class="row">
+                <div class="input-field col s12">
+                    <input type="text" id="newbranch">
+                    <label class="active" for="newbranch">New Branch Name</label>
+                </div>
+          </div>
+        </div>
+        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">Cancel</a> <a onclick="newbranch(document.getElementById('newbranch').value)" class=" modal-action modal-close waves-effect waves-green btn-flat">OK</a> </div>
+    </div>
     <div id="modal_about" class="modal modal-fixed-footer">
         <div class="modal-content">
             <h4><a class="black-text" href="https://github.com/danielperna84/hass-poc-configurator/" target="_blank">HASS Configurator</a></h4>
-            <p>Version: <a class="$versionclass" href="https://github.com/danielperna84/hass-poc-configurator/releases/latest" target="_blank">$current</a></p>
+            <p>Version: <a class="$versionclass" href="https://github.com/danielperna84/hass-poc-configurator/releases/lafbicon_pad" target="_blank">$current</a></p>
             <p>Web-based file editor designed to modify configuration files of <a class="light-blue-text" href="https://home-assistant.io/" target="_blank">Home Assistant</a> or other textual files. Use at your own risk.</p>
             <p>Published under the MIT license</p>
             <p>Developed by:</p>
@@ -1046,7 +1182,7 @@ INDEX = Template(r"""<!DOCTYPE html>
                 <li><a class="light-blue-text" href="https://ace.c9.io/" target="_blank">Ace</a></li>
                 <li><a class="light-blue-text" href="http://materializecss.com/" target="_blank">MaterializeCSS</a></li>
                 <li><a class="light-blue-text" href="https://jquery.com/" target="_blank">jQuery</a></li>
-		<li><a class="light-blue-text" href="https://gitpython.readthedocs.io" target="_blank">GitPython</a></li>
+                <li><a class="light-blue-text" href="https://gitpython.readthedocs.io" target="_blank">GitPython</a></li>
             </ul>
         </div>
         <div class="modal-footer"> <a class=" modal-action modal-close waves-effect btn-flat">OK</a> </div>
@@ -1095,19 +1231,51 @@ INDEX = Template(r"""<!DOCTYPE html>
         </div>
         <div class="col s12 m8 l9">
           <div class="card input-field col s12 grey lighten-4 hoverable">
-              <input class="grey-text text-darken-3" value="" id="currentfile" type="text">
+              <input class="currentfile_input" value="" id="currentfile" type="text">
           </div>
         </div>
-      <div class="col s12 m8 l9 z-depth-2" id="editor"></div>
-      <div>
-        <div id="slide-out" class="fb_side-nav side-nav grey lighten-4">
-          <div class="z-depth-1" id="filebrowser" class="collection with-header">
+        <div class="col s12 m8 l9 z-depth-2" id="editor"></div>
+        <div>
+          <div id="slide-out" class="fb_side-nav side-nav grey lighten-4">
+            <div class="side_tools center hide-on-small-only">
+              <a class="col s3 waves-effect fbtoolbarbutton tooltipped grey lighten-4" href="#modal_newfile" data-position="bottom" data-delay="500" data-tooltip="New File"><i class="material-icons fbtoolbarbutton_icon">note_add</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton tooltipped grey lighten-4" href="#modal_newfolder" data-position="bottom" data-delay="500" data-tooltip="New Folder"><i class="material-icons fbtoolbarbutton_icon">create_new_folder</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton tooltipped grey lighten-4" href="#modal_upload" data-position="bottom" data-delay="500" data-tooltip="Upload File"><i class="material-icons fbtoolbarbutton_icon">file_upload</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton tooltipped grey lighten-4 dropdown-button" data-activates="dropdown_gitmenu" data-alignment='right' data-beloworigin='true' data-delay='500' data-position="bottom" data-tooltip="Git"><i class="material-icons fbtoolbarbutton_icon">call_split</i></a>
+            </div>
+            <div class="side_tools center hide-on-med-and-up z-depth-1">
+              <a class="col s3 waves-effect fbtoolbarbutton grey lighten-4" href="#modal_newfile"><i class="material-icons fbtoolbarbutton_icon">note_add</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton grey lighten-4" href="#modal_newfolder"><i class="material-icons fbtoolbarbutton_icon">create_new_folder</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton grey lighten-4" href="#modal_upload"><i class="material-icons fbtoolbarbutton_icon">file_upload</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton grey lighten-4 dropdown-button" data-activates="dropdown_gitmenu_mobile" data-alignment='right' data-beloworigin='true'><i class="material-icons fbtoolbarbutton_icon">call_split</i></a>
+            </div>
+            <div id="filebrowser">
               <ul class="collection with-header">
-                  <li id="fbheader" class="collection-header"></li>
+                <li class="no-padding">
+                  <div class="col s2 no-padding" style="min-height: 64px">
+                    <a id="uplink" class="col s12 waves-effect" style="min-height: 64px; padding-top: 15px; cursor: pointer;"><i class="grey-text text-darken-2 material-icons no-padding">arrow_back</i></a>
+                  </div>
+                  <div class="col s10" style="white-space: nowrap; overflow: auto; max-width: 250px; min-height: 64px">
+                    <div id="fbheader" class="collection-header2 leftellipsis" style="min-height: 64px; padding-top: 15px; margin-left: -5px;"></div>
+                  </div>
+                </li>
               </ul>
+              <div class="no-padding col s12">
+                <ul class="collapsible" data-collapsible="accordion">
+                  <li class="col s12">
+                    <div id="branchselector" class="col s10 grey lighten-3 grey-text text-darken-2 collapsible-header truncate" style="min-height:48px; padding-top: 6px"><i class="grey-text text-darken-2 left material-icons" style="margin-left: -10px; margin-right: 2px;">arrow_drop_down</i>Branch:<span id="fbheaderbranch"></span></div>
+                    <a href="#modal_newbranch" id="newbranchbutton" class="waves-effect col s2 material-icons grey lighten-3"><i class="grey-text text-darken-2 material-icons">add</i></a>
+                    <div id="branchdropdown" class="collapsible-body">
+                      <div class="grey lighten-4 no-padding" id="branches">
+                        <ul class="center" id="branchlist"></ul>
+                      </div>
+                    </div>
+                  </li>
+                </ul>
+              </div>
               <ul id="fbelements"></ul>
-          </div>
-          <div class="row hide-on-med-and-up">
+            </div>
+            <div class="row hide-on-med-and-up">
             <br />
             <div class="input-field col s12">
               <select onchange="insert(this.value)">
@@ -1479,19 +1647,6 @@ INDEX = Template(r"""<!DOCTYPE html>
     </div>
   </div>
 </main>
-<footer class="hide-on-med-and-up">
-<div class="shadow grey darken-4 row s12 z-depth-4"></div>
-  <div class="fixed-action-btn toolbar active grey lighten-4" data-origin-bottom="77" data-origin-left="984" data-origin-width="56" data-open="true" style="text-align: center; width: 100%; bottom: 0px; left: 0px; transition: transform 0.2s cubic-bezier(0.55, 0.085, 0.68, 0.53), background-color 0s linear 0.2s; overflow: hidden;">
-    <div class="fab-backdrop grey lighten-4" style=" transform: scale(26.575); "></div>
-    <ul>
-      <li class="waves-effect"><a style="opacity: 1;" onclick="editor.setValue('');document.getElementById('currentfile').value=document.getElementById('fbheader').innerHTML+separator+'newfile';document.getElementById('currentfile').setSelectionRange(document.getElementById('currentfile').value.length-7, document.getElementById('currentfile').value.length);document.getElementById('currentfile').focus()"><i class="material-icons grey-text text-darken-2">note_add</i></a></li>
-      <li class="waves-effect"><a style="opacity: 1;" href="#modal_newfolder"><i class="material-icons grey-text text-darken-2">create_new_folder</i></a></li>
-      <li class="waves-effect"><a style="opacity: 1;" href="#modal_save"><i class="material-icons grey-text text-darken-2">save</i></a></li>
-      <li class="waves-effect"><a style="opacity: 1;" href="#modal_close"><i class="material-icons grey-text text-darken-2">highlight_off</i></a></li>
-      <!--<li class="waves-effect"><a style="opacity: 1;" href="#modal_delete"><i class="material-icons grey-text text-darken-2">delete</i></a></li>-->
-    </ul>
-  </div>
-</footer>
 <input type="hidden" id="fb_currentfile" value="" />
 <!-- Scripts -->
 <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
@@ -1500,7 +1655,12 @@ INDEX = Template(r"""<!DOCTYPE html>
     $(document).ready(function () {
         $('select').material_select();
         $('.modal').modal();
-        $('.collapsible').collapsible();
+        $('ul.tabs').tabs();
+        $('.collapsible').collapsible({
+          onOpen: function(el) {
+            $('#branch_tab').click();
+          },
+        });
         $('.dropdown-button').dropdown({
             inDuration: 300,
             outDuration: 225,
@@ -1518,7 +1678,7 @@ INDEX = Template(r"""<!DOCTYPE html>
             draggable: true
         });
         $('.ace_settings-collapse').sideNav({
-            menuWidth: 320, // Default is 300
+            menuWidth: 300, // Default is 300
             edge: 'right', // Choose the horizontal origin
             closeOnClick: true, // Closes side-nav on <a> clicks, useful for Angular/Meteor
             draggable: true // Choose whether you can drag to open on touch screens
@@ -1626,19 +1786,22 @@ INDEX = Template(r"""<!DOCTYPE html>
         sort_select('services');
         sort_select('services_side');
     }
+
     function listdir(path) {
         $.get(encodeURI("api/listdir?path=" + path), function(data) {
             renderpath(data);
         });
+        document.getElementById("slide-out").scrollTop = 0;
     }
 
     function renderitem(itemdata, index) {
         var li = document.createElement('li');
-        li.classList.add('collection-item');
+        li.classList.add("collection-item", "fbicon_pad", "col", "s12", "no-padding");
         var item = document.createElement('a');
+        item.classList.add("waves-effect", "col", "s10", "fbicon_pad");
         var iicon = document.createElement('i');
-        iicon.classList.add('material-icons');
-        var stats = document.createElement('p');
+        iicon.classList.add("material-icons", "fbmenuicon_pad");
+        var stats = document.createElement('span');
         date = new Date(itemdata.modified*1000);
         stats.classList.add('stats');
         if (itemdata.type == 'dir') {
@@ -1671,67 +1834,146 @@ INDEX = Template(r"""<!DOCTYPE html>
         var itext = document.createElement('div');
         itext.innerHTML = itemdata.name;
         itext.classList.add('filename');
+
+        var hasgitadd = false;
+        if (itemdata.gitstatus) {
+            if (itemdata.gittracked == 'untracked') {
+                itext.classList.add('text_darkred');
+                hasgitadd = true;
+            }
+            else {
+                if(itemdata.gitstatus == 'unstaged') {
+                    itext.classList.add('text_darkred');
+                    hasgitadd = true;
+                }
+                else if (itemdata.gitstatus == 'staged') {
+                    itext.classList.add('text_darkgreen');
+                }
+            }
+        }
+
         item.appendChild(itext);
+        item.appendChild(stats);
 
         var dropdown = document.createElement('ul');
         dropdown.id = 'fb_dropdown_' + index;
         dropdown.classList.add('dropdown-content');
         dropdown.classList.add('z-depth-4');
+
+        // Download button
+        var dd_download = document.createElement('li');
+        var dd_download_a = document.createElement('a');
+        dd_download_a.classList.add('waves-effect');
+        dd_download_a.setAttribute('onclick', "download_file('" + encodeURI(itemdata.fullpath) + "')");
+        dd_download_a.innerHTML = "Download";
+        dd_download.appendChild(dd_download_a);
+        dropdown.appendChild(dd_download);
+
+        // Delete button
         var dd_delete = document.createElement('li');
+        dd_delete.classList.add("waves-effect");
         var dd_delete_a = document.createElement('a');
         dd_delete_a.setAttribute('href', "#modal_delete");
         dd_delete_a.innerHTML = "Delete";
         dd_delete.appendChild(dd_delete_a);
         dropdown.appendChild(dd_delete);
 
+        if (itemdata.gitstatus) {
+            var divider = document.createElement('li');
+            divider.classList.add('divider');
+            dropdown.appendChild(divider);
+            if (hasgitadd) {
+                // git add button
+                var dd_gitadd = document.createElement('li');
+                var dd_gitadd_a = document.createElement('a');
+                dd_gitadd_a.classList.add('waves-effect');
+                dd_gitadd_a.setAttribute('href', "#modal_gitadd");
+                dd_gitadd_a.innerHTML = "git add";
+                dd_gitadd.appendChild(dd_gitadd_a);
+                dropdown.appendChild(dd_gitadd);
+            }
+        }
+
         var menubutton = document.createElement('a');
-        menubutton.classList.add('fbmenubutton');
+        menubutton.classList.add("fbmenubutton", "waves-effect", "dropdown-button", "col", "s2", "fbicon_pad");
         menubutton.classList.add('waves-effect');
         menubutton.classList.add('dropdown-button');
         menubutton.setAttribute('data-activates', dropdown.id);
         menubutton.setAttribute('data-alignment', 'right');
+
         var menubuttonicon = document.createElement('i');
         menubutton.classList.add('material-icons');
-        menubutton.classList.add('right');
+        menubutton.classList.add("right");
         menubutton.innerHTML = 'more_vert';
         menubutton.setAttribute('onclick', "document.getElementById('fb_currentfile').value='" + encodeURI(itemdata.fullpath) + "';$('span.fb_currentfile').html('" + itemdata.name + "')");
         li.appendChild(item);
         li.appendChild(menubutton);
-        li.appendChild(stats);
         li.setAttribute("title", itemdata.name)
         li.appendChild(dropdown);
         return li;
     }
 
     function renderpath(dirdata) {
+        var newbranchbutton = document.getElementById('newbranchbutton');
+        newbranchbutton.style.cssText = "display: none !important"
         var fbelements = document.getElementById("fbelements");
         while (fbelements.firstChild) {
             fbelements.removeChild(fbelements.firstChild);
         }
         var fbheader = document.getElementById('fbheader');
         fbheader.innerHTML = dirdata.abspath;
-        var upli = document.createElement('li');
-        var up = document.createElement('a');
-        upli.classList.add('collection-item');
-        upli.classList.add('cursor', 'pointer');
-        up.id = "uplink";
-        up.classList.add('waves-effect');
-        up.setAttribute("onclick", "listdir('" + encodeURI(dirdata.parent) + "')")
-        var upicon = document.createElement('i');
-        upicon.classList.add('material-icons');
-        upicon.innerHTML = 'folder';
-        up.appendChild(upicon);
-        var uptext = document.createElement('span');
-        uptext.innerHTML = '..';
-        uptext.classList.add('filename');
-        up.appendChild(uptext);
-        upli.appendChild(up);
-        fbelements.appendChild(upli);
+        var branchselector = document.getElementById('branchselector');
+        var fbheaderbranch = document.getElementById('fbheaderbranch');
+        var branchlist = document.getElementById('branchlist');
+        while (branchlist.firstChild) {
+            branchlist.removeChild(branchlist.firstChild);
+        }
+        if (dirdata.activebranch) {
+            newbranchbutton.style.display = "inline-block";
+            fbheaderbranch.innerHTML = dirdata.activebranch;
+            fbheaderbranch.style.display = "inline";
+            branchselector.style.display = "block";
+            for (var i = 0; i < dirdata.branches.length; i++) {
+                var branch = document.createElement('li');
+                var link = document.createElement('a');
+                link.classList.add("branch_select", "col", "s12", "no-padding", "truncate");
+                link.innerHTML = dirdata.branches[i];
+                link.href = '#';
+                link.setAttribute('onclick', 'checkout("' + dirdata.branches[i] + '");collapseAll()')
+                branch.appendChild(link);
+                if (dirdata.branches[i] == dirdata.activebranch) {
+                    branch.classList.add('active');
+                }
+                branchlist.appendChild(branch);
+            }
+        }
+        else {
+            fbheaderbranch.innerHTML = "";
+            fbheaderbranch.style.display = "";
+            branchselector.style.display = "none";
+        }
+
+        var uplink = document.getElementById('uplink');
+        uplink.setAttribute("onclick", "listdir('" + encodeURI(dirdata.parent) + "')")
 
         for (var i = 0; i < dirdata.content.length; i++) {
             fbelements.appendChild(renderitem(dirdata.content[i], i));
         }
         $(".dropdown-button").dropdown();
+    }
+
+    function collapseAll() {
+        $(".collapsible-header").removeClass(function() { return "active"; });
+        $(".collapsible").collapsible({accordion: true});
+        $(".collapsible").collapsible({accordion: false});
+    }
+
+    function checkout(){
+      $(".collapsible-header").removeClass(function(){
+        return "active";
+      });
+      $(".collapsible").collapsible({accordion: true});
+      $(".collapsible").collapsible({accordion: false});
     }
 
     function loadfile(filepath) {
@@ -1772,7 +2014,7 @@ INDEX = Template(r"""<!DOCTYPE html>
             data.text = editor.getValue()
             $.post("api/save", data).done(function(resp) {
                 if (resp.error) {
-                    var $toastContent = $("<div><pre>" + resp.message + "\\n" + resp.path + "</pre></div>");
+                    var $toastContent = $("<div><pre>" + resp.message + "\n" + resp.path + "</pre></div>");
                     Materialize.toast($toastContent, 5000);
                 }
                 else {
@@ -1784,8 +2026,12 @@ INDEX = Template(r"""<!DOCTYPE html>
         }
     }
 
+    function download_file(filepath) {
+        window.open("/api/download?filename="+encodeURI(filepath));
+    }
+
     function delete_file() {
-        var path= document.getElementById('currentfile').value;
+        var path = document.getElementById('currentfile').value;
         if (path.length > 0) {
             data = new Object();
             data.path= path;
@@ -1798,7 +2044,8 @@ INDEX = Template(r"""<!DOCTYPE html>
                     var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
                     Materialize.toast($toastContent, 2000);
                     listdir(document.getElementById('fbheader').innerHTML)
-                    document.getElementById('currentfile').value='';editor.setValue('');
+                    document.getElementById('currentfile').value='';
+                    editor.setValue('');
                 }
             });
         }
@@ -1817,8 +2064,91 @@ INDEX = Template(r"""<!DOCTYPE html>
                 else {
                     var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
                     Materialize.toast($toastContent, 2000);
-                    listdir(document.getElementById('fbheader').innerHTML)
-                    document.getElementById('currentfile').value='';editor.setValue('');
+                    listdir(document.getElementById('fbheader').innerHTML);
+                    if (document.getElementById('currentfile').value == path) {
+                        document.getElementById('currentfile').value='';
+                        editor.setValue('');
+                    }
+                }
+            });
+        }
+    }
+
+    function gitadd() {
+        var path = document.getElementById('fb_currentfile').value;
+        if (path.length > 0) {
+            data = new Object();
+            data.path = path;
+            $.post("api/gitadd", data).done(function(resp) {
+                if (resp.error) {
+                    var $toastContent = $("<div><pre>" + resp.message + "\n" + resp.path + "</pre></div>");
+                    Materialize.toast($toastContent, 5000);
+                }
+                else {
+                    var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
+                    Materialize.toast($toastContent, 2000);
+                    listdir(document.getElementById('fbheader').innerHTML);
+                }
+            });
+        }
+    }
+
+    function commit(message) {
+        var path = document.getElementById("fbheader").innerHTML;
+        if (path.length > 0) {
+            data = new Object();
+            data.path = path;
+            data.message = message;
+            $.post("api/commit", data).done(function(resp) {
+                if (resp.error) {
+                    var $toastContent = $("<div><pre>" + resp.message + "\n" + resp.path + "</pre></div>");
+                    Materialize.toast($toastContent, 5000);
+                }
+                else {
+                    var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
+                    Materialize.toast($toastContent, 2000);
+                    listdir(document.getElementById('fbheader').innerHTML);
+                    document.getElementById('commitmessage').value = "";
+                }
+            });
+        }
+    }
+
+    function checkout(branch) {
+        var path = document.getElementById("fbheader").innerHTML;
+        if (path.length > 0) {
+            data = new Object();
+            data.path = path;
+            data.branch = branch;
+            $.post("api/checkout", data).done(function(resp) {
+                if (resp.error) {
+                    var $toastContent = $("<div><pre>" + resp.message + "\n" + resp.path + "</pre></div>");
+                    Materialize.toast($toastContent, 5000);
+                }
+                else {
+                    var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
+                    Materialize.toast($toastContent, 2000);
+                    listdir(document.getElementById('fbheader').innerHTML);
+                }
+            });
+        }
+    }
+
+    function newbranch(branch) {
+        var path = document.getElementById("fbheader").innerHTML;
+        if (path.length > 0) {
+            data = new Object();
+            data.path = path;
+            data.branch = branch;
+            $.post("api/newbranch", data).done(function(resp) {
+                if (resp.error) {
+                    var $toastContent = $("<div><pre>" + resp.message + "\n" + resp.path + "</pre></div>");
+                    Materialize.toast($toastContent, 5000);
+                }
+                else {
+                    var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
+                    Materialize.toast($toastContent, 2000);
+                    listdir(document.getElementById('fbheader').innerHTML);
                 }
             });
         }
@@ -1843,6 +2173,55 @@ INDEX = Template(r"""<!DOCTYPE html>
                 document.getElementById('newfoldername').value = '';
             });
         }
+    }
+
+    function newfile(filename) {
+        var path = document.getElementById('fbheader').innerHTML;
+        if (path.length > 0 && filename.length > 0) {
+            data = new Object();
+            data.path = path;
+            data.name = filename;
+            $.post("api/newfile", data).done(function(resp) {
+                if (resp.error) {
+                    var $toastContent = $("<div><pre>" + resp.message + "\n" + resp.path + "</pre></div>");
+                    Materialize.toast($toastContent, 5000);
+                }
+                else {
+                    var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
+                    Materialize.toast($toastContent, 2000);
+                }
+                listdir(document.getElementById('fbheader').innerHTML);
+                document.getElementById('newfilename').value = '';
+            });
+        }
+    }
+
+    function upload() {
+        var file_data = $('#uploadfile').prop('files')[0];
+        var form_data = new FormData();
+        form_data.append('file', file_data);
+        form_data.append('path', document.getElementById('fbheader').innerHTML);
+        $.ajax({
+            url: 'api/upload',
+            dataType: 'json',
+            cache: false,
+            contentType: false,
+            processData: false,
+            data: form_data,
+            type: 'post',
+            success: function(resp){
+                if (resp.error) {
+                    var $toastContent = $("<div><pre>Error: " + resp.message + "</pre></div>");
+                    Materialize.toast($toastContent, 2000);
+                }
+                else {
+                    var $toastContent = $("<div><pre>Upload succesful</pre></div>");
+                    Materialize.toast($toastContent, 2000);
+                    listdir(document.getElementById('fbheader').innerHTML);
+                    document.getElementById('uploadform').reset();
+                }
+            }
+        });
     }
 
 </script>
@@ -1911,7 +2290,6 @@ INDEX = Template(r"""<!DOCTYPE html>
     var foldstatus = true;
 
     function toggle_fold() {
-        // Not used for now. We'll put a few buttons on top of the editor -> Toolbar. (Search, folding etc.)
         if (foldstatus) {
             editor.getSession().foldAll();
         }
