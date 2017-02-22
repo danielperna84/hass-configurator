@@ -21,7 +21,7 @@ from urllib.parse import urlparse, parse_qs, unquote
 ### Some options for you to change
 LISTENIP = "0.0.0.0"
 LISTENPORT = 3218
-# Set BASEPATH to something like "/home/hass/.homeasssitant" if you're not running the configurator from that path
+# Set BASEPATH to something like "/home/hass/.homeassistant/" if you're not running the configurator from that path
 BASEPATH = None
 # Set the paths to a certificate and the key if you're using SSL, e.g "/etc/ssl/certs/mycert.pem"
 SSL_CERTIFICATE = None
