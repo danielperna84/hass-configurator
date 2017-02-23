@@ -92,7 +92,7 @@
             padding-left: 20px !important;
         }
 
-        #newbranchbutton {
+        #newbranchbutton2 {
             color: #616161 !important;
             display: none;
             float: right;
@@ -394,6 +394,10 @@
 
         .branch_select {
             min-width: 320px !important;
+        }
+
+        a.branch_hover:hover {
+          background-color: #e0e0e0 !important;
         }
 
     </style>
@@ -1217,19 +1221,6 @@
             </ul>
           </li>
           <li>
-            <ul class="collapsible" data-collapsible="accordion">
-              <li class="col s12 grey lighten-4 z-depth-1">
-                <div id="branchselector" class="col s10 grey-text text-darken-2 collapsible-header truncate"><i class="grey-text text-darken-2 left material-icons" style="margin-left: -10px; margin-right: 2px;">arrow_drop_down</i>Branch:<span id="fbheaderbranch"></span></div>
-                  <a href="#modal_newbranch" id="newbranchbutton" class="waves-effect col s2 material-icons hoverable"><i class="grey-text text-darken-2 material-icons">add</i></a>
-                <div id="branchdropdown" class="collapsible-body">
-                  <div class="grey lighten-5 no-padding" id="branches">
-                    <ul class="center" id="branchlist"></ul>
-                  </div>
-                </div>
-              </li>
-            </ul>
-          </li>
-          <li>
             <div class="col s2 no-padding" style="min-height: 64px">
               <a id="uplink" class="col s12 waves-effect" style="min-height: 64px; padding-top: 15px; cursor: pointer;"><i class="arrow grey-text text-darken-2 material-icons">arrow_back</i></a>
             </div>
@@ -1238,9 +1229,22 @@
             </div>
           </li>
           <li>
+            <ul class="collapsible popout no-padding" data-collapsible="accordion">
+              <li class="col s12 white">
+                <div id="branchselector" class="waves-effect grey lighten-4 grey-text text-darken-2 collapsible-header truncate"><i class="grey-text text-darken-2 right no-padding material-icons" style="margin-right: 0;">arrow_drop_down</i>Branch:<span id="fbheaderbranch"></span></div>
+                <div id="branchdropdown" class="collapsible-body">
+                  <div class="no-padding" id="branches">
+                    <a href="#modal_newbranch" id="newbranchbutton" class="grey lighten-4 waves-effect col s12 hoverable center light-blue-text"><i class="grey-text text-darken-1 left material-icons" style="padding-top: 10px; margin-right:0;">add</i>Create New Branch</a>
+                    <ul class="center" id="branchlist"></ul>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </li>
+          <li>
             <ul id="fbelements"></ul>
           </li>
-          <div class="row col s12 z-depth-3 shadow"></div>
+          <div class="row col s12 shadow"></div>
           <div class="z-depth-3 hide-on-med-and-up">
             <div class="input-field col s12" style="margin-top: 30px;">
               <select onchange="insert(this.value)">
@@ -1885,7 +1889,10 @@
                 link.setAttribute('onclick', 'checkout("' + dirdata.branches[i] + '");collapseAll()')
                 branch.appendChild(link);
                 if (dirdata.branches[i] == dirdata.activebranch) {
-                    branch.classList.add('active');
+                    link.classList.add("active", "light-blue", "lighten-2", "white-text");
+                }
+                else {
+                    link.classList.add("grey", "lighten-4", "branch_hover");
                 }
                 branchlist.appendChild(branch);
             }
