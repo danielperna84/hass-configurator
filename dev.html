@@ -31,6 +31,9 @@
           #editor {
               top: 125px;
           }
+          .toolbar_mobile {
+              margin-bottom: 0;
+          }
         }
 
         .leftellipsis {
@@ -55,6 +58,10 @@
             color: #616161 !important;
             font-weight: 400;
             font-size: .9em;
+            min-height: 64px;
+            padding-top: 8px;
+            margin-left: -5px;
+            max-width: 250px;
         }
 
         #fbheaderbranch {
@@ -252,7 +259,10 @@
         }
 
         .shadow {
-            height: 36px;
+            height: 25px;
+            margin: -26px;
+            min-width: 340px;
+            background-color: transparent;
         }
 
         .ace_optionsMenuEntry input {
@@ -375,10 +385,11 @@
         .fbmenuicon_pad {
             min-height: 64px;
             margin-top: 8px !important;
+            margin-right: 18px !important;
         }
 
         .no-padding {
-            padding:0 !important;
+            padding: 0 !important;
         }
 
         .branch_select {
@@ -1178,96 +1189,6 @@
           </div>
         </div>
         <div class="col s12 m8 l9 z-depth-2" id="editor"></div>
-        <div>
-          <div id="slide-out" class="fb_side-nav side-nav grey lighten-4">
-            <div class="side_tools center hide-on-small-only">
-              <a class="col s3 waves-effect fbtoolbarbutton tooltipped grey lighten-4" href="#modal_newfile" data-position="bottom" data-delay="500" data-tooltip="New File"><i class="material-icons fbtoolbarbutton_icon">note_add</i></a>
-              <a class="col s3 waves-effect fbtoolbarbutton tooltipped grey lighten-4" href="#modal_newfolder" data-position="bottom" data-delay="500" data-tooltip="New Folder"><i class="material-icons fbtoolbarbutton_icon">create_new_folder</i></a>
-              <a class="col s3 waves-effect fbtoolbarbutton tooltipped grey lighten-4" href="#modal_upload" data-position="bottom" data-delay="500" data-tooltip="Upload File"><i class="material-icons fbtoolbarbutton_icon">file_upload</i></a>
-              <a class="col s3 waves-effect fbtoolbarbutton tooltipped grey lighten-4 dropdown-button" data-activates="dropdown_gitmenu" data-alignment='right' data-beloworigin='true' data-delay='500' data-position="bottom" data-tooltip="Git"><i class="material-icons fbtoolbarbutton_icon">call_split</i></a>
-            </div>
-            <div class="side_tools center hide-on-med-and-up z-depth-1">
-              <a class="col s3 waves-effect fbtoolbarbutton grey lighten-4" href="#modal_newfile"><i class="material-icons fbtoolbarbutton_icon">note_add</i></a>
-              <a class="col s3 waves-effect fbtoolbarbutton grey lighten-4" href="#modal_newfolder"><i class="material-icons fbtoolbarbutton_icon">create_new_folder</i></a>
-              <a class="col s3 waves-effect fbtoolbarbutton grey lighten-4" href="#modal_upload"><i class="material-icons fbtoolbarbutton_icon">file_upload</i></a>
-              <a class="col s3 waves-effect fbtoolbarbutton grey lighten-4 dropdown-button" data-activates="dropdown_gitmenu_mobile" data-alignment='right' data-beloworigin='true'><i class="material-icons fbtoolbarbutton_icon">call_split</i></a>
-            </div>
-            <div id="filebrowser">
-              <ul class="collection with-header">
-                <li class="no-padding">
-                  <div class="col s2 no-padding" style="min-height: 64px">
-                    <a id="uplink" class="col s12 waves-effect" style="min-height: 64px; padding-top: 15px; cursor: pointer;"><i class="grey-text text-darken-2 material-icons no-padding">arrow_back</i></a>
-                  </div>
-                  <div class="col s10" style="white-space: nowrap; overflow: auto; max-width: 250px; min-height: 64px">
-                    <div id="fbheader" class="collection-header2 leftellipsis" style="min-height: 64px; padding-top: 15px; margin-left: -5px;"></div>
-                  </div>
-                </li>
-              </ul>
-              <div class="no-padding col s12">
-                <ul class="collapsible" data-collapsible="accordion">
-                  <li class="col s12">
-                    <div id="branchselector" class="col s10 grey lighten-3 grey-text text-darken-2 collapsible-header truncate" style="min-height:48px; padding-top: 6px"><i class="grey-text text-darken-2 left material-icons" style="margin-left: -10px; margin-right: 2px;">arrow_drop_down</i>Branch:<span id="fbheaderbranch"></span></div>
-                    <a href="#modal_newbranch" id="newbranchbutton" class="waves-effect col s2 material-icons grey lighten-3"><i class="grey-text text-darken-2 material-icons">add</i></a>
-                    <div id="branchdropdown" class="collapsible-body">
-                      <div class="grey lighten-4 no-padding" id="branches">
-                        <ul class="center" id="branchlist"></ul>
-                      </div>
-                    </div>
-                  </li>
-                </ul>
-              </div>
-              <ul id="fbelements"></ul>
-            </div>
-            <div class="row hide-on-med-and-up">
-            <br />
-            <div class="input-field col s12">
-              <select onchange="insert(this.value)">
-                  <option value="" disabled selected>Select trigger platform</option>
-                  <option value="event">Event</option>
-                  <option value="mqtt">MQTT</option>
-                  <option value="numberic_state">Numeric State</option>
-                  <option value="state">State</option>
-                  <option value="sun">Sun</option>
-                  <option value="template">Template</option>
-                  <option value="time">Time</option>
-                  <option value="zone">Zone</option>
-              </select>
-              <label>Trigger Platforms</label>
-              </div>
-            </div>
-            <div class="row hide-on-med-and-up">
-              <div class="input-field col s12">
-                  <select id="events_side" onchange="insert(this.value)"></select>
-                  <label>Events</label>
-              </div>
-            </div>
-            <div class="row hide-on-med-and-up">
-              <div class="input-field col s12">
-                  <select id="entities_side" onchange="insert(this.value)"></select>
-                  <label>Entities</label>
-              </div>
-            </div>
-            <div class="row hide-on-med-and-up">
-              <div class="input-field col s12">
-                  <select onchange="insert(this.value)">
-                      <option value="" disabled selected>Select condition</option>
-                      <option value="numeric_state">Numeric state</option>
-                      <option value="state">State</option>
-                      <option value="sun">Sun</option>
-                      <option value="template">Template</option>
-                      <option value="time">Time</option>
-                      <option value="zone">Zone</option>
-                  </select>
-                  <label>Conditions</label>
-              </div>
-            </div>
-            <div class="row hide-on-med-and-up">
-              <div class="input-field col s12">
-                  <select id="services_side" onchange="insert(this.value)"></select>
-                  <label>Services</label>
-              </div>
-            </div>
-        </div>
         <div id="edit_float" class="fixed-action-btn vertical click-to-toggle">
           <a class="btn-floating btn-large red hoverable">
             <i class="material-icons">edit</i>
@@ -1280,9 +1201,89 @@
             <li><a class="btn-floating brown tooltipped" data-position="left" data-delay="50" data-tooltip="Fold" onclick="toggle_fold()"><i class="material-icons">all_out</i></a></li>
           </ul>
         </div>
-    </div>
-    <div class="row">
-        <ul id="ace_settings" class="side-nav">
+        <ul id="slide-out" class="side-nav grey lighten-4">
+          <li class="no-padding">
+            <ul class="row no-padding center hide-on-small-only grey lighten-4" style="margin-bottom: 0;">
+              <a class="col s3 waves-effect fbtoolbarbutton tooltipped" href="#modal_newfile" data-position="bottom" data-delay="500" data-tooltip="New File"><i class="material-icons fbtoolbarbutton_icon">note_add</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton tooltipped" href="#modal_newfolder" data-position="bottom" data-delay="500" data-tooltip="New Folder"><i class="material-icons fbtoolbarbutton_icon">create_new_folder</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton tooltipped" href="#modal_upload" data-position="bottom" data-delay="500" data-tooltip="Upload File"><i class="material-icons fbtoolbarbutton_icon">file_upload</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton tooltipped dropdown-button" data-activates="dropdown_gitmenu" data-alignment='right' data-beloworigin='true' data-delay='500' data-position="bottom" data-tooltip="Git"><i class="material-icons fbtoolbarbutton_icon">call_split</i></a>
+            </ul>
+            <ul class="row center toolbar_mobile hide-on-med-and-up grey lighten-4" style="margin-bottom: 0;">
+              <a class="col s3 waves-effect fbtoolbarbutton" href="#modal_newfile"><i class="material-icons fbtoolbarbutton_icon">note_add</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton" href="#modal_newfolder"><i class="material-icons fbtoolbarbutton_icon">create_new_folder</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton" href="#modal_upload"><i class="material-icons fbtoolbarbutton_icon">file_upload</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton dropdown-button" data-activates="dropdown_gitmenu_mobile" data-alignment='right' data-beloworigin='true'><i class="material-icons fbtoolbarbutton_icon">call_split</i></a>
+            </ul>
+          </li>
+          <li>
+            <ul class="collapsible" data-collapsible="accordion">
+              <li class="col s12 grey lighten-4 z-depth-1">
+                <div id="branchselector" class="col s10 grey-text text-darken-2 collapsible-header truncate"><i class="grey-text text-darken-2 left material-icons" style="margin-left: -10px; margin-right: 2px;">arrow_drop_down</i>Branch:<span id="fbheaderbranch"></span></div>
+                  <a href="#modal_newbranch" id="newbranchbutton" class="waves-effect col s2 material-icons hoverable"><i class="grey-text text-darken-2 material-icons">add</i></a>
+                <div id="branchdropdown" class="collapsible-body">
+                  <div class="grey lighten-5 no-padding" id="branches">
+                    <ul class="center" id="branchlist"></ul>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </li>
+          <li>
+            <div class="col s2 no-padding" style="min-height: 64px">
+              <a id="uplink" class="col s12 waves-effect" style="min-height: 64px; padding-top: 15px; cursor: pointer;"><i class="arrow grey-text text-darken-2 material-icons">arrow_back</i></a>
+            </div>
+            <div class="col s10 " style="white-space: nowrap; overflow: auto; min-height: 64px">
+              <div id="fbheader" class="leftellipsis"></div>
+            </div>
+          </li>
+          <li>
+            <ul id="fbelements"></ul>
+          </li>
+          <div class="row col s12 z-depth-3 shadow"></div>
+          <div class="z-depth-3 hide-on-med-and-up">
+            <div class="input-field col s12" style="margin-top: 30px;">
+              <select onchange="insert(this.value)">
+                <option value="" disabled selected>Select trigger platform</option>
+                <option value="event">Event</option>
+                <option value="mqtt">MQTT</option>
+                <option value="numberic_state">Numeric State</option>
+                <option value="state">State</option>
+                <option value="sun">Sun</option>
+                <option value="template">Template</option>
+                <option value="time">Time</option>
+                <option value="zone">Zone</option>
+              </select>
+              <label>Trigger Platforms</label>
+            </div>
+            <div class="input-field col s12">
+              <select id="events_side" onchange="insert(this.value)"></select>
+              <label>Events</label>
+            </div>
+            <div class="input-field col s12">
+              <select id="entities_side" onchange="insert(this.value)"></select>
+              <label>Entities</label>
+            </div>
+            <div class="input-field col s12">
+              <select onchange="insert(this.value)">
+                <option value="" disabled selected>Select condition</option>
+                <option value="numeric_state">Numeric state</option>
+                <option value="state">State</option>
+                <option value="sun">Sun</option>
+                <option value="template">Template</option>
+                <option value="time">Time</option>
+                <option value="zone">Zone</option>
+              </select>
+              <label>Conditions</label>
+            </div>
+            <div class="input-field col s12">
+              <select id="services_side" onchange="insert(this.value)"></select>
+              <label>Services</label>
+            </div>
+          </div>
+        </ul>
+        <div class="row">
+          <ul id="ace_settings" class="side-nav">
             <li><a class="center s12 grey lighten-3 z-depth-1 subheader">Editor Settings</a></li>
             <div class="row col s12">
                 <p class="col s12"> <a class="waves-effect waves-light btn light-blue" href="#modal_acekeyboard">Keyboard Shortcuts</a> </p>
@@ -1586,9 +1587,8 @@
                 </div> <a class="waves-effect waves-light btn light-blue" onclick="save_ace_settings()">Save Settings Locally</a>
                 <p class="center col s12"> Ace Editor 1.2.6 </p>
             </div>
-        </ul>
-    </div>
-  </div>
+          </ul>
+        </div>
 </main>
 <input type="hidden" id="fb_currentfile" value="" />
 <!-- Scripts -->
@@ -1739,7 +1739,7 @@
 
     function renderitem(itemdata, index) {
         var li = document.createElement('li');
-        li.classList.add("collection-item", "fbicon_pad", "col", "s12", "no-padding");
+        li.classList.add("collection-item", "fbicon_pad", "col", "s12", "no-padding", "white");
         var item = document.createElement('a');
         item.classList.add("waves-effect", "col", "s10", "fbicon_pad");
         var iicon = document.createElement('i');
@@ -1776,7 +1776,7 @@
         item.appendChild(iicon);
         var itext = document.createElement('div');
         itext.innerHTML = itemdata.name;
-        itext.classList.add('filename');
+        itext.classList.add("filename");
 
         var hasgitadd = false;
         if (itemdata.gitstatus) {
@@ -1822,10 +1822,10 @@
         dropdown.appendChild(dd_delete);
 
         if (itemdata.gitstatus) {
-            var divider = document.createElement('li');
-            divider.classList.add('divider');
-            dropdown.appendChild(divider);
             if (hasgitadd) {
+                var divider = document.createElement('li');
+                divider.classList.add('divider');
+                dropdown.appendChild(divider);
                 // git add button
                 var dd_gitadd = document.createElement('li');
                 var dd_gitadd_a = document.createElement('a');
