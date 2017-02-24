@@ -2541,6 +2541,26 @@ class RequestHandler(BaseHTTPRequestHandler):
                 res['restart'] = str(err)
             self.wfile.write(bytes(json.dumps(res), "utf8"))
             return
+        elif req.path == '/api/check_config':
+            print("/api/check_config")
+            self.send_header('Content-type', 'text/json')
+            self.end_headers()
+            res = {"check_config": False}
+            try:
+                headers = {
+                    "Content-Type": "application/json"
+                }
+                if HASS_API_PASSWORD:
+                    headers["x-ha-access"] = HASS_API_PASSWORD
+                req = urllib.request.Request("%sservices/homeassistant/check_config" % HASS_API, headers=headers, method='POST')
+                with urllib.request.urlopen(req) as response:
+                    res = json.loads(response.read().decode('utf-8'))
+                    print(res)
+            except Exception as err:
+                print(err)
+                res['restart'] = str(err)
+            self.wfile.write(bytes(json.dumps(res), "utf8"))
+            return
         elif req.path == '/':
             self.send_header('Content-type', 'text/html')
             self.end_headers()
