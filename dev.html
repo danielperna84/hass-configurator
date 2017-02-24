@@ -493,9 +493,11 @@
         <li><a href="#modal_restart">Restart HASS</a></li>
     </ul>
     <ul id="dropdown_gitmenu" class="dropdown-content z-depth-4">
+        <li><a href="#modal_init" class="nowrap waves-effect">git init</a></li>
         <li><a href="#modal_commit" class="nowrap waves-effect">git commit</a></li>
     </ul>
     <ul id="dropdown_gitmenu_mobile" class="dropdown-content z-depth-4">
+        <li><a href="#modal_init" class="nowrap waves-effect">git init</a></li>
         <li><a href="#modal_commit" class="nowrap waves-effect">git commit</a></li>
     </ul>
     <div id="modal_components" class="modal bottom-sheet modal-fixed-footer">
@@ -1039,6 +1041,15 @@
             </form>
         </div>
         <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">Cancel</a> <a onclick="upload()" class="modal-action modal-close waves-effect waves-green btn-flat">OK</a> </div>
+    </div>
+    <div id="modal_init" class="modal">
+        <div class="modal-content">
+            <div class="modal-content">
+                <h4>git init</h4>
+                <p>Are you sure you want to initialize a repository at the current path?</p>
+            </div>
+        </div>
+        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">Cancel</a> <a onclick="gitinit()" class=" modal-action modal-close waves-effect waves-green btn-flat">OK</a> </div>
     </div>
     <div id="modal_commit" class="modal">
         <div class="modal-content">
@@ -2030,6 +2041,25 @@
             data = new Object();
             data.path = path;
             $.post("api/gitadd", data).done(function(resp) {
+                if (resp.error) {
+                    var $toastContent = $("<div><pre>" + resp.message + "\n" + resp.path + "</pre></div>");
+                    Materialize.toast($toastContent, 5000);
+                }
+                else {
+                    var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
+                    Materialize.toast($toastContent, 2000);
+                    listdir(document.getElementById('fbheader').innerHTML);
+                }
+            });
+        }
+    }
+
+    function gitinit() {
+        var path = document.getElementById("fbheader").innerHTML;
+        if (path.length > 0) {
+            data = new Object();
+            data.path = path;
+            $.post("api/init", data).done(function(resp) {
                 if (resp.error) {
                     var $toastContent = $("<div><pre>" + resp.message + "\n" + resp.path + "</pre></div>");
                     Materialize.toast($toastContent, 5000);
