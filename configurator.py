@@ -2815,6 +2815,37 @@ class RequestHandler(BaseHTTPRequestHandler):
                         print("Exception (no repo): %s" % str(err))
             else:
                 response['message'] = "Missing path or branch"
+        elif req.path == '/api/init':
+            try:
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+            except Exception as err:
+                print(err)
+                response['message'] = "%s" % (str(err))
+                postvars = {}
+            if 'path' in postvars.keys():
+                if postvars['path']:
+                    try:
+                        repopath = unquote(postvars['path'][0])
+                        response['path'] = repopath
+                        try:
+                            repo = REPO.init(repopath)
+                            response['error'] = False
+                            response['message'] = "Initialized repository in %s" % repopath
+                            self.send_response(200)
+                            self.send_header('Content-type', 'text/json')
+                            self.end_headers()
+                            self.wfile.write(bytes(json.dumps(response), "utf8"))
+                            return
+                        except Exception as err:
+                            response['error'] = True
+                            response['message'] = str(err)
+                            print(response)
+
+                    except Exception as err:
+                        response['message'] = "Not a git repository: %s" % (str(err))
+                        print("Exception (no repo): %s" % str(err))
+            else:
+                response['message'] = "Missing path or branch"
         elif req.path == '/api/newfolder':
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
