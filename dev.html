@@ -482,6 +482,7 @@
         <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
         <li><a href="#modal_about">About PoC</a></li>
         <li class="divider"></li>
+        <li><a href="#modal_check_config">Check HASS configuration</a></li>
         <li><a href="#modal_restart">Restart HASS</a></li>
     </ul>
     <ul id="dropdown_menu_mobile" class="dropdown-content z-depth-4">
@@ -490,6 +491,7 @@
         <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
         <li><a href="#modal_about">About PoC</a></li>
         <li class="divider"></li>
+        <li><a href="#modal_check_config">Check HASS configuration</a></li>
         <li><a href="#modal_restart">Restart HASS</a></li>
     </ul>
     <ul id="dropdown_gitmenu" class="dropdown-content z-depth-4">
@@ -1085,6 +1087,13 @@
         </div>
         <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="gitadd()" class="modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
     </div>
+    <div id="modal_check_config" class="modal">
+        <div class="modal-content">
+            <h4>Check configuration</h4>
+            <p>Do you really want to check the configuration?</p>
+        </div>
+        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="check_config()" class=" modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
+    </div>
     <div id="modal_restart" class="modal">
         <div class="modal-content">
             <h4>Restart</h4>
@@ -1240,7 +1249,7 @@
             </div>
           </li>
           <li>
-            <ul class="collapsible popout no-padding" data-collapsible="accordion">
+            <ul class="collapsible no-padding" data-collapsible="accordion">
               <li class="col s12 white">
                 <div id="branchselector" class="waves-effect grey lighten-4 grey-text text-darken-2 collapsible-header truncate"><i class="grey-text text-darken-2 right no-padding material-icons" style="margin-right: 0;">arrow_drop_down</i>Branch:<span id="fbheaderbranch"></span></div>
                 <div id="branchdropdown" class="collapsible-body">
@@ -1951,6 +1960,19 @@
             editor.selection.selectFileStart();
             editor.focus();
             document.getElementById('currentfile').value = decodeURI(filepath);
+        });
+    }
+
+    function check_config() {
+        $.get("api/check_config", function (resp) {
+            if (resp.length == 0) {
+                var $toastContent = $("<div><pre>Configuration seems valid.</pre></div>");
+                Materialize.toast($toastContent, 2000);
+            }
+            else {
+                var $toastContent = $("<div><pre>" + resp[0].state + "</pre></div>");
+                Materialize.toast($toastContent, 5000);
+            }
         });
     }
 
