@@ -180,7 +180,7 @@
         }
 
         #dropdown_menu, #dropdown_menu_mobile {
-            min-width: 180px;
+            min-width: 235px;
         }
 
         #dropdown_gitmenu {
@@ -480,7 +480,7 @@
         <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
         <li><a href="#modal_about">About PoC</a></li>
         <li class="divider"></li>
-        <li><a href="#modal_check_config">Check HASS configuration</a></li>
+        <li><a href="#modal_check_config">Check HASS Configuration</a></li>
         <li><a href="#modal_restart">Restart HASS</a></li>
     </ul>
     <ul id="dropdown_menu_mobile" class="dropdown-content z-depth-4">
@@ -489,7 +489,7 @@
         <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
         <li><a href="#modal_about">About PoC</a></li>
         <li class="divider"></li>
-        <li><a href="#modal_check_config">Check HASS configuration</a></li>
+        <li><a href="#modal_check_config">Check HASS Configuration</a></li>
         <li><a href="#modal_restart">Restart HASS</a></li>
     </ul>
     <ul id="dropdown_gitmenu" class="dropdown-content z-depth-4">
@@ -1161,12 +1161,62 @@
                 </li>
             </ul>
             <p>Libraries used:</p>
-            <ul>
+            <div class="row">
+              <div class="col s12 m6 l3">
+                <a href="https://ace.c9.io/" target="_blank">
+                  <div class="card grey lighten-3 hoverable waves-effect">
+                    <div class="card-image">
+                      <img src="http://drive.google.com/uc?export=view&id=0B6wTGzSOtvNBeld4U09LQkV0c2M">
+                    </div>
+                    <div class="card-content">
+                      <p class="grey-text text-darken-2">Ace Editor</p>
+                    </div>
+                  </div>
+                </a>
+              </div>
+              <div class="col s12 m6 l3">
+                <a class="light-blue-text" href="http://materializecss.com/" target="_blank">
+                  <div class="card grey lighten-3 hoverable">
+                    <div class="card-image">
+                      <img src="http://evwilkin.github.io/images/materializecss.png">
+                    </div>
+                    <div class="card-content">
+                      <p class="grey-text text-darken-2">MaterializeCSS</p>
+                    </div>
+                  </div>
+                </a>
+              </div>
+              <div class="col s12 m6 l3">
+                <a class="light-blue-text" href="https://jquery.com/" target="_blank">
+                  <div class="card grey lighten-3 hoverable">
+                    <div class="card-image">
+                      <img src="https://www.shareicon.net/data/512x512/2015/08/30/93002_logo_512x512.png">
+                    </div>
+                    <div class="card-content">
+                      <p class="grey-text text-darken-2">JQuery</p>
+                    </div>
+                  </div>
+                </a>
+              </div>
+              <div class="col s12 m6 l3">
+                <a class="light-blue-text" href="https://gitpython.readthedocs.io" target="_blank">
+                  <div class="card grey lighten-3 hoverable">
+                    <div class="card-image">
+                      <img src="https://image.flaticon.com/icons/svg/52/52234.svg">
+                    </div>
+                    <div class="card-content">
+                      <p class="grey-text text-darken-2">GitPython</p>
+                    </div>
+                  </div>
+                </a>
+              </div>
+            </div>
+        <!--    <ul>
                 <li><a class="light-blue-text" href="https://ace.c9.io/" target="_blank">Ace</a></li>
                 <li><a class="light-blue-text" href="http://materializecss.com/" target="_blank">MaterializeCSS</a></li>
                 <li><a class="light-blue-text" href="https://jquery.com/" target="_blank">jQuery</a></li>
                 <li><a class="light-blue-text" href="https://gitpython.readthedocs.io" target="_blank">GitPython</a></li>
-            </ul>
+            </ul> -->
         </div>
         <div class="modal-footer"> <a class=" modal-action modal-close waves-effect btn-flat">OK</a> </div>
     </div>
@@ -1233,10 +1283,10 @@
         <ul id="slide-out" class="side-nav grey lighten-4">
           <li class="no-padding">
             <ul class="row no-padding center hide-on-small-only grey lighten-4" style="margin-bottom: 0;">
-              <a class="col s3 waves-effect fbtoolbarbutton tooltipped" href="#modal_newfile" data-position="bottom" data-delay="500" data-tooltip="New File"><i class="material-icons fbtoolbarbutton_icon">note_add</i></a>
-              <a class="col s3 waves-effect fbtoolbarbutton tooltipped" href="#modal_newfolder" data-position="bottom" data-delay="500" data-tooltip="New Folder"><i class="material-icons fbtoolbarbutton_icon">create_new_folder</i></a>
-              <a class="col s3 waves-effect fbtoolbarbutton tooltipped" href="#modal_upload" data-position="bottom" data-delay="500" data-tooltip="Upload File"><i class="material-icons fbtoolbarbutton_icon">file_upload</i></a>
-              <a class="col s3 waves-effect fbtoolbarbutton tooltipped dropdown-button" data-activates="dropdown_gitmenu" data-alignment='right' data-beloworigin='true' data-delay='500' data-position="bottom" data-tooltip="Git"><i class="material-icons fbtoolbarbutton_icon">call_split</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton tooltipped" href="#modal_newfile" data-position="bottom" data-delay="500" data-tooltip="New File"><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">note_add</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton tooltipped" href="#modal_newfolder" data-position="bottom" data-delay="500" data-tooltip="New Folder"><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">create_new_folder</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton tooltipped" href="#modal_upload" data-position="bottom" data-delay="500" data-tooltip="Upload File"><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">file_upload</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton tooltipped dropdown-button" data-activates="dropdown_gitmenu" data-alignment='right' data-beloworigin='true' data-delay='500' data-position="bottom" data-tooltip="Git"><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">call_split</i></a>
             </ul>
             <ul class="row center toolbar_mobile hide-on-med-and-up grey lighten-4" style="margin-bottom: 0;">
               <a class="col s3 waves-effect fbtoolbarbutton" href="#modal_newfile"><i class="material-icons fbtoolbarbutton_icon">note_add</i></a>
@@ -1258,8 +1308,8 @@
           </ul>
           <li>
             <ul class="row no-padding" style="margin-bottom: 0;">
-              <a id="branchselector" class="col s10 dropdown-button waves-effect truncate grey-text text-darken-2" data-beloworigin="true" data-activates='branches'><i class="grey-text text-darken-2 left material-icons" style="margin-left: 0; margin-right: 0; padding-top: 12px; padding-right: 8px;">arrow_drop_down</i>Branch:<span id="fbheaderbranch"></span></a>
-              <a id="newbranchbutton" class="waves-effect col s2 center" href="#modal_newbranch"><i class="grey-text text-darken-1 center material-icons" style="padding-top: 12px;">add</i></a>
+              <a id="branchselector" class="col s10 dropdown-button waves-effect truncate grey-text text-darken-3" data-beloworigin="true" data-activates='branches'><i class="grey-text text-darken-2 left material-icons" style="margin-left: 0; margin-right: 0; padding-top: 12px; padding-right: 8px;">arrow_drop_down</i>Branch:<span id="fbheaderbranch"></span></a>
+              <a id="newbranchbutton" class="waves-effect col s2 center" href="#modal_newbranch"><i class="grey-text text-darken-2 center material-icons" style="padding-top: 12px;">add</i></a>
             </ul>
             <div class="divider" style="margin-top: 0;"></div>
           </li>
