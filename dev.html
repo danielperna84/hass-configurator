@@ -65,8 +65,13 @@
         }
 
         #fbheaderbranch {
-            padding: 5px 18px !important;
+            padding: 5px 10px !important;
             display: none;
+            color: #757575 !important;
+        }
+
+        #branchselector {
+            font-weight: 400;
         }
 
         #fbelements {
@@ -90,15 +95,6 @@
             min-height: 64px;
             padding-top: 8px !important;
             padding-left: 20px !important;
-        }
-
-        #newbranchbutton2 {
-            color: #616161 !important;
-            display: none;
-            float: right;
-            min-height: 48px;
-            padding-top: 0 !important;
-            padding-left: 15px !important;
         }
 
         .filename {
@@ -393,7 +389,9 @@
         }
 
         .branch_select {
-            min-width: 320px !important;
+            min-width: 300px !important;
+            font-size: 14px !important;
+            font-weight: 400 !important;
         }
 
         a.branch_hover:hover {
@@ -1129,7 +1127,14 @@
     </div>
     <div id="modal_newbranch" class="modal">
         <div class="modal-content">
-            <h4>New Branch</h4>
+          <div class="row no-padding">
+            <div class="col s11 no-padding">
+              <h4>New Branch</h4>
+            </div>
+            <div class="col s1">
+              <img src="https://image.flaticon.com/icons/png/512/25/25231.png" style="max-width: 40px;" >
+            </div>
+          </div>
             <br>
             <div class="row">
                 <div class="input-field col s12">
@@ -1248,7 +1253,18 @@
               <div id="fbheader" class="leftellipsis"></div>
             </div>
           </li>
+
+          <ul id='branches' class='dropdown-content branch_select z-depth-2 grey lighten-4' style="margin-top: 1px;">
+            <ul id="branchlist"></ul>
+          </ul>
           <li>
+            <ul class="row no-padding" style="margin-bottom: 0;">
+              <a id="branchselector" class="hoverable col s10 dropdown-button waves-effect truncate grey-text text-darken-2" data-beloworigin="true" data-activates='branches'><i class="grey-text text-darken-2 left material-icons" style="margin-left: 0; margin-right: 0; padding-top: 12px; padding-right: 8px;">arrow_drop_down</i>Branch:<span id="fbheaderbranch"></span></a>
+              <a id="newbranchbutton" class="hoverable waves-effect col s2 center" href="#modal_newbranch"><i class="grey-text text-darken-1 center material-icons" style="padding-top: 10px;">add</i></a>
+            </ul>
+            <div class="divider" style="margin-top: 0;"></div>
+          </li>
+          <!-- <li>
             <ul class="collapsible no-padding" data-collapsible="accordion">
               <li class="col s12 white">
                 <div id="branchselector" class="waves-effect grey lighten-4 grey-text text-darken-2 collapsible-header truncate"><i class="grey-text text-darken-2 right no-padding material-icons" style="margin-right: 0;">arrow_drop_down</i>Branch:<span id="fbheaderbranch"></span></div>
@@ -1260,7 +1276,8 @@
                 </div>
               </li>
             </ul>
-          </li>
+          </li> -->
+
           <li>
             <ul id="fbelements"></ul>
           </li>
@@ -1903,16 +1920,16 @@
             for (var i = 0; i < dirdata.branches.length; i++) {
                 var branch = document.createElement('li');
                 var link = document.createElement('a');
-                link.classList.add("branch_select", "col", "s12", "no-padding", "truncate");
+                link.classList.add("branch_select", "truncate");
                 link.innerHTML = dirdata.branches[i];
                 link.href = '#';
                 link.setAttribute('onclick', 'checkout("' + dirdata.branches[i] + '");collapseAll()')
                 branch.appendChild(link);
                 if (dirdata.branches[i] == dirdata.activebranch) {
-                    link.classList.add("active", "light-blue", "lighten-2", "white-text");
+                    link.classList.add("active", "grey", "lighten-1", "white-text");
                 }
                 else {
-                    link.classList.add("grey", "lighten-4", "branch_hover");
+                    link.classList.add("grey-text", "text-darken-2", "branch_hover", "waves-effect", "grey", "lighten-4");
                 }
                 branchlist.appendChild(branch);
             }
