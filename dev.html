@@ -466,11 +466,11 @@
                     <li><a class="waves-effect waves-light files-collapse hide-on-med-and-up" data-activates="slide-out"><i class="material-icons">folder</i></a></li>
                 </ul>
                 <ul class="right">
-                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only markdirty hidesave" data-position="bottom" data-delay="500" data-tooltip="Save" href="#modal_save"><i class="material-icons">save</i></a></li>
+                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only markdirty hidesave" data-position="bottom" data-delay="500" data-tooltip="Save" onclick="save_check()"><i class="material-icons">save</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="500" data-tooltip="Close" href="#modal_close"><i class="material-icons">close</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="500" data-tooltip="Search" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
                     <li><a class="waves-effect waves-light dropdown-button hide-on-small-only" data-activates="dropdown_menu" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
-                    <li><a class="waves-effect waves-light hide-on-med-and-up markdirty hidesave" href="#modal_save"><i class="material-icons">save</i></a></li>
+                    <li><a class="waves-effect waves-light hide-on-med-and-up markdirty hidesave" onclick="save_check()"><i class="material-icons">save</i></a></li>
                     <li><a class="waves-effect waves-light hide-on-med-and-up" href="#modal_close"><i class="material-icons">close</i></a></li>
                     <li><a class="waves-effect waves-light hide-on-med-and-up" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
                     <li><a class="waves-effect waves-light dropdown-button hide-on-med-and-up" data-activates="dropdown_menu_mobile" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
@@ -2141,6 +2141,16 @@
         }
         else {
           Materialize.toast('Error:  Please provide a filename!', 5000);
+        }
+    }
+
+    function save_check() {
+        var filepath = document.getElementById('currentfile').value;
+        if (filepath.length > 0) {
+          $('#modal_save').modal('open');
+        }
+        else {
+            Materialize.toast('Error:  Please provide a filename!', 5000);
         }
     }
 
