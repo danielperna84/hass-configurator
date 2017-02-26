@@ -2348,12 +2348,6 @@
         }
     });
 
-    /*var saveButton = document.getElementById("save")
-    saveButton.addEventListener("click", function() {
-        editor.session.getUndoManager().markClean()
-        saveButton.disabled = editor.session.getUndoManager().isClean()
-    })*/
-
     if (localStorage.hasOwnProperty("pochass")) {
         editor.setOptions(JSON.parse(localStorage.pochass));
         editor.setOptions({
