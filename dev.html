@@ -461,11 +461,11 @@
                     <li><a class="waves-effect waves-light files-collapse hide-on-med-and-up" data-activates="slide-out"><i class="material-icons">folder</i></a></li>
                 </ul>
                 <ul class="right">
-                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="500" data-tooltip="Save" href="#modal_save"><i class="material-icons">save</i></a></li>
+                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only markdirty" data-position="bottom" data-delay="500" data-tooltip="Save" href="#modal_save"><i class="material-icons">save</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="500" data-tooltip="Close" href="#modal_close"><i class="material-icons">close</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="500" data-tooltip="Search" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
                     <li><a class="waves-effect waves-light dropdown-button hide-on-small-only" data-activates="dropdown_menu" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
-                    <li><a class="waves-effect waves-light hide-on-med-and-up" href="#modal_save"><i class="material-icons">save</i></a></li>
+                    <li><a class="waves-effect waves-light hide-on-med-and-up markdirty" href="#modal_save"><i class="material-icons">save</i></a></li>
                     <li><a class="waves-effect waves-light hide-on-med-and-up" href="#modal_close"><i class="material-icons">close</i></a></li>
                     <li><a class="waves-effect waves-light hide-on-med-and-up" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
                     <li><a class="waves-effect waves-light dropdown-button hide-on-med-and-up" data-activates="dropdown_menu_mobile" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
@@ -1094,7 +1094,7 @@
         </div>
         <div class="modal-footer">
           <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">No</a>
-          <a onclick="document.getElementById('currentfile').value='';editor.setValue('');" class="modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Yes</a>
+          <a onclick="document.getElementById('currentfile').value='';editor.getSession().setValue('');$('.markdirty').each(function(i, o){o.classList.remove('red');});" class="modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Yes</a>
         </div>
     </div>
     <div id="modal_delete" class="modal">
@@ -2063,10 +2063,10 @@
             else {
                 editor.setOption('mode', "ace/mode/text");
             }
-            editor.setValue(data);
-            editor.selection.selectFileStart();
-            editor.focus();
+            editor.getSession().setValue(data, -1);
             document.getElementById('currentfile').value = decodeURI(filepath);
+            editor.session.getUndoManager().markClean();
+            $('.markdirty').each(function(i, o){o.classList.remove('red');});
         });
     }
 
@@ -2111,6 +2111,8 @@
                     var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
                     Materialize.toast($toastContent, 2000);
                     listdir(document.getElementById('fbheader').innerHTML);
+                    $('.markdirty').each(function(i, o){o.classList.remove('red');});
+                    editor.session.getUndoManager().markClean();
                 }
             });
         }
@@ -2337,6 +2339,21 @@
 <script>
     ace.require("ace/ext/language_tools");
     var editor = ace.edit("editor");
+    editor.on("input", function() {
+        if (editor.session.getUndoManager().isClean()) {
+            $('.markdirty').each(function(i, o){o.classList.remove('red');});
+        }
+        else {
+            $('.markdirty').each(function(i, o){o.classList.add('red');});
+        }
+    });
+
+    /*var saveButton = document.getElementById("save")
+    saveButton.addEventListener("click", function() {
+        editor.session.getUndoManager().markClean()
+        saveButton.disabled = editor.session.getUndoManager().isClean()
+    })*/
+
     if (localStorage.hasOwnProperty("pochass")) {
         editor.setOptions(JSON.parse(localStorage.pochass));
         editor.setOptions({
