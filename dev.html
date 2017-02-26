@@ -470,7 +470,7 @@
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="500" data-tooltip="Close" href="#modal_close"><i class="material-icons">close</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="500" data-tooltip="Search" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
                     <li><a class="waves-effect waves-light dropdown-button hide-on-small-only" data-activates="dropdown_menu" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
-                    <li><a class="waves-effect waves-light hide-on-med-and-up markdirty" href="#modal_save"><i class="material-icons">save</i></a></li>
+                    <li><a class="waves-effect waves-light hide-on-med-and-up markdirty hidesave" href="#modal_save"><i class="material-icons">save</i></a></li>
                     <li><a class="waves-effect waves-light hide-on-med-and-up" href="#modal_close"><i class="material-icons">close</i></a></li>
                     <li><a class="waves-effect waves-light hide-on-med-and-up" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
                     <li><a class="waves-effect waves-light dropdown-button hide-on-med-and-up" data-activates="dropdown_menu_mobile" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
@@ -1152,11 +1152,12 @@
     <div id="modal_markdirty" class="modal">
         <div class="modal-content">
             <h4>Unsaved Changes</h4>
-            <p>You have unsaved changes on the current file, load new file anyways?</p>
+            <p>You have unsaved changes in the current file. Please save the changes or close the file before opening a new one.</p>
         </div>
         <div class="modal-footer">
-          <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">No</a>
-          <a onclick="" class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Yes</a>
+          <a class="modal-action modal-close waves-effect waves-red btn-flat light-blue-text">Abort</a>
+          <a onclick="document.getElementById('currentfile').value='';editor.getSession().setValue('');$('.markdirty').each(function(i, o){o.classList.remove('red');});" class="modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Close file</a>
+          <a onclick="save()" class="modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Save changes</a>
         </div>
     </div>
     <div id="modal_newfolder" class="modal">
@@ -2069,21 +2070,26 @@
     }
 
     function loadfile(filepath) {
-        $.get("api/file?filename=" + filepath, function(data) {
-            fileparts = filepath.split('.');
-            extension = fileparts[fileparts.length -1];
-            if (modemapping.hasOwnProperty(extension)) {
-                editor.setOption('mode', modemapping[extension]);
-            }
-            else {
-                editor.setOption('mode', "ace/mode/text");
-            }
-            editor.getSession().setValue(data, -1);
-            document.getElementById('currentfile').value = decodeURI(filepath);
-            editor.session.getUndoManager().markClean();
-            $('.markdirty').each(function(i, o){o.classList.remove('red');});
-            $('.markdirty').each(function(i, o){o.classList.add('hidesave');});
-        });
+        if ($('.markdirty.red').length) {
+            $('#modal_markdirty').modal('open');
+        }
+        else {
+            $.get("api/file?filename=" + filepath, function(data) {
+                fileparts = filepath.split('.');
+                extension = fileparts[fileparts.length -1];
+                if (modemapping.hasOwnProperty(extension)) {
+                    editor.setOption('mode', modemapping[extension]);
+                }
+                else {
+                    editor.setOption('mode', "ace/mode/text");
+                }
+                editor.getSession().setValue(data, -1);
+                document.getElementById('currentfile').value = decodeURI(filepath);
+                editor.session.getUndoManager().markClean();
+                $('.markdirty').each(function(i, o){o.classList.remove('red');});
+                $('.markdirty').each(function(i, o){o.classList.add('hidesave');});
+            });
+        }
     }
 
     function check_config() {
