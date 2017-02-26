@@ -506,7 +506,7 @@
             <a target="_blank" href="https://home-assistant.io/components/" class="hide-on-med-and-down modal_btn waves-effect btn-large btn-flat left"><i class="material-icons">launch</i></a>
         </div>
         <div class="modal-footer">
-            <a class="modal-action modal-close waves-effect btn-flat Right">Close</a>
+            <a class="modal-action modal-close waves-effect btn-flat Right light-blue-text">Close</a>
         </div>
     </div>
     <div id="modal_acekeyboard" class="modal bottom-sheet modal-fixed-footer">
@@ -515,7 +515,7 @@
         <br>
         <ul class="collapsible popout" data-collapsible="expandable">
           <li>
-            <div class="collapsible-header hoverable"><i class="material-icons">view_headline</i>Line Operations</div>
+            <div class="collapsible-header"><i class="material-icons">view_headline</i>Line Operations</div>
             <div class="collapsible-body">
               <table class="bordered highlight centered">
                 <thead>
@@ -581,7 +581,7 @@
             </div>
           </li>
           <li>
-            <div class="collapsible-header hoverable"><i class="material-icons">photo_size_select_small</i>Selection</div>
+            <div class="collapsible-header"><i class="material-icons">photo_size_select_small</i>Selection</div>
             <div class="collapsible-body">
               <table class="bordered highlight centered">
                 <thead>
@@ -682,7 +682,7 @@
             </div>
           </li>
           <li>
-            <div class="collapsible-header hoverable"><i class="material-icons">multiline_chart</i>Multicursor</div>
+            <div class="collapsible-header"><i class="material-icons">multiline_chart</i>Multicursor</div>
             <div class="collapsible-body">
               <table class="bordered highlight centered">
                 <thead>
@@ -743,7 +743,7 @@
             </div>
           </li>
           <li>
-            <div class="collapsible-header hoverable"><i class="material-icons">call_missed_outgoing</i>Go To</div>
+            <div class="collapsible-header"><i class="material-icons">call_missed_outgoing</i>Go To</div>
             <div class="collapsible-body">
               <table class="bordered highlight centered">
                 <thead>
@@ -849,7 +849,7 @@
             </div>
           </li>
           <li>
-            <div class="collapsible-header hoverable"><i class="material-icons">find_replace</i>Find/Replace</div>
+            <div class="collapsible-header"><i class="material-icons">find_replace</i>Find/Replace</div>
             <div class="collapsible-body">
               <table class="bordered highlight centered">
                 <thead>
@@ -885,7 +885,7 @@
             </div>
           </li>
           <li>
-            <div class="collapsible-header hoverable"><i class="material-icons">all_out</i>Folding</div>
+            <div class="collapsible-header"><i class="material-icons">all_out</i>Folding</div>
             <div class="collapsible-body">
               <table class="bordered highlight centered">
                 <thead>
@@ -921,7 +921,7 @@
             </div>
           </li>
           <li>
-            <div class="collapsible-header hoverable"><i class="material-icons">devices_other</i>Other</div>
+            <div class="collapsible-header"><i class="material-icons">devices_other</i>Other</div>
             <div class="collapsible-body">
               <table class="bordered highlight centered">
                 <thead>
@@ -1014,7 +1014,7 @@
         </ul>
       </div>
       <div class="modal-footer">
-        <a class="modal-action modal-close waves-effect btn-flat ">Close</a>
+        <a class="modal-action modal-close waves-effect btn-flat light-blue-text">Close</a>
       </div>
     </div>
     <div id="modal_save" class="modal">
@@ -1022,7 +1022,10 @@
             <h4>Save</h4>
             <p>Do you really want to save?</p>
         </div>
-        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="save()" class=" modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
+        <div class="modal-footer">
+          <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">No</a>
+          <a onclick="save()" class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Yes</a>
+        </div>
     </div>
     <div id="modal_upload" class="modal">
         <div class="modal-content">
@@ -1040,7 +1043,10 @@
               </div>
             </form>
         </div>
-        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">Cancel</a> <a onclick="upload()" class="modal-action modal-close waves-effect waves-green btn-flat">OK</a> </div>
+        <div class="modal-footer">
+          <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">Cancel</a>
+          <a onclick="upload()" class="modal-action modal-close waves-effect waves-green btn-flat light-blue-text">OK</a>
+        </div>
     </div>
     <div id="modal_init" class="modal">
         <div class="modal-content">
@@ -1054,7 +1060,10 @@
             </div>
           <p>Are you sure you want to initialize a repository at the current path?</p>
         </div>
-        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">Cancel</a> <a onclick="gitinit()" class=" modal-action modal-close waves-effect waves-green btn-flat">OK</a> </div>
+        <div class="modal-footer">
+          <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">Cancel</a>
+          <a onclick="gitinit()" class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">OK</a>
+        </div>
     </div>
     <div id="modal_commit" class="modal">
         <div class="modal-content">
@@ -1073,21 +1082,30 @@
             </div>
           </div>
         </div>
-        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">Cancel</a> <a onclick="commit(document.getElementById('commitmessage').value)" class=" modal-action modal-close waves-effect waves-green btn-flat">OK</a> </div>
+        <div class="modal-footer">
+          <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">Cancel</a>
+          <a onclick="commit(document.getElementById('commitmessage').value)" class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">OK</a>
+        </div>
     </div>
     <div id="modal_close" class="modal">
         <div class="modal-content">
             <h4>Close File</h4>
             <p>Are you sure you want to close the current file? Unsaved changes will be lost.</p>
         </div>
-        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="document.getElementById('currentfile').value='';editor.setValue('');" class="modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
+        <div class="modal-footer">
+          <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">No</a>
+          <a onclick="document.getElementById('currentfile').value='';editor.setValue('');" class="modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Yes</a>
+        </div>
     </div>
     <div id="modal_delete" class="modal">
         <div class="modal-content">
             <h4>Delete</h4>
             <p>Are you sure you want to delete <span class="fb_currentfile"></span>?</p>
         </div>
-        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="delete_element()" class="modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
+        <div class="modal-footer">
+          <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">No</a>
+          <a onclick="delete_element()" class="modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Yes</a>
+        </div>
     </div>
     <div id="modal_gitadd" class="modal">
         <div class="modal-content">
@@ -1101,21 +1119,30 @@
           </div>
           <p>Are you sure you want to add <span class="fb_currentfile"></span> to the index?</p>
         </div>
-        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="gitadd()" class="modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
+        <div class="modal-footer">
+          <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">No</a>
+          <a onclick="gitadd()" class="modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Yes</a>
+        </div>
     </div>
     <div id="modal_check_config" class="modal">
         <div class="modal-content">
             <h4>Check configuration</h4>
             <p>Do you really want to check the configuration?</p>
         </div>
-        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="check_config()" class=" modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
+        <div class="modal-footer">
+          <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">No</a>
+          <a onclick="check_config()" class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Yes</a>
+        </div>
     </div>
     <div id="modal_restart" class="modal">
         <div class="modal-content">
             <h4>Restart</h4>
             <p>Do you really want to restart Home Assistant?</p>
         </div>
-        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="restart()" class=" modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
+        <div class="modal-footer">
+          <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">No</a>
+          <a onclick="restart()" class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Yes</a>
+        </div>
     </div>
     <div id="modal_newfolder" class="modal">
         <div class="modal-content">
@@ -1128,7 +1155,10 @@
                 </div>
           </div>
         </div>
-        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">Cancel</a> <a onclick="newfolder(document.getElementById('newfoldername').value)" class=" modal-action modal-close waves-effect waves-green btn-flat">OK</a> </div>
+        <div class="modal-footer">
+          <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">Cancel</a>
+          <a onclick="newfolder(document.getElementById('newfoldername').value)" class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">OK</a>
+        </div>
     </div>
     <div id="modal_newfile" class="modal">
         <div class="modal-content">
@@ -1141,7 +1171,10 @@
                 </div>
           </div>
         </div>
-        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">Cancel</a> <a onclick="newfile(document.getElementById('newfilename').value)" class=" modal-action modal-close waves-effect waves-green btn-flat">OK</a> </div>
+        <div class="modal-footer">
+          <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">Cancel</a>
+          <a onclick="newfile(document.getElementById('newfilename').value)" class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">OK</a>
+        </div>
     </div>
     <div id="modal_newbranch" class="modal">
         <div class="modal-content">
@@ -1160,7 +1193,10 @@
                 </div>
           </div>
         </div>
-        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">Cancel</a> <a onclick="newbranch(document.getElementById('newbranch').value)" class=" modal-action modal-close waves-effect waves-green btn-flat">OK</a> </div>
+        <div class="modal-footer">
+          <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">Cancel</a>
+          <a onclick="newbranch(document.getElementById('newbranch').value)" class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">OK</a>
+        </div>
     </div>
     <div id="modal_about" class="modal modal-fixed-footer">
         <div class="modal-content">
@@ -1229,7 +1265,9 @@
               </div>
             </div>
         </div>
-        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect btn-flat">OK</a> </div>
+        <div class="modal-footer">
+          <a class=" modal-action modal-close waves-effect btn-flat light-blue-text">OK</a>
+        </div>
     </div>
     <!-- Main Editor Area -->
     <div class="row">
