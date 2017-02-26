@@ -55,7 +55,7 @@
             display: block;
             cursor: initial;
             pointer-events: none;
-            color: #616161 !important;
+            color: #424242 !important;
             font-weight: 400;
             font-size: .9em;
             min-height: 64px;
@@ -399,9 +399,8 @@
             background-color: #e0e0e0 !important;
         }
 
-        .noclick {
-            pointer-events: none;
-            color: #03a9f4 !important;
+        .hidesave {
+            visibility:hidden
         }
 
     </style>
@@ -467,7 +466,7 @@
                     <li><a class="waves-effect waves-light files-collapse hide-on-med-and-up" data-activates="slide-out"><i class="material-icons">folder</i></a></li>
                 </ul>
                 <ul class="right">
-                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only markdirty noclick" data-position="bottom" data-delay="500" data-tooltip="Save" href="#modal_save"><i class="material-icons">save</i></a></li>
+                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only markdirty hidesave" data-position="bottom" data-delay="500" data-tooltip="Save" href="#modal_save"><i class="material-icons">save</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="500" data-tooltip="Close" href="#modal_close"><i class="material-icons">close</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="500" data-tooltip="Search" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
                     <li><a class="waves-effect waves-light dropdown-button hide-on-small-only" data-activates="dropdown_menu" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
@@ -1348,10 +1347,10 @@
               <a class="col s3 waves-effect fbtoolbarbutton tooltipped dropdown-button" data-activates="dropdown_gitmenu" data-alignment='right' data-beloworigin='true' data-delay='500' data-position="bottom" data-tooltip="Git"><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">call_split</i></a>
             </ul>
             <ul class="row center toolbar_mobile hide-on-med-and-up grey lighten-4" style="margin-bottom: 0;">
-              <a class="col s3 waves-effect fbtoolbarbutton" href="#modal_newfile"><i class="material-icons fbtoolbarbutton_icon">note_add</i></a>
-              <a class="col s3 waves-effect fbtoolbarbutton" href="#modal_newfolder"><i class="material-icons fbtoolbarbutton_icon">create_new_folder</i></a>
-              <a class="col s3 waves-effect fbtoolbarbutton" href="#modal_upload"><i class="material-icons fbtoolbarbutton_icon">file_upload</i></a>
-              <a class="col s3 waves-effect fbtoolbarbutton dropdown-button" data-activates="dropdown_gitmenu_mobile" data-alignment='right' data-beloworigin='true'><i class="material-icons fbtoolbarbutton_icon">call_split</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton" href="#modal_newfile"><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">note_add</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton" href="#modal_newfolder"><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">create_new_folder</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton" href="#modal_upload"><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">file_upload</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton dropdown-button" data-activates="dropdown_gitmenu_mobile" data-alignment='right' data-beloworigin='true'><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">call_split</i></a>
             </ul>
           </li>
           <li>
@@ -1367,7 +1366,7 @@
           </ul>
           <li>
             <ul class="row no-padding" style="margin-bottom: 0;">
-              <a id="branchselector" class="col s10 dropdown-button waves-effect truncate grey-text text-darken-3" data-beloworigin="true" data-activates='branches'><i class="grey-text text-darken-2 left material-icons" style="margin-left: 0; margin-right: 0; padding-top: 12px; padding-right: 8px;">arrow_drop_down</i>Branch:<span id="fbheaderbranch"></span></a>
+              <a id="branchselector" class="col s10 dropdown-button waves-effect truncate grey-text text-darken-2" data-beloworigin="true" data-activates='branches'><i class="grey-text text-darken-2 left material-icons" style="margin-left: 0; margin-right: 0; padding-top: 12px; padding-right: 8px;">arrow_drop_down</i>Branch:<span id="fbheaderbranch"></span></a>
               <a id="newbranchbutton" class="waves-effect col s2 center" href="#modal_newbranch"><i class="grey-text text-darken-2 center material-icons" style="padding-top: 12px;">add</i></a>
             </ul>
             <div class="divider" style="margin-top: 0;"></div>
@@ -2025,7 +2024,7 @@
                     link.classList.add("active", "grey", "lighten-1", "white-text");
                 }
                 else {
-                    link.classList.add("grey-text", "text-darken-2", "branch_hover", "waves-effect", "grey", "lighten-4");
+                    link.classList.add("grey-text", "text-darken-3", "branch_hover", "waves-effect", "grey", "lighten-4");
                 }
                 branchlist.appendChild(branch);
             }
@@ -2073,7 +2072,7 @@
             document.getElementById('currentfile').value = decodeURI(filepath);
             editor.session.getUndoManager().markClean();
             $('.markdirty').each(function(i, o){o.classList.remove('red');});
-            $('.markdirty').each(function(i, o){o.classList.add('noclick');});
+            $('.markdirty').each(function(i, o){o.classList.add('hidesave');});
         });
     }
 
@@ -2119,7 +2118,7 @@
                     Materialize.toast($toastContent, 2000);
                     listdir(document.getElementById('fbheader').innerHTML);
                     $('.markdirty').each(function(i, o){o.classList.remove('red');});
-                    $('.markdirty').each(function(i, o){o.classList.add('noclick');});
+                    $('.markdirty').each(function(i, o){o.classList.add('hidesave');});
                     editor.session.getUndoManager().markClean();
                 }
             });
@@ -2350,11 +2349,11 @@
     editor.on("input", function() {
         if (editor.session.getUndoManager().isClean()) {
             $('.markdirty').each(function(i, o){o.classList.remove('red');});
-            $('.markdirty').each(function(i, o){o.classList.add('noclick');});
+            $('.markdirty').each(function(i, o){o.classList.add('hidesave');});
         }
         else {
             $('.markdirty').each(function(i, o){o.classList.add('red');});
-            $('.markdirty').each(function(i, o){o.classList.remove('noclick');});
+            $('.markdirty').each(function(i, o){o.classList.remove('hidesave');});
         }
     });
 
