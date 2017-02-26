@@ -399,6 +399,11 @@
             background-color: #e0e0e0 !important;
         }
 
+        .noclick {
+            pointer-events: none;
+            color: #03a9f4 !important;
+        }
+
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ace.js" type="text/javascript" charset="utf-8"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ext-modelist.js" type="text/javascript" charset="utf-8"></script>
@@ -462,7 +467,7 @@
                     <li><a class="waves-effect waves-light files-collapse hide-on-med-and-up" data-activates="slide-out"><i class="material-icons">folder</i></a></li>
                 </ul>
                 <ul class="right">
-                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only markdirty" data-position="bottom" data-delay="500" data-tooltip="Save" href="#modal_save"><i class="material-icons">save</i></a></li>
+                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only markdirty noclick" data-position="bottom" data-delay="500" data-tooltip="Save" href="#modal_save"><i class="material-icons">save</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="500" data-tooltip="Close" href="#modal_close"><i class="material-icons">close</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="500" data-tooltip="Search" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
                     <li><a class="waves-effect waves-light dropdown-button hide-on-small-only" data-activates="dropdown_menu" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
@@ -2068,6 +2073,7 @@
             document.getElementById('currentfile').value = decodeURI(filepath);
             editor.session.getUndoManager().markClean();
             $('.markdirty').each(function(i, o){o.classList.remove('red');});
+            $('.markdirty').each(function(i, o){o.classList.add('noclick');});
         });
     }
 
@@ -2113,6 +2119,7 @@
                     Materialize.toast($toastContent, 2000);
                     listdir(document.getElementById('fbheader').innerHTML);
                     $('.markdirty').each(function(i, o){o.classList.remove('red');});
+                    $('.markdirty').each(function(i, o){o.classList.add('noclick');});
                     editor.session.getUndoManager().markClean();
                 }
             });
@@ -2343,9 +2350,11 @@
     editor.on("input", function() {
         if (editor.session.getUndoManager().isClean()) {
             $('.markdirty').each(function(i, o){o.classList.remove('red');});
+            $('.markdirty').each(function(i, o){o.classList.add('noclick');});
         }
         else {
             $('.markdirty').each(function(i, o){o.classList.add('red');});
+            $('.markdirty').each(function(i, o){o.classList.remove('noclick');});
         }
     });
 
