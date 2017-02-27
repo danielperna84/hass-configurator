@@ -488,7 +488,7 @@
                     <li><a class="waves-effect waves-light files-collapse hide-on-med-and-up" data-activates="slide-out" style="padding-left: 25px; padding-right: 25px;"><i class="material-icons">folder</i></a></li>
                 </ul>
                 <ul class="right">
-                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only hidesave" data-position="bottom" data-delay="500" data-tooltip="Save" onclick="save_check()"><i class="material-icons">save</i></a></li>
+                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only markdirty hidesave" data-position="bottom" data-delay="500" data-tooltip="Save" onclick="save_check()"><i class="material-icons">save</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="500" data-tooltip="Close" href="#modal_close"><i class="material-icons">close</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="500" data-tooltip="Search" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
                     <li><a class="waves-effect waves-light dropdown-button hide-on-small-only" data-activates="dropdown_menu" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
@@ -1281,7 +1281,7 @@
                 <a class="light-blue-text" href="https://jquery.com/" target="_blank">
                   <div class="card grey lighten-3 hoverable">
                     <div class="card-image">
-                      <img src="https://www.shareicon.net/data/512x512/2015/08/30/93002_logo_512x512.png">
+                      <img src="https://drive.google.com/uc?export=view&id=0B6wTGzSOtvNBdFI0ZXRGb01xNzQ">
                     </div>
                     <div class="card-content">
                       <p class="grey-text text-darken-2">JQuery</p>
@@ -1293,7 +1293,7 @@
                 <a class="light-blue-text" href="https://gitpython.readthedocs.io" target="_blank">
                   <div class="card grey lighten-3 hoverable">
                     <div class="card-image">
-                      <img src="https://image.flaticon.com/icons/svg/52/52234.svg">
+                      <img src="https://drive.google.com/uc?export=view&id=0B6wTGzSOtvNBakk4ek1uRGxqYVE">
                     </div>
                     <div class="card-content">
                       <p class="grey-text text-darken-2">GitPython</p>
@@ -2108,6 +2108,7 @@
                 editor.getSession().setValue(data, -1);
                 document.getElementById('currentfile').value = decodeURI(filepath);
                 editor.session.getUndoManager().markClean();
+                $('.markdirty').each(function(i, o){o.classList.remove('red');});
                 $('.hidesave').css('opacity', 0);
             });
         }
@@ -2154,6 +2155,7 @@
                     var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
                     Materialize.toast($toastContent, 2000);
                     listdir(document.getElementById('fbheader').innerHTML);
+                    $('.markdirty').each(function(i, o){o.classList.remove('red');});
                     $('.hidesave').css('opacity', 0);
                     editor.session.getUndoManager().markClean();
                 }
@@ -2400,9 +2402,11 @@
     var editor = ace.edit("editor");
     editor.on("input", function() {
         if (editor.session.getUndoManager().isClean()) {
+            $('.markdirty').each(function(i, o){o.classList.remove('red');});
             $('.hidesave').css('opacity', 0);
         }
         else {
+            $('.markdirty').each(function(i, o){o.classList.add('red');});
             $('.hidesave').css('opacity', 1);
         }
     });
