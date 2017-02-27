@@ -135,7 +135,7 @@
         }
 
         input.currentfile_input {
-            margin-bottom: -1px;
+            margin-bottom: 0;
             margin-top: 0;
             padding-left: 5px;
             border-bottom: 0;
@@ -409,6 +409,22 @@
             transition: all 0.5s ease-in-out;
         }
 
+        .pathtip_color {
+            -webkit-animation: fadeinout 1.75s linear 1 forwards;
+            animation: fadeinout 1.75s linear 1 forwards;
+        }
+
+        @-webkit-keyframes fadeinout {
+            0% { background-color: #f5f5f5; }
+            50% { background-color: #ff8a80; }
+            100% { background-color: #f5f5f5; }
+        }
+        @keyframes fadeinout {
+            0% { background-color: #f5f5f5; }
+            50% { background-color: #ff8a80; }
+            100% { background-color: #f5f5f5; }
+        }
+
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ace.js" type="text/javascript" charset="utf-8"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ext-modelist.js" type="text/javascript" charset="utf-8"></script>
@@ -472,11 +488,11 @@
                     <li><a class="waves-effect waves-light files-collapse hide-on-med-and-up" data-activates="slide-out" style="padding-left: 25px; padding-right: 25px;"><i class="material-icons">folder</i></a></li>
                 </ul>
                 <ul class="right">
-                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only red hidesave" data-position="bottom" data-delay="500" data-tooltip="Save" onclick="save_check()"><i class="material-icons">save</i></a></li>
+                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only hidesave" data-position="bottom" data-delay="500" data-tooltip="Save" onclick="save_check()"><i class="material-icons">save</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="500" data-tooltip="Close" href="#modal_close"><i class="material-icons">close</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="500" data-tooltip="Search" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
                     <li><a class="waves-effect waves-light dropdown-button hide-on-small-only" data-activates="dropdown_menu" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
-                    <li><a class="waves-effect waves-light hide-on-med-and-up markdirty red hidesave" onclick="save_check()"><i class="material-icons">save</i></a></li>
+                    <li><a class="waves-effect waves-light hide-on-med-and-up markdirty hidesave" onclick="save_check()"><i class="material-icons">save</i></a></li>
                     <li><a class="waves-effect waves-light hide-on-med-and-up" href="#modal_close"><i class="material-icons">close</i></a></li>
                     <li><a class="waves-effect waves-light hide-on-med-and-up" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
                     <li><a class="waves-effect waves-light dropdown-button hide-on-med-and-up" data-activates="dropdown_menu_mobile" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
@@ -1335,13 +1351,13 @@
             </div>
         </div>
         <div class="col s12 m8 l9">
-          <div class="card input-field col s12 grey lighten-4 hoverable">
+          <div class="card input-field col s12 grey lighten-4 hoverable pathtip">
               <input class="currentfile_input" value="" id="currentfile" type="text">
           </div>
         </div>
         <div class="col s12 m8 l9 z-depth-2" id="editor"></div>
         <div id="edit_float" class="fixed-action-btn vertical click-to-toggle">
-          <a class="btn-floating btn-large red hoverable">
+          <a class="btn-floating btn-large red accent-2 hoverable">
             <i class="material-icons">edit</i>
           </a>
           <ul>
@@ -2155,7 +2171,10 @@
         }
         else {
             Materialize.toast('Error:  Please provide a filename', 5000);
-        }
+            $(".pathtip").bind("animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd", function(){
+              $(this).removeClass("pathtip_color");
+            }).addClass("pathtip_color");
+       }
     }
 
     function download_file(filepath) {
