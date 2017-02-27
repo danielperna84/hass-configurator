@@ -401,7 +401,12 @@
         }
 
         .hidesave {
-            visibility:hidden
+            opacity: 0;
+            -webkit-transition: all 0.5s ease-in-out;
+            -moz-transition: all 0.5s ease-in-out;
+            -ms-transition: all 0.5s ease-in-out;
+            -o-transition: all 0.5s ease-in-out;
+            transition: all 0.5s ease-in-out;
         }
 
     </style>
@@ -467,11 +472,11 @@
                     <li><a class="waves-effect waves-light files-collapse hide-on-med-and-up" data-activates="slide-out" style="padding-left: 25px; padding-right: 25px;"><i class="material-icons">folder</i></a></li>
                 </ul>
                 <ul class="right">
-                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only markdirty hidesave" data-position="bottom" data-delay="500" data-tooltip="Save" onclick="save_check()"><i class="material-icons">save</i></a></li>
+                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only red hidesave" data-position="bottom" data-delay="500" data-tooltip="Save" onclick="save_check()"><i class="material-icons">save</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="500" data-tooltip="Close" href="#modal_close"><i class="material-icons">close</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="500" data-tooltip="Search" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
                     <li><a class="waves-effect waves-light dropdown-button hide-on-small-only" data-activates="dropdown_menu" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
-                    <li><a class="waves-effect waves-light hide-on-med-and-up markdirty hidesave" onclick="save_check()"><i class="material-icons">save</i></a></li>
+                    <li><a class="waves-effect waves-light hide-on-med-and-up markdirty red hidesave" onclick="save_check()"><i class="material-icons">save</i></a></li>
                     <li><a class="waves-effect waves-light hide-on-med-and-up" href="#modal_close"><i class="material-icons">close</i></a></li>
                     <li><a class="waves-effect waves-light hide-on-med-and-up" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
                     <li><a class="waves-effect waves-light dropdown-button hide-on-med-and-up" data-activates="dropdown_menu_mobile" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
@@ -1769,10 +1774,10 @@
             draggable: true
         });
         $('.ace_settings-collapse').sideNav({
-            menuWidth: 300, // Default is 300
-            edge: 'right', // Choose the horizontal origin
-            closeOnClick: true, // Closes side-nav on <a> clicks, useful for Angular/Meteor
-            draggable: true // Choose whether you can drag to open on touch screens
+            menuWidth: 300,
+            edge: 'right',
+            closeOnClick: true,
+            draggable: true
         });
         listdir('.');
     });
@@ -2087,8 +2092,7 @@
                 editor.getSession().setValue(data, -1);
                 document.getElementById('currentfile').value = decodeURI(filepath);
                 editor.session.getUndoManager().markClean();
-                $('.markdirty').each(function(i, o){o.classList.remove('red');});
-                $('.markdirty').each(function(i, o){o.classList.add('hidesave');});
+                $('.hidesave').css('opacity', 0);
             });
         }
     }
@@ -2134,8 +2138,7 @@
                     var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
                     Materialize.toast($toastContent, 2000);
                     listdir(document.getElementById('fbheader').innerHTML);
-                    $('.markdirty').each(function(i, o){o.classList.remove('red');});
-                    $('.markdirty').each(function(i, o){o.classList.add('hidesave');});
+                    $('.hidesave').css('opacity', 0);
                     editor.session.getUndoManager().markClean();
                 }
             });
@@ -2378,12 +2381,10 @@
     var editor = ace.edit("editor");
     editor.on("input", function() {
         if (editor.session.getUndoManager().isClean()) {
-            $('.markdirty').each(function(i, o){o.classList.remove('red');});
-            $('.markdirty').each(function(i, o){o.classList.add('hidesave');});
+            $('.hidesave').css('opacity', 0);
         }
         else {
-            $('.markdirty').each(function(i, o){o.classList.add('red');});
-            $('.markdirty').each(function(i, o){o.classList.remove('hidesave');});
+            $('.hidesave').css('opacity', 1);
         }
     });
 
