@@ -138,6 +138,7 @@
             margin-bottom: -1px;
             margin-top: 0;
             padding-left: 5px;
+            border-bottom: 0;
         }
 
         .side_tools {
@@ -462,8 +463,8 @@
         <nav class="light-blue">
             <div class="nav-wrapper">
                 <ul class="left">
-                    <li><a class="waves-effect waves-light tooltipped files-collapse hide-on-small-only" data-activates="slide-out" data-position="bottom" data-delay="500" data-tooltip="Browse Filesystem"><i class="material-icons">folder</i></a></li>
-                    <li><a class="waves-effect waves-light files-collapse hide-on-med-and-up" data-activates="slide-out"><i class="material-icons">folder</i></a></li>
+                    <li><a class="waves-effect waves-light tooltipped files-collapse hide-on-small-only" data-activates="slide-out" data-position="bottom" data-delay="500" data-tooltip="Browse Filesystem" style="padding-left: 25px; padding-right: 25px;"><i class="material-icons">folder</i></a></li>
+                    <li><a class="waves-effect waves-light files-collapse hide-on-med-and-up" data-activates="slide-out" style="padding-left: 25px; padding-right: 25px;"><i class="material-icons">folder</i></a></li>
                 </ul>
                 <ul class="right">
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only markdirty hidesave" data-position="bottom" data-delay="500" data-tooltip="Save" onclick="save_check()"><i class="material-icons">save</i></a></li>
@@ -2140,7 +2141,7 @@
             });
         }
         else {
-          Materialize.toast('Error:  Please provide a filename!', 5000);
+          Materialize.toast('Error:  Please provide a filename', 5000);
         }
     }
 
@@ -2150,7 +2151,7 @@
           $('#modal_save').modal('open');
         }
         else {
-            Materialize.toast('Error:  Please provide a filename!', 5000);
+            Materialize.toast('Error:  Please provide a filename', 5000);
         }
     }
 
