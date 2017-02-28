@@ -44,7 +44,7 @@ GIT = False
 ### End of options
 
 RELEASEURL = "https://api.github.com/repos/danielperna84/hass-poc-configurator/releases/latest"
-VERSION = "0.1.4"
+VERSION = "0.1.5"
 BASEDIR = "."
 DEV = False
 HTTPD = None
@@ -82,11 +82,14 @@ INDEX = Template(r"""<!DOCTYPE html>
             top: 135px;
             right: 0;
             bottom: 0;
-          }
+        }
 
         @media only screen and (max-width: 600px) {
           #editor {
               top: 125px;
+          }
+          .toolbar_mobile {
+              margin-bottom: 0;
           }
         }
 
@@ -109,14 +112,27 @@ INDEX = Template(r"""<!DOCTYPE html>
             display: block;
             cursor: initial;
             pointer-events: none;
-            color: #616161 !important;
+            color: #424242 !important;
             font-weight: 400;
             font-size: .9em;
+            min-height: 64px;
+            padding-top: 8px;
+            margin-left: -5px;
+            max-width: 250px;
         }
 
         #fbheaderbranch {
-            padding: 5px 18px !important;
+            padding: 5px 10px !important;
             display: none;
+            color: #757575 !important;
+        }
+
+        #branchselector {
+            font-weight: 400;
+        }
+
+        a.branch_select.active {
+            color: white !important;
         }
 
         #fbelements {
@@ -140,15 +156,6 @@ INDEX = Template(r"""<!DOCTYPE html>
             min-height: 64px;
             padding-top: 8px !important;
             padding-left: 20px !important;
-        }
-
-        #newbranchbutton {
-            color: #616161 !important;
-            display: none;
-            float: right;
-            min-height: 48px;
-            padding-top: 0 !important;
-            padding-left: 15px !important;
         }
 
         .filename {
@@ -189,17 +196,18 @@ INDEX = Template(r"""<!DOCTYPE html>
         }
 
         input.currentfile_input {
-          margin-bottom: -1px;
-          margin-top: 0;
-          padding-left: 5px;
+            margin-bottom: 0;
+            margin-top: 0;
+            padding-left: 5px;
+            border-bottom: 0;
         }
 
         .side_tools {
-          vertical-align: middle;
+            vertical-align: middle;
         }
 
         .fbtoolbarbutton_icon {
-           margin-top: 20px;
+            margin-top: 20px;
         }
 
         .collection {
@@ -234,7 +242,7 @@ INDEX = Template(r"""<!DOCTYPE html>
         }
 
         #dropdown_menu, #dropdown_menu_mobile {
-            min-width: 180px;
+            min-width: 235px;
         }
 
         #dropdown_gitmenu {
@@ -309,7 +317,10 @@ INDEX = Template(r"""<!DOCTYPE html>
         }
 
         .shadow {
-            height: 36px;
+            height: 25px;
+            margin: -26px;
+            min-width: 320px;
+            background-color: transparent;
         }
 
         .ace_optionsMenuEntry input {
@@ -432,14 +443,47 @@ INDEX = Template(r"""<!DOCTYPE html>
         .fbmenuicon_pad {
             min-height: 64px;
             margin-top: 8px !important;
+            margin-right: 18px !important;
+            color: #616161 !important;
         }
 
         .no-padding {
-            padding:0 !important;
+            padding: 0 !important;
         }
 
         .branch_select {
-            min-width: 320px !important;
+            min-width: 300px !important;
+            font-size: 14px !important;
+            font-weight: 400 !important;
+        }
+
+        a.branch_hover:hover {
+            background-color: #e0e0e0 !important;
+        }
+
+        .hidesave {
+            opacity: 0;
+            -webkit-transition: all 0.5s ease-in-out;
+            -moz-transition: all 0.5s ease-in-out;
+            -ms-transition: all 0.5s ease-in-out;
+            -o-transition: all 0.5s ease-in-out;
+            transition: all 0.5s ease-in-out;
+        }
+
+        .pathtip_color {
+            -webkit-animation: fadeinout 1.75s linear 1 forwards;
+            animation: fadeinout 1.75s linear 1 forwards;
+        }
+
+        @-webkit-keyframes fadeinout {
+            0% { background-color: #f5f5f5; }
+            50% { background-color: #ff8a80; }
+            100% { background-color: #f5f5f5; }
+        }
+        @keyframes fadeinout {
+            0% { background-color: #f5f5f5; }
+            50% { background-color: #ff8a80; }
+            100% { background-color: #f5f5f5; }
         }
 
     </style>
@@ -501,15 +545,15 @@ INDEX = Template(r"""<!DOCTYPE html>
         <nav class="light-blue">
             <div class="nav-wrapper">
                 <ul class="left">
-                    <li><a class="waves-effect waves-light tooltipped files-collapse hide-on-small-only" data-activates="slide-out" data-position="bottom" data-delay="500" data-tooltip="Browse Filesystem"><i class="material-icons">folder</i></a></li>
-                    <li><a class="waves-effect waves-light files-collapse hide-on-med-and-up" data-activates="slide-out"><i class="material-icons">folder</i></a></li>
+                    <li><a class="waves-effect waves-light tooltipped files-collapse hide-on-small-only" data-activates="slide-out" data-position="bottom" data-delay="500" data-tooltip="Browse Filesystem" style="padding-left: 25px; padding-right: 25px;"><i class="material-icons">folder</i></a></li>
+                    <li><a class="waves-effect waves-light files-collapse hide-on-med-and-up" data-activates="slide-out" style="padding-left: 25px; padding-right: 25px;"><i class="material-icons">folder</i></a></li>
                 </ul>
                 <ul class="right">
-                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="500" data-tooltip="Save" href="#modal_save"><i class="material-icons">save</i></a></li>
+                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only markdirty hidesave" data-position="bottom" data-delay="500" data-tooltip="Save" onclick="save_check()"><i class="material-icons">save</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="500" data-tooltip="Close" href="#modal_close"><i class="material-icons">close</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="500" data-tooltip="Search" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
                     <li><a class="waves-effect waves-light dropdown-button hide-on-small-only" data-activates="dropdown_menu" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
-                    <li><a class="waves-effect waves-light hide-on-med-and-up" href="#modal_save"><i class="material-icons">save</i></a></li>
+                    <li><a class="waves-effect waves-light hide-on-med-and-up markdirty hidesave" onclick="save_check()"><i class="material-icons">save</i></a></li>
                     <li><a class="waves-effect waves-light hide-on-med-and-up" href="#modal_close"><i class="material-icons">close</i></a></li>
                     <li><a class="waves-effect waves-light hide-on-med-and-up" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
                     <li><a class="waves-effect waves-light dropdown-button hide-on-med-and-up" data-activates="dropdown_menu_mobile" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
@@ -524,6 +568,7 @@ INDEX = Template(r"""<!DOCTYPE html>
         <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
         <li><a href="#modal_about">About PoC</a></li>
         <li class="divider"></li>
+        <li><a href="#modal_check_config">Check HASS Configuration</a></li>
         <li><a href="#modal_restart">Restart HASS</a></li>
     </ul>
     <ul id="dropdown_menu_mobile" class="dropdown-content z-depth-4">
@@ -532,12 +577,15 @@ INDEX = Template(r"""<!DOCTYPE html>
         <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
         <li><a href="#modal_about">About PoC</a></li>
         <li class="divider"></li>
+        <li><a href="#modal_check_config">Check HASS Configuration</a></li>
         <li><a href="#modal_restart">Restart HASS</a></li>
     </ul>
     <ul id="dropdown_gitmenu" class="dropdown-content z-depth-4">
+        <li><a href="#modal_init" class="nowrap waves-effect">git init</a></li>
         <li><a href="#modal_commit" class="nowrap waves-effect">git commit</a></li>
     </ul>
     <ul id="dropdown_gitmenu_mobile" class="dropdown-content z-depth-4">
+        <li><a href="#modal_init" class="nowrap waves-effect">git init</a></li>
         <li><a href="#modal_commit" class="nowrap waves-effect">git commit</a></li>
     </ul>
     <div id="modal_components" class="modal bottom-sheet modal-fixed-footer">
@@ -546,7 +594,7 @@ INDEX = Template(r"""<!DOCTYPE html>
             <a target="_blank" href="https://home-assistant.io/components/" class="hide-on-med-and-down modal_btn waves-effect btn-large btn-flat left"><i class="material-icons">launch</i></a>
         </div>
         <div class="modal-footer">
-            <a class="modal-action modal-close waves-effect btn-flat Right">Close</a>
+            <a class="modal-action modal-close waves-effect btn-flat Right light-blue-text">Close</a>
         </div>
     </div>
     <div id="modal_acekeyboard" class="modal bottom-sheet modal-fixed-footer">
@@ -555,7 +603,7 @@ INDEX = Template(r"""<!DOCTYPE html>
         <br>
         <ul class="collapsible popout" data-collapsible="expandable">
           <li>
-            <div class="collapsible-header hoverable"><i class="material-icons">view_headline</i>Line Operations</div>
+            <div class="collapsible-header"><i class="material-icons">view_headline</i>Line Operations</div>
             <div class="collapsible-body">
               <table class="bordered highlight centered">
                 <thead>
@@ -621,7 +669,7 @@ INDEX = Template(r"""<!DOCTYPE html>
             </div>
           </li>
           <li>
-            <div class="collapsible-header hoverable"><i class="material-icons">photo_size_select_small</i>Selection</div>
+            <div class="collapsible-header"><i class="material-icons">photo_size_select_small</i>Selection</div>
             <div class="collapsible-body">
               <table class="bordered highlight centered">
                 <thead>
@@ -722,7 +770,7 @@ INDEX = Template(r"""<!DOCTYPE html>
             </div>
           </li>
           <li>
-            <div class="collapsible-header hoverable"><i class="material-icons">multiline_chart</i>Multicursor</div>
+            <div class="collapsible-header"><i class="material-icons">multiline_chart</i>Multicursor</div>
             <div class="collapsible-body">
               <table class="bordered highlight centered">
                 <thead>
@@ -783,7 +831,7 @@ INDEX = Template(r"""<!DOCTYPE html>
             </div>
           </li>
           <li>
-            <div class="collapsible-header hoverable"><i class="material-icons">call_missed_outgoing</i>Go To</div>
+            <div class="collapsible-header"><i class="material-icons">call_missed_outgoing</i>Go To</div>
             <div class="collapsible-body">
               <table class="bordered highlight centered">
                 <thead>
@@ -889,7 +937,7 @@ INDEX = Template(r"""<!DOCTYPE html>
             </div>
           </li>
           <li>
-            <div class="collapsible-header hoverable"><i class="material-icons">find_replace</i>Find/Replace</div>
+            <div class="collapsible-header"><i class="material-icons">find_replace</i>Find/Replace</div>
             <div class="collapsible-body">
               <table class="bordered highlight centered">
                 <thead>
@@ -925,7 +973,7 @@ INDEX = Template(r"""<!DOCTYPE html>
             </div>
           </li>
           <li>
-            <div class="collapsible-header hoverable"><i class="material-icons">all_out</i>Folding</div>
+            <div class="collapsible-header"><i class="material-icons">all_out</i>Folding</div>
             <div class="collapsible-body">
               <table class="bordered highlight centered">
                 <thead>
@@ -961,7 +1009,7 @@ INDEX = Template(r"""<!DOCTYPE html>
             </div>
           </li>
           <li>
-            <div class="collapsible-header hoverable"><i class="material-icons">devices_other</i>Other</div>
+            <div class="collapsible-header"><i class="material-icons">devices_other</i>Other</div>
             <div class="collapsible-body">
               <table class="bordered highlight centered">
                 <thead>
@@ -1054,7 +1102,7 @@ INDEX = Template(r"""<!DOCTYPE html>
         </ul>
       </div>
       <div class="modal-footer">
-        <a class="modal-action modal-close waves-effect btn-flat ">Close</a>
+        <a class="modal-action modal-close waves-effect btn-flat light-blue-text">Close</a>
       </div>
     </div>
     <div id="modal_save" class="modal">
@@ -1062,7 +1110,10 @@ INDEX = Template(r"""<!DOCTYPE html>
             <h4>Save</h4>
             <p>Do you really want to save?</p>
         </div>
-        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="save()" class=" modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
+        <div class="modal-footer">
+          <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">No</a>
+          <a onclick="save()" class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Yes</a>
+        </div>
     </div>
     <div id="modal_upload" class="modal">
         <div class="modal-content">
@@ -1080,48 +1131,117 @@ INDEX = Template(r"""<!DOCTYPE html>
               </div>
             </form>
         </div>
-        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">Cancel</a> <a onclick="upload()" class="modal-action modal-close waves-effect waves-green btn-flat">OK</a> </div>
+        <div class="modal-footer">
+          <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">Cancel</a>
+          <a onclick="upload()" class="modal-action modal-close waves-effect waves-green btn-flat light-blue-text">OK</a>
+        </div>
+    </div>
+    <div id="modal_init" class="modal">
+        <div class="modal-content">
+            <div class="row no-padding">
+              <div class="col s11 no-padding">
+                <h4>git init</h4>
+              </div>
+              <div class="col s1">
+                <img src="https://image.flaticon.com/icons/svg/52/52234.svg" style="max-width: 40px;" >
+              </div>
+            </div>
+          <p>Are you sure you want to initialize a repository at the current path?</p>
+        </div>
+        <div class="modal-footer">
+          <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">Cancel</a>
+          <a onclick="gitinit()" class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">OK</a>
+        </div>
     </div>
     <div id="modal_commit" class="modal">
         <div class="modal-content">
-            <h4>git commit</h4>
-            <br>
-            <div class="row">
-                <div class="input-field col s12">
-                    <input type="text" id="commitmessage">
-                    <label class="active" for="commitmessage">Commit message</label>
-                </div>
+          <div class="row no-padding">
+            <div class="col s11 no-padding">
+              <h4>git commit</h4>
+            </div>
+            <div class="col s1">
+              <img src="https://image.flaticon.com/icons/svg/52/52234.svg" style="max-width: 40px;" >
+            </div>
+          </div>
+          <div class="row">
+            <div class="input-field col s12">
+              <input type="text" id="commitmessage">
+              <label class="active" for="commitmessage">Commit message</label>
+            </div>
           </div>
         </div>
-        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">Cancel</a> <a onclick="commit(document.getElementById('commitmessage').value)" class=" modal-action modal-close waves-effect waves-green btn-flat">OK</a> </div>
+        <div class="modal-footer">
+          <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">Cancel</a>
+          <a onclick="commit(document.getElementById('commitmessage').value)" class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">OK</a>
+        </div>
     </div>
     <div id="modal_close" class="modal">
         <div class="modal-content">
             <h4>Close File</h4>
             <p>Are you sure you want to close the current file? Unsaved changes will be lost.</p>
         </div>
-        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="document.getElementById('currentfile').value='';editor.setValue('');" class="modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
+        <div class="modal-footer">
+          <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">No</a>
+          <a onclick="document.getElementById('currentfile').value='';editor.getSession().setValue('');$('.markdirty').each(function(i, o){o.classList.remove('red');});" class="modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Yes</a>
+        </div>
     </div>
     <div id="modal_delete" class="modal">
         <div class="modal-content">
             <h4>Delete</h4>
             <p>Are you sure you want to delete <span class="fb_currentfile"></span>?</p>
         </div>
-        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="delete_element()" class="modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
+        <div class="modal-footer">
+          <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">No</a>
+          <a onclick="delete_element()" class="modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Yes</a>
+        </div>
     </div>
     <div id="modal_gitadd" class="modal">
         <div class="modal-content">
-            <h4>git add</h4>
-            <p>Are you sure you want to add <span class="fb_currentfile"></span> to the index?</p>
+          <div class="row no-padding">
+            <div class="col s11 no-padding">
+              <h4>git add</h4>
+            </div>
+            <div class="col s1">
+              <img src="https://image.flaticon.com/icons/svg/52/52234.svg" style="max-width: 40px;" >
+            </div>
+          </div>
+          <p>Are you sure you want to add <span class="fb_currentfile"></span> to the index?</p>
         </div>
-        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="gitadd()" class="modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
+        <div class="modal-footer">
+          <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">No</a>
+          <a onclick="gitadd()" class="modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Yes</a>
+        </div>
+    </div>
+    <div id="modal_check_config" class="modal">
+        <div class="modal-content">
+            <h4>Check configuration</h4>
+            <p>Do you really want to check the configuration?</p>
+        </div>
+        <div class="modal-footer">
+          <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">No</a>
+          <a onclick="check_config()" class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Yes</a>
+        </div>
     </div>
     <div id="modal_restart" class="modal">
         <div class="modal-content">
             <h4>Restart</h4>
             <p>Do you really want to restart Home Assistant?</p>
         </div>
-        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">No</a> <a onclick="restart()" class=" modal-action modal-close waves-effect waves-green btn-flat">Yes</a> </div>
+        <div class="modal-footer">
+          <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">No</a>
+          <a onclick="restart()" class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Yes</a>
+        </div>
+    </div>
+    <div id="modal_markdirty" class="modal">
+        <div class="modal-content">
+            <h4>Unsaved Changes</h4>
+            <p>You have unsaved changes in the current file. Please save the changes or close the file before opening a new one.</p>
+        </div>
+        <div class="modal-footer">
+          <a class="modal-action modal-close waves-effect waves-red btn-flat light-blue-text">Abort</a>
+          <a onclick="document.getElementById('currentfile').value='';editor.getSession().setValue('');$('.markdirty').each(function(i, o){o.classList.remove('red');});" class="modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Close file</a>
+          <a onclick="save()" class="modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Save changes</a>
+        </div>
     </div>
     <div id="modal_newfolder" class="modal">
         <div class="modal-content">
@@ -1134,7 +1254,10 @@ INDEX = Template(r"""<!DOCTYPE html>
                 </div>
           </div>
         </div>
-        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">Cancel</a> <a onclick="newfolder(document.getElementById('newfoldername').value)" class=" modal-action modal-close waves-effect waves-green btn-flat">OK</a> </div>
+        <div class="modal-footer">
+          <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">Cancel</a>
+          <a onclick="newfolder(document.getElementById('newfoldername').value)" class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">OK</a>
+        </div>
     </div>
     <div id="modal_newfile" class="modal">
         <div class="modal-content">
@@ -1147,12 +1270,21 @@ INDEX = Template(r"""<!DOCTYPE html>
                 </div>
           </div>
         </div>
-        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">Cancel</a> <a onclick="newfile(document.getElementById('newfilename').value)" class=" modal-action modal-close waves-effect waves-green btn-flat">OK</a> </div>
+        <div class="modal-footer">
+          <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">Cancel</a>
+          <a onclick="newfile(document.getElementById('newfilename').value)" class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">OK</a>
+        </div>
     </div>
     <div id="modal_newbranch" class="modal">
         <div class="modal-content">
-            <h4>New Branch</h4>
-            <br>
+          <div class="row no-padding">
+            <div class="col s11 no-padding">
+              <h4>New Branch</h4>
+            </div>
+            <div class="col s1">
+              <img src="https://image.flaticon.com/icons/svg/52/52234.svg" style="max-width: 40px;" >
+            </div>
+          </div>
             <div class="row">
                 <div class="input-field col s12">
                     <input type="text" id="newbranch">
@@ -1160,7 +1292,10 @@ INDEX = Template(r"""<!DOCTYPE html>
                 </div>
           </div>
         </div>
-        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect waves-red btn-flat">Cancel</a> <a onclick="newbranch(document.getElementById('newbranch').value)" class=" modal-action modal-close waves-effect waves-green btn-flat">OK</a> </div>
+        <div class="modal-footer">
+          <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">Cancel</a>
+          <a onclick="newbranch(document.getElementById('newbranch').value)" class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">OK</a>
+        </div>
     </div>
     <div id="modal_about" class="modal modal-fixed-footer">
         <div class="modal-content">
@@ -1178,15 +1313,62 @@ INDEX = Template(r"""<!DOCTYPE html>
                 </li>
             </ul>
             <p>Libraries used:</p>
-            <ul>
-                <li><a class="light-blue-text" href="https://ace.c9.io/" target="_blank">Ace</a></li>
-                <li><a class="light-blue-text" href="http://materializecss.com/" target="_blank">MaterializeCSS</a></li>
-                <li><a class="light-blue-text" href="https://jquery.com/" target="_blank">jQuery</a></li>
-                <li><a class="light-blue-text" href="https://gitpython.readthedocs.io" target="_blank">GitPython</a></li>
-            </ul>
+            <div class="row">
+              <div class="col s6 m3 l3">
+                <a href="https://ace.c9.io/" target="_blank">
+                  <div class="card grey lighten-3 hoverable waves-effect">
+                    <div class="card-image">
+                      <img src="https://drive.google.com/uc?export=view&id=0B6wTGzSOtvNBeld4U09LQkV0c2M">
+                    </div>
+                    <div class="card-content">
+                      <p class="grey-text text-darken-2">Ace Editor</p>
+                    </div>
+                  </div>
+                </a>
+              </div>
+              <div class="col s6 m3 l3">
+                <a class="light-blue-text" href="http://materializecss.com/" target="_blank">
+                  <div class="card grey lighten-3 hoverable">
+                    <div class="card-image">
+                      <img src="https://evwilkin.github.io/images/materializecss.png">
+                    </div>
+                    <div class="card-content">
+                      <p class="grey-text text-darken-2">Materialize CSS</p>
+                    </div>
+                  </div>
+                </a>
+              </div>
+              <div class="col s6 m3 l3">
+                <a class="light-blue-text" href="https://jquery.com/" target="_blank">
+                  <div class="card grey lighten-3 hoverable">
+                    <div class="card-image">
+                      <img src="https://drive.google.com/uc?export=view&id=0B6wTGzSOtvNBdFI0ZXRGb01xNzQ">
+                    </div>
+                    <div class="card-content">
+                      <p class="grey-text text-darken-2">JQuery</p>
+                    </div>
+                  </div>
+                </a>
+              </div>
+              <div class="col s6 m3 l3">
+                <a class="light-blue-text" href="https://gitpython.readthedocs.io" target="_blank">
+                  <div class="card grey lighten-3 hoverable">
+                    <div class="card-image">
+                      <img src="https://drive.google.com/uc?export=view&id=0B6wTGzSOtvNBakk4ek1uRGxqYVE">
+                    </div>
+                    <div class="card-content">
+                      <p class="grey-text text-darken-2">GitPython</p>
+                    </div>
+                  </div>
+                </a>
+              </div>
+            </div>
         </div>
-        <div class="modal-footer"> <a class=" modal-action modal-close waves-effect btn-flat">OK</a> </div>
+        <div class="modal-footer">
+          <a class=" modal-action modal-close waves-effect btn-flat light-blue-text">OK</a>
+        </div>
     </div>
+    <!-- Main Editor Area -->
     <div class="row">
         <div class="col m4 l3 hide-on-small-only">
             <br>
@@ -1230,103 +1412,13 @@ INDEX = Template(r"""<!DOCTYPE html>
             </div>
         </div>
         <div class="col s12 m8 l9">
-          <div class="card input-field col s12 grey lighten-4 hoverable">
+          <div class="card input-field col s12 grey lighten-4 hoverable pathtip">
               <input class="currentfile_input" value="" id="currentfile" type="text">
           </div>
         </div>
         <div class="col s12 m8 l9 z-depth-2" id="editor"></div>
-        <div>
-          <div id="slide-out" class="fb_side-nav side-nav grey lighten-4">
-            <div class="side_tools center hide-on-small-only">
-              <a class="col s3 waves-effect fbtoolbarbutton tooltipped grey lighten-4" href="#modal_newfile" data-position="bottom" data-delay="500" data-tooltip="New File"><i class="material-icons fbtoolbarbutton_icon">note_add</i></a>
-              <a class="col s3 waves-effect fbtoolbarbutton tooltipped grey lighten-4" href="#modal_newfolder" data-position="bottom" data-delay="500" data-tooltip="New Folder"><i class="material-icons fbtoolbarbutton_icon">create_new_folder</i></a>
-              <a class="col s3 waves-effect fbtoolbarbutton tooltipped grey lighten-4" href="#modal_upload" data-position="bottom" data-delay="500" data-tooltip="Upload File"><i class="material-icons fbtoolbarbutton_icon">file_upload</i></a>
-              <a class="col s3 waves-effect fbtoolbarbutton tooltipped grey lighten-4 dropdown-button" data-activates="dropdown_gitmenu" data-alignment='right' data-beloworigin='true' data-delay='500' data-position="bottom" data-tooltip="Git"><i class="material-icons fbtoolbarbutton_icon">call_split</i></a>
-            </div>
-            <div class="side_tools center hide-on-med-and-up z-depth-1">
-              <a class="col s3 waves-effect fbtoolbarbutton grey lighten-4" href="#modal_newfile"><i class="material-icons fbtoolbarbutton_icon">note_add</i></a>
-              <a class="col s3 waves-effect fbtoolbarbutton grey lighten-4" href="#modal_newfolder"><i class="material-icons fbtoolbarbutton_icon">create_new_folder</i></a>
-              <a class="col s3 waves-effect fbtoolbarbutton grey lighten-4" href="#modal_upload"><i class="material-icons fbtoolbarbutton_icon">file_upload</i></a>
-              <a class="col s3 waves-effect fbtoolbarbutton grey lighten-4 dropdown-button" data-activates="dropdown_gitmenu_mobile" data-alignment='right' data-beloworigin='true'><i class="material-icons fbtoolbarbutton_icon">call_split</i></a>
-            </div>
-            <div id="filebrowser">
-              <ul class="collection with-header">
-                <li class="no-padding">
-                  <div class="col s2 no-padding" style="min-height: 64px">
-                    <a id="uplink" class="col s12 waves-effect" style="min-height: 64px; padding-top: 15px; cursor: pointer;"><i class="grey-text text-darken-2 material-icons no-padding">arrow_back</i></a>
-                  </div>
-                  <div class="col s10" style="white-space: nowrap; overflow: auto; max-width: 250px; min-height: 64px">
-                    <div id="fbheader" class="collection-header2 leftellipsis" style="min-height: 64px; padding-top: 15px; margin-left: -5px;"></div>
-                  </div>
-                </li>
-              </ul>
-              <div class="no-padding col s12">
-                <ul class="collapsible" data-collapsible="accordion">
-                  <li class="col s12">
-                    <div id="branchselector" class="col s10 grey lighten-3 grey-text text-darken-2 collapsible-header truncate" style="min-height:48px; padding-top: 6px"><i class="grey-text text-darken-2 left material-icons" style="margin-left: -10px; margin-right: 2px;">arrow_drop_down</i>Branch:<span id="fbheaderbranch"></span></div>
-                    <a href="#modal_newbranch" id="newbranchbutton" class="waves-effect col s2 material-icons grey lighten-3"><i class="grey-text text-darken-2 material-icons">add</i></a>
-                    <div id="branchdropdown" class="collapsible-body">
-                      <div class="grey lighten-4 no-padding" id="branches">
-                        <ul class="center" id="branchlist"></ul>
-                      </div>
-                    </div>
-                  </li>
-                </ul>
-              </div>
-              <ul id="fbelements"></ul>
-            </div>
-            <div class="row hide-on-med-and-up">
-            <br />
-            <div class="input-field col s12">
-              <select onchange="insert(this.value)">
-                  <option value="" disabled selected>Select trigger platform</option>
-                  <option value="event">Event</option>
-                  <option value="mqtt">MQTT</option>
-                  <option value="numberic_state">Numeric State</option>
-                  <option value="state">State</option>
-                  <option value="sun">Sun</option>
-                  <option value="template">Template</option>
-                  <option value="time">Time</option>
-                  <option value="zone">Zone</option>
-              </select>
-              <label>Trigger Platforms</label>
-              </div>
-            </div>
-            <div class="row hide-on-med-and-up">
-              <div class="input-field col s12">
-                  <select id="events_side" onchange="insert(this.value)"></select>
-                  <label>Events</label>
-              </div>
-            </div>
-            <div class="row hide-on-med-and-up">
-              <div class="input-field col s12">
-                  <select id="entities_side" onchange="insert(this.value)"></select>
-                  <label>Entities</label>
-              </div>
-            </div>
-            <div class="row hide-on-med-and-up">
-              <div class="input-field col s12">
-                  <select onchange="insert(this.value)">
-                      <option value="" disabled selected>Select condition</option>
-                      <option value="numeric_state">Numeric state</option>
-                      <option value="state">State</option>
-                      <option value="sun">Sun</option>
-                      <option value="template">Template</option>
-                      <option value="time">Time</option>
-                      <option value="zone">Zone</option>
-                  </select>
-                  <label>Conditions</label>
-              </div>
-            </div>
-            <div class="row hide-on-med-and-up">
-              <div class="input-field col s12">
-                  <select id="services_side" onchange="insert(this.value)"></select>
-                  <label>Services</label>
-              </div>
-            </div>
-        </div>
         <div id="edit_float" class="fixed-action-btn vertical click-to-toggle">
-          <a class="btn-floating btn-large red hoverable">
+          <a class="btn-floating btn-large red accent-2 hoverable">
             <i class="material-icons">edit</i>
           </a>
           <ul>
@@ -1337,315 +1429,396 @@ INDEX = Template(r"""<!DOCTYPE html>
             <li><a class="btn-floating brown tooltipped" data-position="left" data-delay="50" data-tooltip="Fold" onclick="toggle_fold()"><i class="material-icons">all_out</i></a></li>
           </ul>
         </div>
-    </div>
-    <div class="row">
-        <ul id="ace_settings" class="side-nav">
-            <li><a class="center s12 grey lighten-3 z-depth-1 subheader">Editor Settings</a></li>
-            <div class="row col s12">
-                <p class="col s12"> <a class="waves-effect waves-light btn light-blue" href="#modal_acekeyboard">Keyboard Shortcuts</a> </p>
-                <p class="col s12">
-                    <input type="checkbox" class="blue_check" onclick="editor.setOption('animatedScroll', !editor.getOptions().animatedScroll)" id="animatedScroll" />
-                    <Label for="animatedScroll">Animated Scroll</label>
-                </p>
-                <p class="col s12">
-                    <input type="checkbox" class="blue_check" onclick="editor.setOption('behavioursEnabled', !editor.getOptions().behavioursEnabled)" id="behavioursEnabled" />
-                    <Label for="behavioursEnabled">Behaviour Enabled</label>
-                </p>
-                <p class="col s12">
-                    <input type="checkbox" class="blue_check" onclick="editor.setOption('displayIndentGuides', !editor.getOptions().displayIndentGuides)" id="displayIndentGuides" />
-                    <Label for="displayIndentGuides">Display Indent Guides</label>
-                </p>
-                <p class="col s12">
-                    <input type="checkbox" class="blue_check" onclick="editor.setOption('fadeFoldWidgets', !editor.getOptions().fadeFoldWidgets)" id="fadeFoldWidgets" />
-                    <Label for="fadeFoldWidgets">Fade Fold Widgets</label>
-                </p>
-                <div class="input-field col s12">
-                    <input type="number" onchange="editor.setOption('fontSize', parseInt(this.value))" min="6" id="fontSize">
-                    <label class="active" for="fontSize">Font Size</label>
-                </div>
-                <p class="col s12">
-                    <input type="checkbox" class="blue_check" onclick="editor.setOption('highlightActiveLine', !editor.getOptions().highlightActiveLine)" id="highlightActiveLine" />
-                    <Label for="highlightActiveLine">Hightlight Active Line</label>
-                </p>
-                <p class="col s12">
-                    <input type="checkbox" class="blue_check" onclick="editor.setOption('highlightGutterLine', !editor.getOptions().highlightGutterLine)" id="highlightGutterLine" />
-                    <Label for="highlightGutterLine">Hightlight Gutter Line</label>
-                </p>
-                <p class="col s12">
-                    <input type="checkbox" class="blue_check" onclick="editor.setOption('highlightSelectedWord', !editor.getOptions().highlightSelectedWord)" id="highlightSelectedWord" />
-                    <Label for="highlightSelectedWord">Hightlight Selected Word</label>
-                </p>
-                <p class="col s12">
-                    <input type="checkbox" class="blue_check" onclick="editor.setOption('hScrollBarAlwaysVisible', !editor.getOptions().hScrollBarAlwaysVisible)" id="hScrollBarAlwaysVisible" />
-                    <Label for="hScrollBarAlwaysVisible">H Scroll Bar Always Visible</label>
-                </p>
-                <div class="input-field col s12">
-                    <select onchange="editor.setKeyboardHandler(this.value)" id="setKeyboardHandler">
-                        <option value="">ace</option>
-                        <option value="ace/keyboard/vim">vim</option>
-                        <option value="ace/keyboard/emacs">emacs</option>
-                    </select>
-                    <label for="setKeyboardHandler">Keyboard Handler</label>
-                </div>
-                <div class="input-field col s12">
-                    <select onchange="editor.setOption('mode', this.value)" id="mode">
-                        <option value="ace/mode/abap">abap</option>
-                        <option value="ace/mode/abc">abc</option>
-                        <option value="ace/mode/actionscript">actionscript</option>
-                        <option value="ace/mode/ada">ada</option>
-                        <option value="ace/mode/apache_conf">apache_conf</option>
-                        <option value="ace/mode/asciidoc">asciidoc</option>
-                        <option value="ace/mode/assembly_x86">assembly_x86</option>
-                        <option value="ace/mode/autohotkey">autohotkey</option>
-                        <option value="ace/mode/batchfile">batchfile</option>
-                        <option value="ace/mode/bro">bro</option>
-                        <option value="ace/mode/c_cpp">c_cpp</option>
-                        <option value="ace/mode/c9search">c9search</option>
-                        <option value="ace/mode/cirru">cirru</option>
-                        <option value="ace/mode/clojure">clojure</option>
-                        <option value="ace/mode/cobol">cobol</option>
-                        <option value="ace/mode/coffee">coffee</option>
-                        <option value="ace/mode/coldfusion">coldfusion</option>
-                        <option value="ace/mode/csharp">csharp</option>
-                        <option value="ace/mode/css">css</option>
-                        <option value="ace/mode/curly">curly</option>
-                        <option value="ace/mode/d">d</option>
-                        <option value="ace/mode/dart">dart</option>
-                        <option value="ace/mode/diff">diff</option>
-                        <option value="ace/mode/django">django</option>
-                        <option value="ace/mode/dockerfile">dockerfile</option>
-                        <option value="ace/mode/dot">dot</option>
-                        <option value="ace/mode/drools">drools</option>
-                        <option value="ace/mode/dummy">dummy</option>
-                        <option value="ace/mode/dummysyntax">dummysyntax</option>
-                        <option value="ace/mode/eiffel">eiffel</option>
-                        <option value="ace/mode/ejs">ejs</option>
-                        <option value="ace/mode/elixir">elixir</option>
-                        <option value="ace/mode/elm">elm</option>
-                        <option value="ace/mode/erlang">erlang</option>
-                        <option value="ace/mode/forth">forth</option>
-                        <option value="ace/mode/fortran">fortran</option>
-                        <option value="ace/mode/ftl">ftl</option>
-                        <option value="ace/mode/gcode">gcode</option>
-                        <option value="ace/mode/gherkin">gherkin</option>
-                        <option value="ace/mode/gitignore">gitignore</option>
-                        <option value="ace/mode/glsl">glsl</option>
-                        <option value="ace/mode/gobstones">gobstones</option>
-                        <option value="ace/mode/golang">golang</option>
-                        <option value="ace/mode/groovy">groovy</option>
-                        <option value="ace/mode/haml">haml</option>
-                        <option value="ace/mode/handlebars">handlebars</option>
-                        <option value="ace/mode/haskell">haskell</option>
-                        <option value="ace/mode/haskell_cabal">haskell_cabal</option>
-                        <option value="ace/mode/haxe">haxe</option>
-                        <option value="ace/mode/hjson">hjson</option>
-                        <option value="ace/mode/html">html</option>
-                        <option value="ace/mode/html_elixir">html_elixir</option>
-                        <option value="ace/mode/html_ruby">html_ruby</option>
-                        <option value="ace/mode/ini">ini</option>
-                        <option value="ace/mode/io">io</option>
-                        <option value="ace/mode/jack">jack</option>
-                        <option value="ace/mode/jade">jade</option>
-                        <option value="ace/mode/java">java</option>
-                        <option value="ace/mode/javascript">javascript</option>
-                        <option value="ace/mode/json">json</option>
-                        <option value="ace/mode/jsoniq">jsoniq</option>
-                        <option value="ace/mode/jsp">jsp</option>
-                        <option value="ace/mode/jsx">jsx</option>
-                        <option value="ace/mode/julia">julia</option>
-                        <option value="ace/mode/kotlin">kotlin</option>
-                        <option value="ace/mode/latex">latex</option>
-                        <option value="ace/mode/less">less</option>
-                        <option value="ace/mode/liquid">liquid</option>
-                        <option value="ace/mode/lisp">lisp</option>
-                        <option value="ace/mode/livescript">livescript</option>
-                        <option value="ace/mode/logiql">logiql</option>
-                        <option value="ace/mode/lsl">lsl</option>
-                        <option value="ace/mode/lua">lua</option>
-                        <option value="ace/mode/luapage">luapage</option>
-                        <option value="ace/mode/lucene">lucene</option>
-                        <option value="ace/mode/makefile">makefile</option>
-                        <option value="ace/mode/markdown">markdown</option>
-                        <option value="ace/mode/mask">mask</option>
-                        <option value="ace/mode/matlab">matlab</option>
-                        <option value="ace/mode/maze">maze</option>
-                        <option value="ace/mode/mel">mel</option>
-                        <option value="ace/mode/mushcode">mushcode</option>
-                        <option value="ace/mode/mysql">mysql</option>
-                        <option value="ace/mode/nix">nix</option>
-                        <option value="ace/mode/nsis">nsis</option>
-                        <option value="ace/mode/objectivec">objectivec</option>
-                        <option value="ace/mode/ocaml">ocaml</option>
-                        <option value="ace/mode/pascal">pascal</option>
-                        <option value="ace/mode/perl">perl</option>
-                        <option value="ace/mode/pgsql">pgsql</option>
-                        <option value="ace/mode/php">php</option>
-                        <option value="ace/mode/powershell">powershell</option>
-                        <option value="ace/mode/praat">praat</option>
-                        <option value="ace/mode/prolog">prolog</option>
-                        <option value="ace/mode/properties">properties</option>
-                        <option value="ace/mode/protobuf">protobuf</option>
-                        <option value="ace/mode/python">python</option>
-                        <option value="ace/mode/r">r</option>
-                        <option value="ace/mode/razor">razor</option>
-                        <option value="ace/mode/rdoc">rdoc</option>
-                        <option value="ace/mode/rhtml">rhtml</option>
-                        <option value="ace/mode/rst">rst</option>
-                        <option value="ace/mode/ruby">ruby</option>
-                        <option value="ace/mode/rust">rust</option>
-                        <option value="ace/mode/sass">sass</option>
-                        <option value="ace/mode/scad">scad</option>
-                        <option value="ace/mode/scala">scala</option>
-                        <option value="ace/mode/scheme">scheme</option>
-                        <option value="ace/mode/scss">scss</option>
-                        <option value="ace/mode/sh">sh</option>
-                        <option value="ace/mode/sjs">sjs</option>
-                        <option value="ace/mode/smarty">smarty</option>
-                        <option value="ace/mode/snippets">snippets</option>
-                        <option value="ace/mode/soy_template">soy_template</option>
-                        <option value="ace/mode/space">space</option>
-                        <option value="ace/mode/sql">sql</option>
-                        <option value="ace/mode/sqlserver">sqlserver</option>
-                        <option value="ace/mode/stylus">stylus</option>
-                        <option value="ace/mode/svg">svg</option>
-                        <option value="ace/mode/swift">swift</option>
-                        <option value="ace/mode/tcl">tcl</option>
-                        <option value="ace/mode/tex">tex</option>
-                        <option value="ace/mode/text">text</option>
-                        <option value="ace/mode/textile">textile</option>
-                        <option value="ace/mode/toml">toml</option>
-                        <option value="ace/mode/tsx">tsx</option>
-                        <option value="ace/mode/twig">twig</option>
-                        <option value="ace/mode/typescript">typescript</option>
-                        <option value="ace/mode/vala">vala</option>
-                        <option value="ace/mode/vbscript">vbscript</option>
-                        <option value="ace/mode/velocity">velocity</option>
-                        <option value="ace/mode/verilog">verilog</option>
-                        <option value="ace/mode/vhdl">vhdl</option>
-                        <option value="ace/mode/wollok">wollok</option>
-                        <option value="ace/mode/xml">xml</option>
-                        <option value="ace/mode/xquery">xquery</option>
-                        <option value="ace/mode/yaml">yaml</option>
-                    </select>
-                    <label for="mode">Mode</label>
-                </div>
-                <div class="input-field col s12">
-                    <select onchange="editor.setOption('newLineMode', this.value)" id="newLineMode">
-                        <option value="auto">Auto</option>
-                        <option value="windows">Windows</option>
-                        <option value="unix">Unix</option>
-                    </select>
-                    <label for="newLineMode">New Line Mode</label>
-                </div>
-                <p class="col s12">
-                    <input type="checkbox" class="blue_check" onclick="editor.setOption('overwrite', !editor.getOptions().overwrite)" id="overwrite" />
-                    <Label for="overwrite">Overwrite</label>
-                </p>
-                <p class="col s12">
-                    <input type="checkbox" class="blue_check" onclick="editor.setOption('readOnly', !editor.getOptions().readOnly)" id="readOnly" />
-                    <Label for="readOnly">Read Only</label>
-                </p>
-                <div class="input-field col s12">
-                    <input value="2" type="number" onchange="editor.setOption('scrollSpeed', parseInt(this.value))" id="scrollSpeed">
-                    <label class="active" for="scrollSpeed">Scroll Speed</label>
-                </div>
-                <p class="col s12">
-                    <input type="checkbox" class="blue_check" onclick="editor.setOption('showFoldWidgets', !editor.getOptions().showFoldWidgets)" id="showFoldWidgets" />
-                    <Label for="showFoldWidgets">Show Fold Widgets</label>
-                </p>
-                <p class="col s12">
-                    <input type="checkbox" class="blue_check" onclick="editor.setOption('showGutter', !editor.getOptions().showGutter)" id="showGutter" />
-                    <Label for="showGutter">Show Gutter</label>
-                </p>
-                <p class="col s12">
-                    <input type="checkbox" class="blue_check" onclick="editor.setOption('showInvisibles', !editor.getOptions().showInvisibles)" id="showInvisibles" />
-                    <Label for="showInvisibles">Show Invisibles</label>
-                </p>
-                <p class="col s12">
-                    <input type="checkbox" class="blue_check" onclick="editor.setOption('showPrintMargin', !editor.getOptions().showPrintMargin)" id="showPrintMargin" />
-                    <Label for="showPrintMargin">Show Print Margin</label>
-                </p>
-                <p class="col s12">
-                    <input type="checkbox" class="blue_check" onclick="editor.setOption('showLineNumbers', !editor.getOptions().showLineNumbers)" id="showLineNumbers" />
-                    <Label for="showLineNumbers">Show Line Numbers</label>
-                </p>
-                <div class="input-field col s12">
-                    <input type="number" onchange="editor.setOption('tabSize', parseInt(this.value))" min="1" id="tabSize">
-                    <label class="active" for="tabSize">Tab Size</label>
-                </div>
-                <div class="input-field col s12">
-                    <select onchange="editor.setTheme(this.value)" id="theme">
-                        <optgroup label="Light Themes">
-                            <option value="ace/theme/chrome">Chrome</option>
-                            <option value="ace/theme/clouds">Clouds</option>
-                            <option value="ace/theme/crimson_editor">Crimson Editor</option>
-                            <option value="ace/theme/dawn">Dawn</option>
-                            <option value="ace/theme/dreamweaver">Dreamweaver</option>
-                            <option value="ace/theme/eclipse">Eclipse</option>
-                            <option value="ace/theme/github">GitHub</option>
-                            <option value="ace/theme/iplastic">IPlastic</option>
-                            <option value="ace/theme/solarized_light">Solarized Light</option>
-                            <option value="ace/theme/textmate">TextMate</option>
-                            <option value="ace/theme/tomorrow">Tomorrow</option>
-                            <option value="ace/theme/xcode">XCode</option>
-                            <option value="ace/theme/kuroir">Kuroir</option>
-                            <option value="ace/theme/katzenmilch">KatzenMilch</option>
-                            <option value="ace/theme/sqlserver">SQL Server</option>
-                        </optgroup>
-                        <optgroup label="Dark Themes">
-                            <option value="ace/theme/ambiance">Ambiance</option>
-                            <option value="ace/theme/chaos">Chaos</option>
-                            <option value="ace/theme/clouds_midnight">Clouds Midnight</option>
-                            <option value="ace/theme/cobalt">Cobalt</option>
-                            <option value="ace/theme/gruvbox">Gruvbox</option>
-                            <option value="ace/theme/idle_fingers">idle Fingers</option>
-                            <option value="ace/theme/kr_theme">krTheme</option>
-                            <option value="ace/theme/merbivore">Merbivore</option>
-                            <option value="ace/theme/merbivore_soft">Merbivore Soft</option>
-                            <option value="ace/theme/mono_industrial">Mono Industrial</option>
-                            <option value="ace/theme/monokai">Monokai</option>
-                            <option value="ace/theme/pastel_on_dark">Pastel on dark</option>
-                            <option value="ace/theme/solarized_dark">Solarized Dark</option>
-                            <option value="ace/theme/terminal">Terminal</option>
-                            <option value="ace/theme/tomorrow_night">Tomorrow Night</option>
-                            <option value="ace/theme/tomorrow_night_blue">Tomorrow Night Blue</option>
-                            <option value="ace/theme/tomorrow_night_bright">Tomorrow Night Bright</option>
-                            <option value="ace/theme/tomorrow_night_eighties">Tomorrow Night 80s</option>
-                            <option value="ace/theme/twilight">Twilight</option>
-                            <option value="ace/theme/vibrant_ink">Vibrant Ink</option>
-                        </optgroup>
-                    </select>
-                    <label for="theme">Theme</label>
-                </div>
-                <p class="col s12">
-                    <input type="checkbox" class="blue_check" onclick="editor.setOption('useSoftTabs', !editor.getOptions().useSoftTabs)" id="useSoftTabs" />
-                    <Label for="useSoftTabs">Use Soft Tabs</label>
-                </p>
-                <p class="col s12">
-                    <input type="checkbox" class="blue_check" onclick="editor.setOption('useWorker', !editor.getOptions().useWorker)" id="useWorker" />
-                    <Label for="useWorker">Use Worker</label>
-                </p>
-                <p class="col s12">
-                    <input type="checkbox" class="blue_check" onclick="editor.setOption('vScrollBarAlwaysVisible', !editor.getOptions().vScrollBarAlwaysVisible)" id="vScrollBarAlwaysVisible" />
-                    <Label for="vScrollBarAlwaysVisible">V Scroll Bar Always Visible</label>
-                </p>
-                <p class="col s12">
-                    <input type="checkbox" class="blue_check" onclick="editor.setOption('wrapBehavioursEnabled', !editor.getOptions().wrapBehavioursEnabled)" id="wrapBehavioursEnabled" />
-                    <Label for="wrapBehavioursEnabled">Wrap Behaviours Enabled</label>
-                </p>
-                <p class="col s12">
-                    <input type="checkbox" class="blue_check" onclick="editor.getSession().setUseWrapMode(!editor.getSession().getUseWrapMode());if(editor.getSession().getUseWrapMode()){document.getElementById('wrap_limit').focus();document.getElementById('wrap_limit').onchange();}" id="wrap" />
-                    <Label for="wrap">Wrap Mode</label>
-                </p>
-                <div class="input-field col s12">
-                    <input id="wrap_limit" type="number" onchange="editor.setOption('wrap', parseInt(this.value))" min="1" value="80">
-                    <label class="active" for="wrap_limit">Wrap Limit</label>
-                </div> <a class="waves-effect waves-light btn light-blue" onclick="save_ace_settings()">Save Settings Locally</a>
-                <p class="center col s12"> Ace Editor 1.2.6 </p>
+      </div>
+      <!-- Left filebrowser sidenav -->
+      <div class="row">
+        <ul id="slide-out" class="side-nav grey lighten-4">
+          <li class="no-padding">
+            <ul class="row no-padding center hide-on-small-only grey lighten-4" style="margin-bottom: 0;">
+              <a class="col s3 waves-effect fbtoolbarbutton tooltipped" href="#modal_newfile" data-position="bottom" data-delay="500" data-tooltip="New File"><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">note_add</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton tooltipped" href="#modal_newfolder" data-position="bottom" data-delay="500" data-tooltip="New Folder"><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">create_new_folder</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton tooltipped" href="#modal_upload" data-position="bottom" data-delay="500" data-tooltip="Upload File"><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">file_upload</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton tooltipped dropdown-button" data-activates="dropdown_gitmenu" data-alignment='right' data-beloworigin='true' data-delay='500' data-position="bottom" data-tooltip="Git"><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">call_split</i></a>
+            </ul>
+            <ul class="row center toolbar_mobile hide-on-med-and-up grey lighten-4" style="margin-bottom: 0;">
+              <a class="col s3 waves-effect fbtoolbarbutton" href="#modal_newfile"><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">note_add</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton" href="#modal_newfolder"><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">create_new_folder</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton" href="#modal_upload"><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">file_upload</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton dropdown-button" data-activates="dropdown_gitmenu_mobile" data-alignment='right' data-beloworigin='true'><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">call_split</i></a>
+            </ul>
+          </li>
+          <li>
+            <div class="col s2 no-padding" style="min-height: 64px">
+              <a id="uplink" class="col s12 waves-effect" style="min-height: 64px; padding-top: 15px; cursor: pointer;"><i class="arrow grey-text text-darken-2 material-icons">arrow_back</i></a>
             </div>
+            <div class="col s10 " style="white-space: nowrap; overflow: auto; min-height: 64px">
+              <div id="fbheader" class="leftellipsis"></div>
+            </div>
+          </li>
+          <ul id='branches' class="dropdown-content branch_select z-depth-2 grey lighten-4">
+            <ul id="branchlist"></ul>
+          </ul>
+          <li>
+            <ul class="row no-padding" style="margin-bottom: 0;">
+              <a id="branchselector" class="col s10 dropdown-button waves-effect truncate grey-text text-darken-2" data-beloworigin="true" data-activates='branches'><i class="grey-text text-darken-2 left material-icons" style="margin-left: 0; margin-right: 0; padding-top: 12px; padding-right: 8px;">arrow_drop_down</i>Branch:<span id="fbheaderbranch"></span></a>
+              <a id="newbranchbutton" class="waves-effect col s2 center" href="#modal_newbranch"><i class="grey-text text-darken-2 center material-icons" style="padding-top: 12px;">add</i></a>
+            </ul>
+            <div class="divider" style="margin-top: 0;"></div>
+          </li>
+          <li>
+            <ul id="fbelements"></ul>
+          </li>
+          <div class="row col s12 shadow"></div>
+          <div class="z-depth-3 hide-on-med-and-up">
+            <div class="input-field col s12" style="margin-top: 30px;">
+              <select onchange="insert(this.value)">
+                <option value="" disabled selected>Select trigger platform</option>
+                <option value="event">Event</option>
+                <option value="mqtt">MQTT</option>
+                <option value="numberic_state">Numeric State</option>
+                <option value="state">State</option>
+                <option value="sun">Sun</option>
+                <option value="template">Template</option>
+                <option value="time">Time</option>
+                <option value="zone">Zone</option>
+              </select>
+              <label>Trigger Platforms</label>
+            </div>
+            <div class="input-field col s12">
+              <select id="events_side" onchange="insert(this.value)"></select>
+              <label>Events</label>
+            </div>
+            <div class="input-field col s12">
+              <select id="entities_side" onchange="insert(this.value)"></select>
+              <label>Entities</label>
+            </div>
+            <div class="input-field col s12">
+              <select onchange="insert(this.value)">
+                <option value="" disabled selected>Select condition</option>
+                <option value="numeric_state">Numeric state</option>
+                <option value="state">State</option>
+                <option value="sun">Sun</option>
+                <option value="template">Template</option>
+                <option value="time">Time</option>
+                <option value="zone">Zone</option>
+              </select>
+              <label>Conditions</label>
+            </div>
+            <div class="input-field col s12">
+              <select id="services_side" onchange="insert(this.value)"></select>
+              <label>Services</label>
+            </div>
+          </div>
         </ul>
-    </div>
-  </div>
+      </div>
+      <!-- Ace Editor SideNav -->
+      <div class="row">
+        <ul id="ace_settings" class="side-nav">
+          <li class="center s12 grey lighten-3 z-depth-1 subheader">Editor Settings</li>
+          <div class="row col s12">
+              <p class="col s12"> <a class="waves-effect waves-light btn light-blue" href="#modal_acekeyboard">Keyboard Shortcuts</a> </p>
+              <p class="col s12">
+                  <input type="checkbox" class="blue_check" onclick="editor.setOption('animatedScroll', !editor.getOptions().animatedScroll)" id="animatedScroll" />
+                  <Label for="animatedScroll">Animated Scroll</label>
+              </p>
+              <p class="col s12">
+                  <input type="checkbox" class="blue_check" onclick="editor.setOption('behavioursEnabled', !editor.getOptions().behavioursEnabled)" id="behavioursEnabled" />
+                  <Label for="behavioursEnabled">Behaviour Enabled</label>
+              </p>
+              <p class="col s12">
+                  <input type="checkbox" class="blue_check" onclick="editor.setOption('displayIndentGuides', !editor.getOptions().displayIndentGuides)" id="displayIndentGuides" />
+                  <Label for="displayIndentGuides">Display Indent Guides</label>
+              </p>
+              <p class="col s12">
+                  <input type="checkbox" class="blue_check" onclick="editor.setOption('fadeFoldWidgets', !editor.getOptions().fadeFoldWidgets)" id="fadeFoldWidgets" />
+                  <Label for="fadeFoldWidgets">Fade Fold Widgets</label>
+              </p>
+              <div class="input-field col s12">
+                  <input type="number" onchange="editor.setOption('fontSize', parseInt(this.value))" min="6" id="fontSize">
+                  <label class="active" for="fontSize">Font Size</label>
+              </div>
+              <p class="col s12">
+                  <input type="checkbox" class="blue_check" onclick="editor.setOption('highlightActiveLine', !editor.getOptions().highlightActiveLine)" id="highlightActiveLine" />
+                  <Label for="highlightActiveLine">Hightlight Active Line</label>
+              </p>
+              <p class="col s12">
+                  <input type="checkbox" class="blue_check" onclick="editor.setOption('highlightGutterLine', !editor.getOptions().highlightGutterLine)" id="highlightGutterLine" />
+                  <Label for="highlightGutterLine">Hightlight Gutter Line</label>
+              </p>
+              <p class="col s12">
+                  <input type="checkbox" class="blue_check" onclick="editor.setOption('highlightSelectedWord', !editor.getOptions().highlightSelectedWord)" id="highlightSelectedWord" />
+                  <Label for="highlightSelectedWord">Hightlight Selected Word</label>
+              </p>
+              <p class="col s12">
+                  <input type="checkbox" class="blue_check" onclick="editor.setOption('hScrollBarAlwaysVisible', !editor.getOptions().hScrollBarAlwaysVisible)" id="hScrollBarAlwaysVisible" />
+                  <Label for="hScrollBarAlwaysVisible">H Scroll Bar Always Visible</label>
+              </p>
+              <div class="input-field col s12">
+                  <select onchange="editor.setKeyboardHandler(this.value)" id="setKeyboardHandler">
+                      <option value="">ace</option>
+                      <option value="ace/keyboard/vim">vim</option>
+                      <option value="ace/keyboard/emacs">emacs</option>
+                  </select>
+                  <label for="setKeyboardHandler">Keyboard Handler</label>
+              </div>
+              <div class="input-field col s12">
+                  <select onchange="editor.setOption('mode', this.value)" id="mode">
+                      <option value="ace/mode/abap">abap</option>
+                      <option value="ace/mode/abc">abc</option>
+                      <option value="ace/mode/actionscript">actionscript</option>
+                      <option value="ace/mode/ada">ada</option>
+                      <option value="ace/mode/apache_conf">apache_conf</option>
+                      <option value="ace/mode/asciidoc">asciidoc</option>
+                      <option value="ace/mode/assembly_x86">assembly_x86</option>
+                      <option value="ace/mode/autohotkey">autohotkey</option>
+                      <option value="ace/mode/batchfile">batchfile</option>
+                      <option value="ace/mode/bro">bro</option>
+                      <option value="ace/mode/c_cpp">c_cpp</option>
+                      <option value="ace/mode/c9search">c9search</option>
+                      <option value="ace/mode/cirru">cirru</option>
+                      <option value="ace/mode/clojure">clojure</option>
+                      <option value="ace/mode/cobol">cobol</option>
+                      <option value="ace/mode/coffee">coffee</option>
+                      <option value="ace/mode/coldfusion">coldfusion</option>
+                      <option value="ace/mode/csharp">csharp</option>
+                      <option value="ace/mode/css">css</option>
+                      <option value="ace/mode/curly">curly</option>
+                      <option value="ace/mode/d">d</option>
+                      <option value="ace/mode/dart">dart</option>
+                      <option value="ace/mode/diff">diff</option>
+                      <option value="ace/mode/django">django</option>
+                      <option value="ace/mode/dockerfile">dockerfile</option>
+                      <option value="ace/mode/dot">dot</option>
+                      <option value="ace/mode/drools">drools</option>
+                      <option value="ace/mode/dummy">dummy</option>
+                      <option value="ace/mode/dummysyntax">dummysyntax</option>
+                      <option value="ace/mode/eiffel">eiffel</option>
+                      <option value="ace/mode/ejs">ejs</option>
+                      <option value="ace/mode/elixir">elixir</option>
+                      <option value="ace/mode/elm">elm</option>
+                      <option value="ace/mode/erlang">erlang</option>
+                      <option value="ace/mode/forth">forth</option>
+                      <option value="ace/mode/fortran">fortran</option>
+                      <option value="ace/mode/ftl">ftl</option>
+                      <option value="ace/mode/gcode">gcode</option>
+                      <option value="ace/mode/gherkin">gherkin</option>
+                      <option value="ace/mode/gitignore">gitignore</option>
+                      <option value="ace/mode/glsl">glsl</option>
+                      <option value="ace/mode/gobstones">gobstones</option>
+                      <option value="ace/mode/golang">golang</option>
+                      <option value="ace/mode/groovy">groovy</option>
+                      <option value="ace/mode/haml">haml</option>
+                      <option value="ace/mode/handlebars">handlebars</option>
+                      <option value="ace/mode/haskell">haskell</option>
+                      <option value="ace/mode/haskell_cabal">haskell_cabal</option>
+                      <option value="ace/mode/haxe">haxe</option>
+                      <option value="ace/mode/hjson">hjson</option>
+                      <option value="ace/mode/html">html</option>
+                      <option value="ace/mode/html_elixir">html_elixir</option>
+                      <option value="ace/mode/html_ruby">html_ruby</option>
+                      <option value="ace/mode/ini">ini</option>
+                      <option value="ace/mode/io">io</option>
+                      <option value="ace/mode/jack">jack</option>
+                      <option value="ace/mode/jade">jade</option>
+                      <option value="ace/mode/java">java</option>
+                      <option value="ace/mode/javascript">javascript</option>
+                      <option value="ace/mode/json">json</option>
+                      <option value="ace/mode/jsoniq">jsoniq</option>
+                      <option value="ace/mode/jsp">jsp</option>
+                      <option value="ace/mode/jsx">jsx</option>
+                      <option value="ace/mode/julia">julia</option>
+                      <option value="ace/mode/kotlin">kotlin</option>
+                      <option value="ace/mode/latex">latex</option>
+                      <option value="ace/mode/less">less</option>
+                      <option value="ace/mode/liquid">liquid</option>
+                      <option value="ace/mode/lisp">lisp</option>
+                      <option value="ace/mode/livescript">livescript</option>
+                      <option value="ace/mode/logiql">logiql</option>
+                      <option value="ace/mode/lsl">lsl</option>
+                      <option value="ace/mode/lua">lua</option>
+                      <option value="ace/mode/luapage">luapage</option>
+                      <option value="ace/mode/lucene">lucene</option>
+                      <option value="ace/mode/makefile">makefile</option>
+                      <option value="ace/mode/markdown">markdown</option>
+                      <option value="ace/mode/mask">mask</option>
+                      <option value="ace/mode/matlab">matlab</option>
+                      <option value="ace/mode/maze">maze</option>
+                      <option value="ace/mode/mel">mel</option>
+                      <option value="ace/mode/mushcode">mushcode</option>
+                      <option value="ace/mode/mysql">mysql</option>
+                      <option value="ace/mode/nix">nix</option>
+                      <option value="ace/mode/nsis">nsis</option>
+                      <option value="ace/mode/objectivec">objectivec</option>
+                      <option value="ace/mode/ocaml">ocaml</option>
+                      <option value="ace/mode/pascal">pascal</option>
+                      <option value="ace/mode/perl">perl</option>
+                      <option value="ace/mode/pgsql">pgsql</option>
+                      <option value="ace/mode/php">php</option>
+                      <option value="ace/mode/powershell">powershell</option>
+                      <option value="ace/mode/praat">praat</option>
+                      <option value="ace/mode/prolog">prolog</option>
+                      <option value="ace/mode/properties">properties</option>
+                      <option value="ace/mode/protobuf">protobuf</option>
+                      <option value="ace/mode/python">python</option>
+                      <option value="ace/mode/r">r</option>
+                      <option value="ace/mode/razor">razor</option>
+                      <option value="ace/mode/rdoc">rdoc</option>
+                      <option value="ace/mode/rhtml">rhtml</option>
+                      <option value="ace/mode/rst">rst</option>
+                      <option value="ace/mode/ruby">ruby</option>
+                      <option value="ace/mode/rust">rust</option>
+                      <option value="ace/mode/sass">sass</option>
+                      <option value="ace/mode/scad">scad</option>
+                      <option value="ace/mode/scala">scala</option>
+                      <option value="ace/mode/scheme">scheme</option>
+                      <option value="ace/mode/scss">scss</option>
+                      <option value="ace/mode/sh">sh</option>
+                      <option value="ace/mode/sjs">sjs</option>
+                      <option value="ace/mode/smarty">smarty</option>
+                      <option value="ace/mode/snippets">snippets</option>
+                      <option value="ace/mode/soy_template">soy_template</option>
+                      <option value="ace/mode/space">space</option>
+                      <option value="ace/mode/sql">sql</option>
+                      <option value="ace/mode/sqlserver">sqlserver</option>
+                      <option value="ace/mode/stylus">stylus</option>
+                      <option value="ace/mode/svg">svg</option>
+                      <option value="ace/mode/swift">swift</option>
+                      <option value="ace/mode/tcl">tcl</option>
+                      <option value="ace/mode/tex">tex</option>
+                      <option value="ace/mode/text">text</option>
+                      <option value="ace/mode/textile">textile</option>
+                      <option value="ace/mode/toml">toml</option>
+                      <option value="ace/mode/tsx">tsx</option>
+                      <option value="ace/mode/twig">twig</option>
+                      <option value="ace/mode/typescript">typescript</option>
+                      <option value="ace/mode/vala">vala</option>
+                      <option value="ace/mode/vbscript">vbscript</option>
+                      <option value="ace/mode/velocity">velocity</option>
+                      <option value="ace/mode/verilog">verilog</option>
+                      <option value="ace/mode/vhdl">vhdl</option>
+                      <option value="ace/mode/wollok">wollok</option>
+                      <option value="ace/mode/xml">xml</option>
+                      <option value="ace/mode/xquery">xquery</option>
+                      <option value="ace/mode/yaml">yaml</option>
+                  </select>
+                  <label for="mode">Mode</label>
+              </div>
+              <div class="input-field col s12">
+                  <select onchange="editor.setOption('newLineMode', this.value)" id="newLineMode">
+                      <option value="auto">Auto</option>
+                      <option value="windows">Windows</option>
+                      <option value="unix">Unix</option>
+                  </select>
+                  <label for="newLineMode">New Line Mode</label>
+              </div>
+              <p class="col s12">
+                  <input type="checkbox" class="blue_check" onclick="editor.setOption('overwrite', !editor.getOptions().overwrite)" id="overwrite" />
+                  <Label for="overwrite">Overwrite</label>
+              </p>
+              <p class="col s12">
+                  <input type="checkbox" class="blue_check" onclick="editor.setOption('readOnly', !editor.getOptions().readOnly)" id="readOnly" />
+                  <Label for="readOnly">Read Only</label>
+              </p>
+              <div class="input-field col s12">
+                  <input value="2" type="number" onchange="editor.setOption('scrollSpeed', parseInt(this.value))" id="scrollSpeed">
+                  <label class="active" for="scrollSpeed">Scroll Speed</label>
+              </div>
+              <p class="col s12">
+                  <input type="checkbox" class="blue_check" onclick="editor.setOption('showFoldWidgets', !editor.getOptions().showFoldWidgets)" id="showFoldWidgets" />
+                  <Label for="showFoldWidgets">Show Fold Widgets</label>
+              </p>
+              <p class="col s12">
+                  <input type="checkbox" class="blue_check" onclick="editor.setOption('showGutter', !editor.getOptions().showGutter)" id="showGutter" />
+                  <Label for="showGutter">Show Gutter</label>
+              </p>
+              <p class="col s12">
+                  <input type="checkbox" class="blue_check" onclick="editor.setOption('showInvisibles', !editor.getOptions().showInvisibles)" id="showInvisibles" />
+                  <Label for="showInvisibles">Show Invisibles</label>
+              </p>
+              <p class="col s12">
+                  <input type="checkbox" class="blue_check" onclick="editor.setOption('showPrintMargin', !editor.getOptions().showPrintMargin)" id="showPrintMargin" />
+                  <Label for="showPrintMargin">Show Print Margin</label>
+              </p>
+              <p class="col s12">
+                  <input type="checkbox" class="blue_check" onclick="editor.setOption('showLineNumbers', !editor.getOptions().showLineNumbers)" id="showLineNumbers" />
+                  <Label for="showLineNumbers">Show Line Numbers</label>
+              </p>
+              <div class="input-field col s12">
+                  <input type="number" onchange="editor.setOption('tabSize', parseInt(this.value))" min="1" id="tabSize">
+                  <label class="active" for="tabSize">Tab Size</label>
+              </div>
+              <div class="input-field col s12">
+                  <select onchange="editor.setTheme(this.value)" id="theme">
+                      <optgroup label="Light Themes">
+                          <option value="ace/theme/chrome">Chrome</option>
+                          <option value="ace/theme/clouds">Clouds</option>
+                          <option value="ace/theme/crimson_editor">Crimson Editor</option>
+                          <option value="ace/theme/dawn">Dawn</option>
+                          <option value="ace/theme/dreamweaver">Dreamweaver</option>
+                          <option value="ace/theme/eclipse">Eclipse</option>
+                          <option value="ace/theme/github">GitHub</option>
+                          <option value="ace/theme/iplastic">IPlastic</option>
+                          <option value="ace/theme/solarized_light">Solarized Light</option>
+                          <option value="ace/theme/textmate">TextMate</option>
+                          <option value="ace/theme/tomorrow">Tomorrow</option>
+                          <option value="ace/theme/xcode">XCode</option>
+                          <option value="ace/theme/kuroir">Kuroir</option>
+                          <option value="ace/theme/katzenmilch">KatzenMilch</option>
+                          <option value="ace/theme/sqlserver">SQL Server</option>
+                      </optgroup>
+                      <optgroup label="Dark Themes">
+                          <option value="ace/theme/ambiance">Ambiance</option>
+                          <option value="ace/theme/chaos">Chaos</option>
+                          <option value="ace/theme/clouds_midnight">Clouds Midnight</option>
+                          <option value="ace/theme/cobalt">Cobalt</option>
+                          <option value="ace/theme/gruvbox">Gruvbox</option>
+                          <option value="ace/theme/idle_fingers">idle Fingers</option>
+                          <option value="ace/theme/kr_theme">krTheme</option>
+                          <option value="ace/theme/merbivore">Merbivore</option>
+                          <option value="ace/theme/merbivore_soft">Merbivore Soft</option>
+                          <option value="ace/theme/mono_industrial">Mono Industrial</option>
+                          <option value="ace/theme/monokai">Monokai</option>
+                          <option value="ace/theme/pastel_on_dark">Pastel on dark</option>
+                          <option value="ace/theme/solarized_dark">Solarized Dark</option>
+                          <option value="ace/theme/terminal">Terminal</option>
+                          <option value="ace/theme/tomorrow_night">Tomorrow Night</option>
+                          <option value="ace/theme/tomorrow_night_blue">Tomorrow Night Blue</option>
+                          <option value="ace/theme/tomorrow_night_bright">Tomorrow Night Bright</option>
+                          <option value="ace/theme/tomorrow_night_eighties">Tomorrow Night 80s</option>
+                          <option value="ace/theme/twilight">Twilight</option>
+                          <option value="ace/theme/vibrant_ink">Vibrant Ink</option>
+                      </optgroup>
+                  </select>
+                  <label for="theme">Theme</label>
+              </div>
+              <p class="col s12">
+                  <input type="checkbox" class="blue_check" onclick="editor.setOption('useSoftTabs', !editor.getOptions().useSoftTabs)" id="useSoftTabs" />
+                  <Label for="useSoftTabs">Use Soft Tabs</label>
+              </p>
+              <p class="col s12">
+                  <input type="checkbox" class="blue_check" onclick="editor.setOption('useWorker', !editor.getOptions().useWorker)" id="useWorker" />
+                  <Label for="useWorker">Use Worker</label>
+              </p>
+              <p class="col s12">
+                  <input type="checkbox" class="blue_check" onclick="editor.setOption('vScrollBarAlwaysVisible', !editor.getOptions().vScrollBarAlwaysVisible)" id="vScrollBarAlwaysVisible" />
+                  <Label for="vScrollBarAlwaysVisible">V Scroll Bar Always Visible</label>
+              </p>
+              <p class="col s12">
+                  <input type="checkbox" class="blue_check" onclick="editor.setOption('wrapBehavioursEnabled', !editor.getOptions().wrapBehavioursEnabled)" id="wrapBehavioursEnabled" />
+                  <Label for="wrapBehavioursEnabled">Wrap Behaviours Enabled</label>
+              </p>
+              <p class="col s12">
+                  <input type="checkbox" class="blue_check" onclick="editor.getSession().setUseWrapMode(!editor.getSession().getUseWrapMode());if(editor.getSession().getUseWrapMode()){document.getElementById('wrap_limit').focus();document.getElementById('wrap_limit').onchange();}" id="wrap" />
+                  <Label for="wrap">Wrap Mode</label>
+              </p>
+              <div class="input-field col s12">
+                  <input id="wrap_limit" type="number" onchange="editor.setOption('wrap', parseInt(this.value))" min="1" value="80">
+                  <label class="active" for="wrap_limit">Wrap Limit</label>
+              </div> <a class="waves-effect waves-light btn light-blue" onclick="save_ace_settings()">Save Settings Locally</a>
+              <p class="center col s12"> Ace Editor 1.2.6 </p>
+          </div>
+        </ul>
+      </div>
 </main>
 <input type="hidden" id="fb_currentfile" value="" />
 <!-- Scripts -->
@@ -1678,10 +1851,10 @@ INDEX = Template(r"""<!DOCTYPE html>
             draggable: true
         });
         $('.ace_settings-collapse').sideNav({
-            menuWidth: 300, // Default is 300
-            edge: 'right', // Choose the horizontal origin
-            closeOnClick: true, // Closes side-nav on <a> clicks, useful for Angular/Meteor
-            draggable: true // Choose whether you can drag to open on touch screens
+            menuWidth: 300,
+            edge: 'right',
+            closeOnClick: true,
+            draggable: true
         });
         listdir('.');
     });
@@ -1796,7 +1969,7 @@ INDEX = Template(r"""<!DOCTYPE html>
 
     function renderitem(itemdata, index) {
         var li = document.createElement('li');
-        li.classList.add("collection-item", "fbicon_pad", "col", "s12", "no-padding");
+        li.classList.add("collection-item", "fbicon_pad", "col", "s12", "no-padding", "white");
         var item = document.createElement('a');
         item.classList.add("waves-effect", "col", "s10", "fbicon_pad");
         var iicon = document.createElement('i');
@@ -1833,7 +2006,7 @@ INDEX = Template(r"""<!DOCTYPE html>
         item.appendChild(iicon);
         var itext = document.createElement('div');
         itext.innerHTML = itemdata.name;
-        itext.classList.add('filename');
+        itext.classList.add("filename");
 
         var hasgitadd = false;
         if (itemdata.gitstatus) {
@@ -1879,10 +2052,10 @@ INDEX = Template(r"""<!DOCTYPE html>
         dropdown.appendChild(dd_delete);
 
         if (itemdata.gitstatus) {
-            var divider = document.createElement('li');
-            divider.classList.add('divider');
-            dropdown.appendChild(divider);
             if (hasgitadd) {
+                var divider = document.createElement('li');
+                divider.classList.add('divider');
+                dropdown.appendChild(divider);
                 // git add button
                 var dd_gitadd = document.createElement('li');
                 var dd_gitadd_a = document.createElement('a');
@@ -1936,13 +2109,16 @@ INDEX = Template(r"""<!DOCTYPE html>
             for (var i = 0; i < dirdata.branches.length; i++) {
                 var branch = document.createElement('li');
                 var link = document.createElement('a');
-                link.classList.add("branch_select", "col", "s12", "no-padding", "truncate");
+                link.classList.add("branch_select", "truncate");
                 link.innerHTML = dirdata.branches[i];
                 link.href = '#';
                 link.setAttribute('onclick', 'checkout("' + dirdata.branches[i] + '");collapseAll()')
                 branch.appendChild(link);
                 if (dirdata.branches[i] == dirdata.activebranch) {
-                    branch.classList.add('active');
+                    link.classList.add("active", "grey", "darken-1");
+                }
+                else {
+                    link.classList.add("grey-text", "text-darken-3", "branch_hover", "waves-effect", "grey", "lighten-4");
                 }
                 branchlist.appendChild(branch);
             }
@@ -1977,19 +2153,38 @@ INDEX = Template(r"""<!DOCTYPE html>
     }
 
     function loadfile(filepath) {
-        $.get("api/file?filename=" + filepath, function(data) {
-            fileparts = filepath.split('.');
-            extension = fileparts[fileparts.length -1];
-            if (modemapping.hasOwnProperty(extension)) {
-                editor.setOption('mode', modemapping[extension]);
+        if ($('.markdirty.red').length) {
+            $('#modal_markdirty').modal('open');
+        }
+        else {
+            $.get("api/file?filename=" + filepath, function(data) {
+                fileparts = filepath.split('.');
+                extension = fileparts[fileparts.length -1];
+                if (modemapping.hasOwnProperty(extension)) {
+                    editor.setOption('mode', modemapping[extension]);
+                }
+                else {
+                    editor.setOption('mode', "ace/mode/text");
+                }
+                editor.getSession().setValue(data, -1);
+                document.getElementById('currentfile').value = decodeURI(filepath);
+                editor.session.getUndoManager().markClean();
+                $('.markdirty').each(function(i, o){o.classList.remove('red');});
+                $('.hidesave').css('opacity', 0);
+            });
+        }
+    }
+
+    function check_config() {
+        $.get("api/check_config", function (resp) {
+            if (resp.length == 0) {
+                var $toastContent = $("<div><pre>Configuration seems valid.</pre></div>");
+                Materialize.toast($toastContent, 2000);
             }
             else {
-                editor.setOption('mode', "ace/mode/text");
+                var $toastContent = $("<div><pre>" + resp[0].state + "</pre></div>");
+                Materialize.toast($toastContent, 5000);
             }
-            editor.setValue(data);
-            editor.selection.selectFileStart();
-            editor.focus();
-            document.getElementById('currentfile').value = decodeURI(filepath);
         });
     }
 
@@ -2021,9 +2216,28 @@ INDEX = Template(r"""<!DOCTYPE html>
                     var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
                     Materialize.toast($toastContent, 2000);
                     listdir(document.getElementById('fbheader').innerHTML);
+                    $('.markdirty').each(function(i, o){o.classList.remove('red');});
+                    $('.hidesave').css('opacity', 0);
+                    editor.session.getUndoManager().markClean();
                 }
             });
         }
+        else {
+          Materialize.toast('Error:  Please provide a filename', 5000);
+        }
+    }
+
+    function save_check() {
+        var filepath = document.getElementById('currentfile').value;
+        if (filepath.length > 0) {
+          $('#modal_save').modal('open');
+        }
+        else {
+            Materialize.toast('Error:  Please provide a filename', 5000);
+            $(".pathtip").bind("animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd", function(){
+              $(this).removeClass("pathtip_color");
+            }).addClass("pathtip_color");
+       }
     }
 
     function download_file(filepath) {
@@ -2080,6 +2294,25 @@ INDEX = Template(r"""<!DOCTYPE html>
             data = new Object();
             data.path = path;
             $.post("api/gitadd", data).done(function(resp) {
+                if (resp.error) {
+                    var $toastContent = $("<div><pre>" + resp.message + "\n" + resp.path + "</pre></div>");
+                    Materialize.toast($toastContent, 5000);
+                }
+                else {
+                    var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
+                    Materialize.toast($toastContent, 2000);
+                    listdir(document.getElementById('fbheader').innerHTML);
+                }
+            });
+        }
+    }
+
+    function gitinit() {
+        var path = document.getElementById("fbheader").innerHTML;
+        if (path.length > 0) {
+            data = new Object();
+            data.path = path;
+            $.post("api/init", data).done(function(resp) {
                 if (resp.error) {
                     var $toastContent = $("<div><pre>" + resp.message + "\n" + resp.path + "</pre></div>");
                     Materialize.toast($toastContent, 5000);
@@ -2228,6 +2461,17 @@ INDEX = Template(r"""<!DOCTYPE html>
 <script>
     ace.require("ace/ext/language_tools");
     var editor = ace.edit("editor");
+    editor.on("input", function() {
+        if (editor.session.getUndoManager().isClean()) {
+            $('.markdirty').each(function(i, o){o.classList.remove('red');});
+            $('.hidesave').css('opacity', 0);
+        }
+        else {
+            $('.markdirty').each(function(i, o){o.classList.add('red');});
+            $('.hidesave').css('opacity', 1);
+        }
+    });
+
     if (localStorage.hasOwnProperty("pochass")) {
         editor.setOptions(JSON.parse(localStorage.pochass));
         editor.setOptions({
@@ -2426,7 +2670,6 @@ class RequestHandler(BaseHTTPRequestHandler):
             try:
                 if filename:
                     filename = unquote(filename[0]).encode('utf-8')
-                    print(filename)
                     if os.path.isfile(os.path.join(BASEDIR.encode('utf-8'), filename)):
                         with open(os.path.join(BASEDIR.encode('utf-8'), filename)) as fptr:
                             content += fptr.read()
@@ -2533,6 +2776,26 @@ class RequestHandler(BaseHTTPRequestHandler):
                 if HASS_API_PASSWORD:
                     headers["x-ha-access"] = HASS_API_PASSWORD
                 req = urllib.request.Request("%sservices/homeassistant/restart" % HASS_API, headers=headers, method='POST')
+                with urllib.request.urlopen(req) as response:
+                    res = json.loads(response.read().decode('utf-8'))
+                    print(res)
+            except Exception as err:
+                print(err)
+                res['restart'] = str(err)
+            self.wfile.write(bytes(json.dumps(res), "utf8"))
+            return
+        elif req.path == '/api/check_config':
+            print("/api/check_config")
+            self.send_header('Content-type', 'text/json')
+            self.end_headers()
+            res = {"check_config": False}
+            try:
+                headers = {
+                    "Content-Type": "application/json"
+                }
+                if HASS_API_PASSWORD:
+                    headers["x-ha-access"] = HASS_API_PASSWORD
+                req = urllib.request.Request("%sservices/homeassistant/check_config" % HASS_API, headers=headers, method='POST')
                 with urllib.request.urlopen(req) as response:
                     res = json.loads(response.read().decode('utf-8'))
                     print(res)
@@ -2800,6 +3063,37 @@ class RequestHandler(BaseHTTPRequestHandler):
                             repo.git.checkout("HEAD", b=branch)
                             response['error'] = False
                             response['message'] = "Created and checked out %s" % branch
+                            self.send_response(200)
+                            self.send_header('Content-type', 'text/json')
+                            self.end_headers()
+                            self.wfile.write(bytes(json.dumps(response), "utf8"))
+                            return
+                        except Exception as err:
+                            response['error'] = True
+                            response['message'] = str(err)
+                            print(response)
+
+                    except Exception as err:
+                        response['message'] = "Not a git repository: %s" % (str(err))
+                        print("Exception (no repo): %s" % str(err))
+            else:
+                response['message'] = "Missing path or branch"
+        elif req.path == '/api/init':
+            try:
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+            except Exception as err:
+                print(err)
+                response['message'] = "%s" % (str(err))
+                postvars = {}
+            if 'path' in postvars.keys():
+                if postvars['path']:
+                    try:
+                        repopath = unquote(postvars['path'][0])
+                        response['path'] = repopath
+                        try:
+                            repo = REPO.init(repopath)
+                            response['error'] = False
+                            response['message'] = "Initialized repository in %s" % repopath
                             self.send_response(200)
                             self.send_header('Content-type', 'text/json')
                             self.end_headers()
