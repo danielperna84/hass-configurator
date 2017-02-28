@@ -1,3 +1,8 @@
+Version 0.1.5 (2017-02-nn)
+- UI improvements
+- Added git init
+- Added check_config API for HASS
+
 Version 0.1.4 (2017-02-20)
 - UI improvements
 - Switch and create git branches

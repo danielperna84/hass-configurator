@@ -21,7 +21,7 @@ from urllib.parse import urlparse, parse_qs, unquote
 ### Some options for you to change
 LISTENIP = "0.0.0.0"
 LISTENPORT = 3218
-# Set BASEPATH to something like "/home/hass/.homeasssitant" if you're not running the configurator from that path
+# Set BASEPATH to something like "/home/hass/.homeassistant/" if you're not running the configurator from that path
 BASEPATH = None
 # Set the paths to a certificate and the key if you're using SSL, e.g "/etc/ssl/certs/mycert.pem"
 SSL_CERTIFICATE = None
@@ -2541,6 +2541,26 @@ class RequestHandler(BaseHTTPRequestHandler):
                 res['restart'] = str(err)
             self.wfile.write(bytes(json.dumps(res), "utf8"))
             return
+        elif req.path == '/api/check_config':
+            print("/api/check_config")
+            self.send_header('Content-type', 'text/json')
+            self.end_headers()
+            res = {"check_config": False}
+            try:
+                headers = {
+                    "Content-Type": "application/json"
+                }
+                if HASS_API_PASSWORD:
+                    headers["x-ha-access"] = HASS_API_PASSWORD
+                req = urllib.request.Request("%sservices/homeassistant/check_config" % HASS_API, headers=headers, method='POST')
+                with urllib.request.urlopen(req) as response:
+                    res = json.loads(response.read().decode('utf-8'))
+                    print(res)
+            except Exception as err:
+                print(err)
+                res['restart'] = str(err)
+            self.wfile.write(bytes(json.dumps(res), "utf8"))
+            return
         elif req.path == '/':
             self.send_header('Content-type', 'text/html')
             self.end_headers()
@@ -2800,6 +2820,37 @@ class RequestHandler(BaseHTTPRequestHandler):
                             repo.git.checkout("HEAD", b=branch)
                             response['error'] = False
                             response['message'] = "Created and checked out %s" % branch
+                            self.send_response(200)
+                            self.send_header('Content-type', 'text/json')
+                            self.end_headers()
+                            self.wfile.write(bytes(json.dumps(response), "utf8"))
+                            return
+                        except Exception as err:
+                            response['error'] = True
+                            response['message'] = str(err)
+                            print(response)
+
+                    except Exception as err:
+                        response['message'] = "Not a git repository: %s" % (str(err))
+                        print("Exception (no repo): %s" % str(err))
+            else:
+                response['message'] = "Missing path or branch"
+        elif req.path == '/api/init':
+            try:
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+            except Exception as err:
+                print(err)
+                response['message'] = "%s" % (str(err))
+                postvars = {}
+            if 'path' in postvars.keys():
+                if postvars['path']:
+                    try:
+                        repopath = unquote(postvars['path'][0])
+                        response['path'] = repopath
+                        try:
+                            repo = REPO.init(repopath)
+                            response['error'] = False
+                            response['message'] = "Initialized repository in %s" % repopath
                             self.send_response(200)
                             self.send_header('Content-type', 'text/json')
                             self.end_headers()
