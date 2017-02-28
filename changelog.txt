@@ -1,4 +1,4 @@
-Version 0.1.5 (2017-02-nn)
+Version 0.1.5 (2017-02-28)
 - UI improvements
 - Added git init
 - Added check_config API for HASS
