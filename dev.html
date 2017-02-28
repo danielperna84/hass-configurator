@@ -74,6 +74,10 @@
             font-weight: 400;
         }
 
+        a.branch_select.active {
+            color: white !important;
+        }
+
         #fbelements {
             margin: 0;
             position: relative;
@@ -2054,7 +2058,7 @@
                 link.setAttribute('onclick', 'checkout("' + dirdata.branches[i] + '");collapseAll()')
                 branch.appendChild(link);
                 if (dirdata.branches[i] == dirdata.activebranch) {
-                    link.classList.add("active", "grey", "lighten-1", "white-text");
+                    link.classList.add("active", "grey", "darken-1");
                 }
                 else {
                     link.classList.add("grey-text", "text-darken-3", "branch_hover", "waves-effect", "grey", "lighten-4");
