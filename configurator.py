@@ -13,6 +13,8 @@ import base64
 import ipaddress
 import signal
 import cgi
+import shlex
+import subprocess
 from string import Template
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import urllib.request
@@ -566,19 +568,23 @@ INDEX = Template(r"""<!DOCTYPE html>
     <ul id="dropdown_menu" class="dropdown-content z-depth-4">
         <li><a target="_blank" href="#modal_components">HASS Components</a></li>
         <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
-        <li><a href="#modal_about">About PoC</a></li>
+        <li><a href="#modal_about">About HASS-Configurator</a></li>
         <li class="divider"></li>
         <li><a href="#modal_check_config">Check HASS Configuration</a></li>
         <li><a href="#modal_restart">Restart HASS</a></li>
+        <li class="divider"></li>
+        <li><a href="#modal_exec_command">Execute shell command</a></li>
     </ul>
     <ul id="dropdown_menu_mobile" class="dropdown-content z-depth-4">
         <li><a target="_blank" href="https://home-assistant.io/help/">Need HASS Help?</a></li>
         <li><a target="_blank" href="https://home-assistant.io/components/">HASS Components</a></li>
         <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
-        <li><a href="#modal_about">About PoC</a></li>
+        <li><a href="#modal_about">About HASS-Configurator</a></li>
         <li class="divider"></li>
         <li><a href="#modal_check_config">Check HASS Configuration</a></li>
         <li><a href="#modal_restart">Restart HASS</a></li>
+        <li class="divider"></li>
+        <li><a href="#modal_exec_command">Execute shell command</a></li>
     </ul>
     <ul id="dropdown_gitmenu" class="dropdown-content z-depth-4">
         <li><a href="#modal_init" class="nowrap waves-effect">git init</a></li>
@@ -1230,6 +1236,21 @@ INDEX = Template(r"""<!DOCTYPE html>
         <div class="modal-footer">
           <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">No</a>
           <a onclick="restart()" class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Yes</a>
+        </div>
+    </div>
+    <div id="modal_exec_command" class="modal">
+        <div class="modal-content">
+            <h4>Execute shell command</h4>
+            <pre class="col s6" id="command_history"></pre>
+        </div>
+        <div class="modal-footer">
+            <div class="input-field">
+                <input placeholder="/bin/ls -l /var/log" id="commandline" type="text">
+                <label for="commandline">Command</label>
+            </div>
+            <a class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Close</a>
+            <a onclick="document.getElementById('command_history').innerText='';" class=" modal-action waves-effect waves-green btn-flat light-blue-text">Clear</a>
+            <a onclick="exec_command()" class=" modal-action waves-effect waves-green btn-flat light-blue-text">Execute</a>
         </div>
     </div>
     <div id="modal_markdirty" class="modal">
@@ -2265,6 +2286,31 @@ INDEX = Template(r"""<!DOCTYPE html>
         }
     }
 
+    function exec_command() {
+        var command = document.getElementById('commandline').value;
+        if (command.length > 0) {
+            data = new Object();
+            data.command = command;
+            data.timeout = 15;
+            $.post("api/exec_command", data).done(function(resp) {
+                if (resp.error) {
+                    var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
+                    Materialize.toast($toastContent, 5000);
+                }
+                else {
+                    var history = document.getElementById('command_history');
+                    history.innerText += resp.message + ': ' + resp.returncode + "\n";
+                    if (resp.stdout) {
+                        history.innerText += resp.stdout;
+                    }
+                    if (resp.stderr) {
+                        history.innerText += resp.stderr;
+                    }
+                }
+            });
+        }
+    }
+
     function delete_element() {
         var path = document.getElementById('fb_currentfile').value;
         if (path.length > 0) {
@@ -2945,6 +2991,53 @@ class RequestHandler(BaseHTTPRequestHandler):
                         print(err)
             else:
                 response['message'] = "Missing filename or text"
+        elif req.path == '/api/exec_command':
+            try:
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+            except Exception as err:
+                print(err)
+                response['message'] = "%s" % (str(err))
+                postvars = {}
+            if 'command' in postvars.keys():
+                if postvars['command']:
+                    try:
+                        command = shlex.split(postvars['command'][0])
+                        timeout = 15
+                        if 'timeout' in postvars.keys():
+                            if postvars['timeout']:
+                                timeout = int(postvars['timeout'][0])
+                        try:
+                            proc = subprocess.Popen(
+                                command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                            stdout, stderr = proc.communicate(timeout=timeout)
+                            self.send_response(200)
+                            self.send_header('Content-type', 'text/json')
+                            self.end_headers()
+                            response['error'] = False
+                            response['message'] = "Command executed: %s" % postvars['command'][0]
+                            response['returncode'] = proc.returncode
+                            try:
+                                response['stdout'] = stdout.decode(sys.getdefaultencoding())
+                            except Exception as err:
+                                print(err)
+                                response['stdout'] = stdout.decode("utf-8", errors="replace")
+                            try:
+                                response['stderr'] = stderr.decode(sys.getdefaultencoding())
+                            except Exception as err:
+                                print(err)
+                                response['stderr'] = stderr.decode("utf-8", errors="replace")
+                            self.wfile.write(bytes(json.dumps(response), "utf8"))
+                            return
+                        except Exception as err:
+                            print(err)
+                            response['error'] = True
+                            response['message'] = str(err)
+
+                    except Exception as err:
+                        response['message'] = "%s" % (str(err))
+                        print(err)
+            else:
+                response['message'] = "Missing command"
         elif req.path == '/api/gitadd':
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)

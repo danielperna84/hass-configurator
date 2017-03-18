@@ -1,3 +1,6 @@
+Version 0.1.6 (2017-03-nn)
+- Executing commands on remote machine now possbile (Issue #30)
+
 Version 0.1.5 (2017-02-28)
 - UI improvements
 - Added git init
