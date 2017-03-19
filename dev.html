@@ -1183,13 +1183,16 @@
         <div class="modal-content">
             <h4>Execute shell command</h4>
             <pre class="col s6" id="command_history"></pre>
+            <br>
+            <div class="row">
+                <div class="input-field col s12">
+                  <input placeholder="/bin/ls -l /var/log" id="commandline" type="text">
+                  <label for="commandline">Command</label>
+                </div>
+          </div>
         </div>
         <div class="modal-footer">
-            <div class="input-field">
-                <input placeholder="/bin/ls -l /var/log" id="commandline" type="text">
-                <label for="commandline">Command</label>
-            </div>
-            <a class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Close</a>
+            <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">Close</a>
             <a onclick="document.getElementById('command_history').innerText='';" class=" modal-action waves-effect waves-green btn-flat light-blue-text">Clear</a>
             <a onclick="exec_command()" class=" modal-action waves-effect waves-green btn-flat light-blue-text">Execute</a>
         </div>
