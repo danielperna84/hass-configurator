@@ -275,7 +275,7 @@ INDEX = Template(r"""<!DOCTYPE html>
             box-shadow: 0 1px 0 0 #03a9f4 !important
         }
 
-        #modal_acekeyboard, #modal_components {
+        #modal_acekeyboard, #modal_components, #modal_icons {
             top: auto;
             width: 96%;
             min-height: 96%;
@@ -567,6 +567,7 @@ INDEX = Template(r"""<!DOCTYPE html>
   <main>
     <ul id="dropdown_menu" class="dropdown-content z-depth-4">
         <li><a target="_blank" href="#modal_components">HASS Components</a></li>
+        <li><a target="_blank" href="#modal_icons">Material Icons</a></li>
         <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
         <li><a href="#modal_about">About HASS-Configurator</a></li>
         <li class="divider"></li>
@@ -578,6 +579,7 @@ INDEX = Template(r"""<!DOCTYPE html>
     <ul id="dropdown_menu_mobile" class="dropdown-content z-depth-4">
         <li><a target="_blank" href="https://home-assistant.io/help/">Need HASS Help?</a></li>
         <li><a target="_blank" href="https://home-assistant.io/components/">HASS Components</a></li>
+        <li><a target="_blank" href="https://materialdesignicons.com/">Material Icons</a></li>
         <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
         <li><a href="#modal_about">About HASS-Configurator</a></li>
         <li class="divider"></li>
@@ -598,6 +600,15 @@ INDEX = Template(r"""<!DOCTYPE html>
         <div class="modal-content_nopad">
             <iframe src="https://home-assistant.io/components/" style="height: 90vh; width: 100vw"> </iframe>
             <a target="_blank" href="https://home-assistant.io/components/" class="hide-on-med-and-down modal_btn waves-effect btn-large btn-flat left"><i class="material-icons">launch</i></a>
+        </div>
+        <div class="modal-footer">
+            <a class="modal-action modal-close waves-effect btn-flat Right light-blue-text">Close</a>
+        </div>
+    </div>
+    <div id="modal_icons" class="modal bottom-sheet modal-fixed-footer">
+    <div class="modal-content_nopad">
+            <iframe src="https://materialdesignicons.com/" style="height: 90vh; width: 100vw"> </iframe>
+            <a target="_blank" href="https://materialdesignicons.com/" class="hide-on-med-and-down modal_btn waves-effect btn-large btn-flat left"><i class="material-icons">launch</i></a>
         </div>
         <div class="modal-footer">
             <a class="modal-action modal-close waves-effect btn-flat Right light-blue-text">Close</a>
