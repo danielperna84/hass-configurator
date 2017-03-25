@@ -1160,7 +1160,7 @@ INDEX = Template(r"""<!DOCTYPE html>
                 <h4>git init</h4>
               </div>
               <div class="col s1">
-                <img src="https://image.flaticon.com/icons/svg/52/52234.svg" style="max-width: 40px;" >
+                <img src="https://drive.google.com/uc?export=view&id=0B6wTGzSOtvNBakk4ek1uRGxqYVE" style="max-width: 40px;" >
               </div>
             </div>
           <p>Are you sure you want to initialize a repository at the current path?</p>
@@ -1177,7 +1177,7 @@ INDEX = Template(r"""<!DOCTYPE html>
               <h4>git commit</h4>
             </div>
             <div class="col s1">
-              <img src="https://image.flaticon.com/icons/svg/52/52234.svg" style="max-width: 40px;" >
+              <img src="https://drive.google.com/uc?export=view&id=0B6wTGzSOtvNBakk4ek1uRGxqYVE" style="max-width: 40px;" >
             </div>
           </div>
           <div class="row">
@@ -1219,7 +1219,7 @@ INDEX = Template(r"""<!DOCTYPE html>
               <h4>git add</h4>
             </div>
             <div class="col s1">
-              <img src="https://image.flaticon.com/icons/svg/52/52234.svg" style="max-width: 40px;" >
+              <img src="https://drive.google.com/uc?export=view&id=0B6wTGzSOtvNBakk4ek1uRGxqYVE" style="max-width: 40px;" >
             </div>
           </div>
           <p>Are you sure you want to add <span class="fb_currentfile"></span> to the index?</p>
@@ -1317,7 +1317,7 @@ INDEX = Template(r"""<!DOCTYPE html>
               <h4>New Branch</h4>
             </div>
             <div class="col s1">
-              <img src="https://image.flaticon.com/icons/svg/52/52234.svg" style="max-width: 40px;" >
+              <img src="https://drive.google.com/uc?export=view&id=0B6wTGzSOtvNBakk4ek1uRGxqYVE" style="max-width: 40px;" >
             </div>
           </div>
             <div class="row">
@@ -2605,7 +2605,8 @@ INDEX = Template(r"""<!DOCTYPE html>
 
 </script>
 </body>
-</html>""")
+</html>
+""")
 
 def signal_handler(sig, frame):
     global HTTPD
