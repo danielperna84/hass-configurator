@@ -102,6 +102,14 @@ INDEX = Template(r"""<!DOCTYPE html>
             white-space: nowrap;
         }
 
+        .select-wrapper input.select-dropdown {
+            width: 96%;
+            overflow: hidden;
+            direction: ltr;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
         #edit_float {
               z-index: 10;
         }
