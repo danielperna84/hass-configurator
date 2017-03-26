@@ -1943,19 +1943,25 @@
             nameparts = itemdata.name.split('.');
             extension = nameparts[nameparts.length -1];
             if (['c', 'cpp', 'css', 'htm', 'html', 'js', 'json', 'php', 'py', 'sh', 'sql', 'xml', 'yaml'].indexOf(extension.toLocaleLowerCase()) > +1 ) {
-                iicon.innerHTML = 'code';
+                iicon.classList.add('mdi', 'mdi-file-xml');
+            }
+            else if (['txt', 'doc', 'docx'].indexOf(extension.toLocaleLowerCase()) > -1 ) {
+                iicon.classList.add('mdi', 'mdi-file-document');
             }
             else if (['bmp', 'gif', 'jpg', 'jpeg', 'png', 'tif', 'webp'].indexOf(extension.toLocaleLowerCase()) > -1 ) {
-                iicon.innerHTML = 'image';
+                iicon.classList.add('mdi', 'mdi-file-image');
             }
             else if (['mp3', 'ogg', 'wav'].indexOf(extension) > -1 ) {
-                iicon.innerHTML = 'audiotrack';
+                iicon.classList.add('mdi', 'mdi-file-music');
             }
             else if (['avi', 'flv', 'mkv', 'mp4', 'mpg', 'mpeg', 'webm'].indexOf(extension.toLocaleLowerCase()) > -1 ) {
-                iicon.innerHTML = 'video_label';
+                iicon.classList.add('mdi', 'mdi-file-video');
+            }
+            else if (['pdf'].indexOf(extension.toLocaleLowerCase()) > -1 ) {
+                iicon.classList.add('mdi', 'mdi-file-pdf');
             }
             else {
-                iicon.innerHTML = 'insert_drive_file';
+                iicon.classList.add('mdi', 'mdi-file');
             }
             item.setAttribute("onclick", "loadfile('" + encodeURI(itemdata.fullpath) + "')");
             stats.innerHTML = "Mod.: " + date.toUTCString() + "&nbsp;&nbsp;Size: " + (itemdata.size/1024).toFixed(1) + " KiB";
