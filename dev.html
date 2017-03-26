@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0" />
     <title>HASS Configurator</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/MaterialDesign-Webfont/1.8.36/css/materialdesignicons.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/css/materialize.min.css">
     <style type="text/css" media="screen">
         body {
@@ -565,7 +566,7 @@
     </div>
     <div id="modal_acekeyboard" class="modal bottom-sheet modal-fixed-footer">
         <div class="modal-content centered">
-        <h4>Ace Keyboard Shortcuts</h4>
+        <h4 class="grey-text text-darken-3">Ace Keyboard Shortcuts<i class="mdi mdi-keyboard right grey-text text-darken-3" style="font-size: 2rem;"></i></h4>
         <br>
         <ul class="collapsible popout" data-collapsible="expandable">
           <li>
@@ -1073,7 +1074,7 @@
     </div>
     <div id="modal_save" class="modal">
         <div class="modal-content">
-            <h4>Save</h4>
+            <h4 class="grey-text text-darken-3">Save<i class="grey-text text-darken-3 material-icons right" style="font-size: 2rem;">save</i></h4>
             <p>Do you really want to save?</p>
         </div>
         <div class="modal-footer">
@@ -1083,7 +1084,7 @@
     </div>
     <div id="modal_upload" class="modal">
         <div class="modal-content">
-            <h4>Upload File</h4>
+            <h4 class="grey-text text-darken-3">Upload File<i class="grey-text text-darken-3 material-icons right" style="font-size: 2.28rem;">file_upload</i></h4>
             <p>Please choose a file to upload</p>
             <form action="#" id="uploadform">
               <div class="file-field input-field">
@@ -1104,14 +1105,7 @@
     </div>
     <div id="modal_init" class="modal">
         <div class="modal-content">
-            <div class="row no-padding">
-              <div class="col s11 no-padding">
-                <h4>git init</h4>
-              </div>
-              <div class="col s1">
-                <img src="https://drive.google.com/uc?export=view&id=0B6wTGzSOtvNBakk4ek1uRGxqYVE" style="max-width: 40px;" >
-              </div>
-            </div>
+          <h4 class="grey-text text-darken-3">git init<i class="mdi mdi-git right grey-text text-darken-3" style="font-size: 2.48rem;"></i></h4>
           <p>Are you sure you want to initialize a repository at the current path?</p>
         </div>
         <div class="modal-footer">
@@ -1121,14 +1115,7 @@
     </div>
     <div id="modal_commit" class="modal">
         <div class="modal-content">
-          <div class="row no-padding">
-            <div class="col s11 no-padding">
-              <h4>git commit</h4>
-            </div>
-            <div class="col s1">
-              <img src="https://drive.google.com/uc?export=view&id=0B6wTGzSOtvNBakk4ek1uRGxqYVE" style="max-width: 40px;" >
-            </div>
-          </div>
+          <h4 class="grey-text text-darken-3">git commit<i class="mdi mdi-git right grey-text text-darken-3" style="font-size: 2.48rem;"></i></h4>
           <div class="row">
             <div class="input-field col s12">
               <input type="text" id="commitmessage">
@@ -1143,7 +1130,7 @@
     </div>
     <div id="modal_close" class="modal">
         <div class="modal-content">
-            <h4>Close File</h4>
+            <h4 class="grey-text text-darken-3">Close File<i class="grey-text text-darken-3 material-icons right" style="font-size: 2.28rem;">close</i></h4>
             <p>Are you sure you want to close the current file? Unsaved changes will be lost.</p>
         </div>
         <div class="modal-footer">
@@ -1153,7 +1140,7 @@
     </div>
     <div id="modal_delete" class="modal">
         <div class="modal-content">
-            <h4>Delete</h4>
+            <h4 class="grey-text text-darken-3">Delete</h4>
             <p>Are you sure you want to delete <span class="fb_currentfile"></span>?</p>
         </div>
         <div class="modal-footer">
@@ -1163,14 +1150,7 @@
     </div>
     <div id="modal_gitadd" class="modal">
         <div class="modal-content">
-          <div class="row no-padding">
-            <div class="col s11 no-padding">
-              <h4>git add</h4>
-            </div>
-            <div class="col s1">
-              <img src="https://drive.google.com/uc?export=view&id=0B6wTGzSOtvNBakk4ek1uRGxqYVE" style="max-width: 40px;" >
-            </div>
-          </div>
+          <h4 class="grey-text text-darken-3">git add<i class="mdi mdi-git right grey-text text-darken-3" style="font-size: 2.48rem;"></i></h4>
           <p>Are you sure you want to add <span class="fb_currentfile"></span> to the index?</p>
         </div>
         <div class="modal-footer">
@@ -1180,8 +1160,8 @@
     </div>
     <div id="modal_check_config" class="modal">
         <div class="modal-content">
-            <h4>Check configuration</h4>
-            <p>Do you really want to check the configuration?</p>
+            <h4 class="grey-text text-darken-3">Check configuration<i class="mdi mdi-settings right grey-text text-darken-3" style="font-size: 2rem;"></i></h4>
+            <p>Do you want to check the configuration?</p>
         </div>
         <div class="modal-footer">
           <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">No</a>
@@ -1190,7 +1170,7 @@
     </div>
     <div id="modal_restart" class="modal">
         <div class="modal-content">
-            <h4>Restart</h4>
+            <h4 class="grey-text text-darken-3">Restart<i class="mdi mdi-restart right grey-text text-darken-3" style="font-size: 2rem;"></i></h4>
             <p>Do you really want to restart Home Assistant?</p>
         </div>
         <div class="modal-footer">
@@ -1200,7 +1180,7 @@
     </div>
     <div id="modal_exec_command" class="modal">
         <div class="modal-content">
-            <h4>Execute shell command</h4>
+            <h4 class="grey-text text-darken-3">Execute shell command<i class="mdi mdi-laptop right grey-text text-darken-3" style="font-size: 2rem;"></i></h4>
             <pre class="col s6" id="command_history"></pre>
             <br>
             <div class="row">
@@ -1218,7 +1198,7 @@
     </div>
     <div id="modal_markdirty" class="modal">
         <div class="modal-content">
-            <h4>Unsaved Changes</h4>
+            <h4 class="grey-text text-darken-3">Unsaved Changes<i class="grey-text text-darken-3 material-icons right" style="font-size: 2rem;">save</i></h4>
             <p>You have unsaved changes in the current file. Please save the changes or close the file before opening a new one.</p>
         </div>
         <div class="modal-footer">
@@ -1229,7 +1209,7 @@
     </div>
     <div id="modal_newfolder" class="modal">
         <div class="modal-content">
-            <h4>New Folder</h4>
+            <h4 class="grey-text text-darken-3">New Folder<i class="grey-text text-darken-3 material-icons right" style="font-size: 2rem;">create_new_folder</i></h4>
             <br>
             <div class="row">
                 <div class="input-field col s12">
@@ -1245,7 +1225,7 @@
     </div>
     <div id="modal_newfile" class="modal">
         <div class="modal-content">
-            <h4>New File</h4>
+            <h4 class="grey-text text-darken-3">New File<i class="grey-text text-darken-3 material-icons right" style="font-size: 2rem;">note_add</i></h4>
             <br>
             <div class="row">
                 <div class="input-field col s12">
@@ -1261,14 +1241,7 @@
     </div>
     <div id="modal_newbranch" class="modal">
         <div class="modal-content">
-          <div class="row no-padding">
-            <div class="col s11 no-padding">
-              <h4>New Branch</h4>
-            </div>
-            <div class="col s1">
-              <img src="https://drive.google.com/uc?export=view&id=0B6wTGzSOtvNBakk4ek1uRGxqYVE" style="max-width: 40px;" >
-            </div>
-          </div>
+            <h4 class="grey-text text-darken-3">New Branch<i class="mdi mdi-git right grey-text text-darken-3" style="font-size: 2.48rem;"></i></h4>
             <div class="row">
                 <div class="input-field col s12">
                     <input type="text" id="newbranch">
@@ -1283,7 +1256,7 @@
     </div>
     <div id="modal_about" class="modal modal-fixed-footer">
         <div class="modal-content">
-            <h4><a class="black-text" href="https://github.com/danielperna84/hass-poc-configurator/" target="_blank">HASS Configurator</a></h4>
+            <h4 class="grey-text text-darken-3"><a class="black-text" href="https://github.com/danielperna84/hass-poc-configurator/" target="_blank">HASS Configurator</a></h4>
             <p>Version: <a class="$versionclass" href="https://github.com/danielperna84/hass-poc-configurator/releases/lafbicon_pad" target="_blank">$current</a></p>
             <p>Web-based file editor designed to modify configuration files of <a class="light-blue-text" href="https://home-assistant.io/" target="_blank">Home Assistant</a> or other textual files. Use at your own risk.</p>
             <p>Published under the MIT license</p>
