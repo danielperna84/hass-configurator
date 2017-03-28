@@ -1,3 +1,9 @@
+Version 0.1.6 (2017-03-28)
+- Executing commands on remote machine now possbile (Issue #30)
+- Using icons from https://materialdesignicons.com
+- Icon browser added
+- UI improvements
+
 Version 0.1.5 (2017-02-28)
 - UI improvements
 - Added git init
