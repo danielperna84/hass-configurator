@@ -46,7 +46,7 @@ GIT = False
 ### End of options
 
 RELEASEURL = "https://api.github.com/repos/danielperna84/hass-poc-configurator/releases/latest"
-VERSION = "0.1.5"
+VERSION = "0.1.6"
 BASEDIR = "."
 DEV = False
 HTTPD = None
@@ -64,6 +64,7 @@ INDEX = Template(r"""<!DOCTYPE html>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0" />
     <title>HASS Configurator</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/MaterialDesign-Webfont/1.8.36/css/materialdesignicons.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/css/materialize.min.css">
     <style type="text/css" media="screen">
         body {
@@ -452,7 +453,7 @@ INDEX = Template(r"""<!DOCTYPE html>
 
         .fbmenuicon_pad {
             min-height: 64px;
-            margin-top: 8px !important;
+            margin-top: 6px !important;
             margin-right: 18px !important;
             color: #616161 !important;
         }
@@ -624,7 +625,7 @@ INDEX = Template(r"""<!DOCTYPE html>
     </div>
     <div id="modal_acekeyboard" class="modal bottom-sheet modal-fixed-footer">
         <div class="modal-content centered">
-        <h4>Ace Keyboard Shortcuts</h4>
+        <h4 class="grey-text text-darken-3">Ace Keyboard Shortcuts<i class="mdi mdi-keyboard right grey-text text-darken-3" style="font-size: 2rem;"></i></h4>
         <br>
         <ul class="collapsible popout" data-collapsible="expandable">
           <li>
@@ -1132,7 +1133,7 @@ INDEX = Template(r"""<!DOCTYPE html>
     </div>
     <div id="modal_save" class="modal">
         <div class="modal-content">
-            <h4>Save</h4>
+            <h4 class="grey-text text-darken-3">Save<i class="grey-text text-darken-3 material-icons right" style="font-size: 2rem;">save</i></h4>
             <p>Do you really want to save?</p>
         </div>
         <div class="modal-footer">
@@ -1142,7 +1143,7 @@ INDEX = Template(r"""<!DOCTYPE html>
     </div>
     <div id="modal_upload" class="modal">
         <div class="modal-content">
-            <h4>Upload File</h4>
+            <h4 class="grey-text text-darken-3">Upload File<i class="grey-text text-darken-3 material-icons right" style="font-size: 2.28rem;">file_upload</i></h4>
             <p>Please choose a file to upload</p>
             <form action="#" id="uploadform">
               <div class="file-field input-field">
@@ -1163,14 +1164,7 @@ INDEX = Template(r"""<!DOCTYPE html>
     </div>
     <div id="modal_init" class="modal">
         <div class="modal-content">
-            <div class="row no-padding">
-              <div class="col s11 no-padding">
-                <h4>git init</h4>
-              </div>
-              <div class="col s1">
-                <img src="https://drive.google.com/uc?export=view&id=0B6wTGzSOtvNBakk4ek1uRGxqYVE" style="max-width: 40px;" >
-              </div>
-            </div>
+          <h4 class="grey-text text-darken-3">git init<i class="mdi mdi-git right grey-text text-darken-3" style="font-size: 2.48rem;"></i></h4>
           <p>Are you sure you want to initialize a repository at the current path?</p>
         </div>
         <div class="modal-footer">
@@ -1180,14 +1174,7 @@ INDEX = Template(r"""<!DOCTYPE html>
     </div>
     <div id="modal_commit" class="modal">
         <div class="modal-content">
-          <div class="row no-padding">
-            <div class="col s11 no-padding">
-              <h4>git commit</h4>
-            </div>
-            <div class="col s1">
-              <img src="https://drive.google.com/uc?export=view&id=0B6wTGzSOtvNBakk4ek1uRGxqYVE" style="max-width: 40px;" >
-            </div>
-          </div>
+          <h4 class="grey-text text-darken-3">git commit<i class="mdi mdi-git right grey-text text-darken-3" style="font-size: 2.48rem;"></i></h4>
           <div class="row">
             <div class="input-field col s12">
               <input type="text" id="commitmessage">
@@ -1202,7 +1189,7 @@ INDEX = Template(r"""<!DOCTYPE html>
     </div>
     <div id="modal_close" class="modal">
         <div class="modal-content">
-            <h4>Close File</h4>
+            <h4 class="grey-text text-darken-3">Close File<i class="grey-text text-darken-3 material-icons right" style="font-size: 2.28rem;">close</i></h4>
             <p>Are you sure you want to close the current file? Unsaved changes will be lost.</p>
         </div>
         <div class="modal-footer">
@@ -1212,7 +1199,7 @@ INDEX = Template(r"""<!DOCTYPE html>
     </div>
     <div id="modal_delete" class="modal">
         <div class="modal-content">
-            <h4>Delete</h4>
+            <h4 class="grey-text text-darken-3">Delete</h4>
             <p>Are you sure you want to delete <span class="fb_currentfile"></span>?</p>
         </div>
         <div class="modal-footer">
@@ -1222,14 +1209,7 @@ INDEX = Template(r"""<!DOCTYPE html>
     </div>
     <div id="modal_gitadd" class="modal">
         <div class="modal-content">
-          <div class="row no-padding">
-            <div class="col s11 no-padding">
-              <h4>git add</h4>
-            </div>
-            <div class="col s1">
-              <img src="https://drive.google.com/uc?export=view&id=0B6wTGzSOtvNBakk4ek1uRGxqYVE" style="max-width: 40px;" >
-            </div>
-          </div>
+          <h4 class="grey-text text-darken-3">git add<i class="mdi mdi-git right grey-text text-darken-3" style="font-size: 2.48rem;"></i></h4>
           <p>Are you sure you want to add <span class="fb_currentfile"></span> to the index?</p>
         </div>
         <div class="modal-footer">
@@ -1239,8 +1219,8 @@ INDEX = Template(r"""<!DOCTYPE html>
     </div>
     <div id="modal_check_config" class="modal">
         <div class="modal-content">
-            <h4>Check configuration</h4>
-            <p>Do you really want to check the configuration?</p>
+            <h4 class="grey-text text-darken-3">Check configuration<i class="mdi mdi-settings right grey-text text-darken-3" style="font-size: 2rem;"></i></h4>
+            <p>Do you want to check the configuration?</p>
         </div>
         <div class="modal-footer">
           <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">No</a>
@@ -1249,7 +1229,7 @@ INDEX = Template(r"""<!DOCTYPE html>
     </div>
     <div id="modal_restart" class="modal">
         <div class="modal-content">
-            <h4>Restart</h4>
+            <h4 class="grey-text text-darken-3">Restart<i class="mdi mdi-restart right grey-text text-darken-3" style="font-size: 2rem;"></i></h4>
             <p>Do you really want to restart Home Assistant?</p>
         </div>
         <div class="modal-footer">
@@ -1259,7 +1239,7 @@ INDEX = Template(r"""<!DOCTYPE html>
     </div>
     <div id="modal_exec_command" class="modal">
         <div class="modal-content">
-            <h4>Execute shell command</h4>
+            <h4 class="grey-text text-darken-3">Execute shell command<i class="mdi mdi-laptop right grey-text text-darken-3" style="font-size: 2rem;"></i></h4>
             <pre class="col s6" id="command_history"></pre>
             <br>
             <div class="row">
@@ -1277,7 +1257,7 @@ INDEX = Template(r"""<!DOCTYPE html>
     </div>
     <div id="modal_markdirty" class="modal">
         <div class="modal-content">
-            <h4>Unsaved Changes</h4>
+            <h4 class="grey-text text-darken-3">Unsaved Changes<i class="grey-text text-darken-3 material-icons right" style="font-size: 2rem;">save</i></h4>
             <p>You have unsaved changes in the current file. Please save the changes or close the file before opening a new one.</p>
         </div>
         <div class="modal-footer">
@@ -1288,7 +1268,7 @@ INDEX = Template(r"""<!DOCTYPE html>
     </div>
     <div id="modal_newfolder" class="modal">
         <div class="modal-content">
-            <h4>New Folder</h4>
+            <h4 class="grey-text text-darken-3">New Folder<i class="grey-text text-darken-3 material-icons right" style="font-size: 2rem;">create_new_folder</i></h4>
             <br>
             <div class="row">
                 <div class="input-field col s12">
@@ -1304,7 +1284,7 @@ INDEX = Template(r"""<!DOCTYPE html>
     </div>
     <div id="modal_newfile" class="modal">
         <div class="modal-content">
-            <h4>New File</h4>
+            <h4 class="grey-text text-darken-3">New File<i class="grey-text text-darken-3 material-icons right" style="font-size: 2rem;">note_add</i></h4>
             <br>
             <div class="row">
                 <div class="input-field col s12">
@@ -1320,14 +1300,7 @@ INDEX = Template(r"""<!DOCTYPE html>
     </div>
     <div id="modal_newbranch" class="modal">
         <div class="modal-content">
-          <div class="row no-padding">
-            <div class="col s11 no-padding">
-              <h4>New Branch</h4>
-            </div>
-            <div class="col s1">
-              <img src="https://drive.google.com/uc?export=view&id=0B6wTGzSOtvNBakk4ek1uRGxqYVE" style="max-width: 40px;" >
-            </div>
-          </div>
+            <h4 class="grey-text text-darken-3">New Branch<i class="mdi mdi-git right grey-text text-darken-3" style="font-size: 2.48rem;"></i></h4>
             <div class="row">
                 <div class="input-field col s12">
                     <input type="text" id="newbranch">
@@ -1342,7 +1315,7 @@ INDEX = Template(r"""<!DOCTYPE html>
     </div>
     <div id="modal_about" class="modal modal-fixed-footer">
         <div class="modal-content">
-            <h4><a class="black-text" href="https://github.com/danielperna84/hass-poc-configurator/" target="_blank">HASS Configurator</a></h4>
+            <h4 class="grey-text text-darken-3"><a class="black-text" href="https://github.com/danielperna84/hass-poc-configurator/" target="_blank">HASS Configurator</a></h4>
             <p>Version: <a class="$versionclass" href="https://github.com/danielperna84/hass-poc-configurator/releases/lafbicon_pad" target="_blank">$current</a></p>
             <p>Web-based file editor designed to modify configuration files of <a class="light-blue-text" href="https://home-assistant.io/" target="_blank">Home Assistant</a> or other textual files. Use at your own risk.</p>
             <p>Published under the MIT license</p>
@@ -1376,7 +1349,7 @@ INDEX = Template(r"""<!DOCTYPE html>
                       <img src="https://evwilkin.github.io/images/materializecss.png">
                     </div>
                     <div class="card-content">
-                      <p class="grey-text text-darken-2">Materialize CSS</p>
+                      <p class="grey-text text-darken-2">Materialize</p>
                     </div>
                   </div>
                 </a>
@@ -1481,13 +1454,13 @@ INDEX = Template(r"""<!DOCTYPE html>
               <a class="col s3 waves-effect fbtoolbarbutton tooltipped" href="#modal_newfile" data-position="bottom" data-delay="500" data-tooltip="New File"><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">note_add</i></a>
               <a class="col s3 waves-effect fbtoolbarbutton tooltipped" href="#modal_newfolder" data-position="bottom" data-delay="500" data-tooltip="New Folder"><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">create_new_folder</i></a>
               <a class="col s3 waves-effect fbtoolbarbutton tooltipped" href="#modal_upload" data-position="bottom" data-delay="500" data-tooltip="Upload File"><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">file_upload</i></a>
-              <a class="col s3 waves-effect fbtoolbarbutton tooltipped dropdown-button" data-activates="dropdown_gitmenu" data-alignment='right' data-beloworigin='true' data-delay='500' data-position="bottom" data-tooltip="Git"><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">call_split</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton tooltipped dropdown-button" data-activates="dropdown_gitmenu" data-alignment='right' data-beloworigin='true' data-delay='500' data-position="bottom" data-tooltip="Git"><i class="mdi mdi-git grey-text text-darken-2 material-icons" style="padding-top: 17px;"></i></a>
             </ul>
             <ul class="row center toolbar_mobile hide-on-med-and-up grey lighten-4" style="margin-bottom: 0;">
               <a class="col s3 waves-effect fbtoolbarbutton" href="#modal_newfile"><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">note_add</i></a>
               <a class="col s3 waves-effect fbtoolbarbutton" href="#modal_newfolder"><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">create_new_folder</i></a>
               <a class="col s3 waves-effect fbtoolbarbutton" href="#modal_upload"><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">file_upload</i></a>
-              <a class="col s3 waves-effect fbtoolbarbutton dropdown-button" data-activates="dropdown_gitmenu_mobile" data-alignment='right' data-beloworigin='true'><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">call_split</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton dropdown-button" data-activates="dropdown_gitmenu_mobile" data-alignment='right' data-beloworigin='true'><i class="mdi mdi-git grey-text text-darken-2 material-icons" style="padding-top: 17px;"></i></a>
             </ul>
           </li>
           <li>
@@ -2029,19 +2002,25 @@ INDEX = Template(r"""<!DOCTYPE html>
             nameparts = itemdata.name.split('.');
             extension = nameparts[nameparts.length -1];
             if (['c', 'cpp', 'css', 'htm', 'html', 'js', 'json', 'php', 'py', 'sh', 'sql', 'xml', 'yaml'].indexOf(extension.toLocaleLowerCase()) > +1 ) {
-                iicon.innerHTML = 'code';
+                iicon.classList.add('mdi', 'mdi-file-xml');
+            }
+            else if (['txt', 'doc', 'docx'].indexOf(extension.toLocaleLowerCase()) > -1 ) {
+                iicon.classList.add('mdi', 'mdi-file-document');
             }
             else if (['bmp', 'gif', 'jpg', 'jpeg', 'png', 'tif', 'webp'].indexOf(extension.toLocaleLowerCase()) > -1 ) {
-                iicon.innerHTML = 'image';
+                iicon.classList.add('mdi', 'mdi-file-image');
             }
             else if (['mp3', 'ogg', 'wav'].indexOf(extension) > -1 ) {
-                iicon.innerHTML = 'audiotrack';
+                iicon.classList.add('mdi', 'mdi-file-music');
             }
             else if (['avi', 'flv', 'mkv', 'mp4', 'mpg', 'mpeg', 'webm'].indexOf(extension.toLocaleLowerCase()) > -1 ) {
-                iicon.innerHTML = 'video_label';
+                iicon.classList.add('mdi', 'mdi-file-video');
+            }
+            else if (['pdf'].indexOf(extension.toLocaleLowerCase()) > -1 ) {
+                iicon.classList.add('mdi', 'mdi-file-pdf');
             }
             else {
-                iicon.innerHTML = 'insert_drive_file';
+                iicon.classList.add('mdi', 'mdi-file');
             }
             item.setAttribute("onclick", "loadfile('" + encodeURI(itemdata.fullpath) + "')");
             stats.innerHTML = "Mod.: " + date.toUTCString() + "&nbsp;&nbsp;Size: " + (itemdata.size/1024).toFixed(1) + " KiB";
@@ -2613,8 +2592,7 @@ INDEX = Template(r"""<!DOCTYPE html>
 
 </script>
 </body>
-</html>
-""")
+</html>""")
 
 def signal_handler(sig, frame):
     global HTTPD
