@@ -1,4 +1,4 @@
-Version 0.1.6 (2017-03-nn)
+Version 0.1.6 (2017-03-28)
 - Executing commands on remote machine now possbile (Issue #30)
 - Using icons from https://materialdesignicons.com
 - Icon browser added
