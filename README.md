@@ -13,7 +13,8 @@ Thanks to the help of [JT Martinez](https://github.com/jmart518) this tool now p
 - Restart HASS directly with the click of a button (API-password required)
 - SSL support
 - Optional authentication and IP filtering for added security
-- Direct links to HASS documentation
+- Direct links to HASS documentation and icons
+- Execute shell commands
 - Modified editor settings can be saved using [localStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage)
 
 ####Screenshot of the configurator embedded into HASS:
