@@ -581,6 +581,8 @@ INDEX = Template(r"""<!DOCTYPE html>
         <li><a href="#modal_about">About HASS-Configurator</a></li>
         <li class="divider"></li>
         <li><a href="#modal_check_config">Check HASS Configuration</a></li>
+        <li><a href="#modal_reload_automations">Reload automations</a></li>
+        <li><a href="#modal_reload_groups">Reload groups</a></li>
         <li><a href="#modal_restart">Restart HASS</a></li>
         <li class="divider"></li>
         <li><a href="#modal_exec_command">Execute shell command</a></li>
@@ -593,6 +595,8 @@ INDEX = Template(r"""<!DOCTYPE html>
         <li><a href="#modal_about">About HASS-Configurator</a></li>
         <li class="divider"></li>
         <li><a href="#modal_check_config">Check HASS Configuration</a></li>
+        <li><a href="#modal_reload_automations">Reload automations</a></li>
+        <li><a href="#modal_reload_groups">Reload groups</a></li>
         <li><a href="#modal_restart">Restart HASS</a></li>
         <li class="divider"></li>
         <li><a href="#modal_exec_command">Execute shell command</a></li>
@@ -1225,6 +1229,26 @@ INDEX = Template(r"""<!DOCTYPE html>
         <div class="modal-footer">
           <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">No</a>
           <a onclick="check_config()" class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Yes</a>
+        </div>
+    </div>
+    <div id="modal_reload_automations" class="modal">
+        <div class="modal-content">
+            <h4 class="grey-text text-darken-3">Reload automations<i class="mdi mdi-settings right grey-text text-darken-3" style="font-size: 2rem;"></i></h4>
+            <p>Do you want to reload the automations?</p>
+        </div>
+        <div class="modal-footer">
+          <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">No</a>
+          <a onclick="reload_automations()" class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Yes</a>
+        </div>
+    </div>
+    <div id="modal_reload_groups" class="modal">
+        <div class="modal-content">
+            <h4 class="grey-text text-darken-3">Reload groups<i class="mdi mdi-settings right grey-text text-darken-3" style="font-size: 2rem;"></i></h4>
+            <p>Do you want to reload the groups?</p>
+        </div>
+        <div class="modal-footer">
+          <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">No</a>
+          <a onclick="reload_groups()" class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Yes</a>
         </div>
     </div>
     <div id="modal_restart" class="modal">
@@ -2210,6 +2234,32 @@ INDEX = Template(r"""<!DOCTYPE html>
         });
     }
 
+    function reload_automations() {
+        $.get("api/reload_automations", function (resp) {
+            if (resp.length == 0) {
+                var $toastContent = $("<div><pre>Automations reloaded.</pre></div>");
+                Materialize.toast($toastContent, 2000);
+            }
+            else {
+                var $toastContent = $("<div><pre>" + resp[0].state + "</pre></div>");
+                Materialize.toast($toastContent, 5000);
+            }
+        });
+    }
+
+    function reload_groups() {
+        $.get("api/reload_groups", function (resp) {
+            if (resp.length == 0) {
+                var $toastContent = $("<div><pre>Groups reloaded.</pre></div>");
+                Materialize.toast($toastContent, 2000);
+            }
+            else {
+                var $toastContent = $("<div><pre>" + resp[0].state + "</pre></div>");
+                Materialize.toast($toastContent, 5000);
+            }
+        });
+    }
+
     function restart() {
         $.get("api/restart", function (resp) {
             if (resp.length == 0) {
@@ -2843,6 +2893,46 @@ class RequestHandler(BaseHTTPRequestHandler):
                 if HASS_API_PASSWORD:
                     headers["x-ha-access"] = HASS_API_PASSWORD
                 req = urllib.request.Request("%sservices/homeassistant/check_config" % HASS_API, headers=headers, method='POST')
+                with urllib.request.urlopen(req) as response:
+                    res = json.loads(response.read().decode('utf-8'))
+                    print(res)
+            except Exception as err:
+                print(err)
+                res['restart'] = str(err)
+            self.wfile.write(bytes(json.dumps(res), "utf8"))
+            return
+        elif req.path == '/api/reload_automations':
+            print("/api/reload_automations")
+            self.send_header('Content-type', 'text/json')
+            self.end_headers()
+            res = {"reload_automations": False}
+            try:
+                headers = {
+                    "Content-Type": "application/json"
+                }
+                if HASS_API_PASSWORD:
+                    headers["x-ha-access"] = HASS_API_PASSWORD
+                req = urllib.request.Request("%sservices/automation/reload" % HASS_API, headers=headers, method='POST')
+                with urllib.request.urlopen(req) as response:
+                    res = json.loads(response.read().decode('utf-8'))
+                    print(res)
+            except Exception as err:
+                print(err)
+                res['restart'] = str(err)
+            self.wfile.write(bytes(json.dumps(res), "utf8"))
+            return
+        elif req.path == '/api/reload_groups':
+            print("/api/reload_groups")
+            self.send_header('Content-type', 'text/json')
+            self.end_headers()
+            res = {"reload_groups": False}
+            try:
+                headers = {
+                    "Content-Type": "application/json"
+                }
+                if HASS_API_PASSWORD:
+                    headers["x-ha-access"] = HASS_API_PASSWORD
+                req = urllib.request.Request("%sservices/group/reload" % HASS_API, headers=headers, method='POST')
                 with urllib.request.urlopen(req) as response:
                     res = json.loads(response.read().decode('utf-8'))
                     print(res)
