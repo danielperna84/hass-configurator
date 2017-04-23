@@ -1,5 +1,8 @@
 Version 0.1.7 (2017-04-nn)
 - Fixed incorrect numeric state option
+- Removed check config option (HASS has changed, not useful anymore)
+- Added reload for groups and automations
+- Proper logging on the server side (useful for supervisor usage)
 
 Version 0.1.6 (2017-03-28)
 - Executing commands on remote machine now possbile (Issue #30)
