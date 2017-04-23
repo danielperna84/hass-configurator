@@ -521,7 +521,7 @@
         <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
         <li><a href="#modal_about">About HASS-Configurator</a></li>
         <li class="divider"></li>
-        <li><a href="#modal_check_config">Check HASS Configuration</a></li>
+        <!--<li><a href="#modal_check_config">Check HASS Configuration</a></li>-->
         <li><a href="#modal_reload_automations">Reload automations</a></li>
         <li><a href="#modal_reload_groups">Reload groups</a></li>
         <li><a href="#modal_restart">Restart HASS</a></li>
@@ -535,7 +535,7 @@
         <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
         <li><a href="#modal_about">About HASS-Configurator</a></li>
         <li class="divider"></li>
-        <li><a href="#modal_check_config">Check HASS Configuration</a></li>
+        <!--<li><a href="#modal_check_config">Check HASS Configuration</a></li>-->
         <li><a href="#modal_reload_automations">Reload automations</a></li>
         <li><a href="#modal_reload_groups">Reload groups</a></li>
         <li><a href="#modal_restart">Restart HASS</a></li>
@@ -2170,34 +2170,22 @@
             }
             else {
                 var $toastContent = $("<div><pre>" + resp[0].state + "</pre></div>");
-                Materialize.toast($toastContent, 5000);
+                Materialize.toast($toastContent, 2000);
             }
         });
     }
 
     function reload_automations() {
         $.get("api/reload_automations", function (resp) {
-            if (resp.length == 0) {
-                var $toastContent = $("<div><pre>Automations reloaded.</pre></div>");
-                Materialize.toast($toastContent, 2000);
-            }
-            else {
-                var $toastContent = $("<div><pre>" + resp[0].state + "</pre></div>");
-                Materialize.toast($toastContent, 5000);
-            }
+            var $toastContent = $("<div>Automations reloaded</div>");
+            Materialize.toast($toastContent, 2000);
         });
     }
 
     function reload_groups() {
         $.get("api/reload_groups", function (resp) {
-            if (resp.length == 0) {
-                var $toastContent = $("<div><pre>Groups reloaded.</pre></div>");
-                Materialize.toast($toastContent, 2000);
-            }
-            else {
-                var $toastContent = $("<div><pre>" + resp[0].state + "</pre></div>");
-                Materialize.toast($toastContent, 5000);
-            }
+            var $toastContent = $("<div><pre>Groups reloaded</pre></div>");
+            Materialize.toast($toastContent, 2000);
         });
     }
 
