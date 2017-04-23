@@ -2237,34 +2237,22 @@ INDEX = Template(r"""<!DOCTYPE html>
             }
             else {
                 var $toastContent = $("<div><pre>" + resp[0].state + "</pre></div>");
-                Materialize.toast($toastContent, 5000);
+                Materialize.toast($toastContent, 2000);
             }
         });
     }
 
     function reload_automations() {
         $.get("api/reload_automations", function (resp) {
-            if (resp.length == 0) {
-                var $toastContent = $("<div><pre>Automations reloaded.</pre></div>");
-                Materialize.toast($toastContent, 2000);
-            }
-            else {
-                var $toastContent = $("<div><pre>" + resp[0].state + "</pre></div>");
-                Materialize.toast($toastContent, 5000);
-            }
+            var $toastContent = $("<div>Automations reloaded</div>");
+            Materialize.toast($toastContent, 2000);
         });
     }
 
     function reload_groups() {
         $.get("api/reload_groups", function (resp) {
-            if (resp.length == 0) {
-                var $toastContent = $("<div><pre>Groups reloaded.</pre></div>");
-                Materialize.toast($toastContent, 2000);
-            }
-            else {
-                var $toastContent = $("<div><pre>" + resp[0].state + "</pre></div>");
-                Materialize.toast($toastContent, 5000);
-            }
+            var $toastContent = $("<div><pre>Groups reloaded</pre></div>");
+            Materialize.toast($toastContent, 2000);
         });
     }
 
