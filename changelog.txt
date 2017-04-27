@@ -1,4 +1,4 @@
-Version 0.1.7 (2017-04-nn)
+Version 0.1.7 (2017-04-27)
 - Fixed incorrect numeric state option
 - Removed check config option (HASS has changed, not useful anymore)
 - Added reload for groups, core and automations
