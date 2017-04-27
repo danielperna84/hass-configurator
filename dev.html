@@ -6,7 +6,7 @@
     <title>HASS Configurator</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/MaterialDesign-Webfont/1.8.36/css/materialdesignicons.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/css/materialize.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/css/materialize.min.css">
     <style type="text/css" media="screen">
         body {
             margin: 0;
@@ -204,6 +204,10 @@
         .dropdown-content li>a,
         .dropdown-content li>span {
             color: #616161 !important;
+        }
+
+        .fb_dd {
+            margin-left: -15px !important;
         }
 
         .blue_check:checked+label:before {
@@ -1816,7 +1820,7 @@
 <input type="hidden" id="fb_currentfile" value="" />
 <!-- Scripts -->
 <script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/js/materialize.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/js/materialize.min.js"></script>
 <script type="text/javascript">
     $(document).ready(function () {
         $('select').material_select();
@@ -2030,12 +2034,12 @@
         var dropdown = document.createElement('ul');
         dropdown.id = 'fb_dropdown_' + index;
         dropdown.classList.add('dropdown-content');
-        dropdown.classList.add('z-depth-4');
+        dropdown.classList.add("z-depth-4");
 
         // Download button
         var dd_download = document.createElement('li');
         var dd_download_a = document.createElement('a');
-        dd_download_a.classList.add('waves-effect');
+        dd_download_a.classList.add("waves-effect", "fb_dd");
         dd_download_a.setAttribute('onclick', "download_file('" + encodeURI(itemdata.fullpath) + "')");
         dd_download_a.innerHTML = "Download";
         dd_download.appendChild(dd_download_a);
@@ -2043,7 +2047,7 @@
 
         // Delete button
         var dd_delete = document.createElement('li');
-        dd_delete.classList.add("waves-effect");
+        dd_delete.classList.add("waves-effect", "fb_dd");
         var dd_delete_a = document.createElement('a');
         dd_delete_a.setAttribute('href', "#modal_delete");
         dd_delete_a.innerHTML = "Delete";
