@@ -3,6 +3,7 @@ Version 0.1.7 (2017-04-27)
 - Removed check config option (HASS has changed, not useful anymore)
 - Added reload for groups, core and automations
 - Proper logging on the server side (useful for supervisor usage)
+- Update Materialize + UI fixes
 
 Version 0.1.6 (2017-03-28)
 - Executing commands on remote machine now possbile (Issue #30)
