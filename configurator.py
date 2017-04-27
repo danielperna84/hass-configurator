@@ -15,6 +15,7 @@ import signal
 import cgi
 import shlex
 import subprocess
+import logging
 from string import Template
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import urllib.request
@@ -45,8 +46,15 @@ BANLIMIT = 0
 GIT = False
 ### End of options
 
-RELEASEURL = "https://api.github.com/repos/danielperna84/hass-poc-configurator/releases/latest"
-VERSION = "0.1.6"
+LOGLEVEL = logging.INFO
+LOG = logging.getLogger(__name__)
+LOG.setLevel(LOGLEVEL)
+SO = logging.StreamHandler(sys.stdout)
+SO.setLevel(LOGLEVEL)
+SO.setFormatter(logging.Formatter('%(levelname)s:%(asctime)s:%(name)s:%(message)s'))
+LOG.addHandler(SO)
+RELEASEURL = "https://api.github.com/repos/danielperna84/hass-configurator/releases/latest"
+VERSION = "0.1.7"
 BASEDIR = "."
 DEV = False
 HTTPD = None
@@ -56,7 +64,7 @@ if GIT:
     try:
         from git import Repo as REPO
     except Exception:
-        print("Unable to import Git module")
+        LOG.warn("Unable to import Git module")
 INDEX = Template(r"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -580,7 +588,10 @@ INDEX = Template(r"""<!DOCTYPE html>
         <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
         <li><a href="#modal_about">About HASS-Configurator</a></li>
         <li class="divider"></li>
-        <li><a href="#modal_check_config">Check HASS Configuration</a></li>
+        <!--<li><a href="#modal_check_config">Check HASS Configuration</a></li>-->
+        <li><a href="#modal_reload_automations">Reload automations</a></li>
+        <li><a href="#modal_reload_groups">Reload groups</a></li>
+        <li><a href="#modal_reload_core">Reload core</a></li>
         <li><a href="#modal_restart">Restart HASS</a></li>
         <li class="divider"></li>
         <li><a href="#modal_exec_command">Execute shell command</a></li>
@@ -592,7 +603,10 @@ INDEX = Template(r"""<!DOCTYPE html>
         <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
         <li><a href="#modal_about">About HASS-Configurator</a></li>
         <li class="divider"></li>
-        <li><a href="#modal_check_config">Check HASS Configuration</a></li>
+        <!--<li><a href="#modal_check_config">Check HASS Configuration</a></li>-->
+        <li><a href="#modal_reload_automations">Reload automations</a></li>
+        <li><a href="#modal_reload_groups">Reload groups</a></li>
+        <li><a href="#modal_reload_core">Reload core</a></li>
         <li><a href="#modal_restart">Restart HASS</a></li>
         <li class="divider"></li>
         <li><a href="#modal_exec_command">Execute shell command</a></li>
@@ -1227,6 +1241,36 @@ INDEX = Template(r"""<!DOCTYPE html>
           <a onclick="check_config()" class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Yes</a>
         </div>
     </div>
+    <div id="modal_reload_automations" class="modal">
+        <div class="modal-content">
+            <h4 class="grey-text text-darken-3">Reload automations<i class="mdi mdi-settings right grey-text text-darken-3" style="font-size: 2rem;"></i></h4>
+            <p>Do you want to reload the automations?</p>
+        </div>
+        <div class="modal-footer">
+          <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">No</a>
+          <a onclick="reload_automations()" class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Yes</a>
+        </div>
+    </div>
+    <div id="modal_reload_groups" class="modal">
+        <div class="modal-content">
+            <h4 class="grey-text text-darken-3">Reload groups<i class="mdi mdi-settings right grey-text text-darken-3" style="font-size: 2rem;"></i></h4>
+            <p>Do you want to reload the groups?</p>
+        </div>
+        <div class="modal-footer">
+          <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">No</a>
+          <a onclick="reload_groups()" class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Yes</a>
+        </div>
+    </div>
+    <div id="modal_reload_core" class="modal">
+        <div class="modal-content">
+            <h4 class="grey-text text-darken-3">Reload core<i class="mdi mdi-settings right grey-text text-darken-3" style="font-size: 2rem;"></i></h4>
+            <p>Do you want to reload the core?</p>
+        </div>
+        <div class="modal-footer">
+          <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">No</a>
+          <a onclick="reload_core()" class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Yes</a>
+        </div>
+    </div>
     <div id="modal_restart" class="modal">
         <div class="modal-content">
             <h4 class="grey-text text-darken-3">Restart<i class="mdi mdi-restart right grey-text text-darken-3" style="font-size: 2rem;"></i></h4>
@@ -1393,7 +1437,7 @@ INDEX = Template(r"""<!DOCTYPE html>
                     <option value="" disabled selected>Select trigger platform</option>
                     <option value="event">Event</option>
                     <option value="mqtt">MQTT</option>
-                    <option value="numberic_state">Numeric State</option>
+                    <option value="numeric_state">Numeric State</option>
                     <option value="state">State</option>
                     <option value="sun">Sun</option>
                     <option value="template">Template</option>
@@ -1491,7 +1535,7 @@ INDEX = Template(r"""<!DOCTYPE html>
                 <option value="" disabled selected>Select trigger platform</option>
                 <option value="event">Event</option>
                 <option value="mqtt">MQTT</option>
-                <option value="numberic_state">Numeric State</option>
+                <option value="numeric_state">Numeric State</option>
                 <option value="state">State</option>
                 <option value="sun">Sun</option>
                 <option value="template">Template</option>
@@ -2205,8 +2249,29 @@ INDEX = Template(r"""<!DOCTYPE html>
             }
             else {
                 var $toastContent = $("<div><pre>" + resp[0].state + "</pre></div>");
-                Materialize.toast($toastContent, 5000);
+                Materialize.toast($toastContent, 2000);
             }
+        });
+    }
+
+    function reload_automations() {
+        $.get("api/reload_automations", function (resp) {
+            var $toastContent = $("<div>Automations reloaded</div>");
+            Materialize.toast($toastContent, 2000);
+        });
+    }
+
+    function reload_groups() {
+        $.get("api/reload_groups", function (resp) {
+            var $toastContent = $("<div><pre>Groups reloaded</pre></div>");
+            Materialize.toast($toastContent, 2000);
+        });
+    }
+
+    function reload_core() {
+        $.get("api/reload_core", function (resp) {
+            var $toastContent = $("<div><pre>Core reloaded</pre></div>");
+            Materialize.toast($toastContent, 2000);
         });
     }
 
@@ -2596,7 +2661,7 @@ INDEX = Template(r"""<!DOCTYPE html>
 
 def signal_handler(sig, frame):
     global HTTPD
-    print("Got signal: %s. Shutting down server" % str(sig))
+    LOG.info("Got signal: %s. Shutting down server" % str(sig))
     HTTPD.server_close()
     sys.exit(0)
 
@@ -2620,8 +2685,8 @@ def load_settings(settingsfile):
                 BANLIMIT = settings.get("BANLIMIT", BANLIMIT)
                 DEV = settings.get("DEV", DEV)
     except Exception as err:
-        print(err)
-        print("Not loading static settings")
+        LOG.warn(err)
+        LOG.warn("Not loading static settings")
     return False
 
 def get_dircontent(path, repo=None):
@@ -2637,7 +2702,7 @@ def get_dircontent(path, repo=None):
             for element in repo.index.diff("HEAD"):
                 staged["%s%s%s" % (repo.working_dir, os.sep, "%s"%os.sep.join(element.b_path.split('/')))] = element.change_type
         except Exception as err:
-            print("Exception: %s" % str(err))
+            LOG.warn("Exception: %s" % str(err))
         for element in repo.index.diff(None):
             unstaged["%s%s%s" % (repo.working_dir, os.sep, "%s"%os.sep.join(element.b_path.split('/')))] = element.change_type
     else:
@@ -2679,8 +2744,8 @@ def get_html():
                 html = Template(fptr.read())
                 return html
         except Exception as err:
-            print(err)
-            print("Delivering embedded HTML")
+            LOG.warn(err)
+            LOG.warn("Delivering embedded HTML")
     return INDEX
 
 def check_access(clientip):
@@ -2697,6 +2762,10 @@ def check_access(clientip):
     return False
 
 class RequestHandler(BaseHTTPRequestHandler):
+    def log_message(self, format, *args):
+        LOG.info("%s - %s" % (self.client_address[0], format%args))
+        return
+
     def do_BLOCK(self):
         self.send_response(420)
         self.end_headers()
@@ -2723,7 +2792,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                     else:
                         content = "File not found"
             except Exception as err:
-                print(err)
+                LOG.warn(err)
                 content = str(err)
             self.wfile.write(bytes(content, "utf8"))
             return
@@ -2733,7 +2802,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             try:
                 if filename:
                     filename = unquote(filename[0]).encode('utf-8')
-                    print(filename)
+                    LOG.info(filename)
                     if os.path.isfile(os.path.join(BASEDIR.encode('utf-8'), filename)):
                         with open(os.path.join(BASEDIR.encode('utf-8'), filename), 'rb') as fptr:
                             filecontent = fptr.read()
@@ -2744,7 +2813,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                     else:
                         content = "File not found"
             except Exception as err:
-                print(err)
+                LOG.warn(err)
                 content = str(err)
             self.send_header('Content-type', 'text/text')
             self.wfile.write(bytes(content, "utf8"))
@@ -2770,7 +2839,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                                 for branch in repo.branches:
                                     branches.append(branch.name)
                             except Exception as err:
-                                print("Exception (no repo): %s" % str(err))
+                                LOG.debug("Exception (no repo): %s" % str(err))
                         dircontent = get_dircontent(dirpath.decode('utf-8'), repo)
                         filedata = {'content': dircontent,
                                     'abspath': os.path.abspath(dirpath).decode('utf-8'),
@@ -2781,7 +2850,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                                    }
                         self.wfile.write(bytes(json.dumps(filedata), "utf8"))
             except Exception as err:
-                print(err)
+                LOG.warn(err)
                 content = str(err)
                 self.wfile.write(bytes(content, "utf8"))
             return
@@ -2792,9 +2861,9 @@ class RequestHandler(BaseHTTPRequestHandler):
             dirpath = query.get('path', None)
             if dirpath:
                 dirpath = unquote(dirpath[0]).encode('utf-8')
-                print(dirpath)
+                LOG.debug(dirpath)
                 absp = os.path.abspath(dirpath)
-                print(absp)
+                LOG.debug(absp)
                 if os.path.isdir(dirpath):
                     self.wfile.write(os.path.abspath(dirpath))
             return
@@ -2805,14 +2874,14 @@ class RequestHandler(BaseHTTPRequestHandler):
             dirpath = query.get('path', None)
             if dirpath:
                 dirpath = unquote(dirpath[0]).encode('utf-8')
-                print(dirpath)
+                LOG.debug(dirpath)
                 absp = os.path.abspath(dirpath)
-                print(absp)
+                LOG.debug(absp)
                 if os.path.isdir(dirpath):
                     self.wfile.write(os.path.abspath(os.path.dirname(dirpath)))
             return
         elif req.path == '/api/restart':
-            print("/api/restart")
+            LOG.info("/api/restart")
             self.send_header('Content-type', 'text/json')
             self.end_headers()
             res = {"restart": False}
@@ -2825,14 +2894,14 @@ class RequestHandler(BaseHTTPRequestHandler):
                 req = urllib.request.Request("%sservices/homeassistant/restart" % HASS_API, headers=headers, method='POST')
                 with urllib.request.urlopen(req) as response:
                     res = json.loads(response.read().decode('utf-8'))
-                    print(res)
+                    LOG.debug(res)
             except Exception as err:
-                print(err)
+                LOG.warn(err)
                 res['restart'] = str(err)
             self.wfile.write(bytes(json.dumps(res), "utf8"))
             return
         elif req.path == '/api/check_config':
-            print("/api/check_config")
+            LOG.info("/api/check_config")
             self.send_header('Content-type', 'text/json')
             self.end_headers()
             res = {"check_config": False}
@@ -2843,11 +2912,71 @@ class RequestHandler(BaseHTTPRequestHandler):
                 if HASS_API_PASSWORD:
                     headers["x-ha-access"] = HASS_API_PASSWORD
                 req = urllib.request.Request("%sservices/homeassistant/check_config" % HASS_API, headers=headers, method='POST')
-                with urllib.request.urlopen(req) as response:
-                    res = json.loads(response.read().decode('utf-8'))
-                    print(res)
+                # with urllib.request.urlopen(req) as response:
+                #     print(json.loads(response.read().decode('utf-8')))
+                #     res['service'] = "called successfully"
             except Exception as err:
-                print(err)
+                LOG.warn(err)
+                res['restart'] = str(err)
+            self.wfile.write(bytes(json.dumps(res), "utf8"))
+            return
+        elif req.path == '/api/reload_automations':
+            LOG.info("/api/reload_automations")
+            self.send_header('Content-type', 'text/json')
+            self.end_headers()
+            res = {"reload_automations": False}
+            try:
+                headers = {
+                    "Content-Type": "application/json"
+                }
+                if HASS_API_PASSWORD:
+                    headers["x-ha-access"] = HASS_API_PASSWORD
+                req = urllib.request.Request("%sservices/automation/reload" % HASS_API, headers=headers, method='POST')
+                with urllib.request.urlopen(req) as response:
+                    LOG.debug(json.loads(response.read().decode('utf-8')))
+                    res['service'] = "called successfully"
+            except Exception as err:
+                LOG.warn(err)
+                res['restart'] = str(err)
+            self.wfile.write(bytes(json.dumps(res), "utf8"))
+            return
+        elif req.path == '/api/reload_groups':
+            LOG.info("/api/reload_groups")
+            self.send_header('Content-type', 'text/json')
+            self.end_headers()
+            res = {"reload_groups": False}
+            try:
+                headers = {
+                    "Content-Type": "application/json"
+                }
+                if HASS_API_PASSWORD:
+                    headers["x-ha-access"] = HASS_API_PASSWORD
+                req = urllib.request.Request("%sservices/group/reload" % HASS_API, headers=headers, method='POST')
+                with urllib.request.urlopen(req) as response:
+                    LOG.debug(json.loads(response.read().decode('utf-8')))
+                    res['service'] = "called successfully"
+            except Exception as err:
+                LOG.warn(err)
+                res['restart'] = str(err)
+            self.wfile.write(bytes(json.dumps(res), "utf8"))
+            return
+        elif req.path == '/api/reload_core':
+            LOG.info("/api/reload_core")
+            self.send_header('Content-type', 'text/json')
+            self.end_headers()
+            res = {"reload_core": False}
+            try:
+                headers = {
+                    "Content-Type": "application/json"
+                }
+                if HASS_API_PASSWORD:
+                    headers["x-ha-access"] = HASS_API_PASSWORD
+                req = urllib.request.Request("%sservices/homeassistant/reload_core_config" % HASS_API, headers=headers, method='POST')
+                with urllib.request.urlopen(req) as response:
+                    LOG.debug(json.loads(response.read().decode('utf-8')))
+                    res['service'] = "called successfully"
+            except Exception as err:
+                LOG.warn(err)
                 res['restart'] = str(err)
             self.wfile.write(bytes(json.dumps(res), "utf8"))
             return
@@ -2867,8 +2996,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                     boot = response.read().decode('utf-8')
 
             except Exception as err:
-                print("Exception getting bootstrap")
-                print(err)
+                LOG.warn("Exception getting bootstrap")
+                LOG.warn(err)
 
             color = "green"
             try:
@@ -2877,8 +3006,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                 if VERSION != latest:
                     color = "red"
             except Exception as err:
-                print("Exception getting release")
-                print(err)
+                LOG.warn("Exception getting release")
+                LOG.warn(err)
             html = get_html().safe_substitute(bootstrap=boot,
                                               current=VERSION,
                                               versionclass=color,
@@ -2906,7 +3035,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
             except Exception as err:
-                print(err)
+                LOG.warn(err)
                 response['message'] = "%s" % (str(err))
                 postvars = {}
             if 'filename' in postvars.keys() and 'text' in postvars.keys():
@@ -2925,7 +3054,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                         return
                     except Exception as err:
                         response['message'] = "%s" % (str(err))
-                        print(err)
+                        LOG.warn(err)
             else:
                 response['message'] = "Missing filename or text"
         elif req.path == '/api/upload':
@@ -2962,7 +3091,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
             except Exception as err:
-                print(err)
+                LOG.warn(err)
                 response['message'] = "%s" % (str(err))
                 postvars = {}
             if 'path' in postvars.keys():
@@ -2983,20 +3112,20 @@ class RequestHandler(BaseHTTPRequestHandler):
                             self.wfile.write(bytes(json.dumps(response), "utf8"))
                             return
                         except Exception as err:
-                            print(err)
+                            LOG.warn(err)
                             response['error'] = True
                             response['message'] = str(err)
 
                     except Exception as err:
                         response['message'] = "%s" % (str(err))
-                        print(err)
+                        LOG.warn(err)
             else:
                 response['message'] = "Missing filename or text"
         elif req.path == '/api/exec_command':
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
             except Exception as err:
-                print(err)
+                LOG.warn(err)
                 response['message'] = "%s" % (str(err))
                 postvars = {}
             if 'command' in postvars.keys():
@@ -3020,30 +3149,30 @@ class RequestHandler(BaseHTTPRequestHandler):
                             try:
                                 response['stdout'] = stdout.decode(sys.getdefaultencoding())
                             except Exception as err:
-                                print(err)
+                                LOG.warn(err)
                                 response['stdout'] = stdout.decode("utf-8", errors="replace")
                             try:
                                 response['stderr'] = stderr.decode(sys.getdefaultencoding())
                             except Exception as err:
-                                print(err)
+                                LOG.warn(err)
                                 response['stderr'] = stderr.decode("utf-8", errors="replace")
                             self.wfile.write(bytes(json.dumps(response), "utf8"))
                             return
                         except Exception as err:
-                            print(err)
+                            LOG.warn(err)
                             response['error'] = True
                             response['message'] = str(err)
 
                     except Exception as err:
                         response['message'] = "%s" % (str(err))
-                        print(err)
+                        LOG.warn(err)
             else:
                 response['message'] = "Missing command"
         elif req.path == '/api/gitadd':
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
             except Exception as err:
-                print(err)
+                LOG.warn(err)
                 response['message'] = "%s" % (str(err))
                 postvars = {}
             if 'path' in postvars.keys():
@@ -3063,20 +3192,20 @@ class RequestHandler(BaseHTTPRequestHandler):
                             self.wfile.write(bytes(json.dumps(response), "utf8"))
                             return
                         except Exception as err:
-                            print(err)
+                            LOG.warn(err)
                             response['error'] = True
                             response['message'] = str(err)
 
                     except Exception as err:
                         response['message'] = "%s" % (str(err))
-                        print(err)
+                        LOG.warn(err)
             else:
                 response['message'] = "Missing filename"
         elif req.path == '/api/commit':
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
             except Exception as err:
-                print(err)
+                LOG.warn(err)
                 response['message'] = "%s" % (str(err))
                 postvars = {}
             if 'path' in postvars.keys() and 'message' in postvars.keys():
@@ -3098,18 +3227,18 @@ class RequestHandler(BaseHTTPRequestHandler):
                         except Exception as err:
                             response['error'] = True
                             response['message'] = str(err)
-                            print(response)
+                            LOG.debug(response)
 
                     except Exception as err:
                         response['message'] = "Not a git repository: %s" % (str(err))
-                        print("Exception (no repo): %s" % str(err))
+                        LOG.warn("Exception (no repo): %s" % str(err))
             else:
                 response['message'] = "Missing path"
         elif req.path == '/api/checkout':
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
             except Exception as err:
-                print(err)
+                LOG.warn(err)
                 response['message'] = "%s" % (str(err))
                 postvars = {}
             if 'path' in postvars.keys() and 'branch' in postvars.keys():
@@ -3132,18 +3261,18 @@ class RequestHandler(BaseHTTPRequestHandler):
                         except Exception as err:
                             response['error'] = True
                             response['message'] = str(err)
-                            print(response)
+                            LOG.warn(response)
 
                     except Exception as err:
                         response['message'] = "Not a git repository: %s" % (str(err))
-                        print("Exception (no repo): %s" % str(err))
+                        LOG.warn("Exception (no repo): %s" % str(err))
             else:
                 response['message'] = "Missing path or branch"
         elif req.path == '/api/newbranch':
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
             except Exception as err:
-                print(err)
+                LOG.warn(err)
                 response['message'] = "%s" % (str(err))
                 postvars = {}
             if 'path' in postvars.keys() and 'branch' in postvars.keys():
@@ -3165,18 +3294,18 @@ class RequestHandler(BaseHTTPRequestHandler):
                         except Exception as err:
                             response['error'] = True
                             response['message'] = str(err)
-                            print(response)
+                            LOG.warn(response)
 
                     except Exception as err:
                         response['message'] = "Not a git repository: %s" % (str(err))
-                        print("Exception (no repo): %s" % str(err))
+                        LOG.warn("Exception (no repo): %s" % str(err))
             else:
                 response['message'] = "Missing path or branch"
         elif req.path == '/api/init':
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
             except Exception as err:
-                print(err)
+                LOG.warn(err)
                 response['message'] = "%s" % (str(err))
                 postvars = {}
             if 'path' in postvars.keys():
@@ -3196,18 +3325,18 @@ class RequestHandler(BaseHTTPRequestHandler):
                         except Exception as err:
                             response['error'] = True
                             response['message'] = str(err)
-                            print(response)
+                            LOG.warn(response)
 
                     except Exception as err:
                         response['message'] = "Not a git repository: %s" % (str(err))
-                        print("Exception (no repo): %s" % str(err))
+                        LOG.warn("Exception (no repo): %s" % str(err))
             else:
                 response['message'] = "Missing path or branch"
         elif req.path == '/api/newfolder':
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
             except Exception as err:
-                print(err)
+                LOG.warn(err)
                 response['message'] = "%s" % (str(err))
                 postvars = {}
             if 'path' in postvars.keys() and 'name' in postvars.keys():
@@ -3226,17 +3355,17 @@ class RequestHandler(BaseHTTPRequestHandler):
                             self.wfile.write(bytes(json.dumps(response), "utf8"))
                             return
                         except Exception as err:
-                            print(err)
+                            LOG.warn(err)
                             response['error'] = True
                             response['message'] = str(err)
                     except Exception as err:
                         response['message'] = "%s" % (str(err))
-                        print(err)
+                        LOG.warn(err)
         elif req.path == '/api/newfile':
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
             except Exception as err:
-                print(err)
+                LOG.warn(err)
                 response['message'] = "%s" % (str(err))
                 postvars = {}
             if 'path' in postvars.keys() and 'name' in postvars.keys():
@@ -3256,12 +3385,12 @@ class RequestHandler(BaseHTTPRequestHandler):
                             self.wfile.write(bytes(json.dumps(response), "utf8"))
                             return
                         except Exception as err:
-                            print(err)
+                            LOG.warn(err)
                             response['error'] = True
                             response['message'] = str(err)
                     except Exception as err:
                         response['message'] = "%s" % (str(err))
-                        print(err)
+                        LOG.warn(err)
             else:
                 response['message'] = "Missing filename or text"
         else:
@@ -3274,7 +3403,7 @@ class RequestHandler(BaseHTTPRequestHandler):
 
 class AuthHandler(RequestHandler):
     def do_AUTHHEAD(self):
-        print("Requesting authorization")
+        LOG.info("Requesting authorization")
         self.send_response(401)
         self.send_header('WWW-Authenticate', 'Basic realm=\"HASS-PoC-Configurator\"')
         self.send_header('Content-type', 'text/html')
@@ -3296,7 +3425,7 @@ class AuthHandler(RequestHandler):
             if BANLIMIT:
                 bancounter = FAIL2BAN_IPS.get(self.client_address[0], 1)
                 if bancounter >= BANLIMIT:
-                    print("Blocking access from %s" % self.client_address[0])
+                    LOG.warn("Blocking access from %s" % self.client_address[0])
                     self.do_BLOCK()
                     return
                 else:
@@ -3321,7 +3450,7 @@ class AuthHandler(RequestHandler):
             if BANLIMIT:
                 bancounter = FAIL2BAN_IPS.get(self.client_address[0], 1)
                 if bancounter >= BANLIMIT:
-                    print("Blocking access from %s" % self.client_address[0])
+                    LOG.warn("Blocking access from %s" % self.client_address[0])
                     self.do_BLOCK()
                     return
                 else:
@@ -3334,7 +3463,7 @@ def main(args):
     global HTTPD, CREDENTIALS
     if args:
         load_settings(args[0])
-    print("Starting server")
+    LOG.info("Starting server")
     server_address = (LISTENIP, LISTENPORT)
     if CREDENTIALS:
         CREDENTIALS = base64.b64encode(bytes(CREDENTIALS, "utf-8"))
@@ -3349,7 +3478,7 @@ def main(args):
                                        certfile=SSL_CERTIFICATE,
                                        keyfile=SSL_KEY,
                                        server_side=True)
-    print('Listening on: %s://%s:%i' % ('https' if SSL_CERTIFICATE else 'http',
+    LOG.info('Listening on: %s://%s:%i' % ('https' if SSL_CERTIFICATE else 'http',
                                         LISTENIP,
                                         LISTENPORT))
     if BASEPATH:
