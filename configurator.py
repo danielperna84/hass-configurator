@@ -2129,7 +2129,7 @@ INDEX = Template(r"""<!DOCTYPE html>
                 // git add button
                 var dd_gitadd = document.createElement('li');
                 var dd_gitadd_a = document.createElement('a');
-                dd_gitadd_a.classList.add('waves-effect');
+                dd_gitadd_a.classList.add('waves-effect', 'fb_dd');
                 dd_gitadd_a.setAttribute('href', "#modal_gitadd");
                 dd_gitadd_a.innerHTML = "git add";
                 dd_gitadd.appendChild(dd_gitadd_a);
