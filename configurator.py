@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 Configurator for Home Assistant.
-https://github.com/danielperna84/hass-poc-configurator
+https://github.com/danielperna84/hass-configurator
 """
 import os
 import sys
@@ -1363,8 +1363,8 @@ INDEX = Template(r"""<!DOCTYPE html>
     </div>
     <div id="modal_about" class="modal modal-fixed-footer">
         <div class="modal-content">
-            <h4 class="grey-text text-darken-3"><a class="black-text" href="https://github.com/danielperna84/hass-poc-configurator/" target="_blank">HASS Configurator</a></h4>
-            <p>Version: <a class="$versionclass" href="https://github.com/danielperna84/hass-poc-configurator/releases/lafbicon_pad" target="_blank">$current</a></p>
+            <h4 class="grey-text text-darken-3"><a class="black-text" href="https://github.com/danielperna84/hass-configurator/" target="_blank">HASS Configurator</a></h4>
+            <p>Version: <a class="$versionclass" href="https://github.com/danielperna84/hass-configurator/releases/" target="_blank">$current</a></p>
             <p>Web-based file editor designed to modify configuration files of <a class="light-blue-text" href="https://home-assistant.io/" target="_blank">Home Assistant</a> or other textual files. Use at your own risk.</p>
             <p>Published under the MIT license</p>
             <p>Developed by:</p>
@@ -2129,7 +2129,7 @@ INDEX = Template(r"""<!DOCTYPE html>
                 // git add button
                 var dd_gitadd = document.createElement('li');
                 var dd_gitadd_a = document.createElement('a');
-                dd_gitadd_a.classList.add('waves-effect');
+                dd_gitadd_a.classList.add('waves-effect', 'fb_dd');
                 dd_gitadd_a.setAttribute('href', "#modal_gitadd");
                 dd_gitadd_a.innerHTML = "git add";
                 dd_gitadd.appendChild(dd_gitadd_a);
@@ -3409,7 +3409,7 @@ class AuthHandler(RequestHandler):
     def do_AUTHHEAD(self):
         LOG.info("Requesting authorization")
         self.send_response(401)
-        self.send_header('WWW-Authenticate', 'Basic realm=\"HASS-PoC-Configurator\"')
+        self.send_header('WWW-Authenticate', 'Basic realm=\"HASS-Configurator\"')
         self.send_header('Content-type', 'text/html')
         self.end_headers()
 

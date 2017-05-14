@@ -1,3 +1,8 @@
+Version 0.1.8 (2017-nn-nn)
+- UI fix (gid add button was broken)
+- Link to repository was broken
+- Removed "poc" from some old links
+
 Version 0.1.7 (2017-04-27)
 - Fixed incorrect numeric state option
 - Removed check config option (HASS has changed, not useful anymore)
