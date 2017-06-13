@@ -16,15 +16,18 @@ import cgi
 import shlex
 import subprocess
 import logging
+import fnmatch
 from string import Template
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import urllib.request
 from urllib.parse import urlparse, parse_qs, unquote
 
+
 ### Some options for you to change
 LISTENIP = "0.0.0.0"
 LISTENPORT = 3218
-# Set BASEPATH to something like "/home/hass/.homeassistant/" if you're not running the configurator from that path
+# Set BASEPATH to something like "/home/hass/.homeassistant/" if you're not running the
+# configurator from that path
 BASEPATH = None
 # Set the paths to a certificate and the key if you're using SSL, e.g "/etc/ssl/certs/mycert.pem"
 SSL_CERTIFICATE = None
@@ -32,6 +35,7 @@ SSL_KEY = None
 # Set the destination where the HASS API is reachable
 HASS_API = "http://127.0.0.1:8123/api/"
 # If a password is required to access the API, set it in the form of "password"
+# if you have HA ignoring SSL locally this is not needed if on same machine.
 HASS_API_PASSWORD = None
 # To enable authentication, set the credentials in the form of "username:password"
 CREDENTIALS = None
@@ -40,10 +44,14 @@ CREDENTIALS = None
 ALLOWED_NETWORKS = []
 # List of statically banned IP addresses, e.g. ["1.1.1.1", "2.2.2.2"]
 BANNED_IPS = []
-# Ban IPs after n failed login attempts. Restart service to reset banning. The default of `0` disables this feature.
+# Ban IPs after n failed login attempts. Restart service to reset banning. The default
+# of `0` disables this feature.
 BANLIMIT = 0
-# Enable git integration. GitPython (https://gitpython.readthedocs.io/en/stable/) has to be installed.
+# Enable git integration. GitPython (https://gitpython.readthedocs.io/en/stable/) has
+# to be installed.
 GIT = False
+# Files to ignore. ["*.", "*.log"] helps cleanup the UI.
+IGNORE_PATTERN = [".*", "*.log", "deps", "icloud", "*.conf", "*.json", "certs", "__pycache__"]
 ### End of options
 
 LOGLEVEL = logging.INFO
@@ -64,7 +72,7 @@ if GIT:
     try:
         from git import Repo as REPO
     except Exception:
-        LOG.warn("Unable to import Git module")
+        LOG.warning("Unable to import Git module")
 INDEX = Template(r"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2665,7 +2673,7 @@ INDEX = Template(r"""<!DOCTYPE html>
 
 def signal_handler(sig, frame):
     global HTTPD
-    LOG.info("Got signal: %s. Shutting down server" % str(sig))
+    LOG.info("Got signal: %s. Shutting down server", str(sig))
     HTTPD.server_close()
     sys.exit(0)
 
@@ -2689,8 +2697,8 @@ def load_settings(settingsfile):
                 BANLIMIT = settings.get("BANLIMIT", BANLIMIT)
                 DEV = settings.get("DEV", DEV)
     except Exception as err:
-        LOG.warn(err)
-        LOG.warn("Not loading static settings")
+        LOG.warning(err)
+        LOG.warning("Not loading static settings")
     return False
 
 def get_dircontent(path, repo=None):
@@ -2706,7 +2714,7 @@ def get_dircontent(path, repo=None):
             for element in repo.index.diff("HEAD"):
                 staged["%s%s%s" % (repo.working_dir, os.sep, "%s"%os.sep.join(element.b_path.split('/')))] = element.change_type
         except Exception as err:
-            LOG.warn("Exception: %s" % str(err))
+            LOG.warning("Exception: %s", str(err))
         for element in repo.index.diff(None):
             unstaged["%s%s%s" % (repo.working_dir, os.sep, "%s"%os.sep.join(element.b_path.split('/')))] = element.change_type
     else:
@@ -2738,7 +2746,16 @@ def get_dircontent(path, repo=None):
         elif edata['fullpath'] in staged:
             edata['gitstatus'] = 'staged'
             edata['changetype'] = staged.get(edata['name'], None)
-        dircontent.append(edata)
+
+        hidden = False
+        if IGNORE_PATTERN is not None:
+            for file_pattern in IGNORE_PATTERN:
+                if fnmatch.fnmatch(edata['name'], file_pattern):
+                    hidden = True
+
+        if not hidden:
+            dircontent.append(edata)
+
     return dircontent
 
 def get_html():
@@ -2748,8 +2765,8 @@ def get_html():
                 html = Template(fptr.read())
                 return html
         except Exception as err:
-            LOG.warn(err)
-            LOG.warn("Delivering embedded HTML")
+            LOG.warning(err)
+            LOG.warning("Delivering embedded HTML")
     return INDEX
 
 def check_access(clientip):
@@ -2796,7 +2813,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                     else:
                         content = "File not found"
             except Exception as err:
-                LOG.warn(err)
+                LOG.warning(err)
                 content = str(err)
             self.wfile.write(bytes(content, "utf8"))
             return
@@ -2817,7 +2834,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                     else:
                         content = "File not found"
             except Exception as err:
-                LOG.warn(err)
+                LOG.warning(err)
                 content = str(err)
             self.send_header('Content-type', 'text/text')
             self.wfile.write(bytes(content, "utf8"))
@@ -2854,7 +2871,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                                    }
                         self.wfile.write(bytes(json.dumps(filedata), "utf8"))
             except Exception as err:
-                LOG.warn(err)
+                LOG.warning(err)
                 content = str(err)
                 self.wfile.write(bytes(content, "utf8"))
             return
@@ -2900,7 +2917,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                     res = json.loads(response.read().decode('utf-8'))
                     LOG.debug(res)
             except Exception as err:
-                LOG.warn(err)
+                LOG.warning(err)
                 res['restart'] = str(err)
             self.wfile.write(bytes(json.dumps(res), "utf8"))
             return
@@ -2920,7 +2937,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 #     print(json.loads(response.read().decode('utf-8')))
                 #     res['service'] = "called successfully"
             except Exception as err:
-                LOG.warn(err)
+                LOG.warning(err)
                 res['restart'] = str(err)
             self.wfile.write(bytes(json.dumps(res), "utf8"))
             return
@@ -2940,7 +2957,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                     LOG.debug(json.loads(response.read().decode('utf-8')))
                     res['service'] = "called successfully"
             except Exception as err:
-                LOG.warn(err)
+                LOG.warning(err)
                 res['restart'] = str(err)
             self.wfile.write(bytes(json.dumps(res), "utf8"))
             return
@@ -2960,7 +2977,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                     LOG.debug(json.loads(response.read().decode('utf-8')))
                     res['service'] = "called successfully"
             except Exception as err:
-                LOG.warn(err)
+                LOG.warning(err)
                 res['restart'] = str(err)
             self.wfile.write(bytes(json.dumps(res), "utf8"))
             return
@@ -2980,7 +2997,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                     LOG.debug(json.loads(response.read().decode('utf-8')))
                     res['service'] = "called successfully"
             except Exception as err:
-                LOG.warn(err)
+                LOG.warning(err)
                 res['restart'] = str(err)
             self.wfile.write(bytes(json.dumps(res), "utf8"))
             return
@@ -3000,8 +3017,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                     boot = response.read().decode('utf-8')
 
             except Exception as err:
-                LOG.warn("Exception getting bootstrap")
-                LOG.warn(err)
+                LOG.warning("Exception getting bootstrap")
+                LOG.warning(err)
 
             color = "green"
             try:
@@ -3010,8 +3027,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                 if VERSION != latest:
                     color = "red"
             except Exception as err:
-                LOG.warn("Exception getting release")
-                LOG.warn(err)
+                LOG.warning("Exception getting release")
+                LOG.warning(err)
             html = get_html().safe_substitute(bootstrap=boot,
                                               current=VERSION,
                                               versionclass=color,
@@ -3039,7 +3056,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
             except Exception as err:
-                LOG.warn(err)
+                LOG.warning(err)
                 response['message'] = "%s" % (str(err))
                 postvars = {}
             if 'filename' in postvars.keys() and 'text' in postvars.keys():
@@ -3058,7 +3075,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                         return
                     except Exception as err:
                         response['message'] = "%s" % (str(err))
-                        LOG.warn(err)
+                        LOG.warning(err)
             else:
                 response['message'] = "Missing filename or text"
         elif req.path == '/api/upload':
@@ -3095,7 +3112,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
             except Exception as err:
-                LOG.warn(err)
+                LOG.warning(err)
                 response['message'] = "%s" % (str(err))
                 postvars = {}
             if 'path' in postvars.keys():
@@ -3116,20 +3133,20 @@ class RequestHandler(BaseHTTPRequestHandler):
                             self.wfile.write(bytes(json.dumps(response), "utf8"))
                             return
                         except Exception as err:
-                            LOG.warn(err)
+                            LOG.warning(err)
                             response['error'] = True
                             response['message'] = str(err)
 
                     except Exception as err:
                         response['message'] = "%s" % (str(err))
-                        LOG.warn(err)
+                        LOG.warning(err)
             else:
                 response['message'] = "Missing filename or text"
         elif req.path == '/api/exec_command':
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
             except Exception as err:
-                LOG.warn(err)
+                LOG.warning(err)
                 response['message'] = "%s" % (str(err))
                 postvars = {}
             if 'command' in postvars.keys():
@@ -3153,30 +3170,30 @@ class RequestHandler(BaseHTTPRequestHandler):
                             try:
                                 response['stdout'] = stdout.decode(sys.getdefaultencoding())
                             except Exception as err:
-                                LOG.warn(err)
+                                LOG.warning(err)
                                 response['stdout'] = stdout.decode("utf-8", errors="replace")
                             try:
                                 response['stderr'] = stderr.decode(sys.getdefaultencoding())
                             except Exception as err:
-                                LOG.warn(err)
+                                LOG.warning(err)
                                 response['stderr'] = stderr.decode("utf-8", errors="replace")
                             self.wfile.write(bytes(json.dumps(response), "utf8"))
                             return
                         except Exception as err:
-                            LOG.warn(err)
+                            LOG.warning(err)
                             response['error'] = True
                             response['message'] = str(err)
 
                     except Exception as err:
                         response['message'] = "%s" % (str(err))
-                        LOG.warn(err)
+                        LOG.warning(err)
             else:
                 response['message'] = "Missing command"
         elif req.path == '/api/gitadd':
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
             except Exception as err:
-                LOG.warn(err)
+                LOG.warning(err)
                 response['message'] = "%s" % (str(err))
                 postvars = {}
             if 'path' in postvars.keys():
@@ -3196,20 +3213,20 @@ class RequestHandler(BaseHTTPRequestHandler):
                             self.wfile.write(bytes(json.dumps(response), "utf8"))
                             return
                         except Exception as err:
-                            LOG.warn(err)
+                            LOG.warning(err)
                             response['error'] = True
                             response['message'] = str(err)
 
                     except Exception as err:
                         response['message'] = "%s" % (str(err))
-                        LOG.warn(err)
+                        LOG.warning(err)
             else:
                 response['message'] = "Missing filename"
         elif req.path == '/api/commit':
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
             except Exception as err:
-                LOG.warn(err)
+                LOG.warning(err)
                 response['message'] = "%s" % (str(err))
                 postvars = {}
             if 'path' in postvars.keys() and 'message' in postvars.keys():
@@ -3235,14 +3252,14 @@ class RequestHandler(BaseHTTPRequestHandler):
 
                     except Exception as err:
                         response['message'] = "Not a git repository: %s" % (str(err))
-                        LOG.warn("Exception (no repo): %s" % str(err))
+                        LOG.warning("Exception (no repo): %s" % str(err))
             else:
                 response['message'] = "Missing path"
         elif req.path == '/api/checkout':
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
             except Exception as err:
-                LOG.warn(err)
+                LOG.warning(err)
                 response['message'] = "%s" % (str(err))
                 postvars = {}
             if 'path' in postvars.keys() and 'branch' in postvars.keys():
@@ -3265,18 +3282,18 @@ class RequestHandler(BaseHTTPRequestHandler):
                         except Exception as err:
                             response['error'] = True
                             response['message'] = str(err)
-                            LOG.warn(response)
+                            LOG.warning(response)
 
                     except Exception as err:
                         response['message'] = "Not a git repository: %s" % (str(err))
-                        LOG.warn("Exception (no repo): %s" % str(err))
+                        LOG.warning("Exception (no repo): %s" % str(err))
             else:
                 response['message'] = "Missing path or branch"
         elif req.path == '/api/newbranch':
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
             except Exception as err:
-                LOG.warn(err)
+                LOG.warning(err)
                 response['message'] = "%s" % (str(err))
                 postvars = {}
             if 'path' in postvars.keys() and 'branch' in postvars.keys():
@@ -3298,18 +3315,18 @@ class RequestHandler(BaseHTTPRequestHandler):
                         except Exception as err:
                             response['error'] = True
                             response['message'] = str(err)
-                            LOG.warn(response)
+                            LOG.warning(response)
 
                     except Exception as err:
                         response['message'] = "Not a git repository: %s" % (str(err))
-                        LOG.warn("Exception (no repo): %s" % str(err))
+                        LOG.warning("Exception (no repo): %s" % str(err))
             else:
                 response['message'] = "Missing path or branch"
         elif req.path == '/api/init':
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
             except Exception as err:
-                LOG.warn(err)
+                LOG.warning(err)
                 response['message'] = "%s" % (str(err))
                 postvars = {}
             if 'path' in postvars.keys():
@@ -3329,18 +3346,18 @@ class RequestHandler(BaseHTTPRequestHandler):
                         except Exception as err:
                             response['error'] = True
                             response['message'] = str(err)
-                            LOG.warn(response)
+                            LOG.warning(response)
 
                     except Exception as err:
                         response['message'] = "Not a git repository: %s" % (str(err))
-                        LOG.warn("Exception (no repo): %s" % str(err))
+                        LOG.warning("Exception (no repo): %s" % str(err))
             else:
                 response['message'] = "Missing path or branch"
         elif req.path == '/api/newfolder':
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
             except Exception as err:
-                LOG.warn(err)
+                LOG.warning(err)
                 response['message'] = "%s" % (str(err))
                 postvars = {}
             if 'path' in postvars.keys() and 'name' in postvars.keys():
@@ -3359,17 +3376,17 @@ class RequestHandler(BaseHTTPRequestHandler):
                             self.wfile.write(bytes(json.dumps(response), "utf8"))
                             return
                         except Exception as err:
-                            LOG.warn(err)
+                            LOG.warning(err)
                             response['error'] = True
                             response['message'] = str(err)
                     except Exception as err:
                         response['message'] = "%s" % (str(err))
-                        LOG.warn(err)
+                        LOG.warning(err)
         elif req.path == '/api/newfile':
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
             except Exception as err:
-                LOG.warn(err)
+                LOG.warning(err)
                 response['message'] = "%s" % (str(err))
                 postvars = {}
             if 'path' in postvars.keys() and 'name' in postvars.keys():
@@ -3389,12 +3406,12 @@ class RequestHandler(BaseHTTPRequestHandler):
                             self.wfile.write(bytes(json.dumps(response), "utf8"))
                             return
                         except Exception as err:
-                            LOG.warn(err)
+                            LOG.warning(err)
                             response['error'] = True
                             response['message'] = str(err)
                     except Exception as err:
                         response['message'] = "%s" % (str(err))
-                        LOG.warn(err)
+                        LOG.warning(err)
             else:
                 response['message'] = "Missing filename or text"
         else:
@@ -3429,7 +3446,7 @@ class AuthHandler(RequestHandler):
             if BANLIMIT:
                 bancounter = FAIL2BAN_IPS.get(self.client_address[0], 1)
                 if bancounter >= BANLIMIT:
-                    LOG.warn("Blocking access from %s" % self.client_address[0])
+                    LOG.warning("Blocking access from %s" % self.client_address[0])
                     self.do_BLOCK()
                     return
                 else:
@@ -3454,7 +3471,7 @@ class AuthHandler(RequestHandler):
             if BANLIMIT:
                 bancounter = FAIL2BAN_IPS.get(self.client_address[0], 1)
                 if bancounter >= BANLIMIT:
-                    LOG.warn("Blocking access from %s" % self.client_address[0])
+                    LOG.warning("Blocking access from %s" % self.client_address[0])
                     self.do_BLOCK()
                     return
                 else:
@@ -3483,8 +3500,8 @@ def main(args):
                                        keyfile=SSL_KEY,
                                        server_side=True)
     LOG.info('Listening on: %s://%s:%i' % ('https' if SSL_CERTIFICATE else 'http',
-                                        LISTENIP,
-                                        LISTENPORT))
+                                           LISTENIP,
+                                           LISTENPORT))
     if BASEPATH:
         os.chdir(BASEPATH)
     HTTPD.serve_forever()
@@ -3492,3 +3509,4 @@ def main(args):
 if __name__ == "__main__":
     signal.signal(signal.SIGINT, signal_handler)
     main(sys.argv[1:])
+    
