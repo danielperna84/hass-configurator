@@ -1,0 +1,15 @@
+FROM mielune/alpine-python3-arm
+MAINTAINER Martin <Munsio> Treml
+
+WORKDIR /opt/app
+COPY ./configurator.py ./run.sh /opt/app/
+RUN chmod a+x ./configurator.py ./run.sh
+
+# Default listening port.
+EXPOSE 8123
+
+# The configuration yaml for persistance.
+VOLUME /config
+
+ENTRYPOINT ["/opt/app/run.sh"]
+
