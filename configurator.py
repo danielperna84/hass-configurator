@@ -50,8 +50,9 @@ BANLIMIT = 0
 # Enable git integration. GitPython (https://gitpython.readthedocs.io/en/stable/) has
 # to be installed.
 GIT = False
-# Files to ignore. ["*.", "*.log"] helps cleanup the UI.
-IGNORE_PATTERN = [".*", "*.log", "deps", "icloud", "*.conf", "*.json", "certs", "__pycache__"]
+# Files to ignore in the UI.  A good example list that cleans up the UI is
+# [".*", "*.log", "deps", "icloud", "*.conf", "*.json", "certs", "__pycache__"] 
+IGNORE_PATTERN = []
 ### End of options
 
 LOGLEVEL = logging.INFO
@@ -2679,7 +2680,8 @@ def signal_handler(sig, frame):
 
 def load_settings(settingsfile):
     global LISTENIP, LISTENPORT, BASEPATH, SSL_CERTIFICATE, SSL_KEY, HASS_API, \
-    HASS_API_PASSWORD, CREDENTIALS, ALLOWED_NETWORKS, BANNED_IPS, BANLIMIT, DEV
+    HASS_API_PASSWORD, CREDENTIALS, ALLOWED_NETWORKS, BANNED_IPS, BANLIMIT, DEV, \
+    IGNORE_PATTERN
     try:
         if os.path.isfile(settingsfile):
             with open(settingsfile) as fptr:
@@ -2696,6 +2698,7 @@ def load_settings(settingsfile):
                 BANNED_IPS = settings.get("BANNED_IPS", BANNED_IPS)
                 BANLIMIT = settings.get("BANLIMIT", BANLIMIT)
                 DEV = settings.get("DEV", DEV)
+		IGNORE_PATTERN = settings.get("IGNORE_PATTERN", IGNORE_PATTERN)
     except Exception as err:
         LOG.warning(err)
         LOG.warning("Not loading static settings")
