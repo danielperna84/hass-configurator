@@ -2698,7 +2698,7 @@ def load_settings(settingsfile):
                 BANNED_IPS = settings.get("BANNED_IPS", BANNED_IPS)
                 BANLIMIT = settings.get("BANLIMIT", BANLIMIT)
                 DEV = settings.get("DEV", DEV)
-		IGNORE_PATTERN = settings.get("IGNORE_PATTERN", IGNORE_PATTERN)
+                IGNORE_PATTERN = settings.get("IGNORE_PATTERN", IGNORE_PATTERN)
     except Exception as err:
         LOG.warning(err)
         LOG.warning("Not loading static settings")
