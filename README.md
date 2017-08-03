@@ -55,6 +55,8 @@ Limit access to the configurator by adding allowed IP addresses / networks to th
 List of statically banned IP addresses, e.g. `BANNED_IPS = ["1.1.1.1", "2.2.2.2"]`
 #### BANLIMIT (integer)
 Ban IPs after n failed login attempts. Restart service to reset banning. The default of `0` disables this feature. `CREDENTIALS` has to be set for this to work.
+#### IGNORE_PATTERN (list)
+Files and folders to ignore in the UI, e.g. `IGNORE_PATTERN = [".*", "*.log", "__pycache__"]`
 #### GIT (bool)
 Set this variable to `True` to enable Git integration. This feature requires [GitPython](https://gitpython.readthedocs.io)
  to be installed on the system that is running the configurator. For thechnical reasons this feature can't be enabled with a static configuration file.
