@@ -19,3 +19,5 @@ disable=
   unnecessary-pass,
   anomalous-backslash-in-string,
   redefined-variable-type,
+  redefined-builtin,
+  no-else-return,

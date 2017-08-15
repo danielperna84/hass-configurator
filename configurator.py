@@ -2786,8 +2786,8 @@ def check_access(clientip):
     return False
 
 class RequestHandler(BaseHTTPRequestHandler):
-    def log_message(self, fmt, *args):
-        LOG.info("%s - %s" % (self.client_address[0], fmt % args))
+    def log_message(self, format, *args):
+        LOG.info("%s - %s" % (self.client_address[0], format % args))
         return
 
     def do_BLOCK(self):
