@@ -51,7 +51,7 @@ BANLIMIT = 0
 # to be installed.
 GIT = False
 # Files to ignore in the UI.  A good example list that cleans up the UI is
-# [".*", "*.log", "deps", "icloud", "*.conf", "*.json", "certs", "__pycache__"] 
+# [".*", "*.log", "deps", "icloud", "*.conf", "*.json", "certs", "__pycache__"]
 IGNORE_PATTERN = []
 ### End of options
 
@@ -2786,8 +2786,8 @@ def check_access(clientip):
     return False
 
 class RequestHandler(BaseHTTPRequestHandler):
-    def log_message(self, format, *args):
-        LOG.info("%s - %s" % (self.client_address[0], format%args))
+    def log_message(self, fmt, *args):
+        LOG.info("%s - %s" % (self.client_address[0], fmt % args))
         return
 
     def do_BLOCK(self):
@@ -3436,7 +3436,7 @@ class AuthHandler(RequestHandler):
     def do_GET(self):
         global CREDENTIALS
         authorization = self.headers.get('Authorization', None)
-        if authorization == None:
+        if authorization is None:
             self.do_AUTHHEAD()
             self.wfile.write(bytes('no auth header received', 'utf-8'))
             pass
@@ -3461,7 +3461,7 @@ class AuthHandler(RequestHandler):
     def do_POST(self):
         global CREDENTIALS
         authorization = self.headers.get('Authorization', None)
-        if authorization == None:
+        if authorization is None:
             self.do_AUTHHEAD()
             self.wfile.write(bytes('no auth header received', 'utf-8'))
             pass
@@ -3512,4 +3512,3 @@ def main(args):
 if __name__ == "__main__":
     signal.signal(signal.SIGINT, signal_handler)
     main(sys.argv[1:])
-    
