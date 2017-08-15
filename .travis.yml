@@ -8,4 +8,4 @@ matrix:
       env: TOXENV=lint
 install: pip install pylint
 language: python
-script: pylint
+script: pylint hass-configurator/configurator.py
