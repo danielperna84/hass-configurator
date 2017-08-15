@@ -1,0 +1,21 @@
+[MASTER]
+reports=no
+
+disable=
+  too-many-lines,
+  missing-docstring,
+  global-statement,
+  global-variable-not-assigned,
+  too-many-return-statements,
+  too-many-nested-blocks,
+  too-many-statements,
+  too-many-branches,
+  too-many-locals,
+  unused-argument,
+  logging-not-lazy,
+  invalid-name,
+  broad-except,
+  line-too-long,
+  unnecessary-pass,
+  anomalous-backslash-in-string,
+  redefined-variable-type,
