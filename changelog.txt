@@ -1,3 +1,6 @@
+Version 0.1.9 (2017-08-16)
+- Updated external libraries @jmart518
+
 Version 0.1.8 (2017-08-03)
 - UI fix (gid add button was broken)
 - Link to repository was broken
