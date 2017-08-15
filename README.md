@@ -1,4 +1,5 @@
 # HASS Configurator
+[![Build Status](https://travis-ci.org/danielperna84/hass-configurator.svg?branch=master)](https://travis-ci.org/danielperna84/hass-configurator)
 ### Configuration UI for Home Assistant
 
 Since there currently is no nice way to edit the yaml-files HASS is using through the HASS frontend, I've code-snippet-patchworked this small webapp. It's essentially an embedded [Ace editor](https://ace.c9.io/), which has syntax hightlighting for yaml (and a ton of other features you can turn on and off). Of course there's also an integrated file browser to select whatever file you want to edit. When you're done with editing the file, click the save-button and it will replace the original.  
