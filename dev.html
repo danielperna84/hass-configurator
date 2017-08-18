@@ -6,7 +6,7 @@
     <title>HASS Configurator</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/MaterialDesign-Webfont/2.0.46/css/materialdesignicons.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/css/materialize.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.1/css/materialize.min.css">
     <style type="text/css" media="screen">
         body {
             margin: 0;
@@ -506,11 +506,11 @@
                 </ul>
                 <ul class="right">
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only markdirty hidesave" data-position="bottom" data-delay="500" data-tooltip="Save" onclick="save_check()"><i class="material-icons">save</i></a></li>
-                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="500" data-tooltip="Close" href="#modal_close"><i class="material-icons">close</i></a></li>
+                    <li><a class="waves-effect waves-light tooltipped hide-on-small-only modal-trigger" data-position="bottom" data-delay="500" data-tooltip="Close" href="#modal_close"><i class="material-icons">close</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="500" data-tooltip="Search" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
                     <li><a class="waves-effect waves-light dropdown-button hide-on-small-only" data-activates="dropdown_menu" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
                     <li><a class="waves-effect waves-light hide-on-med-and-up markdirty hidesave" onclick="save_check()"><i class="material-icons">save</i></a></li>
-                    <li><a class="waves-effect waves-light hide-on-med-and-up" href="#modal_close"><i class="material-icons">close</i></a></li>
+                    <li><a class="waves-effect waves-light hide-on-med-and-up modal-trigger" href="#modal_close"><i class="material-icons">close</i></a></li>
                     <li><a class="waves-effect waves-light hide-on-med-and-up" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
                     <li><a class="waves-effect waves-light dropdown-button hide-on-med-and-up" data-activates="dropdown_menu_mobile" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
                 </ul>
@@ -520,41 +520,41 @@
   </header>
   <main>
     <ul id="dropdown_menu" class="dropdown-content z-depth-4">
-        <li><a target="_blank" href="#modal_components">HASS Components</a></li>
-        <li><a target="_blank" href="#modal_icons">Material Icons</a></li>
+        <li><a class="modal-trigger" target="_blank" href="#modal_components">HASS Components</a></li>
+        <li><a class="modal-trigger" target="_blank" href="#modal_icons">Material Icons</a></li>
         <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
-        <li><a href="#modal_about">About HASS-Configurator</a></li>
+        <li><a class="modal-trigger" href="#modal_about">About HASS-Configurator</a></li>
         <li class="divider"></li>
         <!--<li><a href="#modal_check_config">Check HASS Configuration</a></li>-->
-        <li><a href="#modal_reload_automations">Reload automations</a></li>
-        <li><a href="#modal_reload_groups">Reload groups</a></li>
-        <li><a href="#modal_reload_core">Reload core</a></li>
-        <li><a href="#modal_restart">Restart HASS</a></li>
+        <li><a class="modal-trigger" href="#modal_reload_automations">Reload automations</a></li>
+        <li><a class="modal-trigger" href="#modal_reload_groups">Reload groups</a></li>
+        <li><a class="modal-trigger" href="#modal_reload_core">Reload core</a></li>
+        <li><a class="modal-trigger" href="#modal_restart">Restart HASS</a></li>
         <li class="divider"></li>
-        <li><a href="#modal_exec_command">Execute shell command</a></li>
+        <li><a class="modal-trigger" href="#modal_exec_command">Execute shell command</a></li>
     </ul>
     <ul id="dropdown_menu_mobile" class="dropdown-content z-depth-4">
         <li><a target="_blank" href="https://home-assistant.io/help/">Need HASS Help?</a></li>
         <li><a target="_blank" href="https://home-assistant.io/components/">HASS Components</a></li>
         <li><a target="_blank" href="https://materialdesignicons.com/">Material Icons</a></li>
         <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
-        <li><a href="#modal_about">About HASS-Configurator</a></li>
+        <li><a class="modal-trigger" href="#modal_about">About HASS-Configurator</a></li>
         <li class="divider"></li>
         <!--<li><a href="#modal_check_config">Check HASS Configuration</a></li>-->
-        <li><a href="#modal_reload_automations">Reload automations</a></li>
-        <li><a href="#modal_reload_groups">Reload groups</a></li>
-        <li><a href="#modal_reload_core">Reload core</a></li>
-        <li><a href="#modal_restart">Restart HASS</a></li>
+        <li><a class="modal-trigger" href="#modal_reload_automations">Reload automations</a></li>
+        <li><a class="modal-trigger" href="#modal_reload_groups">Reload groups</a></li>
+        <li><a class="modal-trigger" href="#modal_reload_core">Reload core</a></li>
+        <li><a class="modal-trigger" href="#modal_restart">Restart HASS</a></li>
         <li class="divider"></li>
-        <li><a href="#modal_exec_command">Execute shell command</a></li>
+        <li><a class="modal-trigger" href="#modal_exec_command">Execute shell command</a></li>
     </ul>
     <ul id="dropdown_gitmenu" class="dropdown-content z-depth-4">
-        <li><a href="#modal_init" class="nowrap waves-effect">git init</a></li>
-        <li><a href="#modal_commit" class="nowrap waves-effect">git commit</a></li>
+        <li><a class="modal-trigger" href="#modal_init" class="nowrap waves-effect">git init</a></li>
+        <li><a class="modal-trigger" href="#modal_commit" class="nowrap waves-effect">git commit</a></li>
     </ul>
     <ul id="dropdown_gitmenu_mobile" class="dropdown-content z-depth-4">
-        <li><a href="#modal_init" class="nowrap waves-effect">git init</a></li>
-        <li><a href="#modal_commit" class="nowrap waves-effect">git commit</a></li>
+        <li><a class="modal-trigger" href="#modal_init" class="nowrap waves-effect">git init</a></li>
+        <li><a class="modal-trigger" href="#modal_commit" class="nowrap waves-effect">git commit</a></li>
     </ul>
     <div id="modal_components" class="modal bottom-sheet modal-fixed-footer">
         <div class="modal-content_nopad">
@@ -1432,15 +1432,15 @@
         <ul id="slide-out" class="side-nav grey lighten-4">
           <li class="no-padding">
             <ul class="row no-padding center hide-on-small-only grey lighten-4" style="margin-bottom: 0;">
-              <a class="col s3 waves-effect fbtoolbarbutton tooltipped" href="#modal_newfile" data-position="bottom" data-delay="500" data-tooltip="New File"><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">note_add</i></a>
-              <a class="col s3 waves-effect fbtoolbarbutton tooltipped" href="#modal_newfolder" data-position="bottom" data-delay="500" data-tooltip="New Folder"><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">create_new_folder</i></a>
-              <a class="col s3 waves-effect fbtoolbarbutton tooltipped" href="#modal_upload" data-position="bottom" data-delay="500" data-tooltip="Upload File"><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">file_upload</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton tooltipped modal-trigger" href="#modal_newfile" data-position="bottom" data-delay="500" data-tooltip="New File"><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">note_add</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton tooltipped modal-trigger" href="#modal_newfolder" data-position="bottom" data-delay="500" data-tooltip="New Folder"><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">create_new_folder</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton tooltipped modal-trigger" href="#modal_upload" data-position="bottom" data-delay="500" data-tooltip="Upload File"><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">file_upload</i></a>
               <a class="col s3 waves-effect fbtoolbarbutton tooltipped dropdown-button" data-activates="dropdown_gitmenu" data-alignment='right' data-beloworigin='true' data-delay='500' data-position="bottom" data-tooltip="Git"><i class="mdi mdi-git grey-text text-darken-2 material-icons" style="padding-top: 17px;"></i></a>
             </ul>
             <ul class="row center toolbar_mobile hide-on-med-and-up grey lighten-4" style="margin-bottom: 0;">
-              <a class="col s3 waves-effect fbtoolbarbutton" href="#modal_newfile"><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">note_add</i></a>
-              <a class="col s3 waves-effect fbtoolbarbutton" href="#modal_newfolder"><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">create_new_folder</i></a>
-              <a class="col s3 waves-effect fbtoolbarbutton" href="#modal_upload"><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">file_upload</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton modal-trigger" href="#modal_newfile"><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">note_add</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton modal-trigger" href="#modal_newfolder"><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">create_new_folder</i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton modal-trigger" href="#modal_upload"><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">file_upload</i></a>
               <a class="col s3 waves-effect fbtoolbarbutton dropdown-button" data-activates="dropdown_gitmenu_mobile" data-alignment='right' data-beloworigin='true'><i class="mdi mdi-git grey-text text-darken-2 material-icons" style="padding-top: 17px;"></i></a>
             </ul>
           </li>
@@ -1458,7 +1458,7 @@
           <li>
             <ul class="row no-padding" style="margin-bottom: 0;">
               <a id="branchselector" class="col s10 dropdown-button waves-effect truncate grey-text text-darken-2" data-beloworigin="true" data-activates='branches'><i class="grey-text text-darken-2 left material-icons" style="margin-left: 0; margin-right: 0; padding-top: 12px; padding-right: 8px;">arrow_drop_down</i>Branch:<span id="fbheaderbranch"></span></a>
-              <a id="newbranchbutton" class="waves-effect col s2 center" href="#modal_newbranch"><i class="grey-text text-darken-2 center material-icons" style="padding-top: 12px;">add</i></a>
+              <a id="newbranchbutton" class="waves-effect col s2 center modal-trigger" href="#modal_newbranch"><i class="grey-text text-darken-2 center material-icons" style="padding-top: 12px;">add</i></a>
             </ul>
             <div class="divider" style="margin-top: 0;"></div>
           </li>
@@ -1513,7 +1513,7 @@
         <ul id="ace_settings" class="side-nav">
           <li class="center s12 grey lighten-3 z-depth-1 subheader">Editor Settings</li>
           <div class="row col s12">
-              <p class="col s12"> <a class="waves-effect waves-light btn light-blue" href="#modal_acekeyboard">Keyboard Shortcuts</a> </p>
+              <p class="col s12"> <a class="waves-effect waves-light btn light-blue modal-trigger" href="#modal_acekeyboard">Keyboard Shortcuts</a> </p>
               <p class="col s12">
                   <input type="checkbox" class="blue_check" onclick="editor.setOption('animatedScroll', !editor.getOptions().animatedScroll)" id="animatedScroll" />
                   <Label for="animatedScroll">Animated Scroll</label>
@@ -1820,7 +1820,7 @@
 <input type="hidden" id="fb_currentfile" value="" />
 <!-- Scripts -->
 <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.98.2/js/materialize.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.1/js/materialize.min.js"></script>
 <script type="text/javascript">
     $(document).ready(function () {
         $('select').material_select();
@@ -2047,7 +2047,7 @@
 
         // Delete button
         var dd_delete = document.createElement('li');
-        dd_delete.classList.add("waves-effect", "fb_dd");
+        dd_delete.classList.add("waves-effect", "fb_dd", 'modal-trigger');
         var dd_delete_a = document.createElement('a');
         dd_delete_a.setAttribute('href', "#modal_delete");
         dd_delete_a.innerHTML = "Delete";
@@ -2062,7 +2062,7 @@
                 // git add button
                 var dd_gitadd = document.createElement('li');
                 var dd_gitadd_a = document.createElement('a');
-                dd_gitadd_a.classList.add('waves-effect', 'fb_dd');
+                dd_gitadd_a.classList.add('waves-effect', 'fb_dd', 'modal-trigger');
                 dd_gitadd_a.setAttribute('href', "#modal_gitadd");
                 dd_gitadd_a.innerHTML = "git add";
                 dd_gitadd.appendChild(dd_gitadd_a);
