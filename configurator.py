@@ -2123,7 +2123,7 @@ INDEX = Template(r"""<!DOCTYPE html>
 
         // Delete button
         var dd_delete = document.createElement('li');
-        dd_delete.classList.add("waves-effect", "fb_dd");
+        dd_delete.classList.add("waves-effect", "fb_dd", 'modal-trigger');
         var dd_delete_a = document.createElement('a');
         dd_delete_a.setAttribute('href', "#modal_delete");
         dd_delete_a.innerHTML = "Delete";
@@ -2138,7 +2138,7 @@ INDEX = Template(r"""<!DOCTYPE html>
                 // git add button
                 var dd_gitadd = document.createElement('li');
                 var dd_gitadd_a = document.createElement('a');
-                dd_gitadd_a.classList.add('waves-effect', 'fb_dd');
+                dd_gitadd_a.classList.add('waves-effect', 'fb_dd', 'modal-trigger');
                 dd_gitadd_a.setAttribute('href', "#modal_gitadd");
                 dd_gitadd_a.innerHTML = "git add";
                 dd_gitadd.appendChild(dd_gitadd_a);
