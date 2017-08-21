@@ -274,7 +274,7 @@ INDEX = Template(r"""<!DOCTYPE html>
         }
 
         #dropdown_gitmenu {
-            min-width: 110px;
+            min-width: 140px !important;
         }
 
         .dropdown-content li>a,
@@ -1910,7 +1910,7 @@ INDEX = Template(r"""<!DOCTYPE html>
         $('.dropdown-button').dropdown({
             inDuration: 300,
             outDuration: 225,
-            constrainWidth: true,
+            constrainWidth: false,
             hover: false,
             gutter: 0,
             belowOrigin: true,
@@ -2123,9 +2123,10 @@ INDEX = Template(r"""<!DOCTYPE html>
 
         // Delete button
         var dd_delete = document.createElement('li');
-        dd_delete.classList.add("waves-effect", "fb_dd", 'modal-trigger');
+        dd_delete.classList.add("waves-effect", "fb_dd");
         var dd_delete_a = document.createElement('a');
         dd_delete_a.setAttribute('href', "#modal_delete");
+        dd_delete_a.classList.add("modal-trigger");
         dd_delete_a.innerHTML = "Delete";
         dd_delete.appendChild(dd_delete_a);
         dropdown.appendChild(dd_delete);
