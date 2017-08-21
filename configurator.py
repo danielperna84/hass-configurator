@@ -2123,7 +2123,7 @@ INDEX = Template(r"""<!DOCTYPE html>
 
         // Delete button
         var dd_delete = document.createElement('li');
-        dd_delete.classList.add("waves-effect", "fb_dd");
+        dd_delete.classList.add("waves-effect", "fb_dd", 'modal-trigger');
         var dd_delete_a = document.createElement('a');
         dd_delete_a.setAttribute('href', "#modal_delete");
         dd_delete_a.classList.add("modal-trigger");
