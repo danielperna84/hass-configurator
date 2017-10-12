@@ -1,3 +1,6 @@
+Version 0.2.1 (2017-10-12)
+- Added script reloading
+
 Version 0.2.0 (2017-09-25)
 - Update MaterializeCSS to 0.100.1 @jmart518
 - Added git push option @danielperna84

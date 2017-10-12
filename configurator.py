@@ -603,6 +603,7 @@ INDEX = Template(r"""<!DOCTYPE html>
         <li class="divider"></li>
         <!--<li><a href="#modal_check_config">Check HASS Configuration</a></li>-->
         <li><a class="modal-trigger" href="#modal_reload_automations">Reload automations</a></li>
+        <li><a class="modal-trigger" href="#modal_reload_scripts">Reload scripts</a></li>
         <li><a class="modal-trigger" href="#modal_reload_groups">Reload groups</a></li>
         <li><a class="modal-trigger" href="#modal_reload_core">Reload core</a></li>
         <li><a class="modal-trigger" href="#modal_restart">Restart HASS</a></li>
@@ -618,6 +619,7 @@ INDEX = Template(r"""<!DOCTYPE html>
         <li class="divider"></li>
         <!--<li><a href="#modal_check_config">Check HASS Configuration</a></li>-->
         <li><a class="modal-trigger" href="#modal_reload_automations">Reload automations</a></li>
+        <li><a class="modal-trigger" href="#modal_reload_scripts">Reload scripts</a></li>
         <li><a class="modal-trigger" href="#modal_reload_groups">Reload groups</a></li>
         <li><a class="modal-trigger" href="#modal_reload_core">Reload core</a></li>
         <li><a class="modal-trigger" href="#modal_restart">Restart HASS</a></li>
@@ -1274,6 +1276,16 @@ INDEX = Template(r"""<!DOCTYPE html>
         <div class="modal-footer">
           <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">No</a>
           <a onclick="reload_automations()" class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Yes</a>
+        </div>
+    </div>
+    <div id="modal_reload_scripts" class="modal">
+        <div class="modal-content">
+            <h4 class="grey-text text-darken-3">Reload scripts<i class="mdi mdi-settings right grey-text text-darken-3" style="font-size: 2rem;"></i></h4>
+            <p>Do you want to reload the scripts?</p>
+        </div>
+        <div class="modal-footer">
+          <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">No</a>
+          <a onclick="reload_scripts()" class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Yes</a>
         </div>
     </div>
     <div id="modal_reload_groups" class="modal">
@@ -2287,6 +2299,13 @@ INDEX = Template(r"""<!DOCTYPE html>
         });
     }
 
+    function reload_scripts() {
+        $.get("api/reload_scripts", function (resp) {
+            var $toastContent = $("<div>Scripts reloaded</div>");
+            Materialize.toast($toastContent, 2000);
+        });
+    }
+
     function reload_groups() {
         $.get("api/reload_groups", function (resp) {
             var $toastContent = $("<div><pre>Groups reloaded</pre></div>");
@@ -2988,6 +3007,26 @@ class RequestHandler(BaseHTTPRequestHandler):
                 if HASS_API_PASSWORD:
                     headers["x-ha-access"] = HASS_API_PASSWORD
                 req = urllib.request.Request("%sservices/automation/reload" % HASS_API, headers=headers, method='POST')
+                with urllib.request.urlopen(req) as response:
+                    LOG.debug(json.loads(response.read().decode('utf-8')))
+                    res['service'] = "called successfully"
+            except Exception as err:
+                LOG.warning(err)
+                res['restart'] = str(err)
+            self.wfile.write(bytes(json.dumps(res), "utf8"))
+            return
+        elif req.path == '/api/reload_scripts':
+            LOG.info("/api/reload_scripts")
+            self.send_header('Content-type', 'text/json')
+            self.end_headers()
+            res = {"reload_scripts": False}
+            try:
+                headers = {
+                    "Content-Type": "application/json"
+                }
+                if HASS_API_PASSWORD:
+                    headers["x-ha-access"] = HASS_API_PASSWORD
+                req = urllib.request.Request("%sservices/script/reload" % HASS_API, headers=headers, method='POST')
                 with urllib.request.urlopen(req) as response:
                     LOG.debug(json.loads(response.read().decode('utf-8')))
                     res['service'] = "called successfully"
