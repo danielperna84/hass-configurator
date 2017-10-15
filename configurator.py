@@ -53,6 +53,8 @@ GIT = False
 # Files to ignore in the UI.  A good example list that cleans up the UI is
 # [".*", "*.log", "deps", "icloud", "*.conf", "*.json", "certs", "__pycache__"]
 IGNORE_PATTERN = []
+# if DIRSFIRST is set to `true`, directories will be displayed at the top
+DIRSFIRST = False
 ### End of options
 
 LOGLEVEL = logging.INFO
@@ -2732,7 +2734,7 @@ def signal_handler(sig, frame):
 def load_settings(settingsfile):
     global LISTENIP, LISTENPORT, BASEPATH, SSL_CERTIFICATE, SSL_KEY, HASS_API, \
     HASS_API_PASSWORD, CREDENTIALS, ALLOWED_NETWORKS, BANNED_IPS, BANLIMIT, DEV, \
-    IGNORE_PATTERN
+    IGNORE_PATTERN, DIRSFIRST
     try:
         if os.path.isfile(settingsfile):
             with open(settingsfile) as fptr:
@@ -2750,6 +2752,7 @@ def load_settings(settingsfile):
                 BANLIMIT = settings.get("BANLIMIT", BANLIMIT)
                 DEV = settings.get("DEV", DEV)
                 IGNORE_PATTERN = settings.get("IGNORE_PATTERN", IGNORE_PATTERN)
+                DIRSFIRST = settings.get("DIRSFIRST", DIRSFIRST)
     except Exception as err:
         LOG.warning(err)
         LOG.warning("Not loading static settings")
@@ -2776,7 +2779,15 @@ def get_dircontent(path, repo=None):
         staged = {}
         unstaged = {}
 
-    for elem in sorted(os.listdir(path), key=lambda x: x.lower()):
+    def sorted_file_list():
+        dirlist = [x for x in os.listdir(path) if os.path.isdir(os.path.join(path, x))]
+        filelist = [x for x in os.listdir(path) if not os.path.isdir(os.path.join(path, x))]
+        if DIRSFIRST:
+            return sorted(dirlist, key=lambda x: x.lower()) + sorted(filelist, key=lambda x: x.lower())
+        else:
+            return sorted(dirlist + filelist, key=lambda x: x.lower())
+
+    for elem in sorted_file_list():
         edata = {}
         edata['name'] = elem
         edata['dir'] = path
