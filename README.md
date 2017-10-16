@@ -63,6 +63,8 @@ Set this variable to `True` to enable Git integration. This feature requires [Gi
  to be installed on the system that is running the configurator. For thechnical reasons this feature can't be enabled with a static configuration file.  
 To push local commits to a remote repository, you have to add the remote manually: `git remote add origin ssh://somehost:/user/repo.git`  
 Verify, that the user that is running the configurator is allowed to push without any interaction (by using SSH PubKey authentication for example).
+#### DIRSFIRST (bool)
+if set to `true`, directories will be displayed at the top
  
 __Note regarding `ALLOWED_NETWORKS`, `BANNED_IPS` and `BANLIMIT`__:  
 The way this is implemented works in the following order:
