@@ -53,6 +53,8 @@ GIT = False
 # Files to ignore in the UI.  A good example list that cleans up the UI is
 # [".*", "*.log", "deps", "icloud", "*.conf", "*.json", "certs", "__pycache__"]
 IGNORE_PATTERN = []
+# if DIRSFIRST is set to `true`, directories will be displayed at the top
+DIRSFIRST = False
 ### End of options
 
 LOGLEVEL = logging.INFO
@@ -63,7 +65,7 @@ SO.setLevel(LOGLEVEL)
 SO.setFormatter(logging.Formatter('%(levelname)s:%(asctime)s:%(name)s:%(message)s'))
 LOG.addHandler(SO)
 RELEASEURL = "https://api.github.com/repos/danielperna84/hass-configurator/releases/latest"
-VERSION = "0.2.0"
+VERSION = "0.2.2"
 BASEDIR = "."
 DEV = False
 HTTPD = None
@@ -82,7 +84,7 @@ INDEX = Template(r"""<!DOCTYPE html>
     <title>HASS Configurator</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/MaterialDesign-Webfont/2.0.46/css/materialdesignicons.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.1/css/materialize.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
     <style type="text/css" media="screen">
         body {
             margin: 0;
@@ -519,9 +521,9 @@ INDEX = Template(r"""<!DOCTYPE html>
         }
 
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.8/ace.js" type="text/javascript" charset="utf-8"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.8/ext-modelist.js" type="text/javascript" charset="utf-8"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.8/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.9/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.9/ext-modelist.js" type="text/javascript" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.9/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
 </head>
 <body>
   <div class="preloader-background">
@@ -1912,7 +1914,7 @@ INDEX = Template(r"""<!DOCTYPE html>
                   <input id="wrap_limit" type="number" onchange="editor.setOption('wrap', parseInt(this.value))" min="1" value="80">
                   <label class="active" for="wrap_limit">Wrap Limit</label>
               </div> <a class="waves-effect waves-light btn light-blue" onclick="save_ace_settings()">Save Settings Locally</a>
-              <p class="center col s12"> Ace Editor 1.2.8 </p>
+              <p class="center col s12"> Ace Editor 1.2.9 </p>
           </div>
         </ul>
       </div>
@@ -1920,7 +1922,7 @@ INDEX = Template(r"""<!DOCTYPE html>
 <input type="hidden" id="fb_currentfile" value="" />
 <!-- Scripts -->
 <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.1/js/materialize.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
 <script type="text/javascript">
     $(document).ready(function () {
         $('select').material_select();
@@ -2732,7 +2734,7 @@ def signal_handler(sig, frame):
 def load_settings(settingsfile):
     global LISTENIP, LISTENPORT, BASEPATH, SSL_CERTIFICATE, SSL_KEY, HASS_API, \
     HASS_API_PASSWORD, CREDENTIALS, ALLOWED_NETWORKS, BANNED_IPS, BANLIMIT, DEV, \
-    IGNORE_PATTERN
+    IGNORE_PATTERN, DIRSFIRST
     try:
         if os.path.isfile(settingsfile):
             with open(settingsfile) as fptr:
@@ -2750,6 +2752,7 @@ def load_settings(settingsfile):
                 BANLIMIT = settings.get("BANLIMIT", BANLIMIT)
                 DEV = settings.get("DEV", DEV)
                 IGNORE_PATTERN = settings.get("IGNORE_PATTERN", IGNORE_PATTERN)
+                DIRSFIRST = settings.get("DIRSFIRST", DIRSFIRST)
     except Exception as err:
         LOG.warning(err)
         LOG.warning("Not loading static settings")
@@ -2776,7 +2779,15 @@ def get_dircontent(path, repo=None):
         staged = {}
         unstaged = {}
 
-    for elem in sorted(os.listdir(path), key=lambda x: x.lower()):
+    def sorted_file_list():
+        dirlist = [x for x in os.listdir(path) if os.path.isdir(os.path.join(path, x))]
+        filelist = [x for x in os.listdir(path) if not os.path.isdir(os.path.join(path, x))]
+        if DIRSFIRST:
+            return sorted(dirlist, key=lambda x: x.lower()) + sorted(filelist, key=lambda x: x.lower())
+        else:
+            return sorted(dirlist + filelist, key=lambda x: x.lower())
+
+    for elem in sorted_file_list():
         edata = {}
         edata['name'] = elem
         edata['dir'] = path
