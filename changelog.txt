@@ -1,5 +1,6 @@
-Version 0.2.2 (2017-nn-nn)
+Version 0.2.2 (2017-11-01)
 - Added option to list directories first @dimagoltsman
+- Updated dependencies @jmart518
 
 Version 0.2.1 (2017-10-12)
 - Added script reloading
