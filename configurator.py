@@ -1475,6 +1475,7 @@ INDEX = Template(r"""<!DOCTYPE html>
                 <select onchange="insert(this.value)">
                     <option value="" disabled selected>Select trigger platform</option>
                     <option value="event">Event</option>
+                    <option value="homeassistant">Home Assistant</option>
                     <option value="mqtt">MQTT</option>
                     <option value="numeric_state">Numeric State</option>
                     <option value="state">State</option>
