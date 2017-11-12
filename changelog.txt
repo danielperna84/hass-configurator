@@ -1,6 +1,6 @@
 Version 0.2.3 (2017-11-12)
 - Switched away from removed bootstrap API
-- Added homeassistant-event
+- Added homeassistant-trigger
 
 Version 0.2.2 (2017-11-01)
 - Added option to list directories first @dimagoltsman
