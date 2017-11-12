@@ -65,7 +65,7 @@ SO.setLevel(LOGLEVEL)
 SO.setFormatter(logging.Formatter('%(levelname)s:%(asctime)s:%(name)s:%(message)s'))
 LOG.addHandler(SO)
 RELEASEURL = "https://api.github.com/repos/danielperna84/hass-configurator/releases/latest"
-VERSION = "0.2.2"
+VERSION = "0.2.3"
 BASEDIR = "."
 DEV = False
 HTTPD = None
@@ -1475,6 +1475,7 @@ INDEX = Template(r"""<!DOCTYPE html>
                 <select onchange="insert(this.value)">
                     <option value="" disabled selected>Select trigger platform</option>
                     <option value="event">Event</option>
+                    <option value="homeassistant">Home Assistant</option>
                     <option value="mqtt">MQTT</option>
                     <option value="numeric_state">Numeric State</option>
                     <option value="state">State</option>
@@ -1984,77 +1985,86 @@ INDEX = Template(r"""<!DOCTYPE html>
     modemapping['txt'] = 'ace/mode/text';
     modemapping['xml'] = 'ace/mode/xml';
     modemapping['yaml'] = 'ace/mode/yaml';
+
+    function sort_select(id) {
+        var options = $('#' + id + ' option');
+        var arr = options.map(function (_, o) {
+            return {
+                t: $(o).text(), v: o.value
+            };
+        }).get();
+        arr.sort(function (o1, o2) {
+            var t1 = o1.t.toLowerCase(), t2 = o2.t.toLowerCase();
+            return t1 > t2 ? 1 : t1 < t2 ? -1 : 0;
+        });
+        options.each(function (i, o) {
+            o.value = arr[i].v;
+            $(o).text(arr[i].t);
+        });
+    }
+
     var separator = '$separator';
-    var bootstrap = $bootstrap;
-    if (bootstrap.hasOwnProperty("events")) {
+    var services_list = $services;
+    var events_list = $events;
+    var states_list = $states;
+
+    if (events_list) {
         var events = document.getElementById("events");
-        for (var i = 0; i < bootstrap.events.length; i++) {
+        for (var i = 0; i < events_list.length; i++) {
             var option = document.createElement("option");
-            option.value = bootstrap.events[i].event;
-            option.text = bootstrap.events[i].event;
+            option.value = events_list[i].event;
+            option.text = events_list[i].event;
             events.add(option);
         }
         var events = document.getElementById("events_side");
-        for (var i = 0; i < bootstrap.events.length; i++) {
+        for (var i = 0; i < events_list.length; i++) {
             var option = document.createElement("option");
-            option.value = bootstrap.events[i].event;
-            option.text = bootstrap.events[i].event;
+            option.value = events_list[i].event;
+            option.text = events_list[i].event;
             events.add(option);
         }
+        sort_select('events');
+        sort_select('events_side');
+    }
+
+    if (states_list) {
         var entities = document.getElementById("entities");
-        for (var i = 0; i < bootstrap.states.length; i++) {
+        for (var i = 0; i < states_list.length; i++) {
             var option = document.createElement("option");
-            option.value = bootstrap.states[i].entity_id;
-            option.text = bootstrap.states[i].attributes.friendly_name + ' (' + bootstrap.states[i].entity_id + ')';
+            option.value = states_list[i].entity_id;
+            option.text = states_list[i].attributes.friendly_name + ' (' + states_list[i].entity_id + ')';
             entities.add(option);
         }
         var entities = document.getElementById("entities_side");
-        for (var i = 0; i < bootstrap.states.length; i++) {
+        for (var i = 0; i < states_list.length; i++) {
             var option = document.createElement("option");
-            option.value = bootstrap.states[i].entity_id;
-            option.text = bootstrap.states[i].attributes.friendly_name + ' (' + bootstrap.states[i].entity_id + ')';
+            option.value = states_list[i].entity_id;
+            option.text = states_list[i].attributes.friendly_name + ' (' + states_list[i].entity_id + ')';
             entities.add(option);
         }
+        sort_select('entities');
+        sort_select('entities_side');
+    }
+
+    if (services_list) {
         var services = document.getElementById("services");
-        for (var i = 0; i < bootstrap.services.length; i++) {
-            for (var k in bootstrap.services[i].services) {
+        for (var i = 0; i < services_list.length; i++) {
+            for (var k in services_list[i].services) {
                 var option = document.createElement("option");
-                option.value = bootstrap.services[i].domain + '.' + k;
-                option.text = bootstrap.services[i].domain + '.' + k;
+                option.value = services_list[i].domain + '.' + k;
+                option.text = services_list[i].domain + '.' + k;
                 services.add(option);
             }
         }
         var services = document.getElementById("services_side");
-        for (var i = 0; i < bootstrap.services.length; i++) {
-            for (var k in bootstrap.services[i].services) {
+        for (var i = 0; i < services_list.length; i++) {
+            for (var k in services_list[i].services) {
                 var option = document.createElement("option");
-                option.value = bootstrap.services[i].domain + '.' + k;
-                option.text = bootstrap.services[i].domain + '.' + k;
+                option.value = services_list[i].domain + '.' + k;
+                option.text = services_list[i].domain + '.' + k;
                 services.add(option);
             }
         }
-
-        function sort_select(id) {
-            var options = $('#' + id + ' option');
-            var arr = options.map(function (_, o) {
-                return {
-                    t: $(o).text(), v: o.value
-                };
-            }).get();
-            arr.sort(function (o1, o2) {
-                var t1 = o1.t.toLowerCase(), t2 = o2.t.toLowerCase();
-                return t1 > t2 ? 1 : t1 < t2 ? -1 : 0;
-            });
-            options.each(function (i, o) {
-                o.value = arr[i].v;
-                $(o).text(arr[i].t);
-            });
-        }
-
-        sort_select('events');
-        sort_select('events_side');
-        sort_select('entities');
-        sort_select('entities_side');
         sort_select('services');
         sort_select('services_side');
     }
@@ -3090,16 +3100,27 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
 
-            boot = "{}"
+            services = "[]"
+            events = "[]"
+            states = "[]"
             try:
                 headers = {
                     "Content-Type": "application/json"
                 }
                 if HASS_API_PASSWORD:
                     headers["x-ha-access"] = HASS_API_PASSWORD
-                req = urllib.request.Request("%sbootstrap" % HASS_API, headers=headers, method='GET')
+
+                req = urllib.request.Request("%sservices" % HASS_API, headers=headers, method='GET')
                 with urllib.request.urlopen(req) as response:
-                    boot = response.read().decode('utf-8')
+                    services = response.read().decode('utf-8')
+
+                req = urllib.request.Request("%sevents" % HASS_API, headers=headers, method='GET')
+                with urllib.request.urlopen(req) as response:
+                    events = response.read().decode('utf-8')
+
+                req = urllib.request.Request("%sstates" % HASS_API, headers=headers, method='GET')
+                with urllib.request.urlopen(req) as response:
+                    states = response.read().decode('utf-8')
 
             except Exception as err:
                 LOG.warning("Exception getting bootstrap")
@@ -3114,7 +3135,9 @@ class RequestHandler(BaseHTTPRequestHandler):
             except Exception as err:
                 LOG.warning("Exception getting release")
                 LOG.warning(err)
-            html = get_html().safe_substitute(bootstrap=boot,
+            html = get_html().safe_substitute(services=services,
+                                              events=events,
+                                              states=states,
                                               current=VERSION,
                                               versionclass=color,
                                               separator="\%s" % os.sep if os.sep == "\\" else os.sep)
