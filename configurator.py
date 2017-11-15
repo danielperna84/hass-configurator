@@ -8,6 +8,7 @@ import os
 import sys
 import json
 import ssl
+import socket
 import socketserver
 import base64
 import ipaddress
@@ -18,7 +19,7 @@ import subprocess
 import logging
 import fnmatch
 from string import Template
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler
 import urllib.request
 from urllib.parse import urlparse, parse_qs, unquote
 
@@ -3633,16 +3634,17 @@ def main(args):
     if args:
         load_settings(args[0])
     LOG.info("Starting server")
+    CustomServer = socketserver.TCPServer
+    if ':' in LISTENIP:
+        CustomServer.address_family = socket.AF_INET6
     server_address = (LISTENIP, LISTENPORT)
     if CREDENTIALS:
         CREDENTIALS = base64.b64encode(bytes(CREDENTIALS, "utf-8"))
         Handler = AuthHandler
     else:
         Handler = RequestHandler
-    if not SSL_CERTIFICATE:
-        HTTPD = HTTPServer(server_address, Handler)
-    else:
-        HTTPD = socketserver.TCPServer(server_address, Handler)
+    HTTPD = CustomServer(server_address, Handler)
+    if SSL_CERTIFICATE:
         HTTPD.socket = ssl.wrap_socket(HTTPD.socket,
                                        certfile=SSL_CERTIFICATE,
                                        keyfile=SSL_KEY,
