@@ -2745,7 +2745,7 @@ def signal_handler(sig, frame):
     sys.exit(0)
 
 def load_settings(settingsfile):
-    global LISTENIP, LISTENPORT, BASEPATH, SSL_CERTIFICATE, SSL_KEY, HASS_API, \
+    global LISTENIP, LISTENPORT, BASEPATH, BASE_URL, SSL_CERTIFICATE, SSL_KEY, HASS_API, \
     HASS_API_PASSWORD, CREDENTIALS, ALLOWED_NETWORKS, BANNED_IPS, BANLIMIT, DEV, \
     IGNORE_PATTERN, DIRSFIRST
     try:
@@ -2755,6 +2755,7 @@ def load_settings(settingsfile):
                 LISTENIP = settings.get("LISTENIP", LISTENIP)
                 LISTENPORT = settings.get("LISTENPORT", LISTENPORT)
                 BASEPATH = settings.get("BASEPATH", BASEPATH)
+                BASE_URL = settings.get("BASE_URL", BASE_URL)
                 SSL_CERTIFICATE = settings.get("SSL_CERTIFICATE", SSL_CERTIFICATE)
                 SSL_KEY = settings.get("SSL_KEY", SSL_KEY)
                 HASS_API = settings.get("HASS_API", HASS_API)
