@@ -29,7 +29,7 @@ LISTENPORT = 3218
 # Set BASEPATH to something like "/home/hass/.homeassistant/" if you're not running the
 # configurator from that path
 BASEPATH = None
-# Set BASE_URL to "" for nothing, or something like "ha_configurator/" if you have a 
+# Set BASE_URL to "" for nothing, or something like "ha_configurator/" if you have a
 # reverse proxy and would like to serve this at a different path
 BASE_URL = ""
 # Set the paths to a certificate and the key if you're using SSL, e.g "/etc/ssl/certs/mycert.pem"
