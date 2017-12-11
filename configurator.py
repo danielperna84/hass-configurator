@@ -521,6 +521,11 @@ INDEX = Template(r"""<!DOCTYPE html>
             100% { background-color: #f5f5f5; }
         }
 
+        #lint-status {
+            position: absolute;
+            top: 0.75rem;
+            right: 10px;
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.9/ace.js" type="text/javascript" charset="utf-8"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.9/ext-modelist.js" type="text/javascript" charset="utf-8"></script>
@@ -1515,6 +1520,7 @@ INDEX = Template(r"""<!DOCTYPE html>
         <div class="col s12 m8 l9">
           <div class="card input-field col s12 grey lighten-4 hoverable pathtip">
               <input class="currentfile_input" value="" id="currentfile" type="text">
+              <i class="material-icons" id="lint-status"></i>
           </div>
         </div>
         <div class="col s12 m8 l9 z-depth-2" id="editor"></div>
@@ -2732,6 +2738,29 @@ INDEX = Template(r"""<!DOCTYPE html>
         foldstatus = !foldstatus;
     }
 
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/3.10.0/js-yaml.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript">
+function check_lint(e)
+{
+    if ($('#currentfile').val().match(".yaml$")) {
+        try {
+            var text = editor.getValue().replace(/!(include|secret)/g,".$1"); // hack because js-yaml does not like !include/!secret
+            jsyaml.safeLoad(text);
+            $('#lint-status').text("check_circle");
+            $('#lint-status').removeClass("red-text");
+            $('#lint-status').addClass("green-text");
+        } catch (err) {
+            $('#lint-status').text("error");
+            $('#lint-status').removeClass("green-text");
+            $('#lint-status').addClass("red-text");
+            console.log(err);
+        }
+    } else {
+        $('#lint-status').text("");
+    }
+}
+editor.getSession().on('change', check_lint);
 </script>
 </body>
 </html>""")
