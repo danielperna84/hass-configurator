@@ -526,6 +526,10 @@ INDEX = Template(r"""<!DOCTYPE html>
             top: 0.75rem;
             right: 10px;
         }
+
+        .cursor-pointer {
+            cursor: pointer;
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.9/ace.js" type="text/javascript" charset="utf-8"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.9/ext-modelist.js" type="text/javascript" charset="utf-8"></script>
@@ -2743,37 +2747,40 @@ INDEX = Template(r"""<!DOCTYPE html>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/3.10.0/js-yaml.js" type="text/javascript" charset="utf-8"></script>
 <script type="text/javascript">
 var lint_timeout;
+var lint_status = $('#lint-status'); // speed optimization
 
 function check_lint()
 {
-    if ($('#currentfile').val().match(".yaml$")) {
+    if (document.getElementById('currentfile').value.match(".yaml$")) {
         try {
             var text = editor.getValue().replace(/!(include|secret)/g,".$1"); // hack because js-yaml does not like !include/!secret
             jsyaml.safeLoad(text);
-            $('#lint-status').text("check_circle");
-            $('#lint-status').removeClass("red-text blue-text");
-            $('#lint-status').addClass("green-text");
+            lint_status.text("check_circle");
+            lint_status.removeClass("cursor-pointer red-text grey-text");
+            lint_status.addClass("green-text");
         } catch (err) {
-            $('#lint-status').text("error");
-            $('#lint-status').removeClass("green-text blue-text");
-            $('#lint-status').addClass("red-text");
+            lint_status.text("error");
+            lint_status.removeClass("green-text grey-text");
+            lint_status.addClass("cursor-pointer red-text");
             console.log(err);
         }
     } else {
-        $('#lint-status').text("");
+        lint_status.empty();
     }
 }
 
 function queue_lint(e)
 {
-    if ($('#currentfile').val().match(".yaml$")) {
+    if (document.getElementById('currentfile').value.match(".yaml$")) {
         clearTimeout(lint_timeout);
-        $('#lint-status').text("watch_later");
-        $('#lint-status').removeClass("red-text green-text");
-        $('#lint-status').addClass("blue-text");
-        lint_timeout = setTimeout(check_lint, 1000);
+        lint_timeout = setTimeout(check_lint, 500);
+        if (lint_status.text() != "cached") {
+            lint_status.text("cached");
+            lint_status.removeClass("cursor-pointer red-text green-text");
+            lint_status.addClass("grey-text");
+        }
     } else {
-        $('#lint-status').text("");
+        lint_status.empty();
     }
 }
 
