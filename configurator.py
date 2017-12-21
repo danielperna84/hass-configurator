@@ -2741,18 +2741,20 @@ INDEX = Template(r"""<!DOCTYPE html>
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/3.10.0/js-yaml.js" type="text/javascript" charset="utf-8"></script>
 <script type="text/javascript">
-function check_lint(e)
+var lint_timeout;
+
+function check_lint()
 {
     if ($('#currentfile').val().match(".yaml$")) {
         try {
             var text = editor.getValue().replace(/!(include|secret)/g,".$1"); // hack because js-yaml does not like !include/!secret
             jsyaml.safeLoad(text);
             $('#lint-status').text("check_circle");
-            $('#lint-status').removeClass("red-text");
+            $('#lint-status').removeClass("red-text blue-text");
             $('#lint-status').addClass("green-text");
         } catch (err) {
             $('#lint-status').text("error");
-            $('#lint-status').removeClass("green-text");
+            $('#lint-status').removeClass("green-text blue-text");
             $('#lint-status').addClass("red-text");
             console.log(err);
         }
@@ -2760,7 +2762,21 @@ function check_lint(e)
         $('#lint-status').text("");
     }
 }
-editor.getSession().on('change', check_lint);
+
+function queue_lint(e)
+{
+    if ($('#currentfile').val().match(".yaml$")) {
+        clearTimeout(lint_timeout);
+        $('#lint-status').text("watch_later");
+        $('#lint-status').removeClass("red-text green-text");
+        $('#lint-status').addClass("blue-text");
+        lint_timeout = setTimeout(check_lint, 1000);
+    } else {
+        $('#lint-status').text("");
+    }
+}
+
+editor.getSession().on('change', queue_lint);
 </script>
 </body>
 </html>""")
