@@ -2294,6 +2294,7 @@ INDEX = Template(r"""<!DOCTYPE html>
                 editor.session.getUndoManager().markClean();
                 $('.markdirty').each(function(i, o){o.classList.remove('red');});
                 $('.hidesave').css('opacity', 0);
+                check_lint();
             });
         }
     }
@@ -2776,7 +2777,7 @@ function queue_lint(e)
     }
 }
 
-editor.getSession().on('change', queue_lint);
+editor.on('change', queue_lint);
 </script>
 </body>
 </html>""")
