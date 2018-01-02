@@ -8,6 +8,7 @@ import os
 import sys
 import json
 import ssl
+import socket
 import socketserver
 import base64
 import ipaddress
@@ -18,7 +19,7 @@ import subprocess
 import logging
 import fnmatch
 from string import Template
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler
 import urllib.request
 from urllib.parse import urlparse, parse_qs, unquote
 
@@ -520,6 +521,24 @@ INDEX = Template(r"""<!DOCTYPE html>
             100% { background-color: #f5f5f5; }
         }
 
+        #lint-status {
+            position: absolute;
+            top: 0.75rem;
+            right: 10px;
+        }
+
+        .cursor-pointer {
+            cursor: pointer;
+        }
+
+        #modal_lint.modal {
+            width: 80%;
+        }
+
+        #modal_lint textarea {
+            resize: none;
+            height: auto;
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.9/ace.js" type="text/javascript" charset="utf-8"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.9/ext-modelist.js" type="text/javascript" charset="utf-8"></script>
@@ -1467,6 +1486,14 @@ INDEX = Template(r"""<!DOCTYPE html>
           <a class=" modal-action modal-close waves-effect btn-flat light-blue-text">OK</a>
         </div>
     </div>
+    <div id="modal_lint" class="modal">
+        <div class="modal-content">
+            <textarea rows="8" readonly></textarea>
+        </div>
+        <div class="modal-footer">
+          <a class="modal-action modal-close waves-effect btn-flat light-blue-text">OK</a>
+        </div>
+    </div>
     <!-- Main Editor Area -->
     <div class="row">
         <div class="col m4 l3 hide-on-small-only">
@@ -1514,6 +1541,7 @@ INDEX = Template(r"""<!DOCTYPE html>
         <div class="col s12 m8 l9">
           <div class="card input-field col s12 grey lighten-4 hoverable pathtip">
               <input class="currentfile_input" value="" id="currentfile" type="text">
+              <i class="material-icons" id="lint-status" onclick="show_lint_error()"></i>
           </div>
         </div>
         <div class="col s12 m8 l9 z-depth-2" id="editor"></div>
@@ -2287,6 +2315,7 @@ INDEX = Template(r"""<!DOCTYPE html>
                 editor.session.getUndoManager().markClean();
                 $('.markdirty').each(function(i, o){o.classList.remove('red');});
                 $('.hidesave').css('opacity', 0);
+                check_lint();
             });
         }
     }
@@ -2731,6 +2760,58 @@ INDEX = Template(r"""<!DOCTYPE html>
         foldstatus = !foldstatus;
     }
 
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/3.10.0/js-yaml.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript">
+var lint_timeout;
+var lint_status = $('#lint-status'); // speed optimization
+var lint_error = "";
+
+function check_lint()
+{
+    if (document.getElementById('currentfile').value.match(".yaml$")) {
+        try {
+            var text = editor.getValue().replace(/!(include|secret)/g,".$1"); // hack because js-yaml does not like !include/!secret
+            jsyaml.safeLoad(text);
+            lint_status.text("check_circle");
+            lint_status.removeClass("cursor-pointer red-text grey-text");
+            lint_status.addClass("green-text");
+            lint_error = "";
+        } catch (err) {
+            lint_status.text("error");
+            lint_status.removeClass("green-text grey-text");
+            lint_status.addClass("cursor-pointer red-text");
+            lint_error = err.message;
+        }
+    } else {
+        lint_status.empty();
+    }
+}
+
+function queue_lint(e)
+{
+    if (document.getElementById('currentfile').value.match(".yaml$")) {
+        clearTimeout(lint_timeout);
+        lint_timeout = setTimeout(check_lint, 500);
+        if (lint_status.text() != "cached") {
+            lint_status.text("cached");
+            lint_status.removeClass("cursor-pointer red-text green-text");
+            lint_status.addClass("grey-text");
+        }
+    } else {
+        lint_status.empty();
+    }
+}
+
+function show_lint_error()
+{
+    if(lint_error) {
+        $("#modal_lint textarea").val(lint_error);
+        $("#modal_lint").modal('open');
+    }
+}
+
+editor.on('change', queue_lint);
 </script>
 </body>
 </html>""")
@@ -3633,16 +3714,17 @@ def main(args):
     if args:
         load_settings(args[0])
     LOG.info("Starting server")
+    CustomServer = socketserver.TCPServer
+    if ':' in LISTENIP:
+        CustomServer.address_family = socket.AF_INET6
     server_address = (LISTENIP, LISTENPORT)
     if CREDENTIALS:
         CREDENTIALS = base64.b64encode(bytes(CREDENTIALS, "utf-8"))
         Handler = AuthHandler
     else:
         Handler = RequestHandler
-    if not SSL_CERTIFICATE:
-        HTTPD = HTTPServer(server_address, Handler)
-    else:
-        HTTPD = socketserver.TCPServer(server_address, Handler)
+    HTTPD = CustomServer(server_address, Handler)
+    if SSL_CERTIFICATE:
         HTTPD.socket = ssl.wrap_socket(HTTPD.socket,
                                        certfile=SSL_CERTIFICATE,
                                        keyfile=SSL_KEY,
