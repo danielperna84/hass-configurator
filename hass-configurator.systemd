@@ -1,5 +1,5 @@
 [Unit]
-Description=HASS-PoC-Configurator
+Description=HASS-Configurator
 After=network.target
 
 [Service]
