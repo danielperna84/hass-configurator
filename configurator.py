@@ -2781,7 +2781,6 @@ function check_lint()
             lint_status.text("error");
             lint_status.removeClass("green-text grey-text");
             lint_status.addClass("cursor-pointer red-text");
-            console.log(err);
             lint_error = err.message;
         }
     } else {
