@@ -1,4 +1,5 @@
-Version 0.2.4 (2017-11-nn)
+Version 0.2.4 (2018-01-02)
+- Added YAML linting @AtoxIO
 - Added IPv6 support @danielperna84
 
 Version 0.2.3 (2017-11-12)

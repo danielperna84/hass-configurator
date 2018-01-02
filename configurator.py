@@ -66,7 +66,7 @@ SO.setLevel(LOGLEVEL)
 SO.setFormatter(logging.Formatter('%(levelname)s:%(asctime)s:%(name)s:%(message)s'))
 LOG.addHandler(SO)
 RELEASEURL = "https://api.github.com/repos/danielperna84/hass-configurator/releases/latest"
-VERSION = "0.2.3"
+VERSION = "0.2.4"
 BASEDIR = "."
 DEV = False
 HTTPD = None
