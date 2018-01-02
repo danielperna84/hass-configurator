@@ -530,6 +530,15 @@ INDEX = Template(r"""<!DOCTYPE html>
         .cursor-pointer {
             cursor: pointer;
         }
+
+        #modal_lint.modal {
+            width: 80%;
+        }
+
+        #modal_lint textarea {
+            resize: none;
+            height: auto;
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.9/ace.js" type="text/javascript" charset="utf-8"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.9/ext-modelist.js" type="text/javascript" charset="utf-8"></script>
@@ -1477,6 +1486,14 @@ INDEX = Template(r"""<!DOCTYPE html>
           <a class=" modal-action modal-close waves-effect btn-flat light-blue-text">OK</a>
         </div>
     </div>
+    <div id="modal_lint" class="modal">
+        <div class="modal-content">
+            <textarea rows="8" readonly></textarea>
+        </div>
+        <div class="modal-footer">
+          <a class="modal-action modal-close waves-effect btn-flat light-blue-text">OK</a>
+        </div>
+    </div>
     <!-- Main Editor Area -->
     <div class="row">
         <div class="col m4 l3 hide-on-small-only">
@@ -1524,7 +1541,7 @@ INDEX = Template(r"""<!DOCTYPE html>
         <div class="col s12 m8 l9">
           <div class="card input-field col s12 grey lighten-4 hoverable pathtip">
               <input class="currentfile_input" value="" id="currentfile" type="text">
-              <i class="material-icons" id="lint-status"></i>
+              <i class="material-icons" id="lint-status" onclick="show_lint_error()"></i>
           </div>
         </div>
         <div class="col s12 m8 l9 z-depth-2" id="editor"></div>
@@ -2748,6 +2765,7 @@ INDEX = Template(r"""<!DOCTYPE html>
 <script type="text/javascript">
 var lint_timeout;
 var lint_status = $('#lint-status'); // speed optimization
+var lint_error = "";
 
 function check_lint()
 {
@@ -2758,11 +2776,13 @@ function check_lint()
             lint_status.text("check_circle");
             lint_status.removeClass("cursor-pointer red-text grey-text");
             lint_status.addClass("green-text");
+            lint_error = "";
         } catch (err) {
             lint_status.text("error");
             lint_status.removeClass("green-text grey-text");
             lint_status.addClass("cursor-pointer red-text");
             console.log(err);
+            lint_error = err.message;
         }
     } else {
         lint_status.empty();
@@ -2781,6 +2801,14 @@ function queue_lint(e)
         }
     } else {
         lint_status.empty();
+    }
+}
+
+function show_lint_error()
+{
+    if(lint_error) {
+        $("#modal_lint textarea").val(lint_error);
+        $("#modal_lint").modal('open');
     }
 }
 
