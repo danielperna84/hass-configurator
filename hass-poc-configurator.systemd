@@ -4,8 +4,11 @@ After=network.target
 
 [Service]
 Type=simple
+User=homeassistant
 #Set the path to your configurator.py location
-ExecStart=/usr/bin/python3 /etc/homeassistant/configurator.py
+WorkingDirectory=/etc/homeassistant
+ExecStart=/usr/bin/python3 /etc/homeassistant/configurator.py settings.conf
+Restart=always
 
 [Install]
 WantedBy=multi-user.target
