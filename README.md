@@ -101,3 +101,7 @@ Since the configurator script on its own is no service, you'll have to take some
 4. A tool called [tmux](https://tmux.github.io/), which should be pre-installed with recent AIO installers.
 5. A tool called [screen](http://ss64.com/bash/screen.html). If it's not already installed on your system, you can do `sudo apt-get install screen` to get it. When it's installed, start a screen session by executing `screen`. Then navigate to your HASS directory and start the configurator like described above. Put the screen session into the background by pressing `CTRL+A` and then `CTRL+D`.
 To resume the screen session, log in to your machine and execute `screen -r`.
+
+### Docker
+If you are using docker to run your homeassistant instance at home you can find corresponding docker images for the configurator on [dockerhub](https://hub.docker.com/r/causticlab/hass-configurator-docker/).
+For usage visit the [repository](https://github.com/CausticLab/hass-configurator-docker)
