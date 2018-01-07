@@ -471,6 +471,10 @@ INDEX = Template(r"""<!DOCTYPE html>
             background-color: #03a9f4 !important;
         }
 
+        .ace_invisible {
+            color: rgba(191, 191, 191, 0.5) !important;
+        }
+
         .fbicon_pad {
             min-height: 64px !important;
         }
