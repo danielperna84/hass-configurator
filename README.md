@@ -103,5 +103,5 @@ Since the configurator script on its own is no service, you'll have to take some
 To resume the screen session, log in to your machine and execute `screen -r`.
 
 ### Docker
-If you are using docker to run your homeassistant instance at home you can find corresponding docker images for the configurator on [dockerhub](https://hub.docker.com/r/causticlab/hass-configurator-docker/)
+If you are using docker to run your homeassistant instance at home you can find corresponding docker images for the configurator on [dockerhub](https://hub.docker.com/r/causticlab/hass-configurator-docker/).
 For usage visit the [repository](https://github.com/CausticLab/hass-configurator-docker)
