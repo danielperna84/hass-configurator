@@ -2932,6 +2932,7 @@ def get_html():
 def check_access(clientip):
     global BANNED_IPS
     if clientip in BANNED_IPS:
+        LOG.warning("Client IP banned.")
         return False
     if not ALLOWED_NETWORKS:
         return True
@@ -2939,6 +2940,7 @@ def check_access(clientip):
         ipobject = ipaddress.ip_address(clientip)
         if ipobject in ipaddress.ip_network(net):
             return True
+    LOG.warning("Client IP not within allowed networks.")
     BANNED_IPS.append(clientip)
     return False
 
