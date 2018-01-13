@@ -30,6 +30,9 @@ LISTENPORT = 3218
 # Set BASEPATH to something like "/home/hass/.homeassistant/" if you're not running the
 # configurator from that path
 BASEPATH = None
+# Set BASE_URL to "" for nothing, or something like "ha_configurator/" if you have a
+# reverse proxy and would like to serve this at a different path
+BASE_URL = ""
 # Set the paths to a certificate and the key if you're using SSL, e.g "/etc/ssl/certs/mycert.pem"
 SSL_CERTIFICATE = None
 SSL_KEY = None
@@ -2102,7 +2105,7 @@ INDEX = Template(r"""<!DOCTYPE html>
     }
 
     function listdir(path) {
-        $.get(encodeURI("api/listdir?path=" + path), function(data) {
+        $.get(encodeURI("${base_url}api/listdir?path=" + path), function(data) {
             renderpath(data);
         });
         document.getElementById("slide-out").scrollTop = 0;
@@ -2305,7 +2308,7 @@ INDEX = Template(r"""<!DOCTYPE html>
             $('#modal_markdirty').modal('open');
         }
         else {
-            $.get("api/file?filename=" + filepath, function(data) {
+            $.get("${base_url}api/file?filename=" + filepath, function(data) {
                 fileparts = filepath.split('.');
                 extension = fileparts[fileparts.length -1];
                 if (modemapping.hasOwnProperty(extension)) {
@@ -2325,7 +2328,7 @@ INDEX = Template(r"""<!DOCTYPE html>
     }
 
     function check_config() {
-        $.get("api/check_config", function (resp) {
+        $.get("${base_url}api/check_config", function (resp) {
             if (resp.length == 0) {
                 var $toastContent = $("<div><pre>Configuration seems valid.</pre></div>");
                 Materialize.toast($toastContent, 2000);
@@ -2338,35 +2341,35 @@ INDEX = Template(r"""<!DOCTYPE html>
     }
 
     function reload_automations() {
-        $.get("api/reload_automations", function (resp) {
+        $.get("${base_url}api/reload_automations", function (resp) {
             var $toastContent = $("<div>Automations reloaded</div>");
             Materialize.toast($toastContent, 2000);
         });
     }
 
     function reload_scripts() {
-        $.get("api/reload_scripts", function (resp) {
+        $.get("${base_url}api/reload_scripts", function (resp) {
             var $toastContent = $("<div>Scripts reloaded</div>");
             Materialize.toast($toastContent, 2000);
         });
     }
 
     function reload_groups() {
-        $.get("api/reload_groups", function (resp) {
+        $.get("${base_url}api/reload_groups", function (resp) {
             var $toastContent = $("<div><pre>Groups reloaded</pre></div>");
             Materialize.toast($toastContent, 2000);
         });
     }
 
     function reload_core() {
-        $.get("api/reload_core", function (resp) {
+        $.get("${base_url}api/reload_core", function (resp) {
             var $toastContent = $("<div><pre>Core reloaded</pre></div>");
             Materialize.toast($toastContent, 2000);
         });
     }
 
     function restart() {
-        $.get("api/restart", function (resp) {
+        $.get("${base_url}api/restart", function (resp) {
             if (resp.length == 0) {
                 var $toastContent = $("<div><pre>Restarting HASS</pre></div>");
                 Materialize.toast($toastContent, 2000);
@@ -2384,7 +2387,7 @@ INDEX = Template(r"""<!DOCTYPE html>
             data = new Object();
             data.filename = filepath;
             data.text = editor.getValue()
-            $.post("api/save", data).done(function(resp) {
+            $.post("${base_url}api/save", data).done(function(resp) {
                 if (resp.error) {
                     var $toastContent = $("<div><pre>" + resp.message + "\n" + resp.path + "</pre></div>");
                     Materialize.toast($toastContent, 5000);
@@ -2418,7 +2421,7 @@ INDEX = Template(r"""<!DOCTYPE html>
     }
 
     function download_file(filepath) {
-        window.open("/api/download?filename="+encodeURI(filepath));
+        window.open("/${base_url}api/download?filename="+encodeURI(filepath));
     }
 
     function delete_file() {
@@ -2426,7 +2429,7 @@ INDEX = Template(r"""<!DOCTYPE html>
         if (path.length > 0) {
             data = new Object();
             data.path= path;
-            $.post("api/delete", data).done(function(resp) {
+            $.post("${base_url}api/delete", data).done(function(resp) {
                 if (resp.error) {
                     var $toastContent = $("<div><pre>" + resp.message + "\n" + resp.path + "</pre></div>");
                     Materialize.toast($toastContent, 5000);
@@ -2448,7 +2451,7 @@ INDEX = Template(r"""<!DOCTYPE html>
             data = new Object();
             data.command = command;
             data.timeout = 15;
-            $.post("api/exec_command", data).done(function(resp) {
+            $.post("${base_url}api/exec_command", data).done(function(resp) {
                 if (resp.error) {
                     var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
                     Materialize.toast($toastContent, 5000);
@@ -2472,7 +2475,7 @@ INDEX = Template(r"""<!DOCTYPE html>
         if (path.length > 0) {
             data = new Object();
             data.path= path;
-            $.post("api/delete", data).done(function(resp) {
+            $.post("${base_url}api/delete", data).done(function(resp) {
                 if (resp.error) {
                     var $toastContent = $("<div><pre>" + resp.message + "\n" + resp.path + "</pre></div>");
                     Materialize.toast($toastContent, 5000);
@@ -2495,7 +2498,7 @@ INDEX = Template(r"""<!DOCTYPE html>
         if (path.length > 0) {
             data = new Object();
             data.path = path;
-            $.post("api/gitadd", data).done(function(resp) {
+            $.post("${base_url}api/gitadd", data).done(function(resp) {
                 if (resp.error) {
                     var $toastContent = $("<div><pre>" + resp.message + "\n" + resp.path + "</pre></div>");
                     Materialize.toast($toastContent, 5000);
@@ -2514,7 +2517,7 @@ INDEX = Template(r"""<!DOCTYPE html>
         if (path.length > 0) {
             data = new Object();
             data.path = path;
-            $.post("api/init", data).done(function(resp) {
+            $.post("${base_url}api/init", data).done(function(resp) {
                 if (resp.error) {
                     var $toastContent = $("<div><pre>" + resp.message + "\n" + resp.path + "</pre></div>");
                     Materialize.toast($toastContent, 5000);
@@ -2534,7 +2537,7 @@ INDEX = Template(r"""<!DOCTYPE html>
             data = new Object();
             data.path = path;
             data.message = message;
-            $.post("api/commit", data).done(function(resp) {
+            $.post("${base_url}api/commit", data).done(function(resp) {
                 if (resp.error) {
                     var $toastContent = $("<div><pre>" + resp.message + "\n" + resp.path + "</pre></div>");
                     Materialize.toast($toastContent, 5000);
@@ -2554,7 +2557,7 @@ INDEX = Template(r"""<!DOCTYPE html>
         if (path.length > 0) {
             data = new Object();
             data.path = path;
-            $.post("api/push", data).done(function(resp) {
+            $.post("${base_url}api/push", data).done(function(resp) {
                 if (resp.error) {
                     var $toastContent = $("<div><pre>" + resp.message + "\n" + resp.path + "</pre></div>");
                     Materialize.toast($toastContent, 5000);
@@ -2574,7 +2577,7 @@ INDEX = Template(r"""<!DOCTYPE html>
             data = new Object();
             data.path = path;
             data.branch = branch;
-            $.post("api/checkout", data).done(function(resp) {
+            $.post("${base_url}api/checkout", data).done(function(resp) {
                 if (resp.error) {
                     var $toastContent = $("<div><pre>" + resp.message + "\n" + resp.path + "</pre></div>");
                     Materialize.toast($toastContent, 5000);
@@ -2594,7 +2597,7 @@ INDEX = Template(r"""<!DOCTYPE html>
             data = new Object();
             data.path = path;
             data.branch = branch;
-            $.post("api/newbranch", data).done(function(resp) {
+            $.post("${base_url}api/newbranch", data).done(function(resp) {
                 if (resp.error) {
                     var $toastContent = $("<div><pre>" + resp.message + "\n" + resp.path + "</pre></div>");
                     Materialize.toast($toastContent, 5000);
@@ -2614,7 +2617,7 @@ INDEX = Template(r"""<!DOCTYPE html>
             data = new Object();
             data.path = path;
             data.name = foldername;
-            $.post("api/newfolder", data).done(function(resp) {
+            $.post("${base_url}api/newfolder", data).done(function(resp) {
                 if (resp.error) {
                     var $toastContent = $("<div><pre>" + resp.message + "\n" + resp.path + "</pre></div>");
                     Materialize.toast($toastContent, 5000);
@@ -2635,7 +2638,7 @@ INDEX = Template(r"""<!DOCTYPE html>
             data = new Object();
             data.path = path;
             data.name = filename;
-            $.post("api/newfile", data).done(function(resp) {
+            $.post("${base_url}api/newfile", data).done(function(resp) {
                 if (resp.error) {
                     var $toastContent = $("<div><pre>" + resp.message + "\n" + resp.path + "</pre></div>");
                     Materialize.toast($toastContent, 5000);
@@ -2656,7 +2659,7 @@ INDEX = Template(r"""<!DOCTYPE html>
         form_data.append('file', file_data);
         form_data.append('path', document.getElementById('fbheader').innerHTML);
         $.ajax({
-            url: 'api/upload',
+            url: '${base_url}api/upload',
             dataType: 'json',
             cache: false,
             contentType: false,
@@ -2827,7 +2830,7 @@ def signal_handler(sig, frame):
     sys.exit(0)
 
 def load_settings(settingsfile):
-    global LISTENIP, LISTENPORT, BASEPATH, SSL_CERTIFICATE, SSL_KEY, HASS_API, \
+    global LISTENIP, LISTENPORT, BASEPATH, BASE_URL, SSL_CERTIFICATE, SSL_KEY, HASS_API, \
     HASS_API_PASSWORD, CREDENTIALS, ALLOWED_NETWORKS, BANNED_IPS, BANLIMIT, DEV, \
     IGNORE_PATTERN, DIRSFIRST
     try:
@@ -2837,6 +2840,7 @@ def load_settings(settingsfile):
                 LISTENIP = settings.get("LISTENIP", LISTENIP)
                 LISTENPORT = settings.get("LISTENPORT", LISTENPORT)
                 BASEPATH = settings.get("BASEPATH", BASEPATH)
+                BASE_URL = settings.get("BASE_URL", BASE_URL)
                 SSL_CERTIFICATE = settings.get("SSL_CERTIFICATE", SSL_CERTIFICATE)
                 SSL_KEY = settings.get("SSL_KEY", SSL_KEY)
                 HASS_API = settings.get("HASS_API", HASS_API)
@@ -2961,7 +2965,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         req = urlparse(self.path)
         query = parse_qs(req.query)
         self.send_response(200)
-        if req.path == '/api/file':
+        if req.path == '/' + BASE_URL + 'api/file':
             content = ""
             self.send_header('Content-type', 'text/text')
             self.end_headers()
@@ -2979,7 +2983,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 content = str(err)
             self.wfile.write(bytes(content, "utf8"))
             return
-        elif req.path == '/api/download':
+        elif req.path == '/' + BASE_URL + 'api/download':
             content = ""
             filename = query.get('filename', None)
             try:
@@ -3001,7 +3005,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/text')
             self.wfile.write(bytes(content, "utf8"))
             return
-        elif req.path == '/api/listdir':
+        elif req.path == '/' + BASE_URL + 'api/listdir':
             content = ""
             self.send_header('Content-type', 'text/json')
             self.end_headers()
@@ -3037,7 +3041,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 content = str(err)
                 self.wfile.write(bytes(content, "utf8"))
             return
-        elif req.path == '/api/abspath':
+        elif req.path == '/' + BASE_URL + 'api/abspath':
             content = ""
             self.send_header('Content-type', 'text/text')
             self.end_headers()
@@ -3050,7 +3054,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 if os.path.isdir(dirpath):
                     self.wfile.write(os.path.abspath(dirpath))
             return
-        elif req.path == '/api/parent':
+        elif req.path == '/' + BASE_URL + 'api/parent':
             content = ""
             self.send_header('Content-type', 'text/text')
             self.end_headers()
@@ -3063,8 +3067,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                 if os.path.isdir(dirpath):
                     self.wfile.write(os.path.abspath(os.path.dirname(dirpath)))
             return
-        elif req.path == '/api/restart':
-            LOG.info("/api/restart")
+        elif req.path == '/' + BASE_URL + 'api/restart':
+            LOG.info('/' + BASE_URL + 'api/restart')
             self.send_header('Content-type', 'text/json')
             self.end_headers()
             res = {"restart": False}
@@ -3083,8 +3087,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                 res['restart'] = str(err)
             self.wfile.write(bytes(json.dumps(res), "utf8"))
             return
-        elif req.path == '/api/check_config':
-            LOG.info("/api/check_config")
+        elif req.path == '/' + BASE_URL + 'api/check_config':
+            LOG.info('/' + BASE_URL + 'api/check_config')
             self.send_header('Content-type', 'text/json')
             self.end_headers()
             res = {"check_config": False}
@@ -3103,8 +3107,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                 res['restart'] = str(err)
             self.wfile.write(bytes(json.dumps(res), "utf8"))
             return
-        elif req.path == '/api/reload_automations':
-            LOG.info("/api/reload_automations")
+        elif req.path == '/' + BASE_URL + 'api/reload_automations':
+            LOG.info('/' + BASE_URL + 'api/reload_automations')
             self.send_header('Content-type', 'text/json')
             self.end_headers()
             res = {"reload_automations": False}
@@ -3123,8 +3127,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                 res['restart'] = str(err)
             self.wfile.write(bytes(json.dumps(res), "utf8"))
             return
-        elif req.path == '/api/reload_scripts':
-            LOG.info("/api/reload_scripts")
+        elif req.path == '/' + BASE_URL + 'api/reload_scripts':
+            LOG.info('/' + BASE_URL + 'api/reload_scripts')
             self.send_header('Content-type', 'text/json')
             self.end_headers()
             res = {"reload_scripts": False}
@@ -3143,8 +3147,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                 res['restart'] = str(err)
             self.wfile.write(bytes(json.dumps(res), "utf8"))
             return
-        elif req.path == '/api/reload_groups':
-            LOG.info("/api/reload_groups")
+        elif req.path == '/' + BASE_URL + 'api/reload_groups':
+            LOG.info('/' + BASE_URL + 'api/reload_groups')
             self.send_header('Content-type', 'text/json')
             self.end_headers()
             res = {"reload_groups": False}
@@ -3163,8 +3167,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                 res['restart'] = str(err)
             self.wfile.write(bytes(json.dumps(res), "utf8"))
             return
-        elif req.path == '/api/reload_core':
-            LOG.info("/api/reload_core")
+        elif req.path == '/' + BASE_URL + 'api/reload_core':
+            LOG.info('/' + BASE_URL + 'api/reload_core')
             self.send_header('Content-type', 'text/json')
             self.end_headers()
             res = {"reload_core": False}
@@ -3227,6 +3231,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                                               states=states,
                                               current=VERSION,
                                               versionclass=color,
+                                              base_url=BASE_URL,
                                               separator="\%s" % os.sep if os.sep == "\\" else os.sep)
             self.wfile.write(bytes(html, "utf8"))
             return
@@ -3247,7 +3252,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         }
 
         length = int(self.headers['content-length'])
-        if req.path == '/api/save':
+        if req.path == '/' + BASE_URL + 'api/save':
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
             except Exception as err:
@@ -3273,7 +3278,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                         LOG.warning(err)
             else:
                 response['message'] = "Missing filename or text"
-        elif req.path == '/api/upload':
+        elif req.path == '/' + BASE_URL + 'api/upload':
             if length > 104857600: #100 MB for now
                 read = 0
                 while read < length:
@@ -3303,7 +3308,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 response['message'] = "Upload successful"
                 self.wfile.write(bytes(json.dumps(response), "utf8"))
                 return
-        elif req.path == '/api/delete':
+        elif req.path == '/' + BASE_URL + 'api/delete':
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
             except Exception as err:
@@ -3337,7 +3342,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                         LOG.warning(err)
             else:
                 response['message'] = "Missing filename or text"
-        elif req.path == '/api/exec_command':
+        elif req.path == '/' + BASE_URL + 'api/exec_command':
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
             except Exception as err:
@@ -3384,7 +3389,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                         LOG.warning(err)
             else:
                 response['message'] = "Missing command"
-        elif req.path == '/api/gitadd':
+        elif req.path == '/' + BASE_URL + 'api/gitadd':
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
             except Exception as err:
@@ -3417,7 +3422,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                         LOG.warning(err)
             else:
                 response['message'] = "Missing filename"
-        elif req.path == '/api/commit':
+        elif req.path == '/' + BASE_URL + 'api/commit':
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
             except Exception as err:
@@ -3450,7 +3455,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                         LOG.warning("Exception (no repo): %s" % str(err))
             else:
                 response['message'] = "Missing path"
-        elif req.path == '/api/checkout':
+        elif req.path == '/' + BASE_URL + 'api/checkout':
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
             except Exception as err:
@@ -3484,7 +3489,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                         LOG.warning("Exception (no repo): %s" % str(err))
             else:
                 response['message'] = "Missing path or branch"
-        elif req.path == '/api/newbranch':
+        elif req.path == '/' + BASE_URL + 'api/newbranch':
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
             except Exception as err:
@@ -3517,7 +3522,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                         LOG.warning("Exception (no repo): %s" % str(err))
             else:
                 response['message'] = "Missing path or branch"
-        elif req.path == '/api/init':
+        elif req.path == '/' + BASE_URL + 'api/init':
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
             except Exception as err:
@@ -3548,7 +3553,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                         LOG.warning("Exception (no repo): %s" % str(err))
             else:
                 response['message'] = "Missing path or branch"
-        elif req.path == '/api/push':
+        elif req.path == '/' + BASE_URL + 'api/push':
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
             except Exception as err:
@@ -3588,7 +3593,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                         LOG.warning("Exception (no repo): %s" % str(err))
             else:
                 response['message'] = "Missing path or branch"
-        elif req.path == '/api/newfolder':
+        elif req.path == '/' + BASE_URL + 'api/newfolder':
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
             except Exception as err:
@@ -3617,7 +3622,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                     except Exception as err:
                         response['message'] = "%s" % (str(err))
                         LOG.warning(err)
-        elif req.path == '/api/newfile':
+        elif req.path == '/' + BASE_URL + 'api/newfile':
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
             except Exception as err:

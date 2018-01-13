@@ -42,6 +42,8 @@ The IP address the service is listening on. By default it is binding to `0.0.0.0
 The port the service is listening on. By default it's using 3218, but you can change this if you need to.
 #### BASEPATH (string)
 It is possible to place configurator.py somewhere else. Set the `BASEPATH` to something like `"/home/hass/.homeassistant"`, and no matter where you're running the configurator from, it will start serving files from there. This is needed if you plan on running the configurator with systemd.
+#### BASE_URL (string)
+If you like to run a reverse proxy, you can set `BASE_URL` to something like `"ha_configurator/"` to change the base url at which the configurator will make it's api calls.
 #### SSL_CERTIFICATE / SSL_KEY (string)
 If you're using SSL, set the paths to your SSL files here. This is similar to the SSL setup you can do in HASS.
 #### HASS_API (string)
