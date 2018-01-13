@@ -1,5 +1,7 @@
 Version 0.2.5 (2018-)
 - Added warning-logs for access failure @danielperna84
+- Added transparency to whitespace characters @danielperna84
+- Using external repository for Docker @Munsio
 
 Version 0.2.4 (2018-01-02)
 - Added YAML linting @AtoxIO
