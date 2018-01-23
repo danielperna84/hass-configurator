@@ -299,8 +299,13 @@ INDEX = Template(r"""<!DOCTYPE html>
         }
 
         .input-field input[type=text].valid {
-            border-bottom: 1px solid #03a9f4;;
-            box-shadow: 0 1px 0 0 #03a9f4;;
+            border-bottom: 1px solid #03a9f4 !important;
+            box-shadow: 0 1px 0 0 #03a9f4 !important;
+        }
+
+        .input-field input[type=text]:focus {
+            border-bottom: 1px solid #03a9f4 !important;
+            box-shadow: 0 1px 0 0 #03a9f4 !important;
         }
 
         .row .input-field input:focus {
@@ -624,6 +629,7 @@ INDEX = Template(r"""<!DOCTYPE html>
         <li><a class="modal-trigger" target="_blank" href="#modal_components">HASS Components</a></li>
         <li><a class="modal-trigger" target="_blank" href="#modal_icons">Material Icons</a></li>
         <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
+        <li><a class="modal-trigger" href="#modal_netstat" onclick="get_netstat()">Network status</a></li>
         <li><a class="modal-trigger" href="#modal_about">About HASS-Configurator</a></li>
         <li class="divider"></li>
         <!--<li><a href="#modal_check_config">Check HASS Configuration</a></li>-->
@@ -640,6 +646,7 @@ INDEX = Template(r"""<!DOCTYPE html>
         <li><a target="_blank" href="https://home-assistant.io/components/">HASS Components</a></li>
         <li><a target="_blank" href="https://materialdesignicons.com/">Material Icons</a></li>
         <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
+        <li><a class="modal-trigger" href="#modal_netstat" onclick="get_netstat()">Network status</a></li>
         <li><a class="modal-trigger" href="#modal_about">About HASS-Configurator</a></li>
         <li class="divider"></li>
         <!--<li><a href="#modal_check_config">Check HASS Configuration</a></li>-->
@@ -1343,6 +1350,46 @@ INDEX = Template(r"""<!DOCTYPE html>
           <a onclick="restart()" class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Yes</a>
         </div>
     </div>
+    <div id="modal_a_net_remove" class="modal">
+        <div class="modal-content">
+            <h4 class="grey-text text-darken-3">Remove allowed network / IP<i class="mdi mdi-settings right grey-text text-darken-3" style="font-size: 2rem;"></i></h4>
+            <p>Do you really want to remove the network / IP <b><span id="removenet"></span></b> from the list of allowed networks?</p>
+        </div>
+        <div class="modal-footer">
+          <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">No</a>
+          <a onclick="a_net_remove()" class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Yes</a>
+        </div>
+    </div>
+    <div id="modal_a_net_add" class="modal">
+            <div class="modal-content">
+                <h4 class="grey-text text-darken-3">Add allowed network / IP<i class="mdi mdi-settings right grey-text text-darken-3" style="font-size: 2rem;"></i></h4>
+                <p>Do you really want to Add the network / IP <b><span id="addnet"></span></b> to the list of allowed networks?</p>
+            </div>
+            <div class="modal-footer">
+              <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">No</a>
+              <a onclick="a_net_add()" class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Yes</a>
+            </div>
+        </div>
+    <div id="modal_unban" class="modal">
+        <div class="modal-content">
+            <h4 class="grey-text text-darken-3">Unban IP<i class="mdi mdi-settings right grey-text text-darken-3" style="font-size: 2rem;"></i></h4>
+            <p>Do you really want to unban the IP <b><span id="unbanip"></span></b>?</p>
+        </div>
+        <div class="modal-footer">
+          <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">No</a>
+          <a onclick="banned_unban()" class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Yes</a>
+        </div>
+    </div>
+    <div id="modal_ban" class="modal">
+            <div class="modal-content">
+                <h4 class="grey-text text-darken-3">Ban IP<i class="mdi mdi-settings right grey-text text-darken-3" style="font-size: 2rem;"></i></h4>
+                <p>Do you really want to ban the IP <b><span id="banip"></span></b>?</p>
+            </div>
+            <div class="modal-footer">
+              <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">No</a>
+              <a onclick="banned_ban()" class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Yes</a>
+            </div>
+        </div>
     <div id="modal_exec_command" class="modal">
         <div class="modal-content">
             <h4 class="grey-text text-darken-3">Execute shell command<i class="mdi mdi-laptop right grey-text text-darken-3" style="font-size: 2rem;"></i></h4>
@@ -1412,11 +1459,40 @@ INDEX = Template(r"""<!DOCTYPE html>
                     <input type="text" id="newbranch">
                     <label class="active" for="newbranch">New Branch Name</label>
                 </div>
-          </div>
+            </div>
         </div>
         <div class="modal-footer">
           <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">Cancel</a>
           <a onclick="newbranch(document.getElementById('newbranch').value)" class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">OK</a>
+        </div>
+    </div>
+    <div id="modal_netstat" class="modal">
+        <div class="modal-content">
+            <h4 class="grey-text text-darken-3">Network status<i class="mdi mdi-network right grey-text text-darken-3" style="font-size: 2.48rem;"></i></h4>
+            <p><label for="listening_address">Listening address:&nbsp;</label><span id="listening_address">$listening_address</span></p>
+            <p><label for="hass_api_address">HASS API address:&nbsp;</label><span id="hass_api_address">$hass_api_address</span></p>
+            <p>Modifying the following lists is not persistent. To statically control access please use the configuration file.</p>
+            <p>
+                <ul id="allowed_networks" class="collection with-header"></ul>
+                <br />
+                <div class="input-field">
+                    <a href="#" class="prefix" onclick="helper_a_net_add()"><i class="mdi mdi-plus-circle prefix light-blue-text"></i></a></i>
+                    <input placeholder="192.168.0.0/16" id="add_net_ip" type="text">
+                    <label for="add_net_ip">Add network / IP</label>
+                </div>
+            </p>
+            <p>
+                <ul id="banned_ips" class="collection with-header"></ul>
+                <br />
+                <div class="input-field">
+                    <a href="#" class="prefix" onclick="helper_banned_ban()"><i class="mdi mdi-plus-circle prefix light-blue-text"></i></a></i>
+                    <input placeholder="1.2.3.4" id="add_banned_ip" type="text">
+                    <label for="add_banned_ip">Ban IP</label>
+                </div>
+            </p>
+        </div>
+        <div class="modal-footer">
+          <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">Cancel</a>
         </div>
     </div>
     <div id="modal_about" class="modal modal-fixed-footer">
@@ -2378,6 +2454,175 @@ INDEX = Template(r"""<!DOCTYPE html>
         });
     }
 
+    function get_netstat() {
+        $.get("api/netstat", function (resp) {
+            if (resp.hasOwnProperty("allowed_networks")) {
+                var allowed_list = document.getElementById("allowed_networks");
+                while (allowed_list.firstChild) {
+                    allowed_list.removeChild(allowed_list.firstChild);
+                }
+                var header = document.createElement("li");
+                header.classList.add("collection-header");
+                var header_h4 = document.createElement("h4");
+                header_h4.innerText = "Allowed networks";
+                header_h4.classList.add("grey-text");
+                header_h4.classList.add("text-darken-3");
+                header.appendChild(header_h4);
+                allowed_list.appendChild(header);
+                for (var i = 0; i < resp.allowed_networks.length; i++) {
+                    var li = document.createElement("li");
+                    li.classList.add("collection-item");
+                    var li_div = document.createElement("div");
+                    var address = document.createElement("span");
+                    address.innerText = resp.allowed_networks[i];
+                    li_div.appendChild(address);
+                    var li_a = document.createElement("a");
+                    li_a.classList.add("light-blue-text");
+                    li_a.href = "#!";
+                    li_a.classList.add("secondary-content");
+                    var li_a_i = document.createElement("i");
+                    li_a_i.classList.add("mdi");
+                    li_a_i.classList.add("mdi-delete");
+                    li_a_i.innerText = "Remove";
+                    li_a.appendChild(li_a_i);
+                    li_a.setAttribute("onclick", "helper_a_net_remove('" + resp.allowed_networks[i] + "')");
+                    li_div.appendChild(li_a);
+                    li.appendChild(li_div);
+                    allowed_list.appendChild(li);
+                }
+            }
+            if (resp.hasOwnProperty("banned_ips")) {
+                var banlist = document.getElementById("banned_ips");
+                while (banlist.firstChild) {
+                    banlist.removeChild(banlist.firstChild);
+                }
+                var header = document.createElement("li");
+                header.classList.add("collection-header");
+                var header_h4 = document.createElement("h4");
+                header_h4.innerText = "Banned IPs";
+                header_h4.classList.add("grey-text");
+                header_h4.classList.add("text-darken-3");
+                header.appendChild(header_h4);
+                banlist.appendChild(header);
+                for (var i = 0; i < resp.banned_ips.length; i++) {
+                    var li = document.createElement("li");
+                    li.classList.add("collection-item");
+                    var li_div = document.createElement("div");
+                    var address = document.createElement("span");
+                    address.innerText = resp.banned_ips[i];
+                    li_div.appendChild(address);
+                    var li_a = document.createElement("a");
+                    li_a.classList.add("light-blue-text");
+                    li_a.href = "#!";
+                    li_a.classList.add("secondary-content");
+                    var li_a_i = document.createElement("i");
+                    li_a_i.classList.add("mdi");
+                    li_a_i.classList.add("mdi-delete");
+                    li_a_i.innerText = "Unban";
+                    li_a.appendChild(li_a_i);
+                    li_a.setAttribute("onclick", "helper_banned_unban('" + resp.banned_ips[i] + "')");
+                    li_div.appendChild(li_a);
+                    li.appendChild(li_div);
+                    banlist.appendChild(li);
+                }
+            }
+        });
+    }
+
+    function helper_a_net_remove(network) {
+        document.getElementById("removenet").innerText = network;
+        $('#modal_netstat').modal('close');
+        $('#modal_a_net_remove').modal('open');
+    }
+
+    function a_net_remove() {
+        var network = document.getElementById("removenet").innerText
+        data = new Object();
+        data.network = network;
+        data.method = 'remove';
+        $.post("api/allowed_networks", data).done(function(resp) {
+            if (resp.error) {
+                var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
+                Materialize.toast($toastContent, 5000);
+            }
+            else {
+                var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
+                Materialize.toast($toastContent, 2000);
+            }
+        });
+    }
+
+    function helper_a_net_add() {
+        document.getElementById("addnet").innerText = document.getElementById("add_net_ip").value;
+        document.getElementById("add_net_ip").value = "";
+        $('#modal_netstat').modal('close');
+        $('#modal_a_net_add').modal('open');
+    }
+
+    function a_net_add() {
+        var network = document.getElementById("addnet").innerText
+        data = new Object();
+        data.network = network;
+        data.method = 'add';
+        $.post("api/allowed_networks", data).done(function(resp) {
+            if (resp.error) {
+                var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
+                Materialize.toast($toastContent, 5000);
+            }
+            else {
+                var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
+                Materialize.toast($toastContent, 2000);
+            }
+        });
+    }
+
+    function helper_banned_unban(ip) {
+        document.getElementById("unbanip").innerText = ip;
+        $('#modal_netstat').modal('close');
+        $('#modal_unban').modal('open');
+    }
+
+    function banned_unban() {
+        var ip = document.getElementById("unbanip").innerText
+        data = new Object();
+        data.ip = ip;
+        data.method = 'unban';
+        $.post("api/banned_ips", data).done(function(resp) {
+            if (resp.error) {
+                var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
+                Materialize.toast($toastContent, 5000);
+            }
+            else {
+                var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
+                Materialize.toast($toastContent, 2000);
+            }
+        });
+    }
+
+    function helper_banned_ban() {
+        document.getElementById("banip").innerText = document.getElementById("add_banned_ip").value;
+        document.getElementById("add_banned_ip").value = "";
+        $('#modal_netstat').modal('close');
+        $('#modal_ban').modal('open');
+    }
+
+    function banned_ban() {
+        var ip = document.getElementById("banip").innerText
+        data = new Object();
+        data.ip = ip;
+        data.method = 'ban';
+        $.post("api/banned_ips", data).done(function(resp) {
+            if (resp.error) {
+                var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
+                Materialize.toast($toastContent, 5000);
+            }
+            else {
+                var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
+                Materialize.toast($toastContent, 2000);
+            }
+        });
+    }
+
     function save() {
         var filepath = document.getElementById('currentfile').value;
         if (filepath.length > 0) {
@@ -3063,6 +3308,16 @@ class RequestHandler(BaseHTTPRequestHandler):
                 if os.path.isdir(dirpath):
                     self.wfile.write(os.path.abspath(os.path.dirname(dirpath)))
             return
+        elif req.path == '/api/netstat':
+            content = ""
+            self.send_header('Content-type', 'text/json')
+            self.end_headers()
+            res = {
+                "allowed_networks": ALLOWED_NETWORKS,
+                "banned_ips": BANNED_IPS
+            }
+            self.wfile.write(bytes(json.dumps(res), "utf8"))
+            return
         elif req.path == '/api/restart':
             LOG.info("/api/restart")
             self.send_header('Content-type', 'text/json')
@@ -3227,7 +3482,10 @@ class RequestHandler(BaseHTTPRequestHandler):
                                               states=states,
                                               current=VERSION,
                                               versionclass=color,
-                                              separator="\%s" % os.sep if os.sep == "\\" else os.sep)
+                                              separator="\%s" % os.sep if os.sep == "\\" else os.sep,
+                                              listening_address="%s://%s:%i" % (
+                                                  'https' if SSL_CERTIFICATE else 'http', LISTENIP, LISTENPORT),
+                                              hass_api_address="%s" % (HASS_API, ))
             self.wfile.write(bytes(html, "utf8"))
             return
         else:
@@ -3236,6 +3494,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.wfile.write(bytes("File not found", "utf8"))
 
     def do_POST(self):
+        global ALLOWED_NETWORKS, BANNED_IPS
         if not check_access(self.client_address[0]):
             self.do_BLOCK()
             return
@@ -3649,6 +3908,103 @@ class RequestHandler(BaseHTTPRequestHandler):
                         LOG.warning(err)
             else:
                 response['message'] = "Missing filename or text"
+        elif req.path == '/api/a_net_remove':
+            try:
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+            except Exception as err:
+                LOG.warning(err)
+                response['message'] = "%s" % (str(err))
+                postvars = {}
+            if 'network' in postvars.keys():
+                if postvars['network']:
+                    try:
+                        network = unquote(postvars['network'][0])
+                        ALLOWED_NETWORKS.remove(network)
+                        if not ALLOWED_NETWORKS:
+                            ALLOWED_NETWORKS.append("0.0.0.0/0")
+                        self.send_response(200)
+                        self.send_header('Content-type', 'text/json')
+                        self.end_headers()
+                        response['error'] = False
+                        response['message'] = "Removed network %s" % network
+                        self.wfile.write(bytes(json.dumps(response), "utf8"))
+                        return
+                    except Exception as err:
+                        response['error'] = True
+                        response['message'] = "%s" % (str(err))
+                        LOG.warning(err)
+            else:
+                response['message'] = "Missing network"
+        elif req.path == '/api/allowed_networks':
+            try:
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+            except Exception as err:
+                LOG.warning(err)
+                response['message'] = "%s" % (str(err))
+                postvars = {}
+            if 'network' in postvars.keys() and 'method' in postvars.keys():
+                if postvars['network'] and postvars['method']:
+                    try:
+                        network = unquote(postvars['network'][0])
+                        method = unquote(postvars['method'][0])
+                        if method == 'remove':
+                            if network in ALLOWED_NETWORKS:
+                                ALLOWED_NETWORKS.remove(network)
+                                if not ALLOWED_NETWORKS:
+                                    ALLOWED_NETWORKS.append("0.0.0.0/0")
+                            response['error'] = False
+                        elif method == 'add':
+                            ipaddress.ip_network(network)
+                            ALLOWED_NETWORKS.append(network)
+                            response['error'] = False
+                        else:
+                            response['error'] = True
+                        self.send_response(200)
+                        self.send_header('Content-type', 'text/json')
+                        self.end_headers()
+                        response['error'] = False
+                        response['message'] = "ALLOWED_NETWORKS (%s): %s" % (method, network)
+                        self.wfile.write(bytes(json.dumps(response), "utf8"))
+                        return
+                    except Exception as err:
+                        response['error'] = True
+                        response['message'] = "%s" % (str(err))
+                        LOG.warning(err)
+            else:
+                response['message'] = "Missing network"
+        elif req.path == '/api/banned_ips':
+            try:
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+            except Exception as err:
+                LOG.warning(err)
+                response['message'] = "%s" % (str(err))
+                postvars = {}
+            if 'ip' in postvars.keys() and 'method' in postvars.keys():
+                if postvars['ip'] and postvars['method']:
+                    try:
+                        ip = unquote(postvars['ip'][0])
+                        method = unquote(postvars['method'][0])
+                        if method == 'unban':
+                            if ip in BANNED_IPS:
+                                BANNED_IPS.remove(ip)
+                            response['error'] = False
+                        elif method == 'ban':
+                            ipaddress.ip_network(ip)
+                            BANNED_IPS.append(ip)
+                        else:
+                            response['error'] = True
+                        self.send_response(200)
+                        self.send_header('Content-type', 'text/json')
+                        self.end_headers()
+                        response['message'] = "BANNED_IPS (%s): %s" % (method, ip)
+                        self.wfile.write(bytes(json.dumps(response), "utf8"))
+                        return
+                    except Exception as err:
+                        response['error'] = True
+                        response['message'] = "%s" % (str(err))
+                        LOG.warning(err)
+            else:
+                response['message'] = "Missing IP"
         else:
             response['message'] = "Invalid method"
         self.send_response(200)
