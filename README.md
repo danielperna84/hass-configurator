@@ -79,6 +79,11 @@ The way this is implemented works in the following order:
   - No: Return error 420
   - Yes: Continue and display UI of configurator
 
+Starting at version 0.2.5 you can add / remove IP addresses and networks from and to the `ALLOWED_NETWORKS` and `BANNED_IPS` lists at runtime. Keep in mind though, that these changes are not persistent and will be lost when the service is restarted. The API can be used through the UI in the _Network status_ menu or by sending POST requests to:
+
+- api/allowed_networks (Example JSON-POST data: `{"network":"192.168.0.0/16", "method":"add"}` [methods can be `add` and `remove`])
+- api/banned_ips (Example JSON-POST data: `{"ip":"1.2.3.4", "method":"ban"}` [methods can be `ban` and `unban`])
+
 ### Embedding into HASS
 HASS has the [panel_iframe](https://home-assistant.io/components/panel_iframe/) component. With this it is possible to embed the configurator directly into HASS, allowing you to modify your configuration through the HASS frontend.  
 An example configuration would look like this:
