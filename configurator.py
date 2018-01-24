@@ -1504,10 +1504,22 @@ INDEX = Template(r"""<!DOCTYPE html>
             <p>Developed by:</p>
             <ul>
                 <li>
-                    <div class="chip"> <img src="https://avatars3.githubusercontent.com/u/7396998?v=3&s=400" alt="Contact Person"> <a class="black-text" href="https://github.com/danielperna84" target="_blank">Daniel Perna</a> </div>
+                    <div class="chip"> <img src="https://avatars3.githubusercontent.com/u/7396998?v=4&s=400" alt="Contact Person"> <a class="black-text" href="https://github.com/danielperna84" target="_blank">Daniel Perna</a> </div>
                 </li>
                 <li>
-                    <div class="chip"> <img src="https://avatars2.githubusercontent.com/u/1509640?v=3&s=460" alt="Contact Person"> <a class="black-text" href="https://github.com/jmart518" target="_blank">JT Martinez</a> </div>
+                    <div class="chip"> <img src="https://avatars2.githubusercontent.com/u/1509640?v=4&s=400" alt="Contact Person"> <a class="black-text" href="https://github.com/jmart518" target="_blank">JT Martinez</a> </div>
+                </li>
+                <li>
+                    <div class="chip"> <img src="https://avatars0.githubusercontent.com/u/1525413?v=4&s=400" alt="Contact Person"> <a class="black-text" href="https://github.com/AtoxIO" target="_blank">AtoxIO</a> </div>
+                </li>
+                <li>
+                    <div class="chip"> <img src="https://avatars0.githubusercontent.com/u/646513?s=400&v=4" alt="Contact Person"> <a class="black-text" href="https://github.com/Munsio" target="_blank">Martin Treml</a> </div>
+                </li>
+                <li>
+                    <div class="chip"> <img src="https://avatars2.githubusercontent.com/u/1399443?s=460&v=4" alt="Contact Person"> <a class="black-text" href="https://github.com/sytone" target="_blank">Sytone</a> </div>
+                </li>
+                <li>
+                    <div class="chip"> <img src="https://avatars3.githubusercontent.com/u/1561226?s=400&v=4" alt="Contact Person"> <a class="black-text" href="https://github.com/dimagoltsman" target="_blank">Dima Goltsman</a> </div>
                 </li>
             </ul>
             <p>Libraries used:</p>
