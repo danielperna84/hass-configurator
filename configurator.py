@@ -3908,33 +3908,6 @@ class RequestHandler(BaseHTTPRequestHandler):
                         LOG.warning(err)
             else:
                 response['message'] = "Missing filename or text"
-        elif req.path == '/api/a_net_remove':
-            try:
-                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
-            except Exception as err:
-                LOG.warning(err)
-                response['message'] = "%s" % (str(err))
-                postvars = {}
-            if 'network' in postvars.keys():
-                if postvars['network']:
-                    try:
-                        network = unquote(postvars['network'][0])
-                        ALLOWED_NETWORKS.remove(network)
-                        if not ALLOWED_NETWORKS:
-                            ALLOWED_NETWORKS.append("0.0.0.0/0")
-                        self.send_response(200)
-                        self.send_header('Content-type', 'text/json')
-                        self.end_headers()
-                        response['error'] = False
-                        response['message'] = "Removed network %s" % network
-                        self.wfile.write(bytes(json.dumps(response), "utf8"))
-                        return
-                    except Exception as err:
-                        response['error'] = True
-                        response['message'] = "%s" % (str(err))
-                        LOG.warning(err)
-            else:
-                response['message'] = "Missing network"
         elif req.path == '/api/allowed_networks':
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
