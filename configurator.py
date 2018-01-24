@@ -330,16 +330,16 @@ INDEX = Template(r"""<!DOCTYPE html>
         }
 
         .preloader-background {
-	          display: flex;
-	          align-items: center;
-	          justify-content: center;
-	          background-color: #eee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #eee;
             position: fixed;
-	          z-index: 10000;
-	          top: 0;
-	          left: 0;
-	          right: 0;
-	          bottom: 0;
+            z-index: 10000;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
         }
 
         .modal-content_nopad {
@@ -2081,11 +2081,10 @@ INDEX = Template(r"""<!DOCTYPE html>
 </script>
 <script type="text/javascript">
     document.addEventListener("DOMContentLoaded", function(){
-	     $('.preloader-background').delay(800).fadeOut('slow');
-
-	      $('.preloader-wrapper')
-		      .delay(800)
-		      .fadeOut('slow');
+        $('.preloader-background').delay(800).fadeOut('slow');
+        $('.preloader-wrapper')
+            .delay(800)
+            .fadeOut('slow');
     });
 </script>
 <script>
@@ -2381,11 +2380,11 @@ INDEX = Template(r"""<!DOCTYPE html>
     }
 
     function checkout(){
-      $(".collapsible-header").removeClass(function(){
-        return "active";
-      });
-      $(".collapsible").collapsible({accordion: true});
-      $(".collapsible").collapsible({accordion: false});
+        $(".collapsible-header").removeClass(function(){
+            return "active";
+        });
+        $(".collapsible").collapsible({accordion: true});
+        $(".collapsible").collapsible({accordion: false});
     }
 
     function loadfile(filepath) {
@@ -2664,12 +2663,12 @@ INDEX = Template(r"""<!DOCTYPE html>
     function save_check() {
         var filepath = document.getElementById('currentfile').value;
         if (filepath.length > 0) {
-          $('#modal_save').modal('open');
+            $('#modal_save').modal('open');
         }
         else {
             Materialize.toast('Error:  Please provide a filename', 5000);
             $(".pathtip").bind("animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd", function(){
-              $(this).removeClass("pathtip_color");
+                $(this).removeClass("pathtip_color");
             }).addClass("pathtip_color");
        }
     }
@@ -3028,8 +3027,7 @@ var lint_timeout;
 var lint_status = $('#lint-status'); // speed optimization
 var lint_error = "";
 
-function check_lint()
-{
+function check_lint() {
     if (document.getElementById('currentfile').value.match(".yaml$")) {
         try {
             var text = editor.getValue().replace(/!(include|secret)/g,".$1"); // hack because js-yaml does not like !include/!secret
@@ -3049,8 +3047,7 @@ function check_lint()
     }
 }
 
-function queue_lint(e)
-{
+function queue_lint(e) {
     if (document.getElementById('currentfile').value.match(".yaml$")) {
         clearTimeout(lint_timeout);
         lint_timeout = setTimeout(check_lint, 500);
@@ -3064,8 +3061,7 @@ function queue_lint(e)
     }
 }
 
-function show_lint_error()
-{
+function show_lint_error() {
     if(lint_error) {
         $("#modal_lint textarea").val(lint_error);
         $("#modal_lint").modal('open');
