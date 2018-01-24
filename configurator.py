@@ -27,10 +27,11 @@ from urllib.parse import urlparse, parse_qs, unquote
 ### Some options for you to change
 LISTENIP = "0.0.0.0"
 LISTENPORT = 3218
-# Set BASEPATH to something like "/home/hass/.homeassistant/" if you're not running the
-# configurator from that path
+# Set BASEPATH to something like "/home/hass/.homeassistant/" if you're not
+# running the configurator from that path
 BASEPATH = None
-# Set the paths to a certificate and the key if you're using SSL, e.g "/etc/ssl/certs/mycert.pem"
+# Set the paths to a certificate and the key if you're using SSL,
+# e.g "/etc/ssl/certs/mycert.pem"
 SSL_CERTIFICATE = None
 SSL_KEY = None
 # Set the destination where the HASS API is reachable
@@ -38,24 +39,27 @@ HASS_API = "http://127.0.0.1:8123/api/"
 # If a password is required to access the API, set it in the form of "password"
 # if you have HA ignoring SSL locally this is not needed if on same machine.
 HASS_API_PASSWORD = None
-# To enable authentication, set the credentials in the form of "username:password"
+# Enable authentication, set the credentials in the form of "username:password"
 CREDENTIALS = None
-# Limit access to the configurator by adding allowed IP addresses / networks to the list,
-# e.g ALLOWED_NETWORKS = ["192.168.0.0/24", "172.16.47.23"]
+# Limit access to the configurator by adding allowed IP addresses / networks to
+# the list, e.g ALLOWED_NETWORKS = ["192.168.0.0/24", "172.16.47.23"]
 ALLOWED_NETWORKS = []
 # List of statically banned IP addresses, e.g. ["1.1.1.1", "2.2.2.2"]
 BANNED_IPS = []
-# Ban IPs after n failed login attempts. Restart service to reset banning. The default
-# of `0` disables this feature.
+# Ban IPs after n failed login attempts. Restart service to reset banning.
+# The default of `0` disables this feature.
 BANLIMIT = 0
-# Enable git integration. GitPython (https://gitpython.readthedocs.io/en/stable/) has
-# to be installed.
+# Enable git integration.
+# GitPython (https://gitpython.readthedocs.io/en/stable/) has to be installed.
 GIT = False
 # Files to ignore in the UI.  A good example list that cleans up the UI is
 # [".*", "*.log", "deps", "icloud", "*.conf", "*.json", "certs", "__pycache__"]
 IGNORE_PATTERN = []
 # if DIRSFIRST is set to `true`, directories will be displayed at the top
 DIRSFIRST = False
+# Sesame token. Browse to the configurator URL + /secrettoken to unban your
+# client IP and add it to the list of allowed IPs.
+SESAME = None
 ### End of options
 
 LOGLEVEL = logging.INFO
@@ -63,7 +67,8 @@ LOG = logging.getLogger(__name__)
 LOG.setLevel(LOGLEVEL)
 SO = logging.StreamHandler(sys.stdout)
 SO.setLevel(LOGLEVEL)
-SO.setFormatter(logging.Formatter('%(levelname)s:%(asctime)s:%(name)s:%(message)s'))
+SO.setFormatter(
+    logging.Formatter('%(levelname)s:%(asctime)s:%(name)s:%(message)s'))
 LOG.addHandler(SO)
 RELEASEURL = "https://api.github.com/repos/danielperna84/hass-configurator/releases/latest"
 VERSION = "0.2.4"
@@ -3092,8 +3097,8 @@ def signal_handler(sig, frame):
 
 def load_settings(settingsfile):
     global LISTENIP, LISTENPORT, BASEPATH, SSL_CERTIFICATE, SSL_KEY, HASS_API, \
-    HASS_API_PASSWORD, CREDENTIALS, ALLOWED_NETWORKS, BANNED_IPS, BANLIMIT, DEV, \
-    IGNORE_PATTERN, DIRSFIRST
+    HASS_API_PASSWORD, CREDENTIALS, ALLOWED_NETWORKS, BANNED_IPS, BANLIMIT, \
+    DEV, IGNORE_PATTERN, DIRSFIRST, SESAME
     try:
         if os.path.isfile(settingsfile):
             with open(settingsfile) as fptr:
@@ -3112,6 +3117,7 @@ def load_settings(settingsfile):
                 DEV = settings.get("DEV", DEV)
                 IGNORE_PATTERN = settings.get("IGNORE_PATTERN", IGNORE_PATTERN)
                 DIRSFIRST = settings.get("DIRSFIRST", DIRSFIRST)
+                SESAME = settings.get("SESAME", SESAME)
     except Exception as err:
         LOG.warning(err)
         LOG.warning("Not loading static settings")
@@ -3219,10 +3225,21 @@ class RequestHandler(BaseHTTPRequestHandler):
         self.wfile.write(bytes("Policy not fulfilled", "utf8"))
 
     def do_GET(self):
+        req = urlparse(self.path)
+        if SESAME:
+            if req.path.endswith("/%s" % SESAME):
+                if self.client_address[0] not in ALLOWED_NETWORKS:
+                    ALLOWED_NETWORKS.append(self.client_address[0])
+                if self.client_address[0] in BANNED_IPS:
+                    BANNED_IPS.remove(self.client_address[0])
+                url = req.path[:req.path.rfind(SESAME)]
+                self.send_response(302)
+                self.send_header('Location', url)
+                self.end_headers()
+                return
         if not check_access(self.client_address[0]):
             self.do_BLOCK()
             return
-        req = urlparse(self.path)
         query = parse_qs(req.query)
         self.send_response(200)
         if req.path.endswith('/api/file'):
