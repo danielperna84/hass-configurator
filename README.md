@@ -81,7 +81,7 @@ The way this is implemented works in the following order:
 
 ### API
 
-Starting at version 0.2.5 you can add / remove IP addresses and networks from and to the `ALLOWED_NETWORKS` and `BANNED_IPS` lists at runtime. Keep in mind though, that these changes are not persistent and will be lost when the service is restarted. The API can be used through the UI in the _Network status_ menu or by sending POST requests.
+Starting at version 0.2.5 you can add / remove IP addresses and networks from and to the `ALLOWED_NETWORKS` and `BANNED_IPS` lists at runtime. Keep in mind though, that these changes are not persistent and will be lost when the service is restarted. The API can be used through the UI in the _Network status_ menu or by sending POST requests. A possible use case could be programmatically allowing access from your dynamic public IP, which can be required for some setups involving SSL.
 
 #### API targets:
 
