@@ -1572,6 +1572,17 @@ INDEX = Template(r"""<!DOCTYPE html>
                   </div>
                 </a>
               </div>
+              <div class="col s6 m3 l3">
+                <a class="light-blue-text" href="https://github.com/nodeca/js-yaml" target="_blank">
+                  <div class="card grey lighten-3 hoverable">
+                    <div class="card-image">
+                    </div>
+                    <div class="card-content">
+                      <p class="grey-text text-darken-2">js-yaml</p>
+                    </div>
+                  </div>
+                </a>
+              </div>
             </div>
         </div>
         <div class="modal-footer">
