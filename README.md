@@ -66,7 +66,7 @@ Verify, that the user that is running the configurator is allowed to push withou
 #### DIRSFIRST (bool)
 If set to `true`, directories will be displayed at the top.
 #### SESAME (string)
-If set to _somesecretkeynobodycanguess_, you can browse to `https://your.configurator:3218/somesecretkeynobodycanguess` from any IP, and it will be removed from the `BANNED_IPS` list (in case it has been banned before) and added to the `ALLOWED_NETWORKS` list. Once the request has been processed you will automatically be redirected to the configurator. Think of this as dynamically allowing access from untrusted IPs by providing a secret key (_open sesame!_). Keep in mind, that once the IP has been added, you will either have to restart the configurator or manually remove the IP through the _Newwork status_ to revoke access.
+If set to _somesecretkeynobodycanguess_, you can browse to `https://your.configurator:3218/somesecretkeynobodycanguess` from any IP, and it will be removed from the `BANNED_IPS` list (in case it has been banned before) and added to the `ALLOWED_NETWORKS` list. Once the request has been processed you will automatically be redirected to the configurator. Think of this as dynamically allowing access from untrusted IPs by providing a secret key (_open sesame!_). Keep in mind, that once the IP has been added, you will either have to restart the configurator or manually remove the IP through the _Network status_ to revoke access.
  
 __Note regarding `ALLOWED_NETWORKS`, `BANNED_IPS` and `BANLIMIT`__:  
 The way this is implemented works in the following order:
