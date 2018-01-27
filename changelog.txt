@@ -1,4 +1,4 @@
-Version 0.2.5 (2018-01-25)
+Version 0.2.5 (2018-01-27)
 - Added warning-logs for access failure @danielperna84
 - Added transparency to whitespace characters @danielperna84
 - Using external repository for Docker @Munsio
