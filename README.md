@@ -64,7 +64,9 @@ Set this variable to `True` to enable Git integration. This feature requires [Gi
 To push local commits to a remote repository, you have to add the remote manually: `git remote add origin ssh://somehost:/user/repo.git`  
 Verify, that the user that is running the configurator is allowed to push without any interaction (by using SSH PubKey authentication for example).
 #### DIRSFIRST (bool)
-if set to `true`, directories will be displayed at the top
+If set to `true`, directories will be displayed at the top.
+#### SESAME (string)
+If set to _somesecretkeynobodycanguess_, you can browse to `https://your.configurator:3218/somesecretkeynobodycanguess` from any IP, and it will be removed from the `BANNED_IPS` list (in case it has been banned before) and added to the `ALLOWED_NETWORKS` list. Once the request has been processed you will automatically be redirected to the configurator. Think of this as dynamically allowing access from untrusted IPs by providing a secret key (_open sesame!_). Keep in mind, that once the IP has been added, you will either have to restart the configurator or manually remove the IP through the _Newwork status_ to revoke access.
  
 __Note regarding `ALLOWED_NETWORKS`, `BANNED_IPS` and `BANLIMIT`__:  
 The way this is implemented works in the following order:
@@ -78,6 +80,25 @@ The way this is implemented works in the following order:
 3. Check if client IP address is in `ALLOWED_NETWORKS`
   - No: Return error 420
   - Yes: Continue and display UI of configurator
+
+### API
+
+Starting at version 0.2.5 you can add / remove IP addresses and networks from and to the `ALLOWED_NETWORKS` and `BANNED_IPS` lists at runtime. Keep in mind though, that these changes are not persistent and will be lost when the service is restarted. The API can be used through the UI in the _Network status_ menu or by sending POST requests. A possible use case could be programmatically allowing access from your dynamic public IP, which can be required for some setups involving SSL.
+
+#### API targets:
+
+- `api/allowed_networks`
+   #### Methods:
+   - `add`
+   - `remove`
+   #### Example:
+   - `curl -d "method=add&network=1.2.3.4" -X POST http://127.0.0.1:3218/api/allowed_networks`
+- `api/banned_ips`
+   #### Methods:
+   - `ban`
+   - `unban`
+   #### Example:
+   - Example: `curl -d "method=ban&ip=9.9.9.9" -X POST http://127.0.0.1:3218/api/banned_ips`
 
 ### Embedding into HASS
 HASS has the [panel_iframe](https://home-assistant.io/components/panel_iframe/) component. With this it is possible to embed the configurator directly into HASS, allowing you to modify your configuration through the HASS frontend.  

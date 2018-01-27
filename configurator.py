@@ -27,10 +27,11 @@ from urllib.parse import urlparse, parse_qs, unquote
 ### Some options for you to change
 LISTENIP = "0.0.0.0"
 LISTENPORT = 3218
-# Set BASEPATH to something like "/home/hass/.homeassistant/" if you're not running the
-# configurator from that path
+# Set BASEPATH to something like "/home/hass/.homeassistant/" if you're not
+# running the configurator from that path
 BASEPATH = None
-# Set the paths to a certificate and the key if you're using SSL, e.g "/etc/ssl/certs/mycert.pem"
+# Set the paths to a certificate and the key if you're using SSL,
+# e.g "/etc/ssl/certs/mycert.pem"
 SSL_CERTIFICATE = None
 SSL_KEY = None
 # Set the destination where the HASS API is reachable
@@ -38,24 +39,27 @@ HASS_API = "http://127.0.0.1:8123/api/"
 # If a password is required to access the API, set it in the form of "password"
 # if you have HA ignoring SSL locally this is not needed if on same machine.
 HASS_API_PASSWORD = None
-# To enable authentication, set the credentials in the form of "username:password"
+# Enable authentication, set the credentials in the form of "username:password"
 CREDENTIALS = None
-# Limit access to the configurator by adding allowed IP addresses / networks to the list,
-# e.g ALLOWED_NETWORKS = ["192.168.0.0/24", "172.16.47.23"]
+# Limit access to the configurator by adding allowed IP addresses / networks to
+# the list, e.g ALLOWED_NETWORKS = ["192.168.0.0/24", "172.16.47.23"]
 ALLOWED_NETWORKS = []
 # List of statically banned IP addresses, e.g. ["1.1.1.1", "2.2.2.2"]
 BANNED_IPS = []
-# Ban IPs after n failed login attempts. Restart service to reset banning. The default
-# of `0` disables this feature.
+# Ban IPs after n failed login attempts. Restart service to reset banning.
+# The default of `0` disables this feature.
 BANLIMIT = 0
-# Enable git integration. GitPython (https://gitpython.readthedocs.io/en/stable/) has
-# to be installed.
+# Enable git integration.
+# GitPython (https://gitpython.readthedocs.io/en/stable/) has to be installed.
 GIT = False
 # Files to ignore in the UI.  A good example list that cleans up the UI is
 # [".*", "*.log", "deps", "icloud", "*.conf", "*.json", "certs", "__pycache__"]
 IGNORE_PATTERN = []
 # if DIRSFIRST is set to `true`, directories will be displayed at the top
 DIRSFIRST = False
+# Sesame token. Browse to the configurator URL + /secrettoken to unban your
+# client IP and add it to the list of allowed IPs.
+SESAME = None
 ### End of options
 
 LOGLEVEL = logging.INFO
@@ -63,10 +67,11 @@ LOG = logging.getLogger(__name__)
 LOG.setLevel(LOGLEVEL)
 SO = logging.StreamHandler(sys.stdout)
 SO.setLevel(LOGLEVEL)
-SO.setFormatter(logging.Formatter('%(levelname)s:%(asctime)s:%(name)s:%(message)s'))
+SO.setFormatter(
+    logging.Formatter('%(levelname)s:%(asctime)s:%(name)s:%(message)s'))
 LOG.addHandler(SO)
 RELEASEURL = "https://api.github.com/repos/danielperna84/hass-configurator/releases/latest"
-VERSION = "0.2.4"
+VERSION = "0.2.5"
 BASEDIR = "."
 DEV = False
 HTTPD = None
@@ -299,8 +304,13 @@ INDEX = Template(r"""<!DOCTYPE html>
         }
 
         .input-field input[type=text].valid {
-            border-bottom: 1px solid #03a9f4;;
-            box-shadow: 0 1px 0 0 #03a9f4;;
+            border-bottom: 1px solid #03a9f4 !important;
+            box-shadow: 0 1px 0 0 #03a9f4 !important;
+        }
+
+        .input-field input[type=text]:focus {
+            border-bottom: 1px solid #03a9f4 !important;
+            box-shadow: 0 1px 0 0 #03a9f4 !important;
         }
 
         .row .input-field input:focus {
@@ -325,16 +335,16 @@ INDEX = Template(r"""<!DOCTYPE html>
         }
 
         .preloader-background {
-	          display: flex;
-	          align-items: center;
-	          justify-content: center;
-	          background-color: #eee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #eee;
             position: fixed;
-	          z-index: 10000;
-	          top: 0;
-	          left: 0;
-	          right: 0;
-	          bottom: 0;
+            z-index: 10000;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
         }
 
         .modal-content_nopad {
@@ -624,6 +634,7 @@ INDEX = Template(r"""<!DOCTYPE html>
         <li><a class="modal-trigger" target="_blank" href="#modal_components">HASS Components</a></li>
         <li><a class="modal-trigger" target="_blank" href="#modal_icons">Material Icons</a></li>
         <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
+        <li><a class="modal-trigger" href="#modal_netstat" onclick="get_netstat()">Network status</a></li>
         <li><a class="modal-trigger" href="#modal_about">About HASS-Configurator</a></li>
         <li class="divider"></li>
         <!--<li><a href="#modal_check_config">Check HASS Configuration</a></li>-->
@@ -640,6 +651,7 @@ INDEX = Template(r"""<!DOCTYPE html>
         <li><a target="_blank" href="https://home-assistant.io/components/">HASS Components</a></li>
         <li><a target="_blank" href="https://materialdesignicons.com/">Material Icons</a></li>
         <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
+        <li><a class="modal-trigger" href="#modal_netstat" onclick="get_netstat()">Network status</a></li>
         <li><a class="modal-trigger" href="#modal_about">About HASS-Configurator</a></li>
         <li class="divider"></li>
         <!--<li><a href="#modal_check_config">Check HASS Configuration</a></li>-->
@@ -1343,6 +1355,46 @@ INDEX = Template(r"""<!DOCTYPE html>
           <a onclick="restart()" class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Yes</a>
         </div>
     </div>
+    <div id="modal_a_net_remove" class="modal">
+        <div class="modal-content">
+            <h4 class="grey-text text-darken-3">Remove allowed network / IP<i class="mdi mdi-settings right grey-text text-darken-3" style="font-size: 2rem;"></i></h4>
+            <p>Do you really want to remove the network / IP <b><span id="removenet"></span></b> from the list of allowed networks?</p>
+        </div>
+        <div class="modal-footer">
+          <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">No</a>
+          <a onclick="a_net_remove()" class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Yes</a>
+        </div>
+    </div>
+    <div id="modal_a_net_add" class="modal">
+            <div class="modal-content">
+                <h4 class="grey-text text-darken-3">Add allowed network / IP<i class="mdi mdi-settings right grey-text text-darken-3" style="font-size: 2rem;"></i></h4>
+                <p>Do you really want to Add the network / IP <b><span id="addnet"></span></b> to the list of allowed networks?</p>
+            </div>
+            <div class="modal-footer">
+              <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">No</a>
+              <a onclick="a_net_add()" class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Yes</a>
+            </div>
+        </div>
+    <div id="modal_unban" class="modal">
+        <div class="modal-content">
+            <h4 class="grey-text text-darken-3">Unban IP<i class="mdi mdi-settings right grey-text text-darken-3" style="font-size: 2rem;"></i></h4>
+            <p>Do you really want to unban the IP <b><span id="unbanip"></span></b>?</p>
+        </div>
+        <div class="modal-footer">
+          <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">No</a>
+          <a onclick="banned_unban()" class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Yes</a>
+        </div>
+    </div>
+    <div id="modal_ban" class="modal">
+            <div class="modal-content">
+                <h4 class="grey-text text-darken-3">Ban IP<i class="mdi mdi-settings right grey-text text-darken-3" style="font-size: 2rem;"></i></h4>
+                <p>Do you really want to ban the IP <b><span id="banip"></span></b>?</p>
+            </div>
+            <div class="modal-footer">
+              <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">No</a>
+              <a onclick="banned_ban()" class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Yes</a>
+            </div>
+        </div>
     <div id="modal_exec_command" class="modal">
         <div class="modal-content">
             <h4 class="grey-text text-darken-3">Execute shell command<i class="mdi mdi-laptop right grey-text text-darken-3" style="font-size: 2rem;"></i></h4>
@@ -1412,11 +1464,40 @@ INDEX = Template(r"""<!DOCTYPE html>
                     <input type="text" id="newbranch">
                     <label class="active" for="newbranch">New Branch Name</label>
                 </div>
-          </div>
+            </div>
         </div>
         <div class="modal-footer">
           <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">Cancel</a>
           <a onclick="newbranch(document.getElementById('newbranch').value)" class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">OK</a>
+        </div>
+    </div>
+    <div id="modal_netstat" class="modal">
+        <div class="modal-content">
+            <h4 class="grey-text text-darken-3">Network status<i class="mdi mdi-network right grey-text text-darken-3" style="font-size: 2.48rem;"></i></h4>
+            <p><label for="listening_address">Listening address:&nbsp;</label><span id="listening_address">$listening_address</span></p>
+            <p><label for="hass_api_address">HASS API address:&nbsp;</label><span id="hass_api_address">$hass_api_address</span></p>
+            <p>Modifying the following lists is not persistent. To statically control access please use the configuration file.</p>
+            <p>
+                <ul id="allowed_networks" class="collection with-header"></ul>
+                <br />
+                <div class="input-field">
+                    <a href="#" class="prefix" onclick="helper_a_net_add()"><i class="mdi mdi-plus-circle prefix light-blue-text"></i></a></i>
+                    <input placeholder="192.168.0.0/16" id="add_net_ip" type="text">
+                    <label for="add_net_ip">Add network / IP</label>
+                </div>
+            </p>
+            <p>
+                <ul id="banned_ips" class="collection with-header"></ul>
+                <br />
+                <div class="input-field">
+                    <a href="#" class="prefix" onclick="helper_banned_ban()"><i class="mdi mdi-plus-circle prefix light-blue-text"></i></a></i>
+                    <input placeholder="1.2.3.4" id="add_banned_ip" type="text">
+                    <label for="add_banned_ip">Ban IP</label>
+                </div>
+            </p>
+        </div>
+        <div class="modal-footer">
+          <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">Cancel</a>
         </div>
     </div>
     <div id="modal_about" class="modal modal-fixed-footer">
@@ -1428,10 +1509,22 @@ INDEX = Template(r"""<!DOCTYPE html>
             <p>Developed by:</p>
             <ul>
                 <li>
-                    <div class="chip"> <img src="https://avatars3.githubusercontent.com/u/7396998?v=3&s=400" alt="Contact Person"> <a class="black-text" href="https://github.com/danielperna84" target="_blank">Daniel Perna</a> </div>
+                    <div class="chip"> <img src="https://avatars3.githubusercontent.com/u/7396998?v=4&s=400" alt="Contact Person"> <a class="black-text" href="https://github.com/danielperna84" target="_blank">Daniel Perna</a> </div>
                 </li>
                 <li>
-                    <div class="chip"> <img src="https://avatars2.githubusercontent.com/u/1509640?v=3&s=460" alt="Contact Person"> <a class="black-text" href="https://github.com/jmart518" target="_blank">JT Martinez</a> </div>
+                    <div class="chip"> <img src="https://avatars2.githubusercontent.com/u/1509640?v=4&s=400" alt="Contact Person"> <a class="black-text" href="https://github.com/jmart518" target="_blank">JT Martinez</a> </div>
+                </li>
+                <li>
+                    <div class="chip"> <img src="https://avatars0.githubusercontent.com/u/1525413?v=4&s=400" alt="Contact Person"> <a class="black-text" href="https://github.com/AtoxIO" target="_blank">AtoxIO</a> </div>
+                </li>
+                <li>
+                    <div class="chip"> <img src="https://avatars0.githubusercontent.com/u/646513?s=400&v=4" alt="Contact Person"> <a class="black-text" href="https://github.com/Munsio" target="_blank">Martin Treml</a> </div>
+                </li>
+                <li>
+                    <div class="chip"> <img src="https://avatars2.githubusercontent.com/u/1399443?s=460&v=4" alt="Contact Person"> <a class="black-text" href="https://github.com/sytone" target="_blank">Sytone</a> </div>
+                </li>
+                <li>
+                    <div class="chip"> <img src="https://avatars3.githubusercontent.com/u/1561226?s=400&v=4" alt="Contact Person"> <a class="black-text" href="https://github.com/dimagoltsman" target="_blank">Dima Goltsman</a> </div>
                 </li>
             </ul>
             <p>Libraries used:</p>
@@ -1480,6 +1573,17 @@ INDEX = Template(r"""<!DOCTYPE html>
                     </div>
                     <div class="card-content">
                       <p class="grey-text text-darken-2">GitPython</p>
+                    </div>
+                  </div>
+                </a>
+              </div>
+              <div class="col s6 m3 l3">
+                <a class="light-blue-text" href="https://github.com/nodeca/js-yaml" target="_blank">
+                  <div class="card grey lighten-3 hoverable">
+                    <div class="card-image">
+                    </div>
+                    <div class="card-content">
+                      <p class="grey-text text-darken-2">js-yaml</p>
                     </div>
                   </div>
                 </a>
@@ -1993,11 +2097,10 @@ INDEX = Template(r"""<!DOCTYPE html>
 </script>
 <script type="text/javascript">
     document.addEventListener("DOMContentLoaded", function(){
-	     $('.preloader-background').delay(800).fadeOut('slow');
-
-	      $('.preloader-wrapper')
-		      .delay(800)
-		      .fadeOut('slow');
+        $('.preloader-background').delay(800).fadeOut('slow');
+        $('.preloader-wrapper')
+            .delay(800)
+            .fadeOut('slow');
     });
 </script>
 <script>
@@ -2293,11 +2396,11 @@ INDEX = Template(r"""<!DOCTYPE html>
     }
 
     function checkout(){
-      $(".collapsible-header").removeClass(function(){
-        return "active";
-      });
-      $(".collapsible").collapsible({accordion: true});
-      $(".collapsible").collapsible({accordion: false});
+        $(".collapsible-header").removeClass(function(){
+            return "active";
+        });
+        $(".collapsible").collapsible({accordion: true});
+        $(".collapsible").collapsible({accordion: false});
     }
 
     function loadfile(filepath) {
@@ -2378,6 +2481,175 @@ INDEX = Template(r"""<!DOCTYPE html>
         });
     }
 
+    function get_netstat() {
+        $.get("api/netstat", function (resp) {
+            if (resp.hasOwnProperty("allowed_networks")) {
+                var allowed_list = document.getElementById("allowed_networks");
+                while (allowed_list.firstChild) {
+                    allowed_list.removeChild(allowed_list.firstChild);
+                }
+                var header = document.createElement("li");
+                header.classList.add("collection-header");
+                var header_h4 = document.createElement("h4");
+                header_h4.innerText = "Allowed networks";
+                header_h4.classList.add("grey-text");
+                header_h4.classList.add("text-darken-3");
+                header.appendChild(header_h4);
+                allowed_list.appendChild(header);
+                for (var i = 0; i < resp.allowed_networks.length; i++) {
+                    var li = document.createElement("li");
+                    li.classList.add("collection-item");
+                    var li_div = document.createElement("div");
+                    var address = document.createElement("span");
+                    address.innerText = resp.allowed_networks[i];
+                    li_div.appendChild(address);
+                    var li_a = document.createElement("a");
+                    li_a.classList.add("light-blue-text");
+                    li_a.href = "#!";
+                    li_a.classList.add("secondary-content");
+                    var li_a_i = document.createElement("i");
+                    li_a_i.classList.add("mdi");
+                    li_a_i.classList.add("mdi-delete");
+                    li_a_i.innerText = "Remove";
+                    li_a.appendChild(li_a_i);
+                    li_a.setAttribute("onclick", "helper_a_net_remove('" + resp.allowed_networks[i] + "')");
+                    li_div.appendChild(li_a);
+                    li.appendChild(li_div);
+                    allowed_list.appendChild(li);
+                }
+            }
+            if (resp.hasOwnProperty("banned_ips")) {
+                var banlist = document.getElementById("banned_ips");
+                while (banlist.firstChild) {
+                    banlist.removeChild(banlist.firstChild);
+                }
+                var header = document.createElement("li");
+                header.classList.add("collection-header");
+                var header_h4 = document.createElement("h4");
+                header_h4.innerText = "Banned IPs";
+                header_h4.classList.add("grey-text");
+                header_h4.classList.add("text-darken-3");
+                header.appendChild(header_h4);
+                banlist.appendChild(header);
+                for (var i = 0; i < resp.banned_ips.length; i++) {
+                    var li = document.createElement("li");
+                    li.classList.add("collection-item");
+                    var li_div = document.createElement("div");
+                    var address = document.createElement("span");
+                    address.innerText = resp.banned_ips[i];
+                    li_div.appendChild(address);
+                    var li_a = document.createElement("a");
+                    li_a.classList.add("light-blue-text");
+                    li_a.href = "#!";
+                    li_a.classList.add("secondary-content");
+                    var li_a_i = document.createElement("i");
+                    li_a_i.classList.add("mdi");
+                    li_a_i.classList.add("mdi-delete");
+                    li_a_i.innerText = "Unban";
+                    li_a.appendChild(li_a_i);
+                    li_a.setAttribute("onclick", "helper_banned_unban('" + resp.banned_ips[i] + "')");
+                    li_div.appendChild(li_a);
+                    li.appendChild(li_div);
+                    banlist.appendChild(li);
+                }
+            }
+        });
+    }
+
+    function helper_a_net_remove(network) {
+        document.getElementById("removenet").innerText = network;
+        $('#modal_netstat').modal('close');
+        $('#modal_a_net_remove').modal('open');
+    }
+
+    function a_net_remove() {
+        var network = document.getElementById("removenet").innerText
+        data = new Object();
+        data.network = network;
+        data.method = 'remove';
+        $.post("api/allowed_networks", data).done(function(resp) {
+            if (resp.error) {
+                var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
+                Materialize.toast($toastContent, 5000);
+            }
+            else {
+                var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
+                Materialize.toast($toastContent, 2000);
+            }
+        });
+    }
+
+    function helper_a_net_add() {
+        document.getElementById("addnet").innerText = document.getElementById("add_net_ip").value;
+        document.getElementById("add_net_ip").value = "";
+        $('#modal_netstat').modal('close');
+        $('#modal_a_net_add').modal('open');
+    }
+
+    function a_net_add() {
+        var network = document.getElementById("addnet").innerText
+        data = new Object();
+        data.network = network;
+        data.method = 'add';
+        $.post("api/allowed_networks", data).done(function(resp) {
+            if (resp.error) {
+                var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
+                Materialize.toast($toastContent, 5000);
+            }
+            else {
+                var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
+                Materialize.toast($toastContent, 2000);
+            }
+        });
+    }
+
+    function helper_banned_unban(ip) {
+        document.getElementById("unbanip").innerText = ip;
+        $('#modal_netstat').modal('close');
+        $('#modal_unban').modal('open');
+    }
+
+    function banned_unban() {
+        var ip = document.getElementById("unbanip").innerText
+        data = new Object();
+        data.ip = ip;
+        data.method = 'unban';
+        $.post("api/banned_ips", data).done(function(resp) {
+            if (resp.error) {
+                var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
+                Materialize.toast($toastContent, 5000);
+            }
+            else {
+                var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
+                Materialize.toast($toastContent, 2000);
+            }
+        });
+    }
+
+    function helper_banned_ban() {
+        document.getElementById("banip").innerText = document.getElementById("add_banned_ip").value;
+        document.getElementById("add_banned_ip").value = "";
+        $('#modal_netstat').modal('close');
+        $('#modal_ban').modal('open');
+    }
+
+    function banned_ban() {
+        var ip = document.getElementById("banip").innerText
+        data = new Object();
+        data.ip = ip;
+        data.method = 'ban';
+        $.post("api/banned_ips", data).done(function(resp) {
+            if (resp.error) {
+                var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
+                Materialize.toast($toastContent, 5000);
+            }
+            else {
+                var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
+                Materialize.toast($toastContent, 2000);
+            }
+        });
+    }
+
     function save() {
         var filepath = document.getElementById('currentfile').value;
         if (filepath.length > 0) {
@@ -2407,18 +2679,18 @@ INDEX = Template(r"""<!DOCTYPE html>
     function save_check() {
         var filepath = document.getElementById('currentfile').value;
         if (filepath.length > 0) {
-          $('#modal_save').modal('open');
+            $('#modal_save').modal('open');
         }
         else {
             Materialize.toast('Error:  Please provide a filename', 5000);
             $(".pathtip").bind("animationend webkitAnimationEnd oAnimationEnd MSAnimationEnd", function(){
-              $(this).removeClass("pathtip_color");
+                $(this).removeClass("pathtip_color");
             }).addClass("pathtip_color");
        }
     }
 
     function download_file(filepath) {
-        window.open("/api/download?filename="+encodeURI(filepath));
+        window.open("api/download?filename="+encodeURI(filepath));
     }
 
     function delete_file() {
@@ -2771,8 +3043,7 @@ var lint_timeout;
 var lint_status = $('#lint-status'); // speed optimization
 var lint_error = "";
 
-function check_lint()
-{
+function check_lint() {
     if (document.getElementById('currentfile').value.match(".yaml$")) {
         try {
             var text = editor.getValue().replace(/!(include|secret)/g,".$1"); // hack because js-yaml does not like !include/!secret
@@ -2792,8 +3063,7 @@ function check_lint()
     }
 }
 
-function queue_lint(e)
-{
+function queue_lint(e) {
     if (document.getElementById('currentfile').value.match(".yaml$")) {
         clearTimeout(lint_timeout);
         lint_timeout = setTimeout(check_lint, 500);
@@ -2807,8 +3077,7 @@ function queue_lint(e)
     }
 }
 
-function show_lint_error()
-{
+function show_lint_error() {
     if(lint_error) {
         $("#modal_lint textarea").val(lint_error);
         $("#modal_lint").modal('open');
@@ -2828,8 +3097,8 @@ def signal_handler(sig, frame):
 
 def load_settings(settingsfile):
     global LISTENIP, LISTENPORT, BASEPATH, SSL_CERTIFICATE, SSL_KEY, HASS_API, \
-    HASS_API_PASSWORD, CREDENTIALS, ALLOWED_NETWORKS, BANNED_IPS, BANLIMIT, DEV, \
-    IGNORE_PATTERN, DIRSFIRST
+    HASS_API_PASSWORD, CREDENTIALS, ALLOWED_NETWORKS, BANNED_IPS, BANLIMIT, \
+    DEV, IGNORE_PATTERN, DIRSFIRST, SESAME
     try:
         if os.path.isfile(settingsfile):
             with open(settingsfile) as fptr:
@@ -2848,6 +3117,7 @@ def load_settings(settingsfile):
                 DEV = settings.get("DEV", DEV)
                 IGNORE_PATTERN = settings.get("IGNORE_PATTERN", IGNORE_PATTERN)
                 DIRSFIRST = settings.get("DIRSFIRST", DIRSFIRST)
+                SESAME = settings.get("SESAME", SESAME)
     except Exception as err:
         LOG.warning(err)
         LOG.warning("Not loading static settings")
@@ -2955,13 +3225,24 @@ class RequestHandler(BaseHTTPRequestHandler):
         self.wfile.write(bytes("Policy not fulfilled", "utf8"))
 
     def do_GET(self):
+        req = urlparse(self.path)
+        if SESAME:
+            if req.path.endswith("/%s" % SESAME):
+                if self.client_address[0] not in ALLOWED_NETWORKS:
+                    ALLOWED_NETWORKS.append(self.client_address[0])
+                if self.client_address[0] in BANNED_IPS:
+                    BANNED_IPS.remove(self.client_address[0])
+                url = req.path[:req.path.rfind(SESAME)]
+                self.send_response(302)
+                self.send_header('Location', url)
+                self.end_headers()
+                return
         if not check_access(self.client_address[0]):
             self.do_BLOCK()
             return
-        req = urlparse(self.path)
         query = parse_qs(req.query)
         self.send_response(200)
-        if req.path == '/api/file':
+        if req.path.endswith('/api/file'):
             content = ""
             self.send_header('Content-type', 'text/text')
             self.end_headers()
@@ -2979,7 +3260,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 content = str(err)
             self.wfile.write(bytes(content, "utf8"))
             return
-        elif req.path == '/api/download':
+        elif req.path.endswith('/api/download'):
             content = ""
             filename = query.get('filename', None)
             try:
@@ -3001,7 +3282,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/text')
             self.wfile.write(bytes(content, "utf8"))
             return
-        elif req.path == '/api/listdir':
+        elif req.path.endswith('/api/listdir'):
             content = ""
             self.send_header('Content-type', 'text/json')
             self.end_headers()
@@ -3037,7 +3318,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 content = str(err)
                 self.wfile.write(bytes(content, "utf8"))
             return
-        elif req.path == '/api/abspath':
+        elif req.path.endswith('/api/abspath'):
             content = ""
             self.send_header('Content-type', 'text/text')
             self.end_headers()
@@ -3050,7 +3331,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 if os.path.isdir(dirpath):
                     self.wfile.write(os.path.abspath(dirpath))
             return
-        elif req.path == '/api/parent':
+        elif req.path.endswith('/api/parent'):
             content = ""
             self.send_header('Content-type', 'text/text')
             self.end_headers()
@@ -3063,7 +3344,17 @@ class RequestHandler(BaseHTTPRequestHandler):
                 if os.path.isdir(dirpath):
                     self.wfile.write(os.path.abspath(os.path.dirname(dirpath)))
             return
-        elif req.path == '/api/restart':
+        elif req.path.endswith('/api/netstat'):
+            content = ""
+            self.send_header('Content-type', 'text/json')
+            self.end_headers()
+            res = {
+                "allowed_networks": ALLOWED_NETWORKS,
+                "banned_ips": BANNED_IPS
+            }
+            self.wfile.write(bytes(json.dumps(res), "utf8"))
+            return
+        elif req.path.endswith('/api/restart'):
             LOG.info("/api/restart")
             self.send_header('Content-type', 'text/json')
             self.end_headers()
@@ -3083,7 +3374,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 res['restart'] = str(err)
             self.wfile.write(bytes(json.dumps(res), "utf8"))
             return
-        elif req.path == '/api/check_config':
+        elif req.path.endswith('/api/check_config'):
             LOG.info("/api/check_config")
             self.send_header('Content-type', 'text/json')
             self.end_headers()
@@ -3103,7 +3394,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 res['restart'] = str(err)
             self.wfile.write(bytes(json.dumps(res), "utf8"))
             return
-        elif req.path == '/api/reload_automations':
+        elif req.path.endswith('/api/reload_automations'):
             LOG.info("/api/reload_automations")
             self.send_header('Content-type', 'text/json')
             self.end_headers()
@@ -3123,7 +3414,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 res['restart'] = str(err)
             self.wfile.write(bytes(json.dumps(res), "utf8"))
             return
-        elif req.path == '/api/reload_scripts':
+        elif req.path.endswith('/api/reload_scripts'):
             LOG.info("/api/reload_scripts")
             self.send_header('Content-type', 'text/json')
             self.end_headers()
@@ -3143,7 +3434,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 res['restart'] = str(err)
             self.wfile.write(bytes(json.dumps(res), "utf8"))
             return
-        elif req.path == '/api/reload_groups':
+        elif req.path.endswith('/api/reload_groups'):
             LOG.info("/api/reload_groups")
             self.send_header('Content-type', 'text/json')
             self.end_headers()
@@ -3163,7 +3454,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 res['restart'] = str(err)
             self.wfile.write(bytes(json.dumps(res), "utf8"))
             return
-        elif req.path == '/api/reload_core':
+        elif req.path.endswith('/api/reload_core'):
             LOG.info("/api/reload_core")
             self.send_header('Content-type', 'text/json')
             self.end_headers()
@@ -3183,7 +3474,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 res['restart'] = str(err)
             self.wfile.write(bytes(json.dumps(res), "utf8"))
             return
-        elif req.path == '/':
+        elif req.path.endswith('/'):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
 
@@ -3227,7 +3518,10 @@ class RequestHandler(BaseHTTPRequestHandler):
                                               states=states,
                                               current=VERSION,
                                               versionclass=color,
-                                              separator="\%s" % os.sep if os.sep == "\\" else os.sep)
+                                              separator="\%s" % os.sep if os.sep == "\\" else os.sep,
+                                              listening_address="%s://%s:%i" % (
+                                                  'https' if SSL_CERTIFICATE else 'http', LISTENIP, LISTENPORT),
+                                              hass_api_address="%s" % (HASS_API, ))
             self.wfile.write(bytes(html, "utf8"))
             return
         else:
@@ -3236,6 +3530,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.wfile.write(bytes("File not found", "utf8"))
 
     def do_POST(self):
+        global ALLOWED_NETWORKS, BANNED_IPS
         if not check_access(self.client_address[0]):
             self.do_BLOCK()
             return
@@ -3247,7 +3542,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         }
 
         length = int(self.headers['content-length'])
-        if req.path == '/api/save':
+        if req.path.endswith('/api/save'):
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
             except Exception as err:
@@ -3273,7 +3568,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                         LOG.warning(err)
             else:
                 response['message'] = "Missing filename or text"
-        elif req.path == '/api/upload':
+        elif req.path.endswith('/api/upload'):
             if length > 104857600: #100 MB for now
                 read = 0
                 while read < length:
@@ -3303,7 +3598,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 response['message'] = "Upload successful"
                 self.wfile.write(bytes(json.dumps(response), "utf8"))
                 return
-        elif req.path == '/api/delete':
+        elif req.path.endswith('/api/delete'):
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
             except Exception as err:
@@ -3337,7 +3632,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                         LOG.warning(err)
             else:
                 response['message'] = "Missing filename or text"
-        elif req.path == '/api/exec_command':
+        elif req.path.endswith('/api/exec_command'):
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
             except Exception as err:
@@ -3384,7 +3679,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                         LOG.warning(err)
             else:
                 response['message'] = "Missing command"
-        elif req.path == '/api/gitadd':
+        elif req.path.endswith('/api/gitadd'):
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
             except Exception as err:
@@ -3417,7 +3712,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                         LOG.warning(err)
             else:
                 response['message'] = "Missing filename"
-        elif req.path == '/api/commit':
+        elif req.path.endswith('/api/commit'):
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
             except Exception as err:
@@ -3450,7 +3745,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                         LOG.warning("Exception (no repo): %s" % str(err))
             else:
                 response['message'] = "Missing path"
-        elif req.path == '/api/checkout':
+        elif req.path.endswith('/api/checkout'):
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
             except Exception as err:
@@ -3484,7 +3779,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                         LOG.warning("Exception (no repo): %s" % str(err))
             else:
                 response['message'] = "Missing path or branch"
-        elif req.path == '/api/newbranch':
+        elif req.path.endswith('/api/newbranch'):
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
             except Exception as err:
@@ -3517,7 +3812,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                         LOG.warning("Exception (no repo): %s" % str(err))
             else:
                 response['message'] = "Missing path or branch"
-        elif req.path == '/api/init':
+        elif req.path.endswith('/api/init'):
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
             except Exception as err:
@@ -3548,7 +3843,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                         LOG.warning("Exception (no repo): %s" % str(err))
             else:
                 response['message'] = "Missing path or branch"
-        elif req.path == '/api/push':
+        elif req.path.endswith('/api/push'):
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
             except Exception as err:
@@ -3588,7 +3883,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                         LOG.warning("Exception (no repo): %s" % str(err))
             else:
                 response['message'] = "Missing path or branch"
-        elif req.path == '/api/newfolder':
+        elif req.path.endswith('/api/newfolder'):
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
             except Exception as err:
@@ -3617,7 +3912,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                     except Exception as err:
                         response['message'] = "%s" % (str(err))
                         LOG.warning(err)
-        elif req.path == '/api/newfile':
+        elif req.path.endswith('/api/newfile'):
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
             except Exception as err:
@@ -3649,6 +3944,76 @@ class RequestHandler(BaseHTTPRequestHandler):
                         LOG.warning(err)
             else:
                 response['message'] = "Missing filename or text"
+        elif req.path.endswith('/api/allowed_networks'):
+            try:
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+            except Exception as err:
+                LOG.warning(err)
+                response['message'] = "%s" % (str(err))
+                postvars = {}
+            if 'network' in postvars.keys() and 'method' in postvars.keys():
+                if postvars['network'] and postvars['method']:
+                    try:
+                        network = unquote(postvars['network'][0])
+                        method = unquote(postvars['method'][0])
+                        if method == 'remove':
+                            if network in ALLOWED_NETWORKS:
+                                ALLOWED_NETWORKS.remove(network)
+                                if not ALLOWED_NETWORKS:
+                                    ALLOWED_NETWORKS.append("0.0.0.0/0")
+                            response['error'] = False
+                        elif method == 'add':
+                            ipaddress.ip_network(network)
+                            ALLOWED_NETWORKS.append(network)
+                            response['error'] = False
+                        else:
+                            response['error'] = True
+                        self.send_response(200)
+                        self.send_header('Content-type', 'text/json')
+                        self.end_headers()
+                        response['error'] = False
+                        response['message'] = "ALLOWED_NETWORKS (%s): %s" % (method, network)
+                        self.wfile.write(bytes(json.dumps(response), "utf8"))
+                        return
+                    except Exception as err:
+                        response['error'] = True
+                        response['message'] = "%s" % (str(err))
+                        LOG.warning(err)
+            else:
+                response['message'] = "Missing network"
+        elif req.path.endswith('/api/banned_ips'):
+            try:
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+            except Exception as err:
+                LOG.warning(err)
+                response['message'] = "%s" % (str(err))
+                postvars = {}
+            if 'ip' in postvars.keys() and 'method' in postvars.keys():
+                if postvars['ip'] and postvars['method']:
+                    try:
+                        ip = unquote(postvars['ip'][0])
+                        method = unquote(postvars['method'][0])
+                        if method == 'unban':
+                            if ip in BANNED_IPS:
+                                BANNED_IPS.remove(ip)
+                            response['error'] = False
+                        elif method == 'ban':
+                            ipaddress.ip_network(ip)
+                            BANNED_IPS.append(ip)
+                        else:
+                            response['error'] = True
+                        self.send_response(200)
+                        self.send_header('Content-type', 'text/json')
+                        self.end_headers()
+                        response['message'] = "BANNED_IPS (%s): %s" % (method, ip)
+                        self.wfile.write(bytes(json.dumps(response), "utf8"))
+                        return
+                    except Exception as err:
+                        response['error'] = True
+                        response['message'] = "%s" % (str(err))
+                        LOG.warning(err)
+            else:
+                response['message'] = "Missing IP"
         else:
             response['message'] = "Invalid method"
         self.send_response(200)
