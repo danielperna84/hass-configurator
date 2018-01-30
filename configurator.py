@@ -631,7 +631,9 @@ INDEX = Template(r"""<!DOCTYPE html>
   </header>
   <main>
     <ul id="dropdown_menu" class="dropdown-content z-depth-4">
-        <li><a class="modal-trigger" target="_blank" href="#modal_components">HASS Components</a></li>
+        <li><a onclick="window.open(window.location.href, '_blank');">New tab</a></li>
+        <li class="divider"></li>
+        <li><a class="modal-trigger" target="_blank" href="#modal_components">Components</a></li>
         <li><a class="modal-trigger" target="_blank" href="#modal_icons">Material Icons</a></li>
         <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
         <li><a class="modal-trigger" href="#modal_netstat" onclick="get_netstat()">Network status</a></li>
@@ -647,8 +649,10 @@ INDEX = Template(r"""<!DOCTYPE html>
         <li><a class="modal-trigger" href="#modal_exec_command">Execute shell command</a></li>
     </ul>
     <ul id="dropdown_menu_mobile" class="dropdown-content z-depth-4">
-        <li><a target="_blank" href="https://home-assistant.io/help/">Need HASS Help?</a></li>
-        <li><a target="_blank" href="https://home-assistant.io/components/">HASS Components</a></li>
+        <li><a onclick="window.open(window.location.href, '_blank');">New tab</a></li>
+        <li class="divider"></li>
+        <li><a target="_blank" href="https://home-assistant.io/help/">Help</a></li>
+        <li><a target="_blank" href="https://home-assistant.io/components/">Components</a></li>
         <li><a target="_blank" href="https://materialdesignicons.com/">Material Icons</a></li>
         <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
         <li><a class="modal-trigger" href="#modal_netstat" onclick="get_netstat()">Network status</a></li>
@@ -1272,7 +1276,7 @@ INDEX = Template(r"""<!DOCTYPE html>
         </div>
         <div class="modal-footer">
           <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">No</a>
-          <a onclick="document.getElementById('currentfile').value='';editor.getSession().setValue('');$('.markdirty').each(function(i, o){o.classList.remove('red');});" class="modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Yes</a>
+          <a onclick="document.getElementById('currentfile').value='';editor.getSession().setValue('');$('.markdirty').each(function(i, o){o.classList.remove('red');});document.title = 'HASS Configurator';" class="modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Yes</a>
         </div>
     </div>
     <div id="modal_delete" class="modal">
@@ -2250,7 +2254,7 @@ INDEX = Template(r"""<!DOCTYPE html>
             else {
                 iicon.classList.add('mdi', 'mdi-file');
             }
-            item.setAttribute("onclick", "loadfile('" + encodeURI(itemdata.fullpath) + "')");
+            item.setAttribute("onclick", "loadfile('" + encodeURI(itemdata.fullpath) + "', '" + itemdata.name + "')");
             stats.innerHTML = "Mod.: " + date.toUTCString() + "&nbsp;&nbsp;Size: " + (itemdata.size/1024).toFixed(1) + " KiB";
         }
         item.appendChild(iicon);
@@ -2403,7 +2407,7 @@ INDEX = Template(r"""<!DOCTYPE html>
         $(".collapsible").collapsible({accordion: false});
     }
 
-    function loadfile(filepath) {
+    function loadfile(filepath, filenameonly) {
         if ($('.markdirty.red').length) {
             $('#modal_markdirty').modal('open');
         }
@@ -2422,6 +2426,7 @@ INDEX = Template(r"""<!DOCTYPE html>
                 editor.session.getUndoManager().markClean();
                 $('.markdirty').each(function(i, o){o.classList.remove('red');});
                 $('.hidesave').css('opacity', 0);
+                document.title = filenameonly + " - HASS Configurator";
                 check_lint();
             });
         }
