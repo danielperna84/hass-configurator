@@ -71,7 +71,7 @@ SO.setFormatter(
     logging.Formatter('%(levelname)s:%(asctime)s:%(name)s:%(message)s'))
 LOG.addHandler(SO)
 RELEASEURL = "https://api.github.com/repos/danielperna84/hass-configurator/releases/latest"
-VERSION = "0.2.5"
+VERSION = "0.2.6"
 BASEDIR = "."
 DEV = False
 HTTPD = None
@@ -631,7 +631,9 @@ INDEX = Template(r"""<!DOCTYPE html>
   </header>
   <main>
     <ul id="dropdown_menu" class="dropdown-content z-depth-4">
-        <li><a class="modal-trigger" target="_blank" href="#modal_components">HASS Components</a></li>
+        <li><a onclick="localStorage.setItem('new_tab', true);window.open(window.location.href, '_blank');">New tab</a></li>
+        <li class="divider"></li>
+        <li><a class="modal-trigger" target="_blank" href="#modal_components">Components</a></li>
         <li><a class="modal-trigger" target="_blank" href="#modal_icons">Material Icons</a></li>
         <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
         <li><a class="modal-trigger" href="#modal_netstat" onclick="get_netstat()">Network status</a></li>
@@ -647,8 +649,10 @@ INDEX = Template(r"""<!DOCTYPE html>
         <li><a class="modal-trigger" href="#modal_exec_command">Execute shell command</a></li>
     </ul>
     <ul id="dropdown_menu_mobile" class="dropdown-content z-depth-4">
-        <li><a target="_blank" href="https://home-assistant.io/help/">Need HASS Help?</a></li>
-        <li><a target="_blank" href="https://home-assistant.io/components/">HASS Components</a></li>
+        <li><a onclick="localStorage.setItem('new_tab', true);window.open(window.location.href, '_blank');">New tab</a></li>
+        <li class="divider"></li>
+        <li><a target="_blank" href="https://home-assistant.io/help/">Help</a></li>
+        <li><a target="_blank" href="https://home-assistant.io/components/">Components</a></li>
         <li><a target="_blank" href="https://materialdesignicons.com/">Material Icons</a></li>
         <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
         <li><a class="modal-trigger" href="#modal_netstat" onclick="get_netstat()">Network status</a></li>
@@ -1272,7 +1276,7 @@ INDEX = Template(r"""<!DOCTYPE html>
         </div>
         <div class="modal-footer">
           <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">No</a>
-          <a onclick="document.getElementById('currentfile').value='';editor.getSession().setValue('');$('.markdirty').each(function(i, o){o.classList.remove('red');});" class="modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Yes</a>
+          <a onclick="closefile()" class="modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Yes</a>
         </div>
     </div>
     <div id="modal_delete" class="modal">
@@ -1754,6 +1758,10 @@ INDEX = Template(r"""<!DOCTYPE html>
           <div class="row col s12">
               <p class="col s12"> <a class="waves-effect waves-light btn light-blue modal-trigger" href="#modal_acekeyboard">Keyboard Shortcuts</a> </p>
               <p class="col s12">
+                  <input type="checkbox" class="blue_check" onclick="set_save_prompt(this.checked)" id="savePrompt" />
+                  <Label for="savePrompt">Prompt before save</label>
+              </p>
+              <p class="col s12">
                   <input type="checkbox" class="blue_check" onclick="editor.setOption('animatedScroll', !editor.getOptions().animatedScroll)" id="animatedScroll" />
                   <Label for="animatedScroll">Animated Scroll</label>
               </p>
@@ -2061,6 +2069,72 @@ INDEX = Template(r"""<!DOCTYPE html>
 <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
 <script type="text/javascript">
+    var global_current_filepath = null;
+    var global_current_filename = null;
+
+    function got_focus_or_visibility() {
+        if (global_current_filename && global_current_filepath) {
+            // The globals are set, set the localStorage to those values
+            var current_file = {current_filepath: global_current_filepath,
+                                current_filename: global_current_filename}
+            localStorage.setItem('current_file', JSON.stringify(current_file));
+        }
+        else {
+            // This tab had no prior file opened, clearing from localStorage
+            localStorage.removeItem('current_file');
+        }
+    }
+
+    window.onfocus = function() {
+        got_focus_or_visibility();
+    }
+    //window.onblur = function() {
+    //    console.log("lost focus");
+    //}
+
+    // Got this from here: https://developer.mozilla.org/en-US/docs/Web/API/Page_Visibility_API
+    // Set the name of the hidden property and the change event for visibility
+    var hidden, visibilityChange; 
+    if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support 
+        hidden = "hidden";
+        visibilityChange = "visibilitychange";
+    }
+    else if (typeof document.msHidden !== "undefined") {
+        hidden = "msHidden";
+        visibilityChange = "msvisibilitychange";
+    }
+    else if (typeof document.webkitHidden !== "undefined") {
+        hidden = "webkitHidden";
+        visibilityChange = "webkitvisibilitychange";
+    }
+
+    function handleVisibilityChange() {
+        if (document[hidden]) {
+            // We're doing nothing when the tab gets out of vision
+        }
+        else {
+            // We're doing this if the tab becomes visible
+            got_focus_or_visibility();
+        }
+    }
+    // Warn if the browser doesn't support addEventListener or the Page Visibility API
+    if (typeof document.addEventListener === "undefined" || typeof document.hidden === "undefined") {
+        console.log("This requires a browser, such as Google Chrome or Firefox, that supports the Page Visibility API.");
+    }
+    else {
+        // Handle page visibility change
+        document.addEventListener(visibilityChange, handleVisibilityChange, false);
+    }
+
+    $(document).keydown(function(e) {
+        if ((e.key == 's' || e.key == 'S' ) && (e.ctrlKey || e.metaKey)) {
+            e.preventDefault();
+            save_check();
+            return false;
+        }
+        return true;
+    }); 
+
     $(document).ready(function () {
         $('select').material_select();
         $('.modal').modal();
@@ -2093,14 +2167,24 @@ INDEX = Template(r"""<!DOCTYPE html>
             draggable: true
         });
         listdir('.');
+        document.getElementById('savePrompt').checked = get_save_prompt();
     });
 </script>
 <script type="text/javascript">
-    document.addEventListener("DOMContentLoaded", function(){
+    document.addEventListener("DOMContentLoaded", function() {
         $('.preloader-background').delay(800).fadeOut('slow');
-        $('.preloader-wrapper')
-            .delay(800)
-            .fadeOut('slow');
+        $('.preloader-wrapper').delay(800).fadeOut('slow');
+        if (!localStorage.getItem("new_tab")) {
+            var old_file = localStorage.getItem("current_file");
+            if (old_file) {
+                old_file = JSON.parse(old_file);
+                loadfile(old_file.current_filepath, old_file.current_filename);
+            }
+        }
+        else {
+            localStorage.removeItem("current_file");
+        }
+        localStorage.removeItem("new_tab");
     });
 </script>
 <script>
@@ -2250,7 +2334,7 @@ INDEX = Template(r"""<!DOCTYPE html>
             else {
                 iicon.classList.add('mdi', 'mdi-file');
             }
-            item.setAttribute("onclick", "loadfile('" + encodeURI(itemdata.fullpath) + "')");
+            item.setAttribute("onclick", "loadfile('" + encodeURI(itemdata.fullpath) + "', '" + itemdata.name + "')");
             stats.innerHTML = "Mod.: " + date.toUTCString() + "&nbsp;&nbsp;Size: " + (itemdata.size/1024).toFixed(1) + " KiB";
         }
         item.appendChild(iicon);
@@ -2403,7 +2487,7 @@ INDEX = Template(r"""<!DOCTYPE html>
         $(".collapsible").collapsible({accordion: false});
     }
 
-    function loadfile(filepath) {
+    function loadfile(filepath, filenameonly) {
         if ($('.markdirty.red').length) {
             $('#modal_markdirty').modal('open');
         }
@@ -2422,9 +2506,27 @@ INDEX = Template(r"""<!DOCTYPE html>
                 editor.session.getUndoManager().markClean();
                 $('.markdirty').each(function(i, o){o.classList.remove('red');});
                 $('.hidesave').css('opacity', 0);
+                document.title = filenameonly + " - HASS Configurator";
+                global_current_filepath = filepath;
+                global_current_filename = filenameonly;
+                var current_file = {current_filepath: global_current_filepath,
+                                    current_filename: global_current_filename}
+                localStorage.setItem('current_file', JSON.stringify(current_file));
                 check_lint();
             });
         }
+    }
+
+    function closefile() {
+        document.getElementById('currentfile').value='';
+        editor.getSession().setValue('');
+        $('.markdirty').each(function(i, o) {
+            o.classList.remove('red');
+        });
+        localStorage.removeItem('current_file');
+        global_current_filepath = null;
+        global_current_filename = null;
+        document.title = 'HASS Configurator';
     }
 
     function check_config() {
@@ -2679,7 +2781,12 @@ INDEX = Template(r"""<!DOCTYPE html>
     function save_check() {
         var filepath = document.getElementById('currentfile').value;
         if (filepath.length > 0) {
-            $('#modal_save').modal('open');
+            if (get_save_prompt()) {
+                $('#modal_save').modal('open');
+            }
+            else {
+                save();
+            }
         }
         else {
             Materialize.toast('Error:  Please provide a filename', 5000);
@@ -2984,6 +3091,18 @@ INDEX = Template(r"""<!DOCTYPE html>
             enableSnippets: true
         })
         editor.$blockScrolling = Infinity;
+    }
+
+    function set_save_prompt(checked) {
+        localStorage.setItem('save_prompt', JSON.stringify({save_prompt: checked}));
+    }
+
+    function get_save_prompt() {
+        if (localStorage.getItem('save_prompt')) {
+            var save_prompt = JSON.parse(localStorage.getItem('save_prompt'));
+            return save_prompt.save_prompt;
+        }
+        return false;
     }
 
     function apply_settings() {
