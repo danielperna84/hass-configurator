@@ -2082,7 +2082,6 @@ INDEX = Template(r"""<!DOCTYPE html>
     }
 
     window.onfocus = function() {
-        console.log("got focus");
         got_focus_or_visibility();
     }
     //window.onblur = function() {
@@ -2104,7 +2103,7 @@ INDEX = Template(r"""<!DOCTYPE html>
         hidden = "webkitHidden";
         visibilityChange = "webkitvisibilitychange";
     }
-    
+
     function handleVisibilityChange() {
         if (document[hidden]) {
             // We're doing nothing when the tab gets out of vision
@@ -2122,7 +2121,16 @@ INDEX = Template(r"""<!DOCTYPE html>
         // Handle page visibility change
         document.addEventListener(visibilityChange, handleVisibilityChange, false);
     }
-    
+
+    $(document).keydown(function(e) {
+        if ((e.key == 's' || e.key == 'S' ) && (e.ctrlKey || e.metaKey)) {
+            e.preventDefault();
+            save();
+            return false;
+        }
+        return true;
+    }); 
+
     $(document).ready(function () {
         $('select').material_select();
         $('.modal').modal();
