@@ -2125,7 +2125,7 @@ INDEX = Template(r"""<!DOCTYPE html>
     $(document).keydown(function(e) {
         if ((e.key == 's' || e.key == 'S' ) && (e.ctrlKey || e.metaKey)) {
             e.preventDefault();
-            save();
+            save_check();
             return false;
         }
         return true;
