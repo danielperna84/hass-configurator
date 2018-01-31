@@ -1758,6 +1758,10 @@ INDEX = Template(r"""<!DOCTYPE html>
           <div class="row col s12">
               <p class="col s12"> <a class="waves-effect waves-light btn light-blue modal-trigger" href="#modal_acekeyboard">Keyboard Shortcuts</a> </p>
               <p class="col s12">
+                  <input type="checkbox" class="blue_check" onclick="set_save_prompt(this.checked)" id="savePrompt" />
+                  <Label for="savePrompt">Prompt before save</label>
+              </p>
+              <p class="col s12">
                   <input type="checkbox" class="blue_check" onclick="editor.setOption('animatedScroll', !editor.getOptions().animatedScroll)" id="animatedScroll" />
                   <Label for="animatedScroll">Animated Scroll</label>
               </p>
@@ -2163,10 +2167,11 @@ INDEX = Template(r"""<!DOCTYPE html>
             draggable: true
         });
         listdir('.');
+        document.getElementById('savePrompt').checked = get_save_prompt();
     });
 </script>
 <script type="text/javascript">
-    document.addEventListener("DOMContentLoaded", function(){
+    document.addEventListener("DOMContentLoaded", function() {
         $('.preloader-background').delay(800).fadeOut('slow');
         $('.preloader-wrapper').delay(800).fadeOut('slow');
         if (!localStorage.getItem("new_tab")) {
@@ -2776,7 +2781,12 @@ INDEX = Template(r"""<!DOCTYPE html>
     function save_check() {
         var filepath = document.getElementById('currentfile').value;
         if (filepath.length > 0) {
-            $('#modal_save').modal('open');
+            if (get_save_prompt()) {
+                $('#modal_save').modal('open');
+            }
+            else {
+                save();
+            }
         }
         else {
             Materialize.toast('Error:  Please provide a filename', 5000);
@@ -3081,6 +3091,18 @@ INDEX = Template(r"""<!DOCTYPE html>
             enableSnippets: true
         })
         editor.$blockScrolling = Infinity;
+    }
+
+    function set_save_prompt(checked) {
+        localStorage.setItem('save_prompt', JSON.stringify({save_prompt: checked}));
+    }
+
+    function get_save_prompt() {
+        if (localStorage.getItem('save_prompt')) {
+            var save_prompt = JSON.parse(localStorage.getItem('save_prompt'));
+            return save_prompt.save_prompt;
+        }
+        return false;
     }
 
     function apply_settings() {

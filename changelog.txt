@@ -3,6 +3,7 @@ Version 0.2.6 (2018-)
 - Added menu item to open configurator in new tab (Issue #76) @danielperna84
 - Automatically load last viewed (and not closed) file via localStorage @danielperna84
 - CTRL+s / CMD+s can now be used to save a file @danielperna84
+- Prompting before saving now opt-in in editor settings @danielperna84
 
 Version 0.2.5 (2018-01-27)
 - Added warning-logs for access failure @danielperna84
