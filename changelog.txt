@@ -2,7 +2,7 @@ Version 0.2.6 (2018-01-31)
 - Displaying current filename in title (Issue #76) @danielperna84
 - Added menu item to open configurator in new tab (Issue #76) @danielperna84
 - Automatically load last viewed (and not closed) file via localStorage @danielperna84
-- CTRL+s / CMD+s can now be used to save a file @danielperna84
+- CTRL+s / CMD+s can now be used to save files @danielperna84
 - Prompting before saving now opt-in in editor settings (Issue #77) @danielperna84
 
 Version 0.2.5 (2018-01-27)
