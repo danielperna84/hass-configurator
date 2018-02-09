@@ -34,14 +34,14 @@ There are no dependencies on Python modules that are not part of the standard li
 
 ### Configuration
 Near the top of the py-file you will find some global variables you can change to customize the configurator a little bit. If you are unfamiliar with Python: when setting variables of the type _string_, you have to write that within quotation marks. The default settings are fine for just checking this out quickly. With more customized setups you will have to change some settings though.  
-To keep your setting across updates it is also possible to save settings in an external file. In that case copy [settings.conf](https://github.com/danielperna84/hass-configurator/blob/master/settings.conf) whereever you like and append the full path to the file to the command when starting the configurator. E.g. `sudo .configurator.py /home/hass/.homeassistant/mysettings.conf`. This file is in JSON format. So make sure it has a valid syntax (you can set the editor to JSON to get syntax highlighting for the settings). The major difference to the settings in the py-file is, that `None` becomes `null`.
+To keep your setting across updates it is also possible to save settings in an external file. In that case copy [settings.conf](https://github.com/danielperna84/hass-configurator/blob/master/settings.conf) whereever you like and append the full path to the file to the command when starting the configurator. E.g. `sudo .configurator.py /home/homeassistant/.homeassistant/mysettings.conf`. This file is in JSON format. So make sure it has a valid syntax (you can set the editor to JSON to get syntax highlighting for the settings). The major difference to the settings in the py-file is, that `None` becomes `null`.
 
 #### LISTENIP (string)
 The IP address the service is listening on. By default it is binding to `0.0.0.0`, which is every IPv4 interface on the system. When using `::`, all available IPv6- and IPv4-addresses will be used.
 #### LISTENPORT (integer)
 The port the service is listening on. By default it is using 3218, but you can change this if you need to.
 #### BASEPATH (string)
-It is possible to place configurator.py somewhere else. Set the `BASEPATH` to something like `"/home/hass/.homeassistant"`, and no matter where you are running the configurator from, it will start serving files from there. This is needed if you plan on running the configurator with systemd.
+It is possible to place configurator.py somewhere else. Set the `BASEPATH` to something like `"/home/homeassistant/.homeassistant"`, and no matter where you are running the configurator from, it will start serving files from there. This is needed if you plan on running the configurator with systemd.
 #### SSL_CERTIFICATE / SSL_KEY (string)
 If you're using SSL, set the paths to your SSL files here. This is similar to the SSL setup you can do in HASS.
 #### HASS_API (string)
