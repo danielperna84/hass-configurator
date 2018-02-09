@@ -2,30 +2,30 @@
 [![Build Status](https://travis-ci.org/danielperna84/hass-configurator.svg?branch=master)](https://travis-ci.org/danielperna84/hass-configurator)
 ### Configuration UI for Home Assistant
 
-Since there currently is no nice way to edit the yaml-files HASS is using through the HASS frontend, I've code-snippet-patchworked this small webapp. It's essentially an embedded [Ace editor](https://ace.c9.io/), which has syntax hightlighting for yaml (and a ton of other features you can turn on and off). Of course there's also an integrated file browser to select whatever file you want to edit. When you're done with editing the file, click the save-button and it will replace the original.  
-Thanks to the help of [JT Martinez](https://github.com/jmart518) this tool now presents itself in [Material Design](http://materializecss.com/).
+While the configuration UI of Home Assistant is still in development, you can use this small webapp to modify your configuration. It's essentially an embedded [Ace editor](https://ace.c9.io/), which has syntax hightlighting and automatic linting for yaml files (and a ton of other features you can turn on and off). There is also an integrated file browser to select whatever file you want to edit. When you are done with editing the file, click the save-button (or hit CTRL+s/CMD+s) and it will replace the original file.  
+[JT Martinez](https://github.com/jmart518) has done a wonderful job by implementing [Material Design](http://materializecss.com/).
 
 ### Feature list:
 
-- Web-Based editor to modify your files with syntax highlighting
+- Web-Based editor to modify your files with syntax highlighting and automatic yaml-linting
 - Upload and download files
-- Stage and commit changes in Git repositories, create and switch between branches
+- Stage and commit changes in Git repositories, create and switch between branches, push to remotes
 - Lists of available triggers, events, entities, conditions and services. Selected element gets inserted into the editor at the last cursor position.
 - Restart HASS directly with the click of a button (API-password required)
 - SSL support
 - Optional authentication and IP filtering for added security
 - Direct links to HASS documentation and icons
 - Execute shell commands
-- Modified editor settings can be saved using [localStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage)
+- Customizable editor settings (saved using [localStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage))
 
-#### Screenshot of the configurator embedded into HASS:
+#### Screenshot HASS Configurator:
 ![Screenshot](https://github.com/danielperna84/hass-configurator/blob/master/screenshots/main.png)
 
-If there's anything you want to have differently, feel free to fork and enhance. And if something is not working, create an issue here and I'll have a look at it.  
+If there is anything you want to have differently, feel free to fork and enhance. And if something is not working, create an issue here and I will have a look at it.  
 _WARNING_: This tool allows you to browse your filesystem and modify files. So be careful which files you edit, or you might break critical parts of your system.
 
 ### Installation
-There are no dependencies on Python modules that are not part of the standard library. And all the fancy JavaScript libraries are loaded from CDN (which means this doesn't work when you're offline).  
+There are no dependencies on Python modules that are not part of the standard library. And all the fancy JavaScript libraries are loaded from CDN (which means this does not work when you are offline).  
 - Copy [configurator.py](https://github.com/danielperna84/hass-configurator/blob/master/configurator.py) to your HASS configuration directory (e.g /home/hass/.homeassistant)
 - Make it executable (`sudo chmod 755 configurator.py`)
 - (Optional) Set the `GIT` variable in configurator.py to `True` if [GitPython](https://gitpython.readthedocs.io/) is installed on your system
@@ -33,15 +33,15 @@ There are no dependencies on Python modules that are not part of the standard li
 - To terminate the process do the usual `CTRL+C`, maybe once or twice
 
 ### Configuration
-Near the top of the py-file you'll find some global variables you can change to customize the configurator a little bit. If you're unfamiliar with Python: when setting variables of the type _string_, you have to write that within quotation marks. The default settings are fine for just checking this out quickly. With more customized setups you'll have to change some settings though.  
+Near the top of the py-file you will find some global variables you can change to customize the configurator a little bit. If you are unfamiliar with Python: when setting variables of the type _string_, you have to write that within quotation marks. The default settings are fine for just checking this out quickly. With more customized setups you will have to change some settings though.  
 To keep your setting across updates it is also possible to save settings in an external file. In that case copy [settings.conf](https://github.com/danielperna84/hass-configurator/blob/master/settings.conf) whereever you like and append the full path to the file to the command when starting the configurator. E.g. `sudo .configurator.py /home/hass/.homeassistant/mysettings.conf`. This file is in JSON format. So make sure it has a valid syntax (you can set the editor to JSON to get syntax highlighting for the settings). The major difference to the settings in the py-file is, that `None` becomes `null`.
 
 #### LISTENIP (string)
 The IP address the service is listening on. By default it is binding to `0.0.0.0`, which is every IPv4 interface on the system. When using `::`, all available IPv6- and IPv4-addresses will be used.
 #### LISTENPORT (integer)
-The port the service is listening on. By default it's using 3218, but you can change this if you need to.
+The port the service is listening on. By default it is using 3218, but you can change this if you need to.
 #### BASEPATH (string)
-It is possible to place configurator.py somewhere else. Set the `BASEPATH` to something like `"/home/hass/.homeassistant"`, and no matter where you're running the configurator from, it will start serving files from there. This is needed if you plan on running the configurator with systemd.
+It is possible to place configurator.py somewhere else. Set the `BASEPATH` to something like `"/home/hass/.homeassistant"`, and no matter where you are running the configurator from, it will start serving files from there. This is needed if you plan on running the configurator with systemd.
 #### SSL_CERTIFICATE / SSL_KEY (string)
 If you're using SSL, set the paths to your SSL files here. This is similar to the SSL setup you can do in HASS.
 #### HASS_API (string)
