@@ -2,7 +2,7 @@
 [![Build Status](https://travis-ci.org/danielperna84/hass-configurator.svg?branch=master)](https://travis-ci.org/danielperna84/hass-configurator)
 ### Configuration UI for Home Assistant
 
-While the configuration UI of Home Assistant is still in development, you can use this small webapp to modify your configuration. It's essentially an embedded [Ace editor](https://ace.c9.io/), which has syntax hightlighting and automatic linting for yaml files (and a ton of other features you can turn on and off). There is also an integrated file browser to select whatever file you want to edit. When you are done with editing the file, click the save-button (or hit CTRL+s/CMD+s) and it will replace the original file.  
+While the configuration UI of [Home Assistant](https://home-assistant.io/) is still in development, you can use this small webapp to modify your configuration. It's essentially an embedded [Ace editor](https://ace.c9.io/), which has syntax hightlighting and automatic linting for yaml files (and a ton of other features you can turn on and off). There is also an integrated file browser to select whatever file you want to edit. When you are done with editing the file, click the save-button (or hit CTRL+s/CMD+s) and it will replace the original file.  
 [JT Martinez](https://github.com/jmart518) has done a wonderful job by implementing [Material Design](http://materializecss.com/).
 
 ### Feature list:
