@@ -4214,6 +4214,7 @@ def main(args):
     else:
         Handler = RequestHandler
     HTTPD = CustomServer(server_address, Handler)
+    HTTPD.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     if SSL_CERTIFICATE:
         HTTPD.socket = ssl.wrap_socket(HTTPD.socket,
                                        certfile=SSL_CERTIFICATE,
