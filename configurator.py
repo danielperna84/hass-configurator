@@ -2169,6 +2169,8 @@ INDEX = Template(r"""<!DOCTYPE html>
             closeOnClick: true,
             draggable: true
         });
+        // This fixes the dead spaces when trying to close the file browser
+        $(document).on('click', '.drag-target', function(){$('.button-collapse').sideNav('hide');})
         listdir('.');
         document.getElementById('savePrompt').checked = get_save_prompt();
     });
