@@ -4160,7 +4160,6 @@ class RequestHandler(BaseHTTPRequestHandler):
 class AuthHandler(RequestHandler):
     def do_BLOCK(self, status=420, reason="Policy not fulfilled"):
         self.send_response(status)
-        self.send_header("Connection", "Close")
         self.end_headers()
         self.wfile.write(bytes(reason, "utf8"))
 
