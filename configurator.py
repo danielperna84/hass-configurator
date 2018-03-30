@@ -4158,6 +4158,12 @@ class RequestHandler(BaseHTTPRequestHandler):
         return
 
 class AuthHandler(RequestHandler):
+    def do_BLOCK(self, status=420, reason="Policy not fulfilled"):
+        self.send_response(status)
+        self.send_header("Connection", "Close")
+        self.end_headers()
+        self.wfile.write(bytes(reason, "utf8"))
+
     def do_AUTHHEAD(self):
         LOG.info("Requesting authorization")
         self.send_response(401)
@@ -4221,12 +4227,19 @@ class AuthHandler(RequestHandler):
             self.wfile.write(bytes('Authentication required', 'utf-8'))
             pass
 
+class SimpleServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
+    daemon_threads = True
+    allow_reuse_address = True
+
+    def __init__(self, server_address, RequestHandlerClass):
+        socketserver.TCPServer.__init__(self, server_address, RequestHandlerClass)
+
 def main(args):
     global HTTPD, CREDENTIALS
     if args:
         load_settings(args[0])
     LOG.info("Starting server")
-    CustomServer = socketserver.TCPServer
+    CustomServer = SimpleServer
     if ':' in LISTENIP:
         CustomServer.address_family = socket.AF_INET6
     server_address = (LISTENIP, LISTENPORT)
@@ -4236,7 +4249,6 @@ def main(args):
     else:
         Handler = RequestHandler
     HTTPD = CustomServer(server_address, Handler)
-    HTTPD.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     if SSL_CERTIFICATE:
         HTTPD.socket = ssl.wrap_socket(HTTPD.socket,
                                        certfile=SSL_CERTIFICATE,
