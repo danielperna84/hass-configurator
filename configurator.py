@@ -60,6 +60,9 @@ DIRSFIRST = False
 # Sesame token. Browse to the configurator URL + /secrettoken to unban your
 # client IP and add it to the list of allowed IPs.
 SESAME = None
+# Verify the hostname used in the request. Block access if it doesn't match
+# this value
+VERIFY_HOSTNAME = None
 ### End of options
 
 LOGLEVEL = logging.INFO
@@ -3217,7 +3220,7 @@ def signal_handler(sig, frame):
 def load_settings(settingsfile):
     global LISTENIP, LISTENPORT, BASEPATH, SSL_CERTIFICATE, SSL_KEY, HASS_API, \
     HASS_API_PASSWORD, CREDENTIALS, ALLOWED_NETWORKS, BANNED_IPS, BANLIMIT, \
-    DEV, IGNORE_PATTERN, DIRSFIRST, SESAME
+    DEV, IGNORE_PATTERN, DIRSFIRST, SESAME, VERIFY_HOSTNAME
     try:
         if os.path.isfile(settingsfile):
             with open(settingsfile) as fptr:
@@ -3237,6 +3240,7 @@ def load_settings(settingsfile):
                 IGNORE_PATTERN = settings.get("IGNORE_PATTERN", IGNORE_PATTERN)
                 DIRSFIRST = settings.get("DIRSFIRST", DIRSFIRST)
                 SESAME = settings.get("SESAME", SESAME)
+                VERIFY_HOSTNAME = settings.get("VERIFY_HOSTNAME", VERIFY_HOSTNAME)
     except Exception as err:
         LOG.warning(err)
         LOG.warning("Not loading static settings")
@@ -3333,17 +3337,26 @@ def check_access(clientip):
     BANNED_IPS.append(clientip)
     return False
 
+def verify_hostname(request_hostname):
+    if VERIFY_HOSTNAME:
+        if VERIFY_HOSTNAME not in request_hostname:
+            return False
+    return True
+
 class RequestHandler(BaseHTTPRequestHandler):
     def log_message(self, format, *args):
         LOG.info("%s - %s" % (self.client_address[0], format % args))
         return
 
-    def do_BLOCK(self):
-        self.send_response(420)
+    def do_BLOCK(self, status=420, reason="Policy not fulfilled"):
+        self.send_response(status)
         self.end_headers()
-        self.wfile.write(bytes("Policy not fulfilled", "utf8"))
+        self.wfile.write(bytes(reason, "utf8"))
 
     def do_GET(self):
+        if not verify_hostname(self.headers.get('Host', '')):
+            self.do_BLOCK(403, "Forbidden")
+            return
         req = urlparse(self.path)
         if SESAME:
             if req.path.endswith("/%s" % SESAME):
@@ -3650,6 +3663,9 @@ class RequestHandler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         global ALLOWED_NETWORKS, BANNED_IPS
+        if not verify_hostname(self.headers.get('Host', '')):
+            self.do_BLOCK(403, "Forbidden")
+            return
         if not check_access(self.client_address[0]):
             self.do_BLOCK()
             return
@@ -4151,6 +4167,9 @@ class AuthHandler(RequestHandler):
 
     def do_GET(self):
         global CREDENTIALS
+        if not verify_hostname(self.headers.get('Host', '')):
+            self.do_BLOCK(403, "Forbidden")
+            return
         authorization = self.headers.get('Authorization', None)
         if authorization is None:
             self.do_AUTHHEAD()
@@ -4176,6 +4195,9 @@ class AuthHandler(RequestHandler):
 
     def do_POST(self):
         global CREDENTIALS
+        if not verify_hostname(self.headers.get('Host', '')):
+            self.do_BLOCK(403, "Forbidden")
+            return
         authorization = self.headers.get('Authorization', None)
         if authorization is None:
             self.do_AUTHHEAD()
