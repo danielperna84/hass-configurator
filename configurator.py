@@ -1661,8 +1661,7 @@ INDEX = Template(r"""<!DOCTYPE html>
         </div>
         <div class="col s12 m8 l9">
           <div class="input-field col s12 pathtip">
-              <input class="currentfile_input" value="" id="currentfile" type="text">
-              <label for="file_name">File Name</label>
+              <input placeholder="File Path" class="currentfile_input" value="" id="currentfile" type="text">
               <i class="material-icons" id="lint-status" onclick="show_lint_error()"></i>
           </div>
         </div>
@@ -2076,7 +2075,7 @@ INDEX = Template(r"""<!DOCTYPE html>
 </main>
 <input type="hidden" id="fb_currentfile" value="" />
 <!-- Scripts -->
-<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
 <script type="text/javascript">
     var global_current_filepath = null;
