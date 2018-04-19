@@ -92,7 +92,7 @@ INDEX = Template(r"""<!DOCTYPE html>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0" />
     <title>HASS Configurator</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/MaterialDesign-Webfont/2.0.46/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/MaterialDesign-Webfont/2.2.43/css/materialdesignicons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
     <style type="text/css" media="screen">
         body {
@@ -110,7 +110,7 @@ INDEX = Template(r"""<!DOCTYPE html>
 
         #editor {
             position: fixed;
-            top: 135px;
+            top: 145px;
             right: 0;
             bottom: 0;
         }
@@ -236,9 +236,14 @@ INDEX = Template(r"""<!DOCTYPE html>
 
         input.currentfile_input {
             margin-bottom: 0;
-            margin-top: 0;
+            
+            padding-top: 10px;
             padding-left: 5px;
             border-bottom: 0;
+        }
+
+        .input_padding {
+            padding-top: 10px;
         }
 
         .side_tools {
@@ -557,9 +562,9 @@ INDEX = Template(r"""<!DOCTYPE html>
             height: auto;
         }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.9/ace.js" type="text/javascript" charset="utf-8"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.9/ext-modelist.js" type="text/javascript" charset="utf-8"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.9/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.3.3/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.3.3/ext-modelist.js" type="text/javascript" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.3.3/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
 </head>
 <body>
   <div class="preloader-background">
@@ -1588,6 +1593,7 @@ INDEX = Template(r"""<!DOCTYPE html>
                 <a class="light-blue-text" href="https://github.com/nodeca/js-yaml" target="_blank">
                   <div class="card grey lighten-3 hoverable">
                     <div class="card-image">
+                        <img src="https://avatars2.githubusercontent.com/u/723678?s=200&v=4">
                     </div>
                     <div class="card-content">
                       <p class="grey-text text-darken-2">js-yaml</p>
@@ -1610,7 +1616,7 @@ INDEX = Template(r"""<!DOCTYPE html>
         </div>
     </div>
     <!-- Main Editor Area -->
-    <div class="row">
+    <div class="row input_padding">
         <div class="col m4 l3 hide-on-small-only">
             <br>
             <div class="input-field col s12">
@@ -1654,8 +1660,8 @@ INDEX = Template(r"""<!DOCTYPE html>
             </div>
         </div>
         <div class="col s12 m8 l9">
-          <div class="card input-field col s12 grey lighten-4 hoverable pathtip">
-              <input class="currentfile_input" value="" id="currentfile" type="text">
+          <div class="input-field col s12 pathtip">
+              <input placeholder="File Path" class="currentfile_input" value="" id="currentfile" type="text">
               <i class="material-icons" id="lint-status" onclick="show_lint_error()"></i>
           </div>
         </div>
@@ -2062,14 +2068,14 @@ INDEX = Template(r"""<!DOCTYPE html>
                   <input id="wrap_limit" type="number" onchange="editor.setOption('wrap', parseInt(this.value))" min="1" value="80">
                   <label class="active" for="wrap_limit">Wrap Limit</label>
               </div> <a class="waves-effect waves-light btn light-blue" onclick="save_ace_settings()">Save Settings Locally</a>
-              <p class="center col s12"> Ace Editor 1.2.9 </p>
+              <p class="center col s12"> Ace Editor 1.3.3 </p>
           </div>
         </ul>
       </div>
 </main>
 <input type="hidden" id="fb_currentfile" value="" />
 <!-- Scripts -->
-<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
 <script type="text/javascript">
     var global_current_filepath = null;
