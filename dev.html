@@ -234,9 +234,27 @@
             box-shadow: 0 1px 0 0 #03a9f4 !important;
         }
 
-        .row .input-field input:focus {
+        .input-field input:focus+label {
+            color: #03a9f4 !important;
+        }
+
+        .input-field input[type=password].valid {
             border-bottom: 1px solid #03a9f4 !important;
-            box-shadow: 0 1px 0 0 #03a9f4 !important
+            box-shadow: 0 1px 0 0 #03a9f4 !important;
+        }
+
+        .input-field input[type=password]:focus {
+            border-bottom: 1px solid #03a9f4 !important;
+            box-shadow: 0 1px 0 0 #03a9f4 !important;
+        }
+
+        .input-field textarea:focus+label {
+            color: #03a9f4 !important;
+        }
+
+        .input-field textarea:focus {
+            border-bottom: 1px solid #03a9f4 !important;
+            box-shadow: 0 1px 0 0 #03a9f4 !important;
         }
 
         #modal_acekeyboard, #modal_components, #modal_icons {
@@ -1126,11 +1144,32 @@
         <a class="modal-action modal-close waves-effect btn-flat light-blue-text">Close</a>
       </div>
     </div>
-    <div id="modal_events" class="modal">
+    <div id="modal_events" class="modal modal-fixed-footer">
         <div class="modal-content">
-            <label for="ws_uri">Websocket URI</label><input type="text" id="ws_uri" placeholder="ws://127.0.0.1:8123/api/websocket" value="$hass_ws_address"/>
-            <label for="ws_password">API password</label><input type="password" id="ws_password" value="$api_password"/><br />
-            <textarea id="ws_events"></textarea>
+            <h4 class="grey-text text-darken-3">Event Observer<i class="grey-text text-darken-3 material-icons right" style="font-size: 2rem;">error_outline</i></h4>
+            <br />
+            <div class="row">
+                <form class="col s12">
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <input type="text" id="ws_uri" placeholder="ws://127.0.0.1:8123/api/websocket" value="$hass_ws_address"/>
+                            <label for="ws_uri">Websocket URI</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <input type="password" id="ws_password" value="$api_password"/>
+                            <label for="ws_password">API password</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <textarea id="ws_events" class="materialize-textarea"></textarea>
+                            <label for="ws_events">Events</label>
+                        </div>
+                    </div>
+                </form>
+            </div>
         </div>
         <div class="modal-footer">
           <a onclick="ws_connect()" class=" modal-action waves-effect waves-green btn-flat light-blue-text">Connect</a>
