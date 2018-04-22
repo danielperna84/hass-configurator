@@ -648,6 +648,7 @@ INDEX = Template(r"""<!DOCTYPE html>
         <li><a class="modal-trigger" href="#modal_about">About HASS-Configurator</a></li>
         <li class="divider"></li>
         <!--<li><a href="#modal_check_config">Check HASS Configuration</a></li>-->
+        <li><a class="modal-trigger" href="#modal_events">Observe events</a></li>
         <li><a class="modal-trigger" href="#modal_reload_automations">Reload automations</a></li>
         <li><a class="modal-trigger" href="#modal_reload_scripts">Reload scripts</a></li>
         <li><a class="modal-trigger" href="#modal_reload_groups">Reload groups</a></li>
@@ -667,6 +668,7 @@ INDEX = Template(r"""<!DOCTYPE html>
         <li><a class="modal-trigger" href="#modal_about">About HASS-Configurator</a></li>
         <li class="divider"></li>
         <!--<li><a href="#modal_check_config">Check HASS Configuration</a></li>-->
+        <li><a class="modal-trigger" href="#modal_events">Observe events</a></li>
         <li><a class="modal-trigger" href="#modal_reload_automations">Reload automations</a></li>
         <li><a class="modal-trigger" href="#modal_reload_scripts">Reload scripts</a></li>
         <li><a class="modal-trigger" href="#modal_reload_groups">Reload groups</a></li>
@@ -1210,6 +1212,18 @@ INDEX = Template(r"""<!DOCTYPE html>
       <div class="modal-footer">
         <a class="modal-action modal-close waves-effect btn-flat light-blue-text">Close</a>
       </div>
+    </div>
+    <div id="modal_events" class="modal">
+        <div class="modal-content">
+            <label for="ws_uri">Websocket URI</label><input type="text" id="ws_uri" placeholder="ws://127.0.0.1:8123/api/websocket" value="$hass_ws_address"/>
+            <label for="ws_password">API password</label><input type="password" id="ws_password" value="$api_password"/><br />
+            <textarea id="ws_events"></textarea>
+        </div>
+        <div class="modal-footer">
+          <a onclick="ws_connect()" class=" modal-action waves-effect waves-green btn-flat light-blue-text">Connect</a>
+          <a onclick="ws_disconnect()" class=" modal-action waves-effect waves-green btn-flat light-blue-text">Disconnect</a>
+          <a onclick="ws_disconnect()" class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">Close</a>
+        </div>
     </div>
     <div id="modal_save" class="modal">
         <div class="modal-content">
@@ -2077,6 +2091,46 @@ INDEX = Template(r"""<!DOCTYPE html>
 <!-- Scripts -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
+<script>
+    function ws_connect() {
+        function msg(str) {
+            document.getElementById("ws_events").value = str + "\n\n" + document.getElementById("ws_events").value;
+        }
+
+        try {
+            ws = new WebSocket(document.getElementById("ws_uri").value);
+            ws.addEventListener("open", function(event) {
+                var auth = {
+                    type: "auth",
+                    api_password: document.getElementById("ws_password").value
+                };
+                var data = {
+                    id: 1,
+                    type: "subscribe_events"
+                };
+                ws.send(JSON.stringify(auth));
+                ws.send(JSON.stringify(data));
+            });
+            ws.onmessage = function(event) {
+                msg(event.data);
+            }
+            ws.onclose = function() {msg('Socket closed');};
+            ws.onopen = function() {msg('Socket connected');};
+        }
+        catch(err) {
+            console.log("Error: " + err.message);
+        }
+    }
+
+    function ws_disconnect() {
+        try {
+            ws.close();
+        }
+        catch(err) {
+            console.log("Error: " + err.message);
+        }
+    }
+</script>
 <script type="text/javascript">
     var global_current_filepath = null;
     var global_current_filename = null;
@@ -3653,6 +3707,12 @@ class RequestHandler(BaseHTTPRequestHandler):
             except Exception as err:
                 LOG.warning("Exception getting release")
                 LOG.warning(err)
+            ws_api = ""
+            if HASS_API:
+                protocol, uri = HASS_API.split("//")
+                ws_api = "%s://%swebsocket" % (
+                    "wss" if protocol == 'https' else 'ws',  uri
+                )
             html = get_html().safe_substitute(services=services,
                                               events=events,
                                               states=states,
@@ -3661,7 +3721,9 @@ class RequestHandler(BaseHTTPRequestHandler):
                                               separator="\%s" % os.sep if os.sep == "\\" else os.sep,
                                               listening_address="%s://%s:%i" % (
                                                   'https' if SSL_CERTIFICATE else 'http', LISTENIP, LISTENPORT),
-                                              hass_api_address="%s" % (HASS_API, ))
+                                              hass_api_address="%s" % (HASS_API, ),
+                                              hass_ws_address=ws_api,
+                                              api_password=HASS_API_PASSWORD if HASS_API_PASSWORD else "")
             self.wfile.write(bytes(html, "utf8"))
             return
         else:
