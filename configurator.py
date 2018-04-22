@@ -2108,7 +2108,9 @@ INDEX = Template(r"""<!DOCTYPE html>
                     id: 1,
                     type: "subscribe_events"
                 };
-                ws.send(JSON.stringify(auth));
+                if (document.getElementById("ws_password").value) {
+                    ws.send(JSON.stringify(auth));
+                }
                 ws.send(JSON.stringify(data));
             });
             ws.onmessage = function(event) {
