@@ -3711,7 +3711,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             if HASS_API:
                 protocol, uri = HASS_API.split("//")
                 ws_api = "%s://%swebsocket" % (
-                    "wss" if protocol == 'https' else 'ws',  uri
+                    "wss" if protocol == 'https' else 'ws', uri
                 )
             html = get_html().safe_substitute(services=services,
                                               events=events,
