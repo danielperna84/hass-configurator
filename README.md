@@ -9,13 +9,14 @@ While the configuration UI of [Home Assistant](https://home-assistant.io/) is st
 
 - Web-Based editor to modify your files with syntax highlighting and automatic yaml-linting
 - Upload and download files
-- Stage and commit changes in Git repositories, create and switch between branches, push to remotes
 - Lists of available triggers, events, entities, conditions and services. Selected element gets inserted into the editor at the last cursor position.
-- Restart HASS directly with the click of a button (API-password required)
+- Home Assistant event observer (connect to HASS via WebSocket and see all the events that happen)
+- Restart HASS directly with the click of a button
 - SSL support
 - Optional authentication and IP filtering for added security
-- Direct links to HASS documentation and icons
+- Direct links to Home Assistant documentation and icons
 - Execute shell commands
+- Stage and commit changes in Git repositories, create and switch between branches, push to SSH remotes
 - Customizable editor settings (saved using [localStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage))
 
 #### Screenshot HASS Configurator:

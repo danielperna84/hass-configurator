@@ -74,7 +74,7 @@ SO.setFormatter(
     logging.Formatter('%(levelname)s:%(asctime)s:%(name)s:%(message)s'))
 LOG.addHandler(SO)
 RELEASEURL = "https://api.github.com/repos/danielperna84/hass-configurator/releases/latest"
-VERSION = "0.2.7"
+VERSION = "0.2.8"
 BASEDIR = "."
 DEV = False
 HTTPD = None
@@ -316,9 +316,27 @@ INDEX = Template(r"""<!DOCTYPE html>
             box-shadow: 0 1px 0 0 #03a9f4 !important;
         }
 
-        .row .input-field input:focus {
+        .input-field input:focus+label {
+            color: #03a9f4 !important;
+        }
+
+        .input-field input[type=password].valid {
             border-bottom: 1px solid #03a9f4 !important;
-            box-shadow: 0 1px 0 0 #03a9f4 !important
+            box-shadow: 0 1px 0 0 #03a9f4 !important;
+        }
+
+        .input-field input[type=password]:focus {
+            border-bottom: 1px solid #03a9f4 !important;
+            box-shadow: 0 1px 0 0 #03a9f4 !important;
+        }
+
+        .input-field textarea:focus+label {
+            color: #03a9f4 !important;
+        }
+
+        .input-field textarea:focus {
+            border-bottom: 1px solid #03a9f4 !important;
+            box-shadow: 0 1px 0 0 #03a9f4 !important;
         }
 
         #modal_acekeyboard, #modal_components, #modal_icons {
@@ -643,6 +661,7 @@ INDEX = Template(r"""<!DOCTYPE html>
         <li><a class="modal-trigger" href="#modal_about">About HASS-Configurator</a></li>
         <li class="divider"></li>
         <!--<li><a href="#modal_check_config">Check HASS Configuration</a></li>-->
+        <li><a class="modal-trigger" href="#modal_events">Observe events</a></li>
         <li><a class="modal-trigger" href="#modal_reload_automations">Reload automations</a></li>
         <li><a class="modal-trigger" href="#modal_reload_scripts">Reload scripts</a></li>
         <li><a class="modal-trigger" href="#modal_reload_groups">Reload groups</a></li>
@@ -662,6 +681,7 @@ INDEX = Template(r"""<!DOCTYPE html>
         <li><a class="modal-trigger" href="#modal_about">About HASS-Configurator</a></li>
         <li class="divider"></li>
         <!--<li><a href="#modal_check_config">Check HASS Configuration</a></li>-->
+        <li><a class="modal-trigger" href="#modal_events">Observe events</a></li>
         <li><a class="modal-trigger" href="#modal_reload_automations">Reload automations</a></li>
         <li><a class="modal-trigger" href="#modal_reload_scripts">Reload scripts</a></li>
         <li><a class="modal-trigger" href="#modal_reload_groups">Reload groups</a></li>
@@ -1205,6 +1225,38 @@ INDEX = Template(r"""<!DOCTYPE html>
       <div class="modal-footer">
         <a class="modal-action modal-close waves-effect btn-flat light-blue-text">Close</a>
       </div>
+    </div>
+    <div id="modal_events" class="modal modal-fixed-footer">
+        <div class="modal-content">
+            <h4 class="grey-text text-darken-3">Event Observer<i class="grey-text text-darken-3 material-icons right" style="font-size: 2rem;">error_outline</i></h4>
+            <br />
+            <div class="row">
+                <form class="col s12">
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <input type="text" id="ws_uri" placeholder="ws://127.0.0.1:8123/api/websocket" value="$hass_ws_address"/>
+                            <label for="ws_uri">Websocket URI</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <input type="password" id="ws_password" value="$api_password"/>
+                            <label for="ws_password">API password</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <textarea id="ws_events" class="materialize-textarea"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <a onclick="ws_connect()" id="ws_b_c" class="modal-action waves-effect waves-green btn-flat light-blue-text">Connect</a>
+          <a onclick="ws_disconnect()" id="ws_b_d" class="modal-action waves-effect waves-green btn-flat light-blue-text disabled">Disconnect</a>
+          <a class="modal-action modal-close waves-effect waves-red btn-flat light-blue-text">Close</a>
+        </div>
     </div>
     <div id="modal_save" class="modal">
         <div class="modal-content">
@@ -2071,6 +2123,57 @@ INDEX = Template(r"""<!DOCTYPE html>
 <!-- Scripts -->
 <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
+<script>
+    function ws_connect() {
+        function msg(str) {
+            document.getElementById("ws_events").value = str + "\n\n" + document.getElementById("ws_events").value;
+            $('#ws_events').trigger('autoresize');
+        }
+
+        try {
+            ws = new WebSocket(document.getElementById("ws_uri").value);
+            ws.addEventListener("open", function(event) {
+                var auth = {
+                    type: "auth",
+                    api_password: document.getElementById("ws_password").value
+                };
+                var data = {
+                    id: 1,
+                    type: "subscribe_events"
+                };
+                if (document.getElementById("ws_password").value) {
+                    ws.send(JSON.stringify(auth));
+                }
+                ws.send(JSON.stringify(data));
+            });
+            ws.onmessage = function(event) {
+                msg(event.data);
+            }
+            ws.onclose = function() {
+                msg('Socket closed');
+                document.getElementById('ws_b_c').classList.remove('disabled');
+                document.getElementById('ws_b_d').classList.add('disabled');
+            };
+            ws.onopen = function() {
+                msg('Socket connected');
+                document.getElementById('ws_b_c').classList.add('disabled');
+                document.getElementById('ws_b_d').classList.remove('disabled');
+            };
+        }
+        catch(err) {
+            console.log("Error: " + err.message);
+        }
+    }
+
+    function ws_disconnect() {
+        try {
+            ws.close();
+        }
+        catch(err) {
+            console.log("Error: " + err.message);
+        }
+    }
+</script>
 <script type="text/javascript">
     var global_current_filepath = null;
     var global_current_filename = null;
@@ -3647,6 +3750,12 @@ class RequestHandler(BaseHTTPRequestHandler):
             except Exception as err:
                 LOG.warning("Exception getting release")
                 LOG.warning(err)
+            ws_api = ""
+            if HASS_API:
+                protocol, uri = HASS_API.split("//")
+                ws_api = "%s://%swebsocket" % (
+                    "wss" if protocol == 'https' else 'ws', uri
+                )
             html = get_html().safe_substitute(services=services,
                                               events=events,
                                               states=states,
@@ -3655,7 +3764,9 @@ class RequestHandler(BaseHTTPRequestHandler):
                                               separator="\%s" % os.sep if os.sep == "\\" else os.sep,
                                               listening_address="%s://%s:%i" % (
                                                   'https' if SSL_CERTIFICATE else 'http', LISTENIP, LISTENPORT),
-                                              hass_api_address="%s" % (HASS_API, ))
+                                              hass_api_address="%s" % (HASS_API, ),
+                                              hass_ws_address=ws_api,
+                                              api_password=HASS_API_PASSWORD if HASS_API_PASSWORD else "")
             self.wfile.write(bytes(html, "utf8"))
             return
         else:
