@@ -1,4 +1,4 @@
-Version 0.2.8 (2018-)
+Version 0.2.8 (2018-04-23)
 - Updated CDN libraries @jmart518
 - Cosmetic improvements @jmart518
 - Added event observer @danielperna84
