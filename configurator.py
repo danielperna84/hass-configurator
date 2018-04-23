@@ -1252,7 +1252,6 @@ INDEX = Template(r"""<!DOCTYPE html>
                     <div class="row">
                         <div class="input-field col s12">
                             <textarea id="ws_events" class="materialize-textarea"></textarea>
-                            <label for="ws_events">Events</label>
                         </div>
                     </div>
                 </form>
@@ -2134,6 +2133,7 @@ INDEX = Template(r"""<!DOCTYPE html>
     function ws_connect() {
         function msg(str) {
             document.getElementById("ws_events").value = str + "\n\n" + document.getElementById("ws_events").value;
+            $('#ws_events').trigger('autoresize');
         }
 
         try {
@@ -3312,8 +3312,7 @@ function show_lint_error() {
 editor.on('change', queue_lint);
 </script>
 </body>
-</html>
-""")
+</html>""")
 
 def signal_handler(sig, frame):
     global HTTPD
