@@ -1258,9 +1258,9 @@ INDEX = Template(r"""<!DOCTYPE html>
             </div>
         </div>
         <div class="modal-footer">
-          <a onclick="ws_connect()" class=" modal-action waves-effect waves-green btn-flat light-blue-text">Connect</a>
-          <a onclick="ws_disconnect()" class=" modal-action waves-effect waves-green btn-flat light-blue-text">Disconnect</a>
-          <a onclick="ws_disconnect()" class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">Close</a>
+          <a onclick="ws_connect()" id="ws_b_c" class="modal-action waves-effect waves-green btn-flat light-blue-text">Connect</a>
+          <a onclick="ws_disconnect()" id="ws_b_d" class="modal-action waves-effect waves-green btn-flat light-blue-text disabled">Disconnect</a>
+          <a class="modal-action modal-close waves-effect waves-red btn-flat light-blue-text">Close</a>
         </div>
     </div>
     <div id="modal_save" class="modal">
@@ -2155,8 +2155,16 @@ INDEX = Template(r"""<!DOCTYPE html>
             ws.onmessage = function(event) {
                 msg(event.data);
             }
-            ws.onclose = function() {msg('Socket closed');};
-            ws.onopen = function() {msg('Socket connected');};
+            ws.onclose = function() {
+                msg('Socket closed');
+                document.getElementById('ws_b_c').classList.remove('disabled');
+                document.getElementById('ws_b_d').classList.add('disabled');
+            };
+            ws.onopen = function() {
+                msg('Socket connected');
+                document.getElementById('ws_b_c').classList.add('disabled');
+                document.getElementById('ws_b_d').classList.remove('disabled');
+            };
         }
         catch(err) {
             console.log("Error: " + err.message);
