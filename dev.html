@@ -1165,7 +1165,6 @@
                     <div class="row">
                         <div class="input-field col s12">
                             <textarea id="ws_events" class="materialize-textarea"></textarea>
-                            <label for="ws_events">Events</label>
                         </div>
                     </div>
                 </form>
@@ -2047,6 +2046,7 @@
     function ws_connect() {
         function msg(str) {
             document.getElementById("ws_events").value = str + "\n\n" + document.getElementById("ws_events").value;
+            $('#ws_events').trigger('autoresize');
         }
 
         try {
