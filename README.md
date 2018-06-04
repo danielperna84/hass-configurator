@@ -52,7 +52,7 @@ If you plan on using the restart button, you have to set your API password. Call
 #### CREDENTIALS (string)
 Set credentials in the form of `"username:password"` if authentication should be required for access.
 #### ALLOWED_NETWORKS (list)
-Limit access to the configurator by adding allowed IP addresses / networks to the list, e.g `ALLOWED_NETWORKS = ["192.168.0.0/24", "172.16.47.23"]`
+Limit access to the configurator by adding allowed IP addresses / networks to the list, e.g `ALLOWED_NETWORKS = ["192.168.0.0/24", "172.16.47.23"]`. If you are using the [hass.io addon](https://www.home-assistant.io/addons/configurator/) of the configurator, add the docker-network `172.30.0.0/16` to this list.
 #### BANNED_IPS (list)
 List of statically banned IP addresses, e.g. `BANNED_IPS = ["1.1.1.1", "2.2.2.2"]`
 #### BANLIMIT (integer)
