@@ -652,7 +652,7 @@ INDEX = Template(r"""<!DOCTYPE html>
   </header>
   <main>
     <ul id="dropdown_menu" class="dropdown-content z-depth-4">
-        <li><a onclick="localStorage.setItem('new_tab', true);window.open(window.location.href, '_blank');">New tab</a></li>
+        <li><a onclick="localStorage.setItem('new_tab', true);window.open(window.location.origin+window.location.pathname, '_blank');">New tab</a></li>
         <li class="divider"></li>
         <li><a target="_blank" href="https://home-assistant.io/components/">Components</a></li>
         <li><a target="_blank" href="https://materialdesignicons.com/">Material Icons</a></li>
@@ -671,7 +671,7 @@ INDEX = Template(r"""<!DOCTYPE html>
         <li><a class="modal-trigger" href="#modal_exec_command">Execute shell command</a></li>
     </ul>
     <ul id="dropdown_menu_mobile" class="dropdown-content z-depth-4">
-        <li><a onclick="localStorage.setItem('new_tab', true);window.open(window.location.href, '_blank');">New tab</a></li>
+        <li><a onclick="localStorage.setItem('new_tab', true);window.open(window.location.origin+window.location.pathname, '_blank');">New tab</a></li>
         <li class="divider"></li>
         <li><a target="_blank" href="https://home-assistant.io/help/">Help</a></li>
         <li><a target="_blank" href="https://home-assistant.io/components/">Components</a></li>
@@ -2157,6 +2157,7 @@ INDEX = Template(r"""<!DOCTYPE html>
     }
 </script>
 <script type="text/javascript">
+    var init_loadfile = $loadfile;
     var global_current_filepath = null;
     var global_current_filename = null;
 
@@ -2264,17 +2265,23 @@ INDEX = Template(r"""<!DOCTYPE html>
     document.addEventListener("DOMContentLoaded", function() {
         $('.preloader-background').delay(800).fadeOut('slow');
         $('.preloader-wrapper').delay(800).fadeOut('slow');
-        if (!localStorage.getItem("new_tab")) {
-            var old_file = localStorage.getItem("current_file");
-            if (old_file) {
-                old_file = JSON.parse(old_file);
-                loadfile(old_file.current_filepath, old_file.current_filename);
-            }
+        if (init_loadfile) {
+            init_loadfile_name = init_loadfile.split('/').pop();
+            loadfile(init_loadfile, init_loadfile_name);
         }
         else {
-            localStorage.removeItem("current_file");
+            if (!localStorage.getItem("new_tab")) {
+                var old_file = localStorage.getItem("current_file");
+                if (old_file) {
+                    old_file = JSON.parse(old_file);
+                    loadfile(old_file.current_filepath, old_file.current_filename);
+                }
+            }
+            else {
+                localStorage.removeItem("current_file");
+            }
+            localStorage.removeItem("new_tab");
         }
-        localStorage.removeItem("new_tab");
     });
 </script>
 <script>
@@ -3697,6 +3704,11 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
 
+            loadfile = query.get('loadfile', [None])[0]
+            if loadfile is None:
+                loadfile = 'null'
+            else:
+                loadfile = "'%s'" % loadfile
             services = "[]"
             events = "[]"
             states = "[]"
@@ -3741,6 +3753,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             html = get_html().safe_substitute(services=services,
                                               events=events,
                                               states=states,
+                                              loadfile=loadfile,
                                               current=VERSION,
                                               versionclass=color,
                                               separator="\%s" % os.sep if os.sep == "\\" else os.sep,
