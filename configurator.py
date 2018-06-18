@@ -339,7 +339,7 @@ INDEX = Template(r"""<!DOCTYPE html>
             box-shadow: 0 1px 0 0 #03a9f4 !important;
         }
 
-        #modal_acekeyboard, #modal_components, #modal_icons {
+        #modal_acekeyboard {
             top: auto;
             width: 96%;
             min-height: 96%;
@@ -654,8 +654,8 @@ INDEX = Template(r"""<!DOCTYPE html>
     <ul id="dropdown_menu" class="dropdown-content z-depth-4">
         <li><a onclick="localStorage.setItem('new_tab', true);window.open(window.location.href, '_blank');">New tab</a></li>
         <li class="divider"></li>
-        <li><a class="modal-trigger" target="_blank" href="#modal_components">Components</a></li>
-        <li><a class="modal-trigger" target="_blank" href="#modal_icons">Material Icons</a></li>
+        <li><a target="_blank" href="https://home-assistant.io/components/">Components</a></li>
+        <li><a target="_blank" href="https://materialdesignicons.com/">Material Icons</a></li>
         <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
         <li><a class="modal-trigger" href="#modal_netstat" onclick="get_netstat()">Network status</a></li>
         <li><a class="modal-trigger" href="#modal_about">About HASS-Configurator</a></li>
@@ -700,24 +700,6 @@ INDEX = Template(r"""<!DOCTYPE html>
         <li><a class="modal-trigger" href="#modal_commit" class="nowrap waves-effect">git commit</a></li>
         <li><a class="modal-trigger" href="#modal_push" class="nowrap waves-effect">git push</a></li>
     </ul>
-    <div id="modal_components" class="modal bottom-sheet modal-fixed-footer">
-        <div class="modal-content_nopad">
-            <iframe src="https://home-assistant.io/components/" style="height: 90vh; width: 100vw"> </iframe>
-            <a target="_blank" href="https://home-assistant.io/components/" class="hide-on-med-and-down modal_btn waves-effect btn-large btn-flat left"><i class="material-icons">launch</i></a>
-        </div>
-        <div class="modal-footer">
-            <a class="modal-action modal-close waves-effect btn-flat Right light-blue-text">Close</a>
-        </div>
-    </div>
-    <div id="modal_icons" class="modal bottom-sheet modal-fixed-footer">
-    <div class="modal-content_nopad">
-            <iframe src="https://materialdesignicons.com/" style="height: 90vh; width: 100vw"> </iframe>
-            <a target="_blank" href="https://materialdesignicons.com/" class="hide-on-med-and-down modal_btn waves-effect btn-large btn-flat left"><i class="material-icons">launch</i></a>
-        </div>
-        <div class="modal-footer">
-            <a class="modal-action modal-close waves-effect btn-flat Right light-blue-text">Close</a>
-        </div>
-    </div>
     <div id="modal_acekeyboard" class="modal bottom-sheet modal-fixed-footer">
         <div class="modal-content centered">
         <h4 class="grey-text text-darken-3">Ace Keyboard Shortcuts<i class="mdi mdi-keyboard right grey-text text-darken-3" style="font-size: 2rem;"></i></h4>
