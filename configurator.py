@@ -1670,6 +1670,10 @@ INDEX = Template(r"""<!DOCTYPE html>
                 <label>Events</label>
             </div>
             <div class="input-field col s12">
+                <input type="text" id="entities-search" class="autocomplete" placeholder="sensor.example">
+                <label>Search entity</label>
+            </div>
+            <div class="input-field col s12">
                 <select id="entities" onchange="insert(this.value)"></select>
                 <label>Entities</label>
             </div>
@@ -1767,6 +1771,10 @@ INDEX = Template(r"""<!DOCTYPE html>
             <div class="input-field col s12">
               <select id="events_side" onchange="insert(this.value)"></select>
               <label>Events</label>
+            </div>
+            <div class="input-field col s12">
+                <input type="text" id="entities-search_side" class="autocomplete" placeholder="sensor.example">
+                <label>Search entity</label>
             </div>
             <div class="input-field col s12">
               <select id="entities_side" onchange="insert(this.value)"></select>
@@ -2262,6 +2270,28 @@ INDEX = Template(r"""<!DOCTYPE html>
         $(document).on('click', '.drag-target', function(){$('.button-collapse').sideNav('hide');})
         listdir('.');
         document.getElementById('savePrompt').checked = get_save_prompt();
+        var entities_search = new Object();
+        if (states_list) {
+            for (var i = 0; i < states_list.length; i++) {
+                entities_search[states_list[i].attributes.friendly_name + ' (' + states_list[i].entity_id + ')'] = null;
+            }
+        }
+        $('#entities-search').autocomplete({
+            data: entities_search,
+            limit: 40,
+            onAutocomplete: function(val) {
+                insert(val.split("(")[1].split(")")[0]);
+            },
+            minLength: 1,
+        });
+        $('#entities-search_side').autocomplete({
+            data: entities_search,
+            limit: 40,
+            onAutocomplete: function(val) {
+                insert(val.split("(")[1].split(")")[0]);
+            },
+            minLength: 1,
+        });
     });
 </script>
 <script type="text/javascript">
