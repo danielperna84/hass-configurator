@@ -30,6 +30,9 @@ LISTENPORT = 3218
 # Set BASEPATH to something like "/home/hass/.homeassistant/" if you're not
 # running the configurator from that path
 BASEPATH = None
+# Set ENFORCE_BASEPATH to True to lock the configurator into the basepath and
+# thereby prevent it from opening files outside of the BASEPATH
+ENFORCE_BASEPATH = False
 # Set the paths to a certificate and the key if you're using SSL,
 # e.g "/etc/ssl/certs/mycert.pem"
 SSL_CERTIFICATE = None
@@ -201,7 +204,7 @@ INDEX = Template(r"""<!DOCTYPE html>
             color: #616161 !important;
             font-weight: 400;
             display: inline-block;
-            width: 185px;
+            width: 182px;
             white-space: nowrap;
             text-overflow: ellipsis;
             cursor: pointer;
@@ -2387,7 +2390,10 @@ INDEX = Template(r"""<!DOCTYPE html>
 
     function listdir(path) {
         $.get(encodeURI("api/listdir?path=" + path), function(data) {
-            renderpath(data);
+            if (!data.error) {
+                renderpath(data);
+            }
+            console.log("Permission denied.");
         });
         document.getElementById("slide-out").scrollTop = 0;
     }
@@ -3314,7 +3320,7 @@ def signal_handler(sig, frame):
 def load_settings(settingsfile):
     global LISTENIP, LISTENPORT, BASEPATH, SSL_CERTIFICATE, SSL_KEY, HASS_API, \
     HASS_API_PASSWORD, CREDENTIALS, ALLOWED_NETWORKS, BANNED_IPS, BANLIMIT, \
-    DEV, IGNORE_PATTERN, DIRSFIRST, SESAME, VERIFY_HOSTNAME
+    DEV, IGNORE_PATTERN, DIRSFIRST, SESAME, VERIFY_HOSTNAME, ENFORCE_BASEPATH
     try:
         if os.path.isfile(settingsfile):
             with open(settingsfile) as fptr:
@@ -3322,6 +3328,7 @@ def load_settings(settingsfile):
                 LISTENIP = settings.get("LISTENIP", LISTENIP)
                 LISTENPORT = settings.get("LISTENPORT", LISTENPORT)
                 BASEPATH = settings.get("BASEPATH", BASEPATH)
+                ENFORCE_BASEPATH = settings.get("ENFORCE_BASEPATH", ENFORCE_BASEPATH)
                 SSL_CERTIFICATE = settings.get("SSL_CERTIFICATE", SSL_CERTIFICATE)
                 SSL_KEY = settings.get("SSL_KEY", SSL_KEY)
                 HASS_API = settings.get("HASS_API", HASS_API)
@@ -3339,6 +3346,12 @@ def load_settings(settingsfile):
         LOG.warning(err)
         LOG.warning("Not loading static settings")
     return False
+
+def is_safe_path(basedir, path, follow_symlinks=True):
+  if follow_symlinks:
+    return os.path.realpath(path).startswith(basedir)
+
+  return os.path.abspath(path).startswith(basedir)
 
 def get_dircontent(path, repo=None):
     dircontent = []
@@ -3476,6 +3489,8 @@ class RequestHandler(BaseHTTPRequestHandler):
             try:
                 if filename:
                     filename = unquote(filename[0]).encode('utf-8')
+                    if ENFORCE_BASEPATH and not is_safe_path(BASEPATH.encode('utf-8'), filename):
+                        raise OSError('Access denied.')
                     if os.path.isfile(os.path.join(BASEDIR.encode('utf-8'), filename)):
                         with open(os.path.join(BASEDIR.encode('utf-8'), filename)) as fptr:
                             content += fptr.read()
@@ -3492,6 +3507,8 @@ class RequestHandler(BaseHTTPRequestHandler):
             try:
                 if filename:
                     filename = unquote(filename[0]).encode('utf-8')
+                    if ENFORCE_BASEPATH and not is_safe_path(BASEPATH.encode('utf-8'), filename):
+                        raise OSError('Access denied.')
                     LOG.info(filename)
                     if os.path.isfile(os.path.join(BASEDIR.encode('utf-8'), filename)):
                         with open(os.path.join(BASEDIR.encode('utf-8'), filename), 'rb') as fptr:
@@ -3509,7 +3526,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.wfile.write(bytes(content, "utf8"))
             return
         elif req.path.endswith('/api/listdir'):
-            content = ""
+            content = {'error': None}
             self.send_header('Content-type', 'text/json')
             self.end_headers()
             dirpath = query.get('path', None)
@@ -3517,6 +3534,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                 if dirpath:
                     dirpath = unquote(dirpath[0]).encode('utf-8')
                     if os.path.isdir(dirpath):
+                        if ENFORCE_BASEPATH and not is_safe_path(BASEPATH.encode('utf-8'), dirpath):
+                            raise OSError('Access denied.')
                         repo = None
                         activebranch = None
                         dirty = False
@@ -3536,13 +3555,14 @@ class RequestHandler(BaseHTTPRequestHandler):
                                     'parent': os.path.dirname(os.path.abspath(dirpath)).decode('utf-8'),
                                     'branches': branches,
                                     'activebranch': activebranch,
-                                    'dirty': dirty
+                                    'dirty': dirty,
+                                    'error': None
                                    }
                         self.wfile.write(bytes(json.dumps(filedata), "utf8"))
             except Exception as err:
                 LOG.warning(err)
-                content = str(err)
-                self.wfile.write(bytes(content, "utf8"))
+                content['error'] = str(err)
+                self.wfile.write(bytes(json.dumps(content), "utf8"))
             return
         elif req.path.endswith('/api/abspath'):
             content = ""

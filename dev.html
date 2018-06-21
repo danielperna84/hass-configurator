@@ -114,7 +114,7 @@
             color: #616161 !important;
             font-weight: 400;
             display: inline-block;
-            width: 185px;
+            width: 182px;
             white-space: nowrap;
             text-overflow: ellipsis;
             cursor: pointer;
@@ -2300,7 +2300,10 @@
 
     function listdir(path) {
         $.get(encodeURI("api/listdir?path=" + path), function(data) {
-            renderpath(data);
+            if (!data.error) {
+                renderpath(data);
+            }
+            console.log("Permission denied.");
         });
         document.getElementById("slide-out").scrollTop = 0;
     }
