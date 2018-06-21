@@ -2,6 +2,7 @@ Version 0.2.9 (2018-06-)
 - Material Icons and HASS-help now open in new tab instead of modal (Issues #85 and #34) @danielperna84
 - Open file by URL (Issue #95) @danielperna84
 - Added ENFORCE_BASEPATH option (Issue #68) @danielperna84
+- Cosmetic fix for scaled viewports @danielperna84
 
 Version 0.2.8 (2018-04-23)
 - Updated CDN libraries @jmart518
