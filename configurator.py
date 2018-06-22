@@ -2423,7 +2423,9 @@ INDEX = Template(r"""<!DOCTYPE html>
             if (!data.error) {
                 renderpath(data);
             }
-            console.log("Permission denied.");
+            else {
+                console.log("Permission denied."); 
+            }
         });
         document.getElementById("slide-out").scrollTop = 0;
     }
