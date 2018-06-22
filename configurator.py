@@ -3291,7 +3291,7 @@ INDEX = Template(r"""<!DOCTYPE html>
     }
 
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/3.10.0/js-yaml.js" type="text/javascript" charset="utf-8"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/3.12.0/js-yaml.js" type="text/javascript" charset="utf-8"></script>
 <script type="text/javascript">
 var lint_timeout;
 var lint_status = $('#lint-status'); // speed optimization
