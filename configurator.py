@@ -30,6 +30,9 @@ LISTENPORT = 3218
 # Set BASEPATH to something like "/home/hass/.homeassistant/" if you're not
 # running the configurator from that path
 BASEPATH = None
+# Set ENFORCE_BASEPATH to True to lock the configurator into the basepath and
+# thereby prevent it from opening files outside of the BASEPATH
+ENFORCE_BASEPATH = False
 # Set the paths to a certificate and the key if you're using SSL,
 # e.g "/etc/ssl/certs/mycert.pem"
 SSL_CERTIFICATE = None
@@ -74,7 +77,7 @@ SO.setFormatter(
     logging.Formatter('%(levelname)s:%(asctime)s:%(name)s:%(message)s'))
 LOG.addHandler(SO)
 RELEASEURL = "https://api.github.com/repos/danielperna84/hass-configurator/releases/latest"
-VERSION = "0.2.8"
+VERSION = "0.2.9"
 BASEDIR = "."
 DEV = False
 HTTPD = None
@@ -201,7 +204,7 @@ INDEX = Template(r"""<!DOCTYPE html>
             color: #616161 !important;
             font-weight: 400;
             display: inline-block;
-            width: 185px;
+            width: 182px;
             white-space: nowrap;
             text-overflow: ellipsis;
             cursor: pointer;
@@ -339,7 +342,7 @@ INDEX = Template(r"""<!DOCTYPE html>
             box-shadow: 0 1px 0 0 #03a9f4 !important;
         }
 
-        #modal_acekeyboard, #modal_components, #modal_icons {
+        #modal_acekeyboard {
             top: auto;
             width: 96%;
             min-height: 96%;
@@ -575,9 +578,9 @@ INDEX = Template(r"""<!DOCTYPE html>
             height: auto;
         }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.9/ace.js" type="text/javascript" charset="utf-8"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.9/ext-modelist.js" type="text/javascript" charset="utf-8"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.9/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.3.3/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.3.3/ext-modelist.js" type="text/javascript" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.3.3/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
 </head>
 <body>
   <div class="preloader-background">
@@ -652,10 +655,10 @@ INDEX = Template(r"""<!DOCTYPE html>
   </header>
   <main>
     <ul id="dropdown_menu" class="dropdown-content z-depth-4">
-        <li><a onclick="localStorage.setItem('new_tab', true);window.open(window.location.href, '_blank');">New tab</a></li>
+        <li><a onclick="localStorage.setItem('new_tab', true);window.open(window.location.origin+window.location.pathname, '_blank');">New tab</a></li>
         <li class="divider"></li>
-        <li><a class="modal-trigger" target="_blank" href="#modal_components">Components</a></li>
-        <li><a class="modal-trigger" target="_blank" href="#modal_icons">Material Icons</a></li>
+        <li><a target="_blank" href="https://home-assistant.io/components/">Components</a></li>
+        <li><a target="_blank" href="https://materialdesignicons.com/">Material Icons</a></li>
         <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
         <li><a class="modal-trigger" href="#modal_netstat" onclick="get_netstat()">Network status</a></li>
         <li><a class="modal-trigger" href="#modal_about">About HASS-Configurator</a></li>
@@ -671,7 +674,7 @@ INDEX = Template(r"""<!DOCTYPE html>
         <li><a class="modal-trigger" href="#modal_exec_command">Execute shell command</a></li>
     </ul>
     <ul id="dropdown_menu_mobile" class="dropdown-content z-depth-4">
-        <li><a onclick="localStorage.setItem('new_tab', true);window.open(window.location.href, '_blank');">New tab</a></li>
+        <li><a onclick="localStorage.setItem('new_tab', true);window.open(window.location.origin+window.location.pathname, '_blank');">New tab</a></li>
         <li class="divider"></li>
         <li><a target="_blank" href="https://home-assistant.io/help/">Help</a></li>
         <li><a target="_blank" href="https://home-assistant.io/components/">Components</a></li>
@@ -700,24 +703,6 @@ INDEX = Template(r"""<!DOCTYPE html>
         <li><a class="modal-trigger" href="#modal_commit" class="nowrap waves-effect">git commit</a></li>
         <li><a class="modal-trigger" href="#modal_push" class="nowrap waves-effect">git push</a></li>
     </ul>
-    <div id="modal_components" class="modal bottom-sheet modal-fixed-footer">
-        <div class="modal-content_nopad">
-            <iframe src="https://home-assistant.io/components/" style="height: 90vh; width: 100vw"> </iframe>
-            <a target="_blank" href="https://home-assistant.io/components/" class="hide-on-med-and-down modal_btn waves-effect btn-large btn-flat left"><i class="material-icons">launch</i></a>
-        </div>
-        <div class="modal-footer">
-            <a class="modal-action modal-close waves-effect btn-flat Right light-blue-text">Close</a>
-        </div>
-    </div>
-    <div id="modal_icons" class="modal bottom-sheet modal-fixed-footer">
-    <div class="modal-content_nopad">
-            <iframe src="https://materialdesignicons.com/" style="height: 90vh; width: 100vw"> </iframe>
-            <a target="_blank" href="https://materialdesignicons.com/" class="hide-on-med-and-down modal_btn waves-effect btn-large btn-flat left"><i class="material-icons">launch</i></a>
-        </div>
-        <div class="modal-footer">
-            <a class="modal-action modal-close waves-effect btn-flat Right light-blue-text">Close</a>
-        </div>
-    </div>
     <div id="modal_acekeyboard" class="modal bottom-sheet modal-fixed-footer">
         <div class="modal-content centered">
         <h4 class="grey-text text-darken-3">Ace Keyboard Shortcuts<i class="mdi mdi-keyboard right grey-text text-darken-3" style="font-size: 2rem;"></i></h4>
@@ -1685,6 +1670,10 @@ INDEX = Template(r"""<!DOCTYPE html>
                 <label>Events</label>
             </div>
             <div class="input-field col s12">
+                <input type="text" id="entities-search" class="autocomplete" placeholder="sensor.example">
+                <label>Search entity</label>
+            </div>
+            <div class="input-field col s12">
                 <select id="entities" onchange="insert(this.value)"></select>
                 <label>Entities</label>
             </div>
@@ -1782,6 +1771,10 @@ INDEX = Template(r"""<!DOCTYPE html>
             <div class="input-field col s12">
               <select id="events_side" onchange="insert(this.value)"></select>
               <label>Events</label>
+            </div>
+            <div class="input-field col s12">
+                <input type="text" id="entities-search_side" class="autocomplete" placeholder="sensor.example">
+                <label>Search entity</label>
             </div>
             <div class="input-field col s12">
               <select id="entities_side" onchange="insert(this.value)"></select>
@@ -2114,14 +2107,14 @@ INDEX = Template(r"""<!DOCTYPE html>
                   <input id="wrap_limit" type="number" onchange="editor.setOption('wrap', parseInt(this.value))" min="1" value="80">
                   <label class="active" for="wrap_limit">Wrap Limit</label>
               </div> <a class="waves-effect waves-light btn light-blue" onclick="save_ace_settings()">Save Settings Locally</a>
-              <p class="center col s12"> Ace Editor 1.2.9 </p>
+              <p class="center col s12"> Ace Editor 1.3.3 </p>
           </div>
         </ul>
       </div>
 </main>
 <input type="hidden" id="fb_currentfile" value="" />
 <!-- Scripts -->
-<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
 <script>
     function ws_connect() {
@@ -2175,6 +2168,7 @@ INDEX = Template(r"""<!DOCTYPE html>
     }
 </script>
 <script type="text/javascript">
+    var init_loadfile = $loadfile;
     var global_current_filepath = null;
     var global_current_filename = null;
 
@@ -2276,23 +2270,51 @@ INDEX = Template(r"""<!DOCTYPE html>
         $(document).on('click', '.drag-target', function(){$('.button-collapse').sideNav('hide');})
         listdir('.');
         document.getElementById('savePrompt').checked = get_save_prompt();
+        var entities_search = new Object();
+        if (states_list) {
+            for (var i = 0; i < states_list.length; i++) {
+                entities_search[states_list[i].attributes.friendly_name + ' (' + states_list[i].entity_id + ')'] = null;
+            }
+        }
+        $('#entities-search').autocomplete({
+            data: entities_search,
+            limit: 40,
+            onAutocomplete: function(val) {
+                insert(val.split("(")[1].split(")")[0]);
+            },
+            minLength: 1,
+        });
+        $('#entities-search_side').autocomplete({
+            data: entities_search,
+            limit: 40,
+            onAutocomplete: function(val) {
+                insert(val.split("(")[1].split(")")[0]);
+            },
+            minLength: 1,
+        });
     });
 </script>
 <script type="text/javascript">
     document.addEventListener("DOMContentLoaded", function() {
         $('.preloader-background').delay(800).fadeOut('slow');
         $('.preloader-wrapper').delay(800).fadeOut('slow');
-        if (!localStorage.getItem("new_tab")) {
-            var old_file = localStorage.getItem("current_file");
-            if (old_file) {
-                old_file = JSON.parse(old_file);
-                loadfile(old_file.current_filepath, old_file.current_filename);
-            }
+        if (init_loadfile) {
+            init_loadfile_name = init_loadfile.split('/').pop();
+            loadfile(init_loadfile, init_loadfile_name);
         }
         else {
-            localStorage.removeItem("current_file");
+            if (!localStorage.getItem("new_tab")) {
+                var old_file = localStorage.getItem("current_file");
+                if (old_file) {
+                    old_file = JSON.parse(old_file);
+                    loadfile(old_file.current_filepath, old_file.current_filename);
+                }
+            }
+            else {
+                localStorage.removeItem("current_file");
+            }
+            localStorage.removeItem("new_tab");
         }
-        localStorage.removeItem("new_tab");
     });
 </script>
 <script>
@@ -2398,7 +2420,12 @@ INDEX = Template(r"""<!DOCTYPE html>
 
     function listdir(path) {
         $.get(encodeURI("api/listdir?path=" + path), function(data) {
-            renderpath(data);
+            if (!data.error) {
+                renderpath(data);
+            }
+            else {
+                console.log("Permission denied."); 
+            }
         });
         document.getElementById("slide-out").scrollTop = 0;
     }
@@ -3264,7 +3291,7 @@ INDEX = Template(r"""<!DOCTYPE html>
     }
 
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/3.10.0/js-yaml.js" type="text/javascript" charset="utf-8"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/3.12.0/js-yaml.js" type="text/javascript" charset="utf-8"></script>
 <script type="text/javascript">
 var lint_timeout;
 var lint_status = $('#lint-status'); // speed optimization
@@ -3325,7 +3352,7 @@ def signal_handler(sig, frame):
 def load_settings(settingsfile):
     global LISTENIP, LISTENPORT, BASEPATH, SSL_CERTIFICATE, SSL_KEY, HASS_API, \
     HASS_API_PASSWORD, CREDENTIALS, ALLOWED_NETWORKS, BANNED_IPS, BANLIMIT, \
-    DEV, IGNORE_PATTERN, DIRSFIRST, SESAME, VERIFY_HOSTNAME
+    DEV, IGNORE_PATTERN, DIRSFIRST, SESAME, VERIFY_HOSTNAME, ENFORCE_BASEPATH
     try:
         if os.path.isfile(settingsfile):
             with open(settingsfile) as fptr:
@@ -3333,6 +3360,7 @@ def load_settings(settingsfile):
                 LISTENIP = settings.get("LISTENIP", LISTENIP)
                 LISTENPORT = settings.get("LISTENPORT", LISTENPORT)
                 BASEPATH = settings.get("BASEPATH", BASEPATH)
+                ENFORCE_BASEPATH = settings.get("ENFORCE_BASEPATH", ENFORCE_BASEPATH)
                 SSL_CERTIFICATE = settings.get("SSL_CERTIFICATE", SSL_CERTIFICATE)
                 SSL_KEY = settings.get("SSL_KEY", SSL_KEY)
                 HASS_API = settings.get("HASS_API", HASS_API)
@@ -3350,6 +3378,11 @@ def load_settings(settingsfile):
         LOG.warning(err)
         LOG.warning("Not loading static settings")
     return False
+
+def is_safe_path(basedir, path, follow_symlinks=True):
+    if follow_symlinks:
+        return os.path.realpath(path).startswith(basedir)
+    return os.path.abspath(path).startswith(basedir)
 
 def get_dircontent(path, repo=None):
     dircontent = []
@@ -3487,6 +3520,8 @@ class RequestHandler(BaseHTTPRequestHandler):
             try:
                 if filename:
                     filename = unquote(filename[0]).encode('utf-8')
+                    if ENFORCE_BASEPATH and not is_safe_path(BASEPATH.encode('utf-8'), filename):
+                        raise OSError('Access denied.')
                     if os.path.isfile(os.path.join(BASEDIR.encode('utf-8'), filename)):
                         with open(os.path.join(BASEDIR.encode('utf-8'), filename)) as fptr:
                             content += fptr.read()
@@ -3503,6 +3538,8 @@ class RequestHandler(BaseHTTPRequestHandler):
             try:
                 if filename:
                     filename = unquote(filename[0]).encode('utf-8')
+                    if ENFORCE_BASEPATH and not is_safe_path(BASEPATH.encode('utf-8'), filename):
+                        raise OSError('Access denied.')
                     LOG.info(filename)
                     if os.path.isfile(os.path.join(BASEDIR.encode('utf-8'), filename)):
                         with open(os.path.join(BASEDIR.encode('utf-8'), filename), 'rb') as fptr:
@@ -3520,7 +3557,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.wfile.write(bytes(content, "utf8"))
             return
         elif req.path.endswith('/api/listdir'):
-            content = ""
+            content = {'error': None}
             self.send_header('Content-type', 'text/json')
             self.end_headers()
             dirpath = query.get('path', None)
@@ -3528,6 +3565,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                 if dirpath:
                     dirpath = unquote(dirpath[0]).encode('utf-8')
                     if os.path.isdir(dirpath):
+                        if ENFORCE_BASEPATH and not is_safe_path(BASEPATH.encode('utf-8'), dirpath):
+                            raise OSError('Access denied.')
                         repo = None
                         activebranch = None
                         dirty = False
@@ -3547,13 +3586,14 @@ class RequestHandler(BaseHTTPRequestHandler):
                                     'parent': os.path.dirname(os.path.abspath(dirpath)).decode('utf-8'),
                                     'branches': branches,
                                     'activebranch': activebranch,
-                                    'dirty': dirty
+                                    'dirty': dirty,
+                                    'error': None
                                    }
                         self.wfile.write(bytes(json.dumps(filedata), "utf8"))
             except Exception as err:
                 LOG.warning(err)
-                content = str(err)
-                self.wfile.write(bytes(content, "utf8"))
+                content['error'] = str(err)
+                self.wfile.write(bytes(json.dumps(content), "utf8"))
             return
         elif req.path.endswith('/api/abspath'):
             content = ""
@@ -3715,6 +3755,11 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
 
+            loadfile = query.get('loadfile', [None])[0]
+            if loadfile is None:
+                loadfile = 'null'
+            else:
+                loadfile = "'%s'" % loadfile
             services = "[]"
             events = "[]"
             states = "[]"
@@ -3759,6 +3804,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             html = get_html().safe_substitute(services=services,
                                               events=events,
                                               states=states,
+                                              loadfile=loadfile,
                                               current=VERSION,
                                               versionclass=color,
                                               separator="\%s" % os.sep if os.sep == "\\" else os.sep,

@@ -114,7 +114,7 @@
             color: #616161 !important;
             font-weight: 400;
             display: inline-block;
-            width: 185px;
+            width: 182px;
             white-space: nowrap;
             text-overflow: ellipsis;
             cursor: pointer;
@@ -252,7 +252,7 @@
             box-shadow: 0 1px 0 0 #03a9f4 !important;
         }
 
-        #modal_acekeyboard, #modal_components, #modal_icons {
+        #modal_acekeyboard {
             top: auto;
             width: 96%;
             min-height: 96%;
@@ -488,9 +488,9 @@
             height: auto;
         }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.9/ace.js" type="text/javascript" charset="utf-8"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.9/ext-modelist.js" type="text/javascript" charset="utf-8"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.9/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.3.3/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.3.3/ext-modelist.js" type="text/javascript" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.3.3/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
 </head>
 <body>
   <div class="preloader-background">
@@ -565,10 +565,10 @@
   </header>
   <main>
     <ul id="dropdown_menu" class="dropdown-content z-depth-4">
-        <li><a onclick="localStorage.setItem('new_tab', true);window.open(window.location.href, '_blank');">New tab</a></li>
+        <li><a onclick="localStorage.setItem('new_tab', true);window.open(window.location.origin+window.location.pathname, '_blank');">New tab</a></li>
         <li class="divider"></li>
-        <li><a class="modal-trigger" target="_blank" href="#modal_components">Components</a></li>
-        <li><a class="modal-trigger" target="_blank" href="#modal_icons">Material Icons</a></li>
+        <li><a target="_blank" href="https://home-assistant.io/components/">Components</a></li>
+        <li><a target="_blank" href="https://materialdesignicons.com/">Material Icons</a></li>
         <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
         <li><a class="modal-trigger" href="#modal_netstat" onclick="get_netstat()">Network status</a></li>
         <li><a class="modal-trigger" href="#modal_about">About HASS-Configurator</a></li>
@@ -584,7 +584,7 @@
         <li><a class="modal-trigger" href="#modal_exec_command">Execute shell command</a></li>
     </ul>
     <ul id="dropdown_menu_mobile" class="dropdown-content z-depth-4">
-        <li><a onclick="localStorage.setItem('new_tab', true);window.open(window.location.href, '_blank');">New tab</a></li>
+        <li><a onclick="localStorage.setItem('new_tab', true);window.open(window.location.origin+window.location.pathname, '_blank');">New tab</a></li>
         <li class="divider"></li>
         <li><a target="_blank" href="https://home-assistant.io/help/">Help</a></li>
         <li><a target="_blank" href="https://home-assistant.io/components/">Components</a></li>
@@ -613,24 +613,6 @@
         <li><a class="modal-trigger" href="#modal_commit" class="nowrap waves-effect">git commit</a></li>
         <li><a class="modal-trigger" href="#modal_push" class="nowrap waves-effect">git push</a></li>
     </ul>
-    <div id="modal_components" class="modal bottom-sheet modal-fixed-footer">
-        <div class="modal-content_nopad">
-            <iframe src="https://home-assistant.io/components/" style="height: 90vh; width: 100vw"> </iframe>
-            <a target="_blank" href="https://home-assistant.io/components/" class="hide-on-med-and-down modal_btn waves-effect btn-large btn-flat left"><i class="material-icons">launch</i></a>
-        </div>
-        <div class="modal-footer">
-            <a class="modal-action modal-close waves-effect btn-flat Right light-blue-text">Close</a>
-        </div>
-    </div>
-    <div id="modal_icons" class="modal bottom-sheet modal-fixed-footer">
-    <div class="modal-content_nopad">
-            <iframe src="https://materialdesignicons.com/" style="height: 90vh; width: 100vw"> </iframe>
-            <a target="_blank" href="https://materialdesignicons.com/" class="hide-on-med-and-down modal_btn waves-effect btn-large btn-flat left"><i class="material-icons">launch</i></a>
-        </div>
-        <div class="modal-footer">
-            <a class="modal-action modal-close waves-effect btn-flat Right light-blue-text">Close</a>
-        </div>
-    </div>
     <div id="modal_acekeyboard" class="modal bottom-sheet modal-fixed-footer">
         <div class="modal-content centered">
         <h4 class="grey-text text-darken-3">Ace Keyboard Shortcuts<i class="mdi mdi-keyboard right grey-text text-darken-3" style="font-size: 2rem;"></i></h4>
@@ -1598,6 +1580,10 @@
                 <label>Events</label>
             </div>
             <div class="input-field col s12">
+                <input type="text" id="entities-search" class="autocomplete" placeholder="sensor.example">
+                <label>Search entity</label>
+            </div>
+            <div class="input-field col s12">
                 <select id="entities" onchange="insert(this.value)"></select>
                 <label>Entities</label>
             </div>
@@ -1695,6 +1681,10 @@
             <div class="input-field col s12">
               <select id="events_side" onchange="insert(this.value)"></select>
               <label>Events</label>
+            </div>
+            <div class="input-field col s12">
+                <input type="text" id="entities-search_side" class="autocomplete" placeholder="sensor.example">
+                <label>Search entity</label>
             </div>
             <div class="input-field col s12">
               <select id="entities_side" onchange="insert(this.value)"></select>
@@ -2027,14 +2017,14 @@
                   <input id="wrap_limit" type="number" onchange="editor.setOption('wrap', parseInt(this.value))" min="1" value="80">
                   <label class="active" for="wrap_limit">Wrap Limit</label>
               </div> <a class="waves-effect waves-light btn light-blue" onclick="save_ace_settings()">Save Settings Locally</a>
-              <p class="center col s12"> Ace Editor 1.2.9 </p>
+              <p class="center col s12"> Ace Editor 1.3.3 </p>
           </div>
         </ul>
       </div>
 </main>
 <input type="hidden" id="fb_currentfile" value="" />
 <!-- Scripts -->
-<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
 <script>
     function ws_connect() {
@@ -2088,6 +2078,7 @@
     }
 </script>
 <script type="text/javascript">
+    var init_loadfile = $loadfile;
     var global_current_filepath = null;
     var global_current_filename = null;
 
@@ -2189,23 +2180,51 @@
         $(document).on('click', '.drag-target', function(){$('.button-collapse').sideNav('hide');})
         listdir('.');
         document.getElementById('savePrompt').checked = get_save_prompt();
+        var entities_search = new Object();
+        if (states_list) {
+            for (var i = 0; i < states_list.length; i++) {
+                entities_search[states_list[i].attributes.friendly_name + ' (' + states_list[i].entity_id + ')'] = null;
+            }
+        }
+        $('#entities-search').autocomplete({
+            data: entities_search,
+            limit: 40,
+            onAutocomplete: function(val) {
+                insert(val.split("(")[1].split(")")[0]);
+            },
+            minLength: 1,
+        });
+        $('#entities-search_side').autocomplete({
+            data: entities_search,
+            limit: 40,
+            onAutocomplete: function(val) {
+                insert(val.split("(")[1].split(")")[0]);
+            },
+            minLength: 1,
+        });
     });
 </script>
 <script type="text/javascript">
     document.addEventListener("DOMContentLoaded", function() {
         $('.preloader-background').delay(800).fadeOut('slow');
         $('.preloader-wrapper').delay(800).fadeOut('slow');
-        if (!localStorage.getItem("new_tab")) {
-            var old_file = localStorage.getItem("current_file");
-            if (old_file) {
-                old_file = JSON.parse(old_file);
-                loadfile(old_file.current_filepath, old_file.current_filename);
-            }
+        if (init_loadfile) {
+            init_loadfile_name = init_loadfile.split('/').pop();
+            loadfile(init_loadfile, init_loadfile_name);
         }
         else {
-            localStorage.removeItem("current_file");
+            if (!localStorage.getItem("new_tab")) {
+                var old_file = localStorage.getItem("current_file");
+                if (old_file) {
+                    old_file = JSON.parse(old_file);
+                    loadfile(old_file.current_filepath, old_file.current_filename);
+                }
+            }
+            else {
+                localStorage.removeItem("current_file");
+            }
+            localStorage.removeItem("new_tab");
         }
-        localStorage.removeItem("new_tab");
     });
 </script>
 <script>
@@ -2311,7 +2330,12 @@
 
     function listdir(path) {
         $.get(encodeURI("api/listdir?path=" + path), function(data) {
-            renderpath(data);
+            if (!data.error) {
+                renderpath(data);
+            }
+            else {
+                console.log("Permission denied."); 
+            }
         });
         document.getElementById("slide-out").scrollTop = 0;
     }
@@ -3177,7 +3201,7 @@
     }
 
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/3.10.0/js-yaml.js" type="text/javascript" charset="utf-8"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/3.12.0/js-yaml.js" type="text/javascript" charset="utf-8"></script>
 <script type="text/javascript">
 var lint_timeout;
 var lint_status = $('#lint-status'); // speed optimization
