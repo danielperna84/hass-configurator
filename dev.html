@@ -607,11 +607,13 @@
         <li><a class="modal-trigger" href="#modal_init" class="nowrap waves-effect">git init</a></li>
         <li><a class="modal-trigger" href="#modal_commit" class="nowrap waves-effect">git commit</a></li>
         <li><a class="modal-trigger" href="#modal_push" class="nowrap waves-effect">git push</a></li>
+        <li><a class="modal-trigger" href="#modal_stash" class="nowrap waves-effect">git stash</a></li>
     </ul>
     <ul id="dropdown_gitmenu_mobile" class="dropdown-content z-depth-4">
         <li><a class="modal-trigger" href="#modal_init" class="nowrap waves-effect">git init</a></li>
         <li><a class="modal-trigger" href="#modal_commit" class="nowrap waves-effect">git commit</a></li>
         <li><a class="modal-trigger" href="#modal_push" class="nowrap waves-effect">git push</a></li>
+        <li><a class="modal-trigger" href="#modal_stash" class="nowrap waves-effect">git stash</a></li>
     </ul>
     <div id="modal_acekeyboard" class="modal bottom-sheet modal-fixed-footer">
         <div class="modal-content centered">
@@ -1217,6 +1219,16 @@
         <div class="modal-footer">
           <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">Cancel</a>
           <a onclick="gitpush()" class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">OK</a>
+        </div>
+    </div>
+    <div id="modal_stash" class="modal">
+        <div class="modal-content">
+          <h4 class="grey-text text-darken-3">git stash<i class="mdi mdi-git right grey-text text-darken-3" style="font-size: 2.48rem;"></i></h4>
+          <p>Are you sure you want to stash your changes?</p>
+        </div>
+        <div class="modal-footer">
+          <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">Cancel</a>
+          <a onclick="gitstash()" class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">OK</a>
         </div>
     </div>
     <div id="modal_close" class="modal">
@@ -2986,6 +2998,25 @@
                 else {
                     var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
                     Materialize.toast($toastContent, 2000);
+                    listdir(document.getElementById('fbheader').innerHTML);
+                }
+            });
+        }
+    }
+
+    function gitstash() {
+        var path = document.getElementById("fbheader").innerHTML;
+        if (path.length > 0) {
+            data = new Object();
+            data.path = path;
+            $.post("api/stash", data).done(function(resp) {
+                if (resp.error) {
+                    var $toastContent = $("<div><pre>" + resp.message + "\n" + resp.path + "</pre></div>");
+                    Materialize.toast($toastContent, 5000);
+                }
+                else {
+                    var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
+                    Materialize.toast($toastContent, 5000);
                     listdir(document.getElementById('fbheader').innerHTML);
                 }
             });

@@ -699,11 +699,13 @@ INDEX = Template(r"""<!DOCTYPE html>
         <li><a class="modal-trigger" href="#modal_init" class="nowrap waves-effect">git init</a></li>
         <li><a class="modal-trigger" href="#modal_commit" class="nowrap waves-effect">git commit</a></li>
         <li><a class="modal-trigger" href="#modal_push" class="nowrap waves-effect">git push</a></li>
+        <li><a class="modal-trigger" href="#modal_stash" class="nowrap waves-effect">git stash</a></li>
     </ul>
     <ul id="dropdown_gitmenu_mobile" class="dropdown-content z-depth-4">
         <li><a class="modal-trigger" href="#modal_init" class="nowrap waves-effect">git init</a></li>
         <li><a class="modal-trigger" href="#modal_commit" class="nowrap waves-effect">git commit</a></li>
         <li><a class="modal-trigger" href="#modal_push" class="nowrap waves-effect">git push</a></li>
+        <li><a class="modal-trigger" href="#modal_stash" class="nowrap waves-effect">git stash</a></li>
     </ul>
     <div id="modal_acekeyboard" class="modal bottom-sheet modal-fixed-footer">
         <div class="modal-content centered">
@@ -1309,6 +1311,16 @@ INDEX = Template(r"""<!DOCTYPE html>
         <div class="modal-footer">
           <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">Cancel</a>
           <a onclick="gitpush()" class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">OK</a>
+        </div>
+    </div>
+    <div id="modal_stash" class="modal">
+        <div class="modal-content">
+          <h4 class="grey-text text-darken-3">git stash<i class="mdi mdi-git right grey-text text-darken-3" style="font-size: 2.48rem;"></i></h4>
+          <p>Are you sure you want to stash your changes?</p>
+        </div>
+        <div class="modal-footer">
+          <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">Cancel</a>
+          <a onclick="gitstash()" class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">OK</a>
         </div>
     </div>
     <div id="modal_close" class="modal">
@@ -3084,6 +3096,25 @@ INDEX = Template(r"""<!DOCTYPE html>
         }
     }
 
+    function gitstash() {
+        var path = document.getElementById("fbheader").innerHTML;
+        if (path.length > 0) {
+            data = new Object();
+            data.path = path;
+            $.post("api/stash", data).done(function(resp) {
+                if (resp.error) {
+                    var $toastContent = $("<div><pre>" + resp.message + "\n" + resp.path + "</pre></div>");
+                    Materialize.toast($toastContent, 5000);
+                }
+                else {
+                    var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
+                    Materialize.toast($toastContent, 5000);
+                    listdir(document.getElementById('fbheader').innerHTML);
+                }
+            });
+        }
+    }
+
     function checkout(branch) {
         var path = document.getElementById("fbheader").innerHTML;
         if (path.length > 0) {
@@ -4182,6 +4213,38 @@ class RequestHandler(BaseHTTPRequestHandler):
                                 repo.remotes.origin.push()
                                 response['error'] = False
                                 response['message'] = "Pushed to %s" % urls[0]
+                            self.send_response(200)
+                            self.send_header('Content-type', 'text/json')
+                            self.end_headers()
+                            self.wfile.write(bytes(json.dumps(response), "utf8"))
+                            return
+                        except Exception as err:
+                            response['error'] = True
+                            response['message'] = str(err)
+                            LOG.warning(response)
+
+                    except Exception as err:
+                        response['message'] = "Not a git repository: %s" % (str(err))
+                        LOG.warning("Exception (no repo): %s" % str(err))
+            else:
+                response['message'] = "Missing path or branch"
+        elif req.path.endswith('/api/stash'):
+            try:
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+            except Exception as err:
+                LOG.warning(err)
+                response['message'] = "%s" % (str(err))
+                postvars = {}
+            if 'path' in postvars.keys():
+                if postvars['path']:
+                    try:
+                        repopath = unquote(postvars['path'][0])
+                        response['path'] = repopath
+                        try:
+                            repo = REPO(repopath)
+                            returnvalue = repo.git.stash()
+                            response['error'] = False
+                            response['message'] = "%s\n%s" % (returnvalue, repopath)
                             self.send_response(200)
                             self.send_header('Content-type', 'text/json')
                             self.end_headers()
