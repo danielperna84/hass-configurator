@@ -66,6 +66,8 @@ SESAME = None
 # Verify the hostname used in the request. Block access if it doesn't match
 # this value
 VERIFY_HOSTNAME = None
+# Prefix for environment variables
+ENV_PREFIX = "HC_"
 ### End of options
 
 LOGLEVEL = logging.INFO
@@ -3352,37 +3354,55 @@ def signal_handler(sig, frame):
 def load_settings(settingsfile):
     global LISTENIP, LISTENPORT, BASEPATH, SSL_CERTIFICATE, SSL_KEY, HASS_API, \
     HASS_API_PASSWORD, CREDENTIALS, ALLOWED_NETWORKS, BANNED_IPS, BANLIMIT, \
-    DEV, IGNORE_PATTERN, DIRSFIRST, SESAME, VERIFY_HOSTNAME, ENFORCE_BASEPATH
-    try:
-        if os.path.isfile(settingsfile):
-            with open(settingsfile) as fptr:
-                settings = json.loads(fptr.read())
-                LISTENIP = settings.get("LISTENIP", LISTENIP)
-                LISTENPORT = settings.get("LISTENPORT", LISTENPORT)
-                BASEPATH = settings.get("BASEPATH", BASEPATH)
-                ENFORCE_BASEPATH = settings.get("ENFORCE_BASEPATH", ENFORCE_BASEPATH)
-                SSL_CERTIFICATE = settings.get("SSL_CERTIFICATE", SSL_CERTIFICATE)
-                SSL_KEY = settings.get("SSL_KEY", SSL_KEY)
-                HASS_API = settings.get("HASS_API", HASS_API)
-                HASS_API_PASSWORD = settings.get("HASS_API_PASSWORD", HASS_API_PASSWORD)
-                CREDENTIALS = settings.get("CREDENTIALS", CREDENTIALS)
-                ALLOWED_NETWORKS = settings.get("ALLOWED_NETWORKS", ALLOWED_NETWORKS)
-                BANNED_IPS = settings.get("BANNED_IPS", BANNED_IPS)
-                BANLIMIT = settings.get("BANLIMIT", BANLIMIT)
-                DEV = settings.get("DEV", DEV)
-                IGNORE_PATTERN = settings.get("IGNORE_PATTERN", IGNORE_PATTERN)
-                DIRSFIRST = settings.get("DIRSFIRST", DIRSFIRST)
-                SESAME = settings.get("SESAME", SESAME)
-                VERIFY_HOSTNAME = settings.get("VERIFY_HOSTNAME", VERIFY_HOSTNAME)
-    except Exception as err:
-        LOG.warning(err)
-        LOG.warning("Not loading static settings")
-    return False
+    DEV, IGNORE_PATTERN, DIRSFIRST, SESAME, VERIFY_HOSTNAME, ENFORCE_BASEPATH, \
+    ENV_PREFIX
+    settings = {}
+    if settingsfile:
+        try:
+            if os.path.isfile(settingsfile):
+                with open(settingsfile) as fptr:
+                    settings = json.loads(fptr.read())
+        except Exception as err:
+            LOG.warning(err)
+            LOG.warning("Not loading settings from file")
+    ENV_PREFIX = settings.get('ENV_PREFIX', ENV_PREFIX)
+    for key, value in os.environ.items():
+        if key.startswith(ENV_PREFIX):
+            # Convert booleans
+            if value in ['true', 'false', 'True', 'False']:
+                value = True if value in ['true', 'True'] else False
+            # Convert None / null
+            elif value in ['none', 'None' 'null']:
+                value = None
+            # Convert plain numbers
+            elif value.isnumeric():
+                value = int(value)
+            settings[key[len(ENV_PREFIX):]] = value
+    LISTENIP = settings.get("LISTENIP", LISTENIP)
+    LISTENPORT = settings.get("LISTENPORT", LISTENPORT)
+    BASEPATH = settings.get("BASEPATH", BASEPATH)
+    ENFORCE_BASEPATH = settings.get("ENFORCE_BASEPATH", ENFORCE_BASEPATH)
+    SSL_CERTIFICATE = settings.get("SSL_CERTIFICATE", SSL_CERTIFICATE)
+    SSL_KEY = settings.get("SSL_KEY", SSL_KEY)
+    HASS_API = settings.get("HASS_API", HASS_API)
+    HASS_API_PASSWORD = settings.get("HASS_API_PASSWORD", HASS_API_PASSWORD)
+    CREDENTIALS = settings.get("CREDENTIALS", CREDENTIALS)
+    ALLOWED_NETWORKS = settings.get("ALLOWED_NETWORKS", ALLOWED_NETWORKS)
+    BANNED_IPS = settings.get("BANNED_IPS", BANNED_IPS)
+    BANLIMIT = settings.get("BANLIMIT", BANLIMIT)
+    DEV = settings.get("DEV", DEV)
+    IGNORE_PATTERN = settings.get("IGNORE_PATTERN", IGNORE_PATTERN)
+    DIRSFIRST = settings.get("DIRSFIRST", DIRSFIRST)
+    SESAME = settings.get("SESAME", SESAME)
+    VERIFY_HOSTNAME = settings.get("VERIFY_HOSTNAME", VERIFY_HOSTNAME)
+
 
 def is_safe_path(basedir, path, follow_symlinks=True):
+    if basedir is None:
+        return True
     if follow_symlinks:
-        return os.path.realpath(path).startswith(basedir)
-    return os.path.abspath(path).startswith(basedir)
+        return os.path.realpath(path).startswith(basedir.encode('utf-8'))
+    return os.path.abspath(path).startswith(basedir.encode('utf-8'))
 
 def get_dircontent(path, repo=None):
     dircontent = []
@@ -3520,7 +3540,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             try:
                 if filename:
                     filename = unquote(filename[0]).encode('utf-8')
-                    if ENFORCE_BASEPATH and not is_safe_path(BASEPATH.encode('utf-8'), filename):
+                    if ENFORCE_BASEPATH and not is_safe_path(BASEPATH, filename):
                         raise OSError('Access denied.')
                     if os.path.isfile(os.path.join(BASEDIR.encode('utf-8'), filename)):
                         with open(os.path.join(BASEDIR.encode('utf-8'), filename)) as fptr:
@@ -3538,7 +3558,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             try:
                 if filename:
                     filename = unquote(filename[0]).encode('utf-8')
-                    if ENFORCE_BASEPATH and not is_safe_path(BASEPATH.encode('utf-8'), filename):
+                    if ENFORCE_BASEPATH and not is_safe_path(BASEPATH, filename):
                         raise OSError('Access denied.')
                     LOG.info(filename)
                     if os.path.isfile(os.path.join(BASEDIR.encode('utf-8'), filename)):
@@ -3565,7 +3585,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 if dirpath:
                     dirpath = unquote(dirpath[0]).encode('utf-8')
                     if os.path.isdir(dirpath):
-                        if ENFORCE_BASEPATH and not is_safe_path(BASEPATH.encode('utf-8'), dirpath):
+                        if ENFORCE_BASEPATH and not is_safe_path(BASEPATH, dirpath):
                             raise OSError('Access denied.')
                         repo = None
                         activebranch = None
@@ -4396,6 +4416,8 @@ def main(args):
     global HTTPD, CREDENTIALS
     if args:
         load_settings(args[0])
+    else:
+        load_settings(None)
     LOG.info("Starting server")
     CustomServer = SimpleServer
     if ':' in LISTENIP:
