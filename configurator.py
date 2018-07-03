@@ -3432,6 +3432,10 @@ def load_settings(settingsfile):
     SESAME = settings.get("SESAME", SESAME)
     VERIFY_HOSTNAME = settings.get("VERIFY_HOSTNAME", VERIFY_HOSTNAME)
 
+    if HASS_API_PASSWORD:
+        password_problems(HASS_API_PASSWORD, "HASS_API_PASSWORD")
+    if CREDENTIALS:
+        password_problems(":".join(CREDENTIALS.split(":")[1:]), "CREDENTIALS")
 
 def is_safe_path(basedir, path, follow_symlinks=True):
     if basedir is None:
@@ -3515,6 +3519,27 @@ def get_html():
             LOG.warning(err)
             LOG.warning("Delivering embedded HTML")
     return INDEX
+
+def password_problems(password, name="UNKNOWN"):
+    problems = 0
+    if password is None:
+        return problems
+    if len(password) < 8:
+        LOG.warning("Password %s is too short" % name)
+        problems += 1
+    if password.isalpha():
+        LOG.warning("Password %s does not contain digits" % name)
+        problems += 1
+    if password.isdigit():
+        LOG.warning("Password %s does not contain alphabetic characters" % name)
+        problems += 1
+    quota = len(set(password)) / len(password)
+    exp = len(password) ** len(set(password))
+    score = exp / quota / 8
+    if score < 65536:
+        LOG.warning("Password %s does not contain enough unique characters (%i)" % (name, len(set(password))))
+        problems += 1
+    return problems
 
 def check_access(clientip):
     global BANNED_IPS
