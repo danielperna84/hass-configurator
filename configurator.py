@@ -3399,6 +3399,7 @@ def load_settings(settingsfile):
     ENV_PREFIX = settings.get('ENV_PREFIX', ENV_PREFIX)
     for key, value in os.environ.items():
         if key.startswith(ENV_PREFIX):
+            print("Got setting: %s" % key)
             # Convert booleans
             if value in ['true', 'false', 'True', 'False']:
                 value = True if value in ['true', 'True'] else False
@@ -3408,6 +3409,10 @@ def load_settings(settingsfile):
             # Convert plain numbers
             elif value.isnumeric():
                 value = int(value)
+            # Make lists out of comma separated values for list-settings
+            elif key[len(ENV_PREFIX):] in ["ALLOWED_NETWORKS", "BANNED_IPS", "IGNORE_PATTERN"]:
+                print("got networks: %s" % value)
+                value = value.split(',')
             settings[key[len(ENV_PREFIX):]] = value
     LISTENIP = settings.get("LISTENIP", LISTENIP)
     LISTENPORT = settings.get("LISTENPORT", LISTENPORT)

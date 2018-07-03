@@ -1,5 +1,5 @@
 Version 0.3.0 (2018-)
-- Allow passing settings (except lists) via environment variables (Issue #100) @danielperna84
+- Allow passing settings via environment variables (Issue #100) @danielperna84
 - Added basic git stash functionality (Issue #16) @danielperna84
 
 Version 0.2.9 (2018-06-22)
