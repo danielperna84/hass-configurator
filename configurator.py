@@ -3436,6 +3436,8 @@ def load_settings(settingsfile):
         password_problems(HASS_API_PASSWORD, "HASS_API_PASSWORD")
     if CREDENTIALS:
         password_problems(":".join(CREDENTIALS.split(":")[1:]), "CREDENTIALS")
+    if SESAME:
+        password_problems(SESAME, "SESAME")
 
 def is_safe_path(basedir, path, follow_symlinks=True):
     if basedir is None:
