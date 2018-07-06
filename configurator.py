@@ -4537,9 +4537,10 @@ class SimpleServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     def __init__(self, server_address, RequestHandlerClass):
         socketserver.TCPServer.__init__(self, server_address, RequestHandlerClass)
 
-def persistent_notification(title="HASS Configurator",
-                            message="Notification by HASS Configurator",
-                            notification_id="HC_PERSISTENT_NOTIFICATION"):
+def notify(service="persistent_notification.create",
+           title="HASS Configurator",
+           message="Notification by HASS Configurator",
+           notification_id=None):
     if not HASS_API:
         return
     headers = {
@@ -4547,13 +4548,14 @@ def persistent_notification(title="HASS Configurator",
     }
     data = {
         "title": title,
-        "message": message,
-        "notification_id": notification_id
+        "message": message
     }
+    if notification_id:
+        data["notification_id"] = notification_id
     if HASS_API_PASSWORD:
         headers["x-ha-access"] = HASS_API_PASSWORD
     req = urllib.request.Request(
-        "%sservices/persistent_notification/create" % HASS_API,
+        "%sservices/%s" % (HASS_API, service.replace('.', '/')),
         data=bytes(json.dumps(data).encode('utf-8')),
         headers=headers, method='POST')
     try:
@@ -4561,7 +4563,7 @@ def persistent_notification(title="HASS Configurator",
             message = response.read().decode('utf-8')
             LOG.debug(message)
     except Exception as err:
-        LOG.warning("Exception while creating persistent notification: %s" % err)
+        LOG.warning("Exception while creating notification: %s" % err)
 
 def main(args):
     global HTTPD, CREDENTIALS
@@ -4582,7 +4584,7 @@ def main(args):
                 "Refer to the HASS configurator logs for further information." % problems,
                 "notification_id": "HC_HASS_API_PASSWORD"
             }
-            persistent_notification(**data)
+            notify(**data)
 
         problems = None
         if SESAME:
@@ -4594,7 +4596,7 @@ def main(args):
                 "Refer to the HASS configurator logs for further information." % problems,
                 "notification_id": "HC_SESAME"
             }
-            persistent_notification(**data)
+            notify(**data)
 
         problems = None
         if CREDENTIALS:
@@ -4606,7 +4608,7 @@ def main(args):
                 "Refer to the HASS configurator logs for further information." % problems,
                 "notification_id": "HC_CREDENTIALS"
             }
-            persistent_notification(**data)
+            notify(**data)
     except Exception as err:
         LOG.warning("Exception while checking passwords: %s" % err)
 
