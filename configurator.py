@@ -68,6 +68,9 @@ SESAME = None
 VERIFY_HOSTNAME = None
 # Prefix for environment variables
 ENV_PREFIX = "HC_"
+# Notification service like `notify.mytelegram`. Default is `persistent_notification.create`
+NOTIFY_SERVICE_DEFAULT = "persistent_notification.create"
+NOTIFY_SERVICE = NOTIFY_SERVICE_DEFAULT
 ### End of options
 
 LOGLEVEL = logging.INFO
@@ -3386,7 +3389,7 @@ def load_settings(settingsfile):
     global LISTENIP, LISTENPORT, BASEPATH, SSL_CERTIFICATE, SSL_KEY, HASS_API, \
     HASS_API_PASSWORD, CREDENTIALS, ALLOWED_NETWORKS, BANNED_IPS, BANLIMIT, \
     DEV, IGNORE_PATTERN, DIRSFIRST, SESAME, VERIFY_HOSTNAME, ENFORCE_BASEPATH, \
-    ENV_PREFIX
+    ENV_PREFIX, NOTIFY_SERVICE
     settings = {}
     if settingsfile:
         try:
@@ -3429,6 +3432,7 @@ def load_settings(settingsfile):
     DIRSFIRST = settings.get("DIRSFIRST", DIRSFIRST)
     SESAME = settings.get("SESAME", SESAME)
     VERIFY_HOSTNAME = settings.get("VERIFY_HOSTNAME", VERIFY_HOSTNAME)
+    NOTIFY_SERVICE = settings.get("NOTIFY_SERVICE", NOTIFY_SERVICE_DEFAULT)
 
 def is_safe_path(basedir, path, follow_symlinks=True):
     if basedir is None:
@@ -4537,7 +4541,7 @@ class SimpleServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     def __init__(self, server_address, RequestHandlerClass):
         socketserver.TCPServer.__init__(self, server_address, RequestHandlerClass)
 
-def notify(service="persistent_notification.create",
+def notify(service=NOTIFY_SERVICE,
            title="HASS Configurator",
            message="Notification by HASS Configurator",
            notification_id=None):
@@ -4550,7 +4554,7 @@ def notify(service="persistent_notification.create",
         "title": title,
         "message": message
     }
-    if notification_id:
+    if notification_id and NOTIFY_SERVICE == NOTIFY_SERVICE_DEFAULT:
         data["notification_id"] = notification_id
     if HASS_API_PASSWORD:
         headers["x-ha-access"] = HASS_API_PASSWORD
@@ -4579,6 +4583,7 @@ def main(args):
             problems = password_problems(HASS_API_PASSWORD, "HASS_API_PASSWORD")
         if problems:
             data = {
+                "service": NOTIFY_SERVICE,
                 "title": "HASS Configurator - Password warning",
                 "message": "Your HASS API password seems insecure (%i). " \
                 "Refer to the HASS configurator logs for further information." % problems,
@@ -4591,6 +4596,7 @@ def main(args):
             problems = password_problems(SESAME, "SESAME")
         if problems:
             data = {
+                "service": NOTIFY_SERVICE,
                 "title": "HASS Configurator - Password warning",
                 "message": "Your SESAME seems insecure (%i). " \
                 "Refer to the HASS configurator logs for further information." % problems,
@@ -4603,6 +4609,7 @@ def main(args):
             problems = password_problems(":".join(CREDENTIALS.split(":")[1:]), "CREDENTIALS")
         if problems:
             data = {
+                "service": NOTIFY_SERVICE,
                 "title": "HASS Configurator - Password warning",
                 "message": "Your CREDENTIALS seems insecure (%i). " \
                 "Refer to the HASS configurator logs for further information." % problems,

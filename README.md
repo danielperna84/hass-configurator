@@ -75,6 +75,8 @@ If set to _somesecretkeynobodycanguess_, you can browse to `https://your.configu
 HTTP requests include the hostname to which the request has been made. To improve security you can set this parameter to `yourdomain.example.com`. This will check if the hostname within the request matches the one you are expecting. If it does not match, a `403 Forbidden` response will be sent. As a result attackers that scan your IP address won't be able to connect unless they know the correct hostname. Be careful with this option though, because it prohibits you from accessing the configurator directly via IP.
 #### ENV_PREFIX (string)
 To modify the default prefix for settings passed as environment variables (`HC_`) change this setting to another value that meets your demands.
+#### NOTIFY_SERVICE (string)
+Define a notification service from your Home Assistant setup that should be used to send notifications, e.g. `notify.mytelegram`. The default is `persistent_notification.create`. Do __NOT__ change the value of the `NOTIFY_SERVICE_DEFAULT` variable!
  
 __Note regarding `ALLOWED_NETWORKS`, `BANNED_IPS` and `BANLIMIT`__:  
 The way this is implemented works in the following order:
