@@ -21,7 +21,7 @@ import fnmatch
 from string import Template
 from http.server import BaseHTTPRequestHandler
 import urllib.request
-from urllib.parse import urlparse, parse_qs, unquote
+from urllib.parse import urlparse, parse_qs, unquote, urlencode
 
 
 ### Some options for you to change
@@ -3432,13 +3432,6 @@ def load_settings(settingsfile):
     SESAME = settings.get("SESAME", SESAME)
     VERIFY_HOSTNAME = settings.get("VERIFY_HOSTNAME", VERIFY_HOSTNAME)
 
-    if HASS_API_PASSWORD:
-        password_problems(HASS_API_PASSWORD, "HASS_API_PASSWORD")
-    if CREDENTIALS:
-        password_problems(":".join(CREDENTIALS.split(":")[1:]), "CREDENTIALS")
-    if SESAME:
-        password_problems(SESAME, "SESAME")
-
 def is_safe_path(basedir, path, follow_symlinks=True):
     if basedir is None:
         return True
@@ -3531,16 +3524,16 @@ def password_problems(password, name="UNKNOWN"):
         problems += 1
     if password.isalpha():
         LOG.warning("Password %s does not contain digits" % name)
-        problems += 1
+        problems += 2
     if password.isdigit():
         LOG.warning("Password %s does not contain alphabetic characters" % name)
-        problems += 1
+        problems += 4
     quota = len(set(password)) / len(password)
     exp = len(password) ** len(set(password))
     score = exp / quota / 8
     if score < 65536:
         LOG.warning("Password %s does not contain enough unique characters (%i)" % (name, len(set(password))))
-        problems += 1
+        problems += 8
     return problems
 
 def check_access(clientip):
@@ -3847,23 +3840,27 @@ class RequestHandler(BaseHTTPRequestHandler):
             events = "[]"
             states = "[]"
             try:
-                headers = {
-                    "Content-Type": "application/json"
-                }
-                if HASS_API_PASSWORD:
-                    headers["x-ha-access"] = HASS_API_PASSWORD
+                if HASS_API:
+                    headers = {
+                        "Content-Type": "application/json"
+                    }
+                    if HASS_API_PASSWORD:
+                        headers["x-ha-access"] = HASS_API_PASSWORD
 
-                req = urllib.request.Request("%sservices" % HASS_API, headers=headers, method='GET')
-                with urllib.request.urlopen(req) as response:
-                    services = response.read().decode('utf-8')
+                    req = urllib.request.Request("%sservices" % HASS_API,
+                                                headers=headers, method='GET')
+                    with urllib.request.urlopen(req) as response:
+                        services = response.read().decode('utf-8')
 
-                req = urllib.request.Request("%sevents" % HASS_API, headers=headers, method='GET')
-                with urllib.request.urlopen(req) as response:
-                    events = response.read().decode('utf-8')
+                    req = urllib.request.Request("%sevents" % HASS_API,
+                                                headers=headers, method='GET')
+                    with urllib.request.urlopen(req) as response:
+                        events = response.read().decode('utf-8')
 
-                req = urllib.request.Request("%sstates" % HASS_API, headers=headers, method='GET')
-                with urllib.request.urlopen(req) as response:
-                    states = response.read().decode('utf-8')
+                    req = urllib.request.Request("%sstates" % HASS_API,
+                                                headers=headers, method='GET')
+                    with urllib.request.urlopen(req) as response:
+                        states = response.read().decode('utf-8')
 
             except Exception as err:
                 LOG.warning("Exception getting bootstrap")
@@ -4507,6 +4504,32 @@ class SimpleServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     def __init__(self, server_address, RequestHandlerClass):
         socketserver.TCPServer.__init__(self, server_address, RequestHandlerClass)
 
+def persistent_notification(title="HASS Configurator",
+                            message="Notification by HASS Configurator",
+                            notification_id="HC_PERSISTENT_NOTIFICATION"):
+    if not HASS_API:
+        return
+    headers = {
+        "Content-Type": "application/json"
+    }
+    data = {
+        "title": title,
+        "message": message,
+        "notification_id": notification_id
+    }
+    if HASS_API_PASSWORD:
+        headers["x-ha-access"] = HASS_API_PASSWORD
+    req = urllib.request.Request(
+        "%sservices/persistent_notification/create" % HASS_API,
+        data=bytes(json.dumps(data).encode('utf-8')),
+        headers=headers, method='POST')
+    try:
+        with urllib.request.urlopen(req) as response:
+            message = response.read().decode('utf-8')
+            LOG.debug(message)
+    except Exception as err:
+        LOG.warning("Exception while creating persistent notification: %s" % err)
+
 def main(args):
     global HTTPD, CREDENTIALS
     if args:
@@ -4514,6 +4537,46 @@ def main(args):
     else:
         load_settings(None)
     LOG.info("Starting server")
+
+    try:
+        problems = None
+        if HASS_API_PASSWORD:
+            problems = password_problems(HASS_API_PASSWORD, "HASS_API_PASSWORD")
+        if problems:
+            data = {
+                "title": "HASS Configurator - Password warning",
+                "message": "Your HASS API password seems insecure (%i). " \
+                "Refer to the HASS configurator logs for further information." % problems,
+                "notification_id": "HC_HASS_API_PASSWORD"
+            }
+            persistent_notification(**data)
+
+        problems = None
+        if SESAME:
+            problems = password_problems(SESAME, "SESAME")
+        if problems:
+            data = {
+                "title": "HASS Configurator - Password warning",
+                "message": "Your SESAME seems insecure (%i). " \
+                "Refer to the HASS configurator logs for further information." % problems,
+                "notification_id": "HC_SESAME"
+            }
+            persistent_notification(**data)
+
+        problems = None
+        if CREDENTIALS:
+            problems = password_problems(":".join(CREDENTIALS.split(":")[1:]), "CREDENTIALS")
+        if problems:
+            data = {
+                "title": "HASS Configurator - Password warning",
+                "message": "Your CREDENTIALS seems insecure (%i). " \
+                "Refer to the HASS configurator logs for further information." % problems,
+                "notification_id": "HC_CREDENTIALS"
+            }
+            persistent_notification(**data)
+    except Exception as err:
+        LOG.warning("Exception while checking passwords: %s" % err)
+
     CustomServer = SimpleServer
     if ':' in LISTENIP:
         CustomServer.address_family = socket.AF_INET6
