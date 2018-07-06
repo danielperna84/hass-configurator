@@ -3399,7 +3399,6 @@ def load_settings(settingsfile):
     ENV_PREFIX = settings.get('ENV_PREFIX', ENV_PREFIX)
     for key, value in os.environ.items():
         if key.startswith(ENV_PREFIX):
-            print("Got setting: %s" % key)
             # Convert booleans
             if value in ['true', 'false', 'True', 'False']:
                 value = True if value in ['true', 'True'] else False
@@ -3411,7 +3410,6 @@ def load_settings(settingsfile):
                 value = int(value)
             # Make lists out of comma separated values for list-settings
             elif key[len(ENV_PREFIX):] in ["ALLOWED_NETWORKS", "BANNED_IPS", "IGNORE_PATTERN"]:
-                print("got networks: %s" % value)
                 value = value.split(',')
             settings[key[len(ENV_PREFIX):]] = value
     LISTENIP = settings.get("LISTENIP", LISTENIP)
@@ -3517,6 +3515,7 @@ def get_html():
 
 def password_problems(password, name="UNKNOWN"):
     problems = 0
+    password = str(password)
     if password is None:
         return problems
     if len(password) < 8:
@@ -3641,7 +3640,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                 if dirpath:
                     dirpath = unquote(dirpath[0]).encode('utf-8')
                     if os.path.isdir(dirpath):
-                        if ENFORCE_BASEPATH and not is_safe_path(BASEPATH, dirpath):
+                        if ENFORCE_BASEPATH and not is_safe_path(BASEPATH,
+                                                                 dirpath):
                             raise OSError('Access denied.')
                         repo = None
                         activebranch = None
@@ -3649,7 +3649,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                         branches = []
                         if REPO:
                             try:
-                                repo = REPO(dirpath.decode('utf-8'), search_parent_directories=True)
+                                repo = REPO(dirpath.decode('utf-8'),
+                                            search_parent_directories=True)
                                 activebranch = repo.active_branch.name
                                 dirty = repo.is_dirty()
                                 for branch in repo.branches:
@@ -3718,7 +3719,9 @@ class RequestHandler(BaseHTTPRequestHandler):
                 }
                 if HASS_API_PASSWORD:
                     headers["x-ha-access"] = HASS_API_PASSWORD
-                req = urllib.request.Request("%sservices/homeassistant/restart" % HASS_API, headers=headers, method='POST')
+                req = urllib.request.Request(
+                    "%sservices/homeassistant/restart" % HASS_API,
+                    headers=headers, method='POST')
                 with urllib.request.urlopen(req) as response:
                     res = json.loads(response.read().decode('utf-8'))
                     LOG.debug(res)
@@ -3738,7 +3741,9 @@ class RequestHandler(BaseHTTPRequestHandler):
                 }
                 if HASS_API_PASSWORD:
                     headers["x-ha-access"] = HASS_API_PASSWORD
-                req = urllib.request.Request("%sservices/homeassistant/check_config" % HASS_API, headers=headers, method='POST')
+                req = urllib.request.Request(
+                    "%sservices/homeassistant/check_config" % HASS_API,
+                    headers=headers, method='POST')
                 # with urllib.request.urlopen(req) as response:
                 #     print(json.loads(response.read().decode('utf-8')))
                 #     res['service'] = "called successfully"
@@ -3758,7 +3763,9 @@ class RequestHandler(BaseHTTPRequestHandler):
                 }
                 if HASS_API_PASSWORD:
                     headers["x-ha-access"] = HASS_API_PASSWORD
-                req = urllib.request.Request("%sservices/automation/reload" % HASS_API, headers=headers, method='POST')
+                req = urllib.request.Request(
+                    "%sservices/automation/reload" % HASS_API,
+                    headers=headers, method='POST')
                 with urllib.request.urlopen(req) as response:
                     LOG.debug(json.loads(response.read().decode('utf-8')))
                     res['service'] = "called successfully"
@@ -3778,7 +3785,9 @@ class RequestHandler(BaseHTTPRequestHandler):
                 }
                 if HASS_API_PASSWORD:
                     headers["x-ha-access"] = HASS_API_PASSWORD
-                req = urllib.request.Request("%sservices/script/reload" % HASS_API, headers=headers, method='POST')
+                req = urllib.request.Request(
+                    "%sservices/script/reload" % HASS_API,
+                    headers=headers, method='POST')
                 with urllib.request.urlopen(req) as response:
                     LOG.debug(json.loads(response.read().decode('utf-8')))
                     res['service'] = "called successfully"
@@ -3798,7 +3807,9 @@ class RequestHandler(BaseHTTPRequestHandler):
                 }
                 if HASS_API_PASSWORD:
                     headers["x-ha-access"] = HASS_API_PASSWORD
-                req = urllib.request.Request("%sservices/group/reload" % HASS_API, headers=headers, method='POST')
+                req = urllib.request.Request(
+                    "%sservices/group/reload" % HASS_API,
+                    headers=headers, method='POST')
                 with urllib.request.urlopen(req) as response:
                     LOG.debug(json.loads(response.read().decode('utf-8')))
                     res['service'] = "called successfully"
@@ -3818,7 +3829,9 @@ class RequestHandler(BaseHTTPRequestHandler):
                 }
                 if HASS_API_PASSWORD:
                     headers["x-ha-access"] = HASS_API_PASSWORD
-                req = urllib.request.Request("%sservices/homeassistant/reload_core_config" % HASS_API, headers=headers, method='POST')
+                req = urllib.request.Request(
+                    "%sservices/homeassistant/reload_core_config" % HASS_API,
+                    headers=headers, method='POST')
                 with urllib.request.urlopen(req) as response:
                     LOG.debug(json.loads(response.read().decode('utf-8')))
                     res['service'] = "called successfully"
@@ -3918,7 +3931,8 @@ class RequestHandler(BaseHTTPRequestHandler):
         length = int(self.headers['content-length'])
         if req.path.endswith('/api/save'):
             try:
-                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'),
+                                    keep_blank_values=1)
             except Exception as err:
                 LOG.warning(err)
                 response['message'] = "%s" % (str(err))
@@ -3974,7 +3988,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                 return
         elif req.path.endswith('/api/delete'):
             try:
-                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'),
+                                    keep_blank_values=1)
             except Exception as err:
                 LOG.warning(err)
                 response['message'] = "%s" % (str(err))
@@ -4008,7 +4023,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                 response['message'] = "Missing filename or text"
         elif req.path.endswith('/api/exec_command'):
             try:
-                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'),
+                                    keep_blank_values=1)
             except Exception as err:
                 LOG.warning(err)
                 response['message'] = "%s" % (str(err))
@@ -4023,7 +4039,9 @@ class RequestHandler(BaseHTTPRequestHandler):
                                 timeout = int(postvars['timeout'][0])
                         try:
                             proc = subprocess.Popen(
-                                command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                                command,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE)
                             stdout, stderr = proc.communicate(timeout=timeout)
                             self.send_response(200)
                             self.send_header('Content-type', 'text/json')
@@ -4055,7 +4073,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                 response['message'] = "Missing command"
         elif req.path.endswith('/api/gitadd'):
             try:
-                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'),
+                                    keep_blank_values=1)
             except Exception as err:
                 LOG.warning(err)
                 response['message'] = "%s" % (str(err))
@@ -4064,7 +4083,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                 if postvars['path']:
                     try:
                         addpath = unquote(postvars['path'][0])
-                        repo = REPO(addpath, search_parent_directories=True)
+                        repo = REPO(addpath,
+                                    search_parent_directories=True)
                         filepath = "/".join(addpath.split(os.sep)[len(repo.working_dir.split(os.sep)):])
                         response['path'] = filepath
                         try:
@@ -4088,7 +4108,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                 response['message'] = "Missing filename"
         elif req.path.endswith('/api/commit'):
             try:
-                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'),
+                                    keep_blank_values=1)
             except Exception as err:
                 LOG.warning(err)
                 response['message'] = "%s" % (str(err))
@@ -4099,7 +4120,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                         commitpath = unquote(postvars['path'][0])
                         response['path'] = commitpath
                         message = unquote(postvars['message'][0])
-                        repo = REPO(commitpath, search_parent_directories=True)
+                        repo = REPO(commitpath,
+                                    search_parent_directories=True)
                         try:
                             repo.index.commit(message)
                             response['error'] = False
@@ -4121,7 +4143,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                 response['message'] = "Missing path"
         elif req.path.endswith('/api/checkout'):
             try:
-                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'),
+                                    keep_blank_values=1)
             except Exception as err:
                 LOG.warning(err)
                 response['message'] = "%s" % (str(err))
@@ -4132,7 +4155,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                         branchpath = unquote(postvars['path'][0])
                         response['path'] = branchpath
                         branch = unquote(postvars['branch'][0])
-                        repo = REPO(branchpath, search_parent_directories=True)
+                        repo = REPO(branchpath,
+                                    search_parent_directories=True)
                         try:
                             head = [h for h in repo.heads if h.name == branch][0]
                             head.checkout()
@@ -4155,7 +4179,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                 response['message'] = "Missing path or branch"
         elif req.path.endswith('/api/newbranch'):
             try:
-                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'),
+                                    keep_blank_values=1)
             except Exception as err:
                 LOG.warning(err)
                 response['message'] = "%s" % (str(err))
@@ -4166,7 +4191,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                         branchpath = unquote(postvars['path'][0])
                         response['path'] = branchpath
                         branch = unquote(postvars['branch'][0])
-                        repo = REPO(branchpath, search_parent_directories=True)
+                        repo = REPO(branchpath,
+                                    search_parent_directories=True)
                         try:
                             repo.git.checkout("HEAD", b=branch)
                             response['error'] = False
@@ -4188,7 +4214,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                 response['message'] = "Missing path or branch"
         elif req.path.endswith('/api/init'):
             try:
-                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'),
+                                    keep_blank_values=1)
             except Exception as err:
                 LOG.warning(err)
                 response['message'] = "%s" % (str(err))
@@ -4219,7 +4246,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                 response['message'] = "Missing path or branch"
         elif req.path.endswith('/api/push'):
             try:
-                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'),
+                                    keep_blank_values=1)
             except Exception as err:
                 LOG.warning(err)
                 response['message'] = "%s" % (str(err))
@@ -4259,7 +4287,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                 response['message'] = "Missing path or branch"
         elif req.path.endswith('/api/stash'):
             try:
-                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'),
+                                    keep_blank_values=1)
             except Exception as err:
                 LOG.warning(err)
                 response['message'] = "%s" % (str(err))
@@ -4291,7 +4320,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                 response['message'] = "Missing path or branch"
         elif req.path.endswith('/api/newfolder'):
             try:
-                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'),
+                                    keep_blank_values=1)
             except Exception as err:
                 LOG.warning(err)
                 response['message'] = "%s" % (str(err))
@@ -4320,7 +4350,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                         LOG.warning(err)
         elif req.path.endswith('/api/newfile'):
             try:
-                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'),
+                                    keep_blank_values=1)
             except Exception as err:
                 LOG.warning(err)
                 response['message'] = "%s" % (str(err))
@@ -4352,7 +4383,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                 response['message'] = "Missing filename or text"
         elif req.path.endswith('/api/allowed_networks'):
             try:
-                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'),
+                                    keep_blank_values=1)
             except Exception as err:
                 LOG.warning(err)
                 response['message'] = "%s" % (str(err))
@@ -4389,7 +4421,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                 response['message'] = "Missing network"
         elif req.path.endswith('/api/banned_ips'):
             try:
-                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'),
+                                    keep_blank_values=1)
             except Exception as err:
                 LOG.warning(err)
                 response['message'] = "%s" % (str(err))
