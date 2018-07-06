@@ -21,7 +21,7 @@ import fnmatch
 from string import Template
 from http.server import BaseHTTPRequestHandler
 import urllib.request
-from urllib.parse import urlparse, parse_qs, unquote, urlencode
+from urllib.parse import urlparse, parse_qs, unquote
 
 
 ### Some options for you to change
@@ -3861,17 +3861,17 @@ class RequestHandler(BaseHTTPRequestHandler):
                         headers["x-ha-access"] = HASS_API_PASSWORD
 
                     req = urllib.request.Request("%sservices" % HASS_API,
-                                                headers=headers, method='GET')
+                                                 headers=headers, method='GET')
                     with urllib.request.urlopen(req) as response:
                         services = response.read().decode('utf-8')
 
                     req = urllib.request.Request("%sevents" % HASS_API,
-                                                headers=headers, method='GET')
+                                                 headers=headers, method='GET')
                     with urllib.request.urlopen(req) as response:
                         events = response.read().decode('utf-8')
 
                     req = urllib.request.Request("%sstates" % HASS_API,
-                                                headers=headers, method='GET')
+                                                 headers=headers, method='GET')
                     with urllib.request.urlopen(req) as response:
                         states = response.read().decode('utf-8')
 
