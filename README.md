@@ -76,7 +76,7 @@ HTTP requests include the hostname to which the request has been made. To improv
 #### ENV_PREFIX (string)
 To modify the default prefix for settings passed as environment variables (`HC_`) change this setting to another value that meets your demands.
 #### NOTIFY_SERVICE (string)
-Define a notification service from your Home Assistant setup that should be used to send notifications, e.g. `notify.mytelegram`. The default is `persistent_notification.create`. Do __NOT__ change the value of the `NOTIFY_SERVICE_DEFAULT` variable! You will be notified if your `HASS_API_PASSWORD`, `SESAME` or `CREDENTIALS` password seems insecure. Additionally a notification with the accessing IP will be sent every time the `SESAME` token has been used for whitelisting.
+Define a notification service from your Home Assistant setup that should be used to send notifications, e.g. `notify.mytelegram`. The default is `persistent_notification.create`. Do __NOT__ change the value of the `NOTIFY_SERVICE_DEFAULT` variable! You will be notified if your `HASS_API_PASSWORD`, `SESAME` or `CREDENTIALS` password seems insecure. Additionally a notification with the accessing IP will be sent every time the `SESAME` token has been used for whitelisting. To disable this feature set the value to `False`.
  
 __Note regarding `ALLOWED_NETWORKS`, `BANNED_IPS` and `BANLIMIT`__:  
 The way this is implemented works in the following order:

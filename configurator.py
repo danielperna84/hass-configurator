@@ -4550,7 +4550,7 @@ class SimpleServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
 def notify(title="HASS Configurator",
            message="Notification by HASS Configurator",
            notification_id=None):
-    if not HASS_API:
+    if not HASS_API or not NOTIFY_SERVICE:
         return
     headers = {
         "Content-Type": "application/json"
