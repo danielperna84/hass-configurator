@@ -1,8 +1,8 @@
 Version 0.3.0 (2018-)
 - Allow passing settings via environment variables (Issue #100) @danielperna84
 - Added basic git stash functionality (Issue #16) @danielperna84
-- Logging warnings if used passwords are insecure (Issue #100) @danielperna84
 - Added NOTIFY_SERVICE option @danielperna84
+- Notifying if used passwords are insecure (Issue #100) and if SESAME has been used @danielperna84
 
 Version 0.2.9 (2018-06-22)
 - Material Icons and HASS-help now open in new tab instead of modal (Issues #85 and #34) @danielperna84

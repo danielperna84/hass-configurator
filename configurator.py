@@ -3585,6 +3585,12 @@ class RequestHandler(BaseHTTPRequestHandler):
                 self.send_response(302)
                 self.send_header('Location', url)
                 self.end_headers()
+                data = {
+                    "title": "HASS Configurator - SESAME access",
+                    "message": "Your SESAME token has been used to whitelist " \
+                    "the IP address %s." % self.client_address[0]
+                }
+                notify(**data)
                 return
         if not check_access(self.client_address[0]):
             self.do_BLOCK()
@@ -4541,8 +4547,7 @@ class SimpleServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     def __init__(self, server_address, RequestHandlerClass):
         socketserver.TCPServer.__init__(self, server_address, RequestHandlerClass)
 
-def notify(service=NOTIFY_SERVICE,
-           title="HASS Configurator",
+def notify(title="HASS Configurator",
            message="Notification by HASS Configurator",
            notification_id=None):
     if not HASS_API:
@@ -4559,7 +4564,7 @@ def notify(service=NOTIFY_SERVICE,
     if HASS_API_PASSWORD:
         headers["x-ha-access"] = HASS_API_PASSWORD
     req = urllib.request.Request(
-        "%sservices/%s" % (HASS_API, service.replace('.', '/')),
+        "%sservices/%s" % (HASS_API, NOTIFY_SERVICE.replace('.', '/')),
         data=bytes(json.dumps(data).encode('utf-8')),
         headers=headers, method='POST')
     try:
@@ -4583,7 +4588,6 @@ def main(args):
             problems = password_problems(HASS_API_PASSWORD, "HASS_API_PASSWORD")
         if problems:
             data = {
-                "service": NOTIFY_SERVICE,
                 "title": "HASS Configurator - Password warning",
                 "message": "Your HASS API password seems insecure (%i). " \
                 "Refer to the HASS configurator logs for further information." % problems,
@@ -4596,7 +4600,6 @@ def main(args):
             problems = password_problems(SESAME, "SESAME")
         if problems:
             data = {
-                "service": NOTIFY_SERVICE,
                 "title": "HASS Configurator - Password warning",
                 "message": "Your SESAME seems insecure (%i). " \
                 "Refer to the HASS configurator logs for further information." % problems,
@@ -4609,7 +4612,6 @@ def main(args):
             problems = password_problems(":".join(CREDENTIALS.split(":")[1:]), "CREDENTIALS")
         if problems:
             data = {
-                "service": NOTIFY_SERVICE,
                 "title": "HASS Configurator - Password warning",
                 "message": "Your CREDENTIALS seems insecure (%i). " \
                 "Refer to the HASS configurator logs for further information." % problems,
