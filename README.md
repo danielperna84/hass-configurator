@@ -55,7 +55,7 @@ If you plan on using the restart button, you have to set your API password. Call
 #### USERNAME (string)
 If you want to enable [HTTP basic authentication](https://en.wikipedia.org/wiki/Basic_access_authentication) you can set the desired username here. The `:` character is not allowed.
 #### PASSWORD (string)
-Set the password that should be used for authentication. Only if `USERNAME` __and__ `PASSWORD` are set authentication will be enabled.
+Set the password that should be used for authentication. Only if `USERNAME` __and__ `PASSWORD` are set authentication will be enabled. You may provide the password as a SHA256-hash with the prefix `{sha256}`. For example `PASSWORD = "test"` is functionally equal to `PASSWORD = "{sha256}9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"`. The hash will be converted to lower case automatically. Using the hash provides extra security by not exposing the actual password in plaintext in your configuration.
 #### CREDENTIALS (string)
 The credentials in the form of `"username:password"` are now deprecated and should be removed from you configuration. Replace it by specifying `USERNAME` and `PASSWORD`. It will still work though to ensure backwards compatibility.
 #### ALLOWED_NETWORKS (list)

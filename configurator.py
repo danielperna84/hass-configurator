@@ -18,6 +18,7 @@ import shlex
 import subprocess
 import logging
 import fnmatch
+import hashlib
 from string import Template
 from http.server import BaseHTTPRequestHandler
 import urllib.request
@@ -3443,6 +3444,8 @@ def load_settings(settingsfile):
     if CREDENTIALS and (USERNAME is None or PASSWORD is None):
         USERNAME = CREDENTIALS.split(":")[0]
         PASSWORD = ":".join(CREDENTIALS.split(":")[1:])
+    if PASSWORD and PASSWORD.startswith("{sha256}"):
+        PASSWORD = PASSWORD.lower()
 
 def is_safe_path(basedir, path, follow_symlinks=True):
     if basedir is None:
@@ -4498,18 +4501,24 @@ class AuthHandler(RequestHandler):
         if not verify_hostname(self.headers.get('Host', '')):
             self.do_BLOCK(403, "Forbidden")
             return
-        authorization = self.headers.get('Authorization', None)
-        token = base64.b64encode(bytes("%s:%s" % (USERNAME, PASSWORD), "utf-8"))
-        if authorization is None:
+        header = self.headers.get('Authorization', None)
+        if header is None:
             self.do_AUTHHEAD()
             self.wfile.write(bytes('no auth header received', 'utf-8'))
-            pass
-        elif authorization == 'Basic %s' % token.decode('utf-8'):
-            if BANLIMIT:
-                FAIL2BAN_IPS.pop(self.client_address[0], None)
-            super().do_GET()
-            pass
         else:
+            authorization = header.split()
+            if len(authorization) == 2 and authorization[0] == "Basic":
+                plain = base64.b64decode(authorization[1]).decode("utf-8")
+                parts = plain.split(':')
+                username = parts[0]
+                password = ":".join(parts[1:])
+                if PASSWORD.startswith("{sha256}"):
+                    password = "{sha256}%s" % hashlib.sha256(password.encode("utf-8")).hexdigest()
+                if username == USERNAME and password == PASSWORD:
+                    if BANLIMIT:
+                        FAIL2BAN_IPS.pop(self.client_address[0], None)
+                    super().do_GET()
+                    return
             if BANLIMIT:
                 bancounter = FAIL2BAN_IPS.get(self.client_address[0], 1)
                 if bancounter >= BANLIMIT:
@@ -4520,24 +4529,29 @@ class AuthHandler(RequestHandler):
                     FAIL2BAN_IPS[self.client_address[0]] = bancounter + 1
             self.do_AUTHHEAD()
             self.wfile.write(bytes('Authentication required', 'utf-8'))
-            pass
 
     def do_POST(self):
         if not verify_hostname(self.headers.get('Host', '')):
             self.do_BLOCK(403, "Forbidden")
             return
-        authorization = self.headers.get('Authorization', None)
-        token = base64.b64encode(bytes("%s:%s" % (USERNAME, PASSWORD), "utf-8"))
-        if authorization is None:
+        header = self.headers.get('Authorization', None)
+        if header is None:
             self.do_AUTHHEAD()
             self.wfile.write(bytes('no auth header received', 'utf-8'))
-            pass
-        elif authorization == 'Basic %s' % token.decode('utf-8'):
-            if BANLIMIT:
-                FAIL2BAN_IPS.pop(self.client_address[0], None)
-            super().do_POST()
-            pass
         else:
+            authorization = header.split()
+            if len(authorization) == 2 and authorization[0] == "Basic":
+                plain = base64.b64decode(authorization[1]).decode("utf-8")
+                parts = plain.split(':')
+                username = parts[0]
+                password = ":".join(parts[1:])
+                if PASSWORD.startswith("{sha256}"):
+                    password = "{sha256}%s" % hashlib.sha256(password.encode("utf-8")).hexdigest()
+                if username == USERNAME and password == PASSWORD:
+                    if BANLIMIT:
+                        FAIL2BAN_IPS.pop(self.client_address[0], None)
+                    super().do_POST()
+                    return
             if BANLIMIT:
                 bancounter = FAIL2BAN_IPS.get(self.client_address[0], 1)
                 if bancounter >= BANLIMIT:
@@ -4548,7 +4562,6 @@ class AuthHandler(RequestHandler):
                     FAIL2BAN_IPS[self.client_address[0]] = bancounter + 1
             self.do_AUTHHEAD()
             self.wfile.write(bytes('Authentication required', 'utf-8'))
-            pass
 
 class SimpleServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
     daemon_threads = True
