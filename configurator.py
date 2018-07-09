@@ -42,8 +42,13 @@ HASS_API = "http://127.0.0.1:8123/api/"
 # If a password is required to access the API, set it in the form of "password"
 # if you have HA ignoring SSL locally this is not needed if on same machine.
 HASS_API_PASSWORD = None
-# Enable authentication, set the credentials in the form of "username:password"
+# Using the CREDENTIALS variable is deprecated.
+# It will still work though if USERNAME and PASSWORD are not set.
 CREDENTIALS = None
+# Set the username used for basic authentication.
+USERNAME = None
+# Set the password used for basic authentication.
+PASSWORD = None
 # Limit access to the configurator by adding allowed IP addresses / networks to
 # the list, e.g ALLOWED_NETWORKS = ["192.168.0.0/24", "172.16.47.23"]
 ALLOWED_NETWORKS = []
@@ -3389,7 +3394,7 @@ def load_settings(settingsfile):
     global LISTENIP, LISTENPORT, BASEPATH, SSL_CERTIFICATE, SSL_KEY, HASS_API, \
     HASS_API_PASSWORD, CREDENTIALS, ALLOWED_NETWORKS, BANNED_IPS, BANLIMIT, \
     DEV, IGNORE_PATTERN, DIRSFIRST, SESAME, VERIFY_HOSTNAME, ENFORCE_BASEPATH, \
-    ENV_PREFIX, NOTIFY_SERVICE
+    ENV_PREFIX, NOTIFY_SERVICE, USERNAME, PASSWORD
     settings = {}
     if settingsfile:
         try:
@@ -3433,6 +3438,11 @@ def load_settings(settingsfile):
     SESAME = settings.get("SESAME", SESAME)
     VERIFY_HOSTNAME = settings.get("VERIFY_HOSTNAME", VERIFY_HOSTNAME)
     NOTIFY_SERVICE = settings.get("NOTIFY_SERVICE", NOTIFY_SERVICE_DEFAULT)
+    USERNAME = settings.get("USERNAME", USERNAME)
+    PASSWORD = settings.get("PASSWORD", PASSWORD)
+    if CREDENTIALS and (USERNAME is None or PASSWORD is None):
+        USERNAME = CREDENTIALS.split(":")[0]
+        PASSWORD = ":".join(CREDENTIALS.split(":")[1:])
 
 def is_safe_path(basedir, path, follow_symlinks=True):
     if basedir is None:
@@ -4485,16 +4495,16 @@ class AuthHandler(RequestHandler):
         self.end_headers()
 
     def do_GET(self):
-        global CREDENTIALS
         if not verify_hostname(self.headers.get('Host', '')):
             self.do_BLOCK(403, "Forbidden")
             return
         authorization = self.headers.get('Authorization', None)
+        token = base64.b64encode(bytes("%s:%s" % (USERNAME, PASSWORD), "utf-8"))
         if authorization is None:
             self.do_AUTHHEAD()
             self.wfile.write(bytes('no auth header received', 'utf-8'))
             pass
-        elif authorization == 'Basic %s' % CREDENTIALS.decode('utf-8'):
+        elif authorization == 'Basic %s' % token.decode('utf-8'):
             if BANLIMIT:
                 FAIL2BAN_IPS.pop(self.client_address[0], None)
             super().do_GET()
@@ -4513,16 +4523,16 @@ class AuthHandler(RequestHandler):
             pass
 
     def do_POST(self):
-        global CREDENTIALS
         if not verify_hostname(self.headers.get('Host', '')):
             self.do_BLOCK(403, "Forbidden")
             return
         authorization = self.headers.get('Authorization', None)
+        token = base64.b64encode(bytes("%s:%s" % (USERNAME, PASSWORD), "utf-8"))
         if authorization is None:
             self.do_AUTHHEAD()
             self.wfile.write(bytes('no auth header received', 'utf-8'))
             pass
-        elif authorization == 'Basic %s' % CREDENTIALS.decode('utf-8'):
+        elif authorization == 'Basic %s' % token.decode('utf-8'):
             if BANLIMIT:
                 FAIL2BAN_IPS.pop(self.client_address[0], None)
             super().do_POST()
@@ -4575,7 +4585,7 @@ def notify(title="HASS Configurator",
         LOG.warning("Exception while creating notification: %s" % err)
 
 def main(args):
-    global HTTPD, CREDENTIALS
+    global HTTPD
     if args:
         load_settings(args[0])
     else:
@@ -4608,14 +4618,14 @@ def main(args):
             notify(**data)
 
         problems = None
-        if CREDENTIALS:
-            problems = password_problems(":".join(CREDENTIALS.split(":")[1:]), "CREDENTIALS")
+        if PASSWORD:
+            problems = password_problems(PASSWORD, "PASSWORD")
         if problems:
             data = {
                 "title": "HASS Configurator - Password warning",
-                "message": "Your CREDENTIALS seems insecure (%i). " \
+                "message": "Your PASSWORD seems insecure (%i). " \
                 "Refer to the HASS configurator logs for further information." % problems,
-                "notification_id": "HC_CREDENTIALS"
+                "notification_id": "HC_PASSWORD"
             }
             notify(**data)
     except Exception as err:
@@ -4625,8 +4635,7 @@ def main(args):
     if ':' in LISTENIP:
         CustomServer.address_family = socket.AF_INET6
     server_address = (LISTENIP, LISTENPORT)
-    if CREDENTIALS:
-        CREDENTIALS = base64.b64encode(bytes(CREDENTIALS, "utf-8"))
+    if USERNAME and PASSWORD:
         Handler = AuthHandler
     else:
         Handler = RequestHandler

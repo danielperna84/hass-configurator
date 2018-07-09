@@ -52,8 +52,12 @@ If you're using SSL, set the paths to your SSL files here. This is similar to th
 The configurator fetches some data from your running HASS instance. If the API isn't available through the default URL, modify this variable to fix this.
 #### HASS_API_PASSWORD (string)
 If you plan on using the restart button, you have to set your API password. Calling the restart service of HASS is prohibited without authentication.
+#### USERNAME (string)
+If you want to enable [HTTP basic authentication](https://en.wikipedia.org/wiki/Basic_access_authentication) you can set the desired username here. The `:` character is not allowed.
+#### PASSWORD (string)
+Set the password that should be used for authentication. Only if `USERNAME` __and__ `PASSWORD` are set authentication will be enabled.
 #### CREDENTIALS (string)
-Set credentials in the form of `"username:password"` if authentication should be required for access.
+The credentials in the form of `"username:password"` are now deprecated and should be removed from you configuration. Replace it by specifying `USERNAME` and `PASSWORD`. It will still work though to ensure backwards compatibility.
 #### ALLOWED_NETWORKS (list)
 Limit access to the configurator by adding allowed IP addresses / networks to the list, e.g `ALLOWED_NETWORKS = ["192.168.0.0/24", "172.16.47.23"]`. If you are using the [hass.io addon](https://www.home-assistant.io/addons/configurator/) of the configurator, add the docker-network `172.30.0.0/16` to this list.
 #### BANNED_IPS (list)
