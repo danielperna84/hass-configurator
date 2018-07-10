@@ -69,6 +69,9 @@ DIRSFIRST = False
 # Sesame token. Browse to the configurator URL + /secrettoken to unban your
 # client IP and add it to the list of allowed IPs.
 SESAME = None
+# Instead of a static SESAME token you may also use a TOTP based token that
+# changes every 30 seconds. The value needs to be a base 32 encoded string.
+SESAME_TOTP_SECRET = None
 # Verify the hostname used in the request. Block access if it doesn't match
 # this value
 VERIFY_HOSTNAME = None
@@ -91,14 +94,16 @@ RELEASEURL = "https://api.github.com/repos/danielperna84/hass-configurator/relea
 VERSION = "0.3.0"
 BASEDIR = "."
 DEV = False
+TOTP = None
 HTTPD = None
 FAIL2BAN_IPS = {}
 REPO = False
 if GIT:
     try:
         from git import Repo as REPO
-    except Exception:
+    except ImportError:
         LOG.warning("Unable to import Git module")
+
 INDEX = Template(r"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -3395,7 +3400,7 @@ def load_settings(settingsfile):
     global LISTENIP, LISTENPORT, BASEPATH, SSL_CERTIFICATE, SSL_KEY, HASS_API, \
     HASS_API_PASSWORD, CREDENTIALS, ALLOWED_NETWORKS, BANNED_IPS, BANLIMIT, \
     DEV, IGNORE_PATTERN, DIRSFIRST, SESAME, VERIFY_HOSTNAME, ENFORCE_BASEPATH, \
-    ENV_PREFIX, NOTIFY_SERVICE, USERNAME, PASSWORD
+    ENV_PREFIX, NOTIFY_SERVICE, USERNAME, PASSWORD, SESAME_TOTP_SECRET, TOTP
     settings = {}
     if settingsfile:
         try:
@@ -3437,6 +3442,7 @@ def load_settings(settingsfile):
     IGNORE_PATTERN = settings.get("IGNORE_PATTERN", IGNORE_PATTERN)
     DIRSFIRST = settings.get("DIRSFIRST", DIRSFIRST)
     SESAME = settings.get("SESAME", SESAME)
+    SESAME_TOTP_SECRET = settings.get("SESAME_TOTP_SECRET", SESAME_TOTP_SECRET)
     VERIFY_HOSTNAME = settings.get("VERIFY_HOSTNAME", VERIFY_HOSTNAME)
     NOTIFY_SERVICE = settings.get("NOTIFY_SERVICE", NOTIFY_SERVICE_DEFAULT)
     USERNAME = settings.get("USERNAME", USERNAME)
@@ -3446,6 +3452,14 @@ def load_settings(settingsfile):
         PASSWORD = ":".join(CREDENTIALS.split(":")[1:])
     if PASSWORD and PASSWORD.startswith("{sha256}"):
         PASSWORD = PASSWORD.lower()
+    if SESAME_TOTP_SECRET:
+        try:
+            import pyotp
+            TOTP = pyotp.TOTP(SESAME_TOTP_SECRET)
+        except ImportError:
+            LOG.warning("Unable to import pyotp module")
+        except Exception as err:
+            LOG.warning("Unable to create TOTP object: %s" % err)
 
 def is_safe_path(basedir, path, follow_symlinks=True):
     if basedir is None:
@@ -3588,13 +3602,14 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.do_BLOCK(403, "Forbidden")
             return
         req = urlparse(self.path)
-        if SESAME:
-            if req.path.endswith("/%s" % SESAME):
+        if SESAME or TOTP:
+            chunk = req.path.split("/")[-1]
+            if chunk == SESAME or TOTP.verify(chunk):
                 if self.client_address[0] not in ALLOWED_NETWORKS:
                     ALLOWED_NETWORKS.append(self.client_address[0])
                 if self.client_address[0] in BANNED_IPS:
                     BANNED_IPS.remove(self.client_address[0])
-                url = req.path[:req.path.rfind(SESAME)]
+                url = req.path[:req.path.rfind(chunk)]
                 self.send_response(302)
                 self.send_header('Location', url)
                 self.end_headers()
@@ -4590,6 +4605,7 @@ def notify(title="HASS Configurator",
         "%sservices/%s" % (HASS_API, NOTIFY_SERVICE.replace('.', '/')),
         data=bytes(json.dumps(data).encode('utf-8')),
         headers=headers, method='POST')
+    LOG.info("%s" % data)
     try:
         with urllib.request.urlopen(req) as response:
             message = response.read().decode('utf-8')
