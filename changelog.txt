@@ -7,6 +7,7 @@ Version 0.3.0 (2018-)
 - PASSWORD can optionally be provided as SHA256 hash (Issue #100) @danielperna84
 - Added SESAME_TOTP_SECRET for TOTP based IP whitelisting (Issue #100) @danielperna84
 - Added git diff functionality (Issue #16) @danielperna84
+- Red colored menu button as indicator for outdated version @danielperna84
 
 Version 0.2.9 (2018-06-22)
 - Material Icons and HASS-help now open in new tab instead of modal (Issues #85 and #34) @danielperna84

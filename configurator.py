@@ -659,7 +659,7 @@ INDEX = Template(r"""<!DOCTYPE html>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only markdirty hidesave" data-position="bottom" data-delay="500" data-tooltip="Save" onclick="save_check()"><i class="material-icons">save</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only modal-trigger" data-position="bottom" data-delay="500" data-tooltip="Close" href="#modal_close"><i class="material-icons">close</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="500" data-tooltip="Search" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
-                    <li><a class="waves-effect waves-light dropdown-button hide-on-small-only" data-activates="dropdown_menu" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
+                    <li><a class="waves-effect waves-light dropdown-button hide-on-small-only $versionclass" data-activates="dropdown_menu" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
                     <li><a class="waves-effect waves-light hide-on-med-and-up markdirty hidesave" onclick="save_check()"><i class="material-icons">save</i></a></li>
                     <li><a class="waves-effect waves-light hide-on-med-and-up modal-trigger" href="#modal_close"><i class="material-icons">close</i></a></li>
                     <li><a class="waves-effect waves-light hide-on-med-and-up" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
@@ -3945,12 +3945,12 @@ class RequestHandler(BaseHTTPRequestHandler):
                 LOG.warning("Exception getting bootstrap")
                 LOG.warning(err)
 
-            color = "green"
+            color = ""
             try:
                 response = urllib.request.urlopen(RELEASEURL)
                 latest = json.loads(response.read().decode('utf-8'))['tag_name']
                 if VERSION != latest:
-                    color = "red"
+                    color = "red-text"
             except Exception as err:
                 LOG.warning("Exception getting release")
                 LOG.warning(err)
