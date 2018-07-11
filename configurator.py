@@ -2562,6 +2562,14 @@ INDEX = Template(r"""<!DOCTYPE html>
                 dd_gitadd_a.innerHTML = "git add";
                 dd_gitadd.appendChild(dd_gitadd_a);
                 dropdown.appendChild(dd_gitadd);
+                // git diff button
+                var dd_gitdiff = document.createElement('li');
+                var dd_gitdiff_a = document.createElement('a');
+                dd_gitdiff_a.classList.add('waves-effect', 'fb_dd', 'modal-trigger');
+                dd_gitdiff_a.setAttribute('onclick', "gitdiff()");
+                dd_gitdiff_a.innerHTML = "git diff";
+                dd_gitdiff.appendChild(dd_gitdiff_a);
+                dropdown.appendChild(dd_gitdiff);
             }
         }
 
@@ -3046,6 +3054,26 @@ INDEX = Template(r"""<!DOCTYPE html>
                     var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
                     Materialize.toast($toastContent, 2000);
                     listdir(document.getElementById('fbheader').innerHTML);
+                }
+            });
+        }
+    }
+
+    function gitdiff() {
+        var path = document.getElementById('fb_currentfile').value;
+        closefile();
+        if (path.length > 0) {
+            data = new Object();
+            data.path = path;
+            $.post("api/gitdiff", data).done(function(resp) {
+                if (resp.error) {
+                    var $toastContent = $("<div><pre>" + resp.message + "\n" + resp.path + "</pre></div>");
+                    Materialize.toast($toastContent, 5000);
+                }
+                else {
+                    editor.setOption('mode', modemapping['diff']);
+                    editor.getSession().setValue(resp.message, -1);
+                    editor.session.getUndoManager().markClean();
                 }
             });
         }
@@ -4129,6 +4157,41 @@ class RequestHandler(BaseHTTPRequestHandler):
                             repo.index.add([filepath])
                             response['error'] = False
                             response['message'] = "Added file to index"
+                            self.send_response(200)
+                            self.send_header('Content-type', 'text/json')
+                            self.end_headers()
+                            self.wfile.write(bytes(json.dumps(response), "utf8"))
+                            return
+                        except Exception as err:
+                            LOG.warning(err)
+                            response['error'] = True
+                            response['message'] = str(err)
+
+                    except Exception as err:
+                        response['message'] = "%s" % (str(err))
+                        LOG.warning(err)
+            else:
+                response['message'] = "Missing filename"
+        elif req.path.endswith('/api/gitdiff'):
+            try:
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'),
+                                    keep_blank_values=1)
+            except Exception as err:
+                LOG.warning(err)
+                response['message'] = "%s" % (str(err))
+                postvars = {}
+            if 'path' in postvars.keys():
+                if postvars['path']:
+                    try:
+                        diffpath = unquote(postvars['path'][0])
+                        repo = REPO(diffpath,
+                                    search_parent_directories=True)
+                        filepath = "/".join(diffpath.split(os.sep)[len(repo.working_dir.split(os.sep)):])
+                        response['path'] = filepath
+                        try:
+                            diff = repo.index.diff(None, create_patch=True, paths=filepath)[0].diff.decode("utf-8")
+                            response['error'] = False
+                            response['message'] = diff
                             self.send_response(200)
                             self.send_header('Content-type', 'text/json')
                             self.end_headers()
