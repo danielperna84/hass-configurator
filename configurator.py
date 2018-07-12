@@ -27,7 +27,7 @@ from urllib.parse import urlparse, parse_qs, unquote
 
 ### Some options for you to change
 LISTENIP = "0.0.0.0"
-LISTENPORT = 3218
+PORT = 3218
 # Set BASEPATH to something like "/home/hass/.homeassistant/" if you're not
 # running the configurator from that path
 BASEPATH = None
@@ -3420,7 +3420,7 @@ def signal_handler(sig, frame):
     sys.exit(0)
 
 def load_settings(settingsfile):
-    global LISTENIP, LISTENPORT, BASEPATH, SSL_CERTIFICATE, SSL_KEY, HASS_API, \
+    global LISTENIP, PORT, BASEPATH, SSL_CERTIFICATE, SSL_KEY, HASS_API, \
     HASS_API_PASSWORD, CREDENTIALS, ALLOWED_NETWORKS, BANNED_IPS, BANLIMIT, \
     DEV, IGNORE_PATTERN, DIRSFIRST, SESAME, VERIFY_HOSTNAME, ENFORCE_BASEPATH, \
     ENV_PREFIX, NOTIFY_SERVICE, USERNAME, PASSWORD, SESAME_TOTP_SECRET, TOTP, \
@@ -3458,7 +3458,10 @@ def load_settings(settingsfile):
         except ImportError:
             LOG.warning("Unable to import Git module")
     LISTENIP = settings.get("LISTENIP", LISTENIP)
-    LISTENPORT = settings.get("LISTENPORT", LISTENPORT)
+    LISTENPORT = settings.get("LISTENPORT", None)
+    PORT = settings.get("PORT", PORT)
+    if LISTENPORT is not None:
+        PORT = LISTENPORT
     BASEPATH = settings.get("BASEPATH", BASEPATH)
     ENFORCE_BASEPATH = settings.get("ENFORCE_BASEPATH", ENFORCE_BASEPATH)
     SSL_CERTIFICATE = settings.get("SSL_CERTIFICATE", SSL_CERTIFICATE)
@@ -3972,7 +3975,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                                               versionclass=color,
                                               separator="\%s" % os.sep if os.sep == "\\" else os.sep,
                                               listening_address="%s://%s:%i" % (
-                                                  'https' if SSL_CERTIFICATE else 'http', LISTENIP, LISTENPORT),
+                                                  'https' if SSL_CERTIFICATE else 'http', LISTENIP, PORT),
                                               hass_api_address="%s" % (HASS_API, ),
                                               hass_ws_address=ws_api,
                                               api_password=HASS_API_PASSWORD if HASS_API_PASSWORD else "")
@@ -4737,7 +4740,7 @@ def main(args):
     CustomServer = SimpleServer
     if ':' in LISTENIP:
         CustomServer.address_family = socket.AF_INET6
-    server_address = (LISTENIP, LISTENPORT)
+    server_address = (LISTENIP, PORT)
     if USERNAME and PASSWORD:
         Handler = AuthHandler
     else:
@@ -4750,7 +4753,7 @@ def main(args):
                                        server_side=True)
     LOG.info('Listening on: %s://%s:%i' % ('https' if SSL_CERTIFICATE else 'http',
                                            LISTENIP,
-                                           LISTENPORT))
+                                           PORT))
     if BASEPATH:
         os.chdir(BASEPATH)
     HTTPD.serve_forever()

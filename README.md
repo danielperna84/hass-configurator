@@ -40,8 +40,8 @@ Another way of passing settings is by using [environment variables](https://en.w
 
 #### LISTENIP (string)
 The IP address the service is listening on. By default it is binding to `0.0.0.0`, which is every IPv4 interface on the system. When using `::`, all available IPv6- and IPv4-addresses will be used.
-#### LISTENPORT (integer)
-The port the service is listening on. By default it is using 3218, but you can change this if you need to.
+#### PORT (integer)
+The port the service is listening on. By default it is using 3218, but you can change this if you need to. The former setting `LISTENPORT` still works but is deprecated. Please change your settings accordingly.
 #### BASEPATH (string)
 It is possible to place configurator.py somewhere else. Set the `BASEPATH` to something like `"/home/homeassistant/.homeassistant"`, and no matter where you are running the configurator from, it will start serving files from there. This is needed if you plan on running the configurator with systemd.
 #### ENFORCE_BASEPATH (bool)
