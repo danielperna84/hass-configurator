@@ -4200,7 +4200,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                         except Exception as err:
                             LOG.warning(err)
                             response['error'] = True
-                            response['message'] = str(err)
+                            response['message'] = "Unable to load diff: %s" % str(err)
 
                     except Exception as err:
                         response['message'] = "%s" % (str(err))
