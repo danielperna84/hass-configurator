@@ -97,12 +97,7 @@ DEV = False
 TOTP = None
 HTTPD = None
 FAIL2BAN_IPS = {}
-REPO = False
-if GIT:
-    try:
-        from git import Repo as REPO
-    except ImportError:
-        LOG.warning("Unable to import Git module")
+REPO = None
 
 INDEX = Template(r"""<!DOCTYPE html>
 <html lang="en">
@@ -3428,7 +3423,8 @@ def load_settings(settingsfile):
     global LISTENIP, LISTENPORT, BASEPATH, SSL_CERTIFICATE, SSL_KEY, HASS_API, \
     HASS_API_PASSWORD, CREDENTIALS, ALLOWED_NETWORKS, BANNED_IPS, BANLIMIT, \
     DEV, IGNORE_PATTERN, DIRSFIRST, SESAME, VERIFY_HOSTNAME, ENFORCE_BASEPATH, \
-    ENV_PREFIX, NOTIFY_SERVICE, USERNAME, PASSWORD, SESAME_TOTP_SECRET, TOTP
+    ENV_PREFIX, NOTIFY_SERVICE, USERNAME, PASSWORD, SESAME_TOTP_SECRET, TOTP, \
+    GIT, REPO
     settings = {}
     if settingsfile:
         try:
@@ -3454,6 +3450,13 @@ def load_settings(settingsfile):
             elif key[len(ENV_PREFIX):] in ["ALLOWED_NETWORKS", "BANNED_IPS", "IGNORE_PATTERN"]:
                 value = value.split(',')
             settings[key[len(ENV_PREFIX):]] = value
+    GIT = settings.get("GIT", GIT)
+    if GIT:
+        try:
+            # pylint: disable=redefined-outer-name
+            from git import Repo as REPO
+        except ImportError:
+            LOG.warning("Unable to import Git module")
     LISTENIP = settings.get("LISTENIP", LISTENIP)
     LISTENPORT = settings.get("LISTENPORT", LISTENPORT)
     BASEPATH = settings.get("BASEPATH", BASEPATH)
@@ -3715,6 +3718,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                         branches = []
                         if REPO:
                             try:
+                                # pylint: disable=not-callable
                                 repo = REPO(dirpath.decode('utf-8'),
                                             search_parent_directories=True)
                                 activebranch = repo.active_branch.name
@@ -4149,6 +4153,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 if postvars['path']:
                     try:
                         addpath = unquote(postvars['path'][0])
+                        # pylint: disable=not-callable
                         repo = REPO(addpath,
                                     search_parent_directories=True)
                         filepath = "/".join(addpath.split(os.sep)[len(repo.working_dir.split(os.sep)):])
@@ -4184,6 +4189,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 if postvars['path']:
                     try:
                         diffpath = unquote(postvars['path'][0])
+                        # pylint: disable=not-callable
                         repo = REPO(diffpath,
                                     search_parent_directories=True)
                         filepath = "/".join(diffpath.split(os.sep)[len(repo.working_dir.split(os.sep)):])
@@ -4221,6 +4227,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                         commitpath = unquote(postvars['path'][0])
                         response['path'] = commitpath
                         message = unquote(postvars['message'][0])
+                        # pylint: disable=not-callable
                         repo = REPO(commitpath,
                                     search_parent_directories=True)
                         try:
@@ -4256,6 +4263,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                         branchpath = unquote(postvars['path'][0])
                         response['path'] = branchpath
                         branch = unquote(postvars['branch'][0])
+                        # pylint: disable=not-callable
                         repo = REPO(branchpath,
                                     search_parent_directories=True)
                         try:
@@ -4292,6 +4300,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                         branchpath = unquote(postvars['path'][0])
                         response['path'] = branchpath
                         branch = unquote(postvars['branch'][0])
+                        # pylint: disable=not-callable
                         repo = REPO(branchpath,
                                     search_parent_directories=True)
                         try:
@@ -4359,6 +4368,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                         repopath = unquote(postvars['path'][0])
                         response['path'] = repopath
                         try:
+                            # pylint: disable=not-callable
                             repo = REPO(repopath)
                             urls = []
                             if repo.remotes:
@@ -4400,6 +4410,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                         repopath = unquote(postvars['path'][0])
                         response['path'] = repopath
                         try:
+                            # pylint: disable=not-callable
                             repo = REPO(repopath)
                             returnvalue = repo.git.stash()
                             response['error'] = False
