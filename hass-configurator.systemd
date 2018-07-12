@@ -5,8 +5,15 @@ After=network.target
 [Service]
 Type=simple
 User=homeassistant
-#Set the path to your configurator.py location
+# Set configuration options by specifying environment variables
+# Environment=HC_LISTENIP=0.0.0.0
+# Environment=HC_PORT=3218
+# Environment=HC_GIT=false
+# Environment=HC_ALLOWED_NETWORKS=192.168.1.0/24,127.0.0.1
+# ...
+# Set the path to your configurator.py location
 WorkingDirectory=/etc/homeassistant
+# You can also save your static options in a JSON formatted conf-file
 ExecStart=/usr/bin/python3 /etc/homeassistant/configurator.py settings.conf
 Restart=always
 

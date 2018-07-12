@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
+# pylint: disable=too-many-lines
 """
 Configurator for Home Assistant.
 https://github.com/danielperna84/hass-configurator
@@ -18,15 +19,15 @@ import shlex
 import subprocess
 import logging
 import fnmatch
+import hashlib
 from string import Template
 from http.server import BaseHTTPRequestHandler
 import urllib.request
 from urllib.parse import urlparse, parse_qs, unquote
 
-
 ### Some options for you to change
 LISTENIP = "0.0.0.0"
-LISTENPORT = 3218
+PORT = 3218
 # Set BASEPATH to something like "/home/hass/.homeassistant/" if you're not
 # running the configurator from that path
 BASEPATH = None
@@ -42,8 +43,13 @@ HASS_API = "http://127.0.0.1:8123/api/"
 # If a password is required to access the API, set it in the form of "password"
 # if you have HA ignoring SSL locally this is not needed if on same machine.
 HASS_API_PASSWORD = None
-# Enable authentication, set the credentials in the form of "username:password"
+# Using the CREDENTIALS variable is deprecated.
+# It will still work though if USERNAME and PASSWORD are not set.
 CREDENTIALS = None
+# Set the username used for basic authentication.
+USERNAME = None
+# Set the password used for basic authentication.
+PASSWORD = None
 # Limit access to the configurator by adding allowed IP addresses / networks to
 # the list, e.g ALLOWED_NETWORKS = ["192.168.0.0/24", "172.16.47.23"]
 ALLOWED_NETWORKS = []
@@ -63,9 +69,19 @@ DIRSFIRST = False
 # Sesame token. Browse to the configurator URL + /secrettoken to unban your
 # client IP and add it to the list of allowed IPs.
 SESAME = None
+# Instead of a static SESAME token you may also use a TOTP based token that
+# changes every 30 seconds. The value needs to be a base 32 encoded string.
+SESAME_TOTP_SECRET = None
 # Verify the hostname used in the request. Block access if it doesn't match
 # this value
 VERIFY_HOSTNAME = None
+# Prefix for environment variables
+ENV_PREFIX = "HC_"
+# Ignore SSL errors when connecting to the HASS API
+IGNORE_SSL = False
+# Notification service like `notify.mytelegram`. Default is `persistent_notification.create`
+NOTIFY_SERVICE_DEFAULT = "persistent_notification.create"
+NOTIFY_SERVICE = NOTIFY_SERVICE_DEFAULT
 ### End of options
 
 LOGLEVEL = logging.INFO
@@ -77,17 +93,15 @@ SO.setFormatter(
     logging.Formatter('%(levelname)s:%(asctime)s:%(name)s:%(message)s'))
 LOG.addHandler(SO)
 RELEASEURL = "https://api.github.com/repos/danielperna84/hass-configurator/releases/latest"
-VERSION = "0.2.9"
+VERSION = "0.3.0"
 BASEDIR = "."
 DEV = False
+LISTENPORT = None
+TOTP = None
 HTTPD = None
 FAIL2BAN_IPS = {}
-REPO = False
-if GIT:
-    try:
-        from git import Repo as REPO
-    except Exception:
-        LOG.warning("Unable to import Git module")
+REPO = None
+
 INDEX = Template(r"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -643,11 +657,11 @@ INDEX = Template(r"""<!DOCTYPE html>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only markdirty hidesave" data-position="bottom" data-delay="500" data-tooltip="Save" onclick="save_check()"><i class="material-icons">save</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only modal-trigger" data-position="bottom" data-delay="500" data-tooltip="Close" href="#modal_close"><i class="material-icons">close</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="500" data-tooltip="Search" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
-                    <li><a class="waves-effect waves-light dropdown-button hide-on-small-only" data-activates="dropdown_menu" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
+                    <li><a class="waves-effect waves-light dropdown-button hide-on-small-only $versionclass" data-activates="dropdown_menu" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
                     <li><a class="waves-effect waves-light hide-on-med-and-up markdirty hidesave" onclick="save_check()"><i class="material-icons">save</i></a></li>
                     <li><a class="waves-effect waves-light hide-on-med-and-up modal-trigger" href="#modal_close"><i class="material-icons">close</i></a></li>
                     <li><a class="waves-effect waves-light hide-on-med-and-up" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
-                    <li><a class="waves-effect waves-light dropdown-button hide-on-med-and-up" data-activates="dropdown_menu_mobile" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
+                    <li><a class="waves-effect waves-light dropdown-button hide-on-med-and-up $versionclass" data-activates="dropdown_menu_mobile" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
                 </ul>
             </div>
         </nav>
@@ -697,11 +711,13 @@ INDEX = Template(r"""<!DOCTYPE html>
         <li><a class="modal-trigger" href="#modal_init" class="nowrap waves-effect">git init</a></li>
         <li><a class="modal-trigger" href="#modal_commit" class="nowrap waves-effect">git commit</a></li>
         <li><a class="modal-trigger" href="#modal_push" class="nowrap waves-effect">git push</a></li>
+        <li><a class="modal-trigger" href="#modal_stash" class="nowrap waves-effect">git stash</a></li>
     </ul>
     <ul id="dropdown_gitmenu_mobile" class="dropdown-content z-depth-4">
         <li><a class="modal-trigger" href="#modal_init" class="nowrap waves-effect">git init</a></li>
         <li><a class="modal-trigger" href="#modal_commit" class="nowrap waves-effect">git commit</a></li>
         <li><a class="modal-trigger" href="#modal_push" class="nowrap waves-effect">git push</a></li>
+        <li><a class="modal-trigger" href="#modal_stash" class="nowrap waves-effect">git stash</a></li>
     </ul>
     <div id="modal_acekeyboard" class="modal bottom-sheet modal-fixed-footer">
         <div class="modal-content centered">
@@ -1309,6 +1325,16 @@ INDEX = Template(r"""<!DOCTYPE html>
           <a onclick="gitpush()" class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">OK</a>
         </div>
     </div>
+    <div id="modal_stash" class="modal">
+        <div class="modal-content">
+          <h4 class="grey-text text-darken-3">git stash<i class="mdi mdi-git right grey-text text-darken-3" style="font-size: 2.48rem;"></i></h4>
+          <p>Are you sure you want to stash your changes?</p>
+        </div>
+        <div class="modal-footer">
+          <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">Cancel</a>
+          <a onclick="gitstash()" class=" modal-action modal-close waves-effect waves-green btn-flat light-blue-text">OK</a>
+        </div>
+    </div>
     <div id="modal_close" class="modal">
         <div class="modal-content">
             <h4 class="grey-text text-darken-3">Close File<i class="grey-text text-darken-3 material-icons right" style="font-size: 2.28rem;">close</i></h4>
@@ -1722,13 +1748,13 @@ INDEX = Template(r"""<!DOCTYPE html>
               <a class="col s3 waves-effect fbtoolbarbutton tooltipped modal-trigger" href="#modal_newfile" data-position="bottom" data-delay="500" data-tooltip="New File"><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">note_add</i></a>
               <a class="col s3 waves-effect fbtoolbarbutton tooltipped modal-trigger" href="#modal_newfolder" data-position="bottom" data-delay="500" data-tooltip="New Folder"><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">create_new_folder</i></a>
               <a class="col s3 waves-effect fbtoolbarbutton tooltipped modal-trigger" href="#modal_upload" data-position="bottom" data-delay="500" data-tooltip="Upload File"><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">file_upload</i></a>
-              <a class="col s3 waves-effect fbtoolbarbutton tooltipped dropdown-button" data-activates="dropdown_gitmenu" data-alignment='right' data-beloworigin='true' data-delay='500' data-position="bottom" data-tooltip="Git"><i class="mdi mdi-git grey-text text-darken-2 material-icons" style="padding-top: 17px;"></i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton tooltipped dropdown-button $githidden" data-activates="dropdown_gitmenu" data-alignment='right' data-beloworigin='true' data-delay='500' data-position="bottom" data-tooltip="Git"><i class="mdi mdi-git grey-text text-darken-2 material-icons" style="padding-top: 17px;"></i></a>
             </ul>
             <ul class="row center toolbar_mobile hide-on-med-and-up grey lighten-4" style="margin-bottom: 0;">
               <a class="col s3 waves-effect fbtoolbarbutton modal-trigger" href="#modal_newfile"><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">note_add</i></a>
               <a class="col s3 waves-effect fbtoolbarbutton modal-trigger" href="#modal_newfolder"><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">create_new_folder</i></a>
               <a class="col s3 waves-effect fbtoolbarbutton modal-trigger" href="#modal_upload"><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">file_upload</i></a>
-              <a class="col s3 waves-effect fbtoolbarbutton dropdown-button" data-activates="dropdown_gitmenu_mobile" data-alignment='right' data-beloworigin='true'><i class="mdi mdi-git grey-text text-darken-2 material-icons" style="padding-top: 17px;"></i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton dropdown-button $githidden" data-activates="dropdown_gitmenu_mobile" data-alignment='right' data-beloworigin='true'><i class="mdi mdi-git grey-text text-darken-2 material-icons" style="padding-top: 17px;"></i></a>
             </ul>
           </li>
           <li>
@@ -2264,7 +2290,7 @@ INDEX = Template(r"""<!DOCTYPE html>
             menuWidth: 300,
             edge: 'right',
             closeOnClick: true,
-            draggable: true
+            draggable: false
         });
         // This fixes the dead spaces when trying to close the file browser
         $(document).on('click', '.drag-target', function(){$('.button-collapse').sideNav('hide');})
@@ -2534,6 +2560,14 @@ INDEX = Template(r"""<!DOCTYPE html>
                 dd_gitadd_a.innerHTML = "git add";
                 dd_gitadd.appendChild(dd_gitadd_a);
                 dropdown.appendChild(dd_gitadd);
+                // git diff button
+                var dd_gitdiff = document.createElement('li');
+                var dd_gitdiff_a = document.createElement('a');
+                dd_gitdiff_a.classList.add('waves-effect', 'fb_dd', 'modal-trigger');
+                dd_gitdiff_a.setAttribute('onclick', "gitdiff()");
+                dd_gitdiff_a.innerHTML = "git diff";
+                dd_gitdiff.appendChild(dd_gitdiff_a);
+                dropdown.appendChild(dd_gitdiff);
             }
         }
 
@@ -3023,6 +3057,26 @@ INDEX = Template(r"""<!DOCTYPE html>
         }
     }
 
+    function gitdiff() {
+        var path = document.getElementById('fb_currentfile').value;
+        closefile();
+        if (path.length > 0) {
+            data = new Object();
+            data.path = path;
+            $.post("api/gitdiff", data).done(function(resp) {
+                if (resp.error) {
+                    var $toastContent = $("<div><pre>" + resp.message + "\n" + resp.path + "</pre></div>");
+                    Materialize.toast($toastContent, 5000);
+                }
+                else {
+                    editor.setOption('mode', modemapping['diff']);
+                    editor.getSession().setValue(resp.message, -1);
+                    editor.session.getUndoManager().markClean();
+                }
+            });
+        }
+    }
+
     function gitinit() {
         var path = document.getElementById("fbheader").innerHTML;
         if (path.length > 0) {
@@ -3076,6 +3130,25 @@ INDEX = Template(r"""<!DOCTYPE html>
                 else {
                     var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
                     Materialize.toast($toastContent, 2000);
+                    listdir(document.getElementById('fbheader').innerHTML);
+                }
+            });
+        }
+    }
+
+    function gitstash() {
+        var path = document.getElementById("fbheader").innerHTML;
+        if (path.length > 0) {
+            data = new Object();
+            data.path = path;
+            $.post("api/stash", data).done(function(resp) {
+                if (resp.error) {
+                    var $toastContent = $("<div><pre>" + resp.message + "\n" + resp.path + "</pre></div>");
+                    Materialize.toast($toastContent, 5000);
+                }
+                else {
+                    var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
+                    Materialize.toast($toastContent, 5000);
                     listdir(document.getElementById('fbheader').innerHTML);
                 }
             });
@@ -3343,48 +3416,105 @@ editor.on('change', queue_lint);
 </body>
 </html>""")
 
+# pylint: disable=unused-argument
 def signal_handler(sig, frame):
+    """Handle signal to shut down server."""
     global HTTPD
     LOG.info("Got signal: %s. Shutting down server", str(sig))
     HTTPD.server_close()
     sys.exit(0)
 
 def load_settings(settingsfile):
+    """Load settings from file and environment."""
     global LISTENIP, LISTENPORT, BASEPATH, SSL_CERTIFICATE, SSL_KEY, HASS_API, \
     HASS_API_PASSWORD, CREDENTIALS, ALLOWED_NETWORKS, BANNED_IPS, BANLIMIT, \
-    DEV, IGNORE_PATTERN, DIRSFIRST, SESAME, VERIFY_HOSTNAME, ENFORCE_BASEPATH
-    try:
-        if os.path.isfile(settingsfile):
-            with open(settingsfile) as fptr:
-                settings = json.loads(fptr.read())
-                LISTENIP = settings.get("LISTENIP", LISTENIP)
-                LISTENPORT = settings.get("LISTENPORT", LISTENPORT)
-                BASEPATH = settings.get("BASEPATH", BASEPATH)
-                ENFORCE_BASEPATH = settings.get("ENFORCE_BASEPATH", ENFORCE_BASEPATH)
-                SSL_CERTIFICATE = settings.get("SSL_CERTIFICATE", SSL_CERTIFICATE)
-                SSL_KEY = settings.get("SSL_KEY", SSL_KEY)
-                HASS_API = settings.get("HASS_API", HASS_API)
-                HASS_API_PASSWORD = settings.get("HASS_API_PASSWORD", HASS_API_PASSWORD)
-                CREDENTIALS = settings.get("CREDENTIALS", CREDENTIALS)
-                ALLOWED_NETWORKS = settings.get("ALLOWED_NETWORKS", ALLOWED_NETWORKS)
-                BANNED_IPS = settings.get("BANNED_IPS", BANNED_IPS)
-                BANLIMIT = settings.get("BANLIMIT", BANLIMIT)
-                DEV = settings.get("DEV", DEV)
-                IGNORE_PATTERN = settings.get("IGNORE_PATTERN", IGNORE_PATTERN)
-                DIRSFIRST = settings.get("DIRSFIRST", DIRSFIRST)
-                SESAME = settings.get("SESAME", SESAME)
-                VERIFY_HOSTNAME = settings.get("VERIFY_HOSTNAME", VERIFY_HOSTNAME)
-    except Exception as err:
-        LOG.warning(err)
-        LOG.warning("Not loading static settings")
-    return False
+    DEV, IGNORE_PATTERN, DIRSFIRST, SESAME, VERIFY_HOSTNAME, ENFORCE_BASEPATH, \
+    ENV_PREFIX, NOTIFY_SERVICE, USERNAME, PASSWORD, SESAME_TOTP_SECRET, TOTP, \
+    GIT, REPO, PORT, IGNORE_SSL
+    settings = {}
+    if settingsfile:
+        try:
+            if os.path.isfile(settingsfile):
+                with open(settingsfile) as fptr:
+                    settings = json.loads(fptr.read())
+        except Exception as err:
+            LOG.warning(err)
+            LOG.warning("Not loading settings from file")
+    ENV_PREFIX = settings.get('ENV_PREFIX', ENV_PREFIX)
+    for key, value in os.environ.items():
+        if key.startswith(ENV_PREFIX):
+            # Convert booleans
+            if value in ['true', 'false', 'True', 'False']:
+                value = True if value in ['true', 'True'] else False
+            # Convert None / null
+            elif value in ['none', 'None' 'null']:
+                value = None
+            # Convert plain numbers
+            elif value.isnumeric():
+                value = int(value)
+            # Make lists out of comma separated values for list-settings
+            elif key[len(ENV_PREFIX):] in ["ALLOWED_NETWORKS", "BANNED_IPS", "IGNORE_PATTERN"]:
+                value = value.split(',')
+            settings[key[len(ENV_PREFIX):]] = value
+    GIT = settings.get("GIT", GIT)
+    if GIT:
+        try:
+            # pylint: disable=redefined-outer-name
+            from git import Repo as REPO
+        except ImportError:
+            LOG.warning("Unable to import Git module")
+    LISTENIP = settings.get("LISTENIP", LISTENIP)
+    LISTENPORT = settings.get("LISTENPORT", None)
+    PORT = settings.get("PORT", PORT)
+    if LISTENPORT is not None:
+        PORT = LISTENPORT
+    BASEPATH = settings.get("BASEPATH", BASEPATH)
+    ENFORCE_BASEPATH = settings.get("ENFORCE_BASEPATH", ENFORCE_BASEPATH)
+    SSL_CERTIFICATE = settings.get("SSL_CERTIFICATE", SSL_CERTIFICATE)
+    SSL_KEY = settings.get("SSL_KEY", SSL_KEY)
+    HASS_API = settings.get("HASS_API", HASS_API)
+    HASS_API_PASSWORD = settings.get("HASS_API_PASSWORD", HASS_API_PASSWORD)
+    CREDENTIALS = settings.get("CREDENTIALS", CREDENTIALS)
+    ALLOWED_NETWORKS = settings.get("ALLOWED_NETWORKS", ALLOWED_NETWORKS)
+    BANNED_IPS = settings.get("BANNED_IPS", BANNED_IPS)
+    BANLIMIT = settings.get("BANLIMIT", BANLIMIT)
+    DEV = settings.get("DEV", DEV)
+    IGNORE_PATTERN = settings.get("IGNORE_PATTERN", IGNORE_PATTERN)
+    DIRSFIRST = settings.get("DIRSFIRST", DIRSFIRST)
+    SESAME = settings.get("SESAME", SESAME)
+    SESAME_TOTP_SECRET = settings.get("SESAME_TOTP_SECRET", SESAME_TOTP_SECRET)
+    VERIFY_HOSTNAME = settings.get("VERIFY_HOSTNAME", VERIFY_HOSTNAME)
+    NOTIFY_SERVICE = settings.get("NOTIFY_SERVICE", NOTIFY_SERVICE_DEFAULT)
+    IGNORE_SSL = settings.get("IGNORE_SSL", IGNORE_SSL)
+    if IGNORE_SSL:
+        # pylint: disable=protected-access
+        ssl._create_default_https_context = ssl._create_unverified_context
+    USERNAME = settings.get("USERNAME", USERNAME)
+    PASSWORD = settings.get("PASSWORD", PASSWORD)
+    if CREDENTIALS and (USERNAME is None or PASSWORD is None):
+        USERNAME = CREDENTIALS.split(":")[0]
+        PASSWORD = ":".join(CREDENTIALS.split(":")[1:])
+    if PASSWORD and PASSWORD.startswith("{sha256}"):
+        PASSWORD = PASSWORD.lower()
+    if SESAME_TOTP_SECRET:
+        try:
+            import pyotp
+            TOTP = pyotp.TOTP(SESAME_TOTP_SECRET)
+        except ImportError:
+            LOG.warning("Unable to import pyotp module")
+        except Exception as err:
+            LOG.warning("Unable to create TOTP object: %s" % err)
 
 def is_safe_path(basedir, path, follow_symlinks=True):
+    """Check path for malicious traversal."""
+    if basedir is None:
+        return True
     if follow_symlinks:
-        return os.path.realpath(path).startswith(basedir)
-    return os.path.abspath(path).startswith(basedir)
+        return os.path.realpath(path).startswith(basedir.encode('utf-8'))
+    return os.path.abspath(path).startswith(basedir.encode('utf-8'))
 
 def get_dircontent(path, repo=None):
+    """Get content of directory."""
     dircontent = []
     if repo:
         untracked = [
@@ -3395,23 +3525,30 @@ def get_dircontent(path, repo=None):
         unstaged = {}
         try:
             for element in repo.index.diff("HEAD"):
-                staged["%s%s%s" % (repo.working_dir, os.sep, "%s"%os.sep.join(element.b_path.split('/')))] = element.change_type
+                staged["%s%s%s" % (repo.working_dir,
+                                   os.sep,
+                                   "%s"%os.sep.join(
+                                       element.b_path.split('/')))] = element.change_type
         except Exception as err:
             LOG.warning("Exception: %s", str(err))
         for element in repo.index.diff(None):
-            unstaged["%s%s%s" % (repo.working_dir, os.sep, "%s"%os.sep.join(element.b_path.split('/')))] = element.change_type
+            unstaged["%s%s%s" % (repo.working_dir,
+                                 os.sep,
+                                 "%s"%os.sep.join(
+                                     element.b_path.split('/')))] = element.change_type
     else:
         untracked = []
         staged = {}
         unstaged = {}
 
     def sorted_file_list():
+        """Sort list of files / directories."""
         dirlist = [x for x in os.listdir(path) if os.path.isdir(os.path.join(path, x))]
         filelist = [x for x in os.listdir(path) if not os.path.isdir(os.path.join(path, x))]
         if DIRSFIRST:
-            return sorted(dirlist, key=lambda x: x.lower()) + sorted(filelist, key=lambda x: x.lower())
-        else:
-            return sorted(dirlist + filelist, key=lambda x: x.lower())
+            return sorted(dirlist, key=lambda x: x.lower()) + \
+                sorted(filelist, key=lambda x: x.lower())
+        return sorted(dirlist + filelist, key=lambda x: x.lower())
 
     for elem in sorted_file_list():
         edata = {}
@@ -3450,6 +3587,7 @@ def get_dircontent(path, repo=None):
     return dircontent
 
 def get_html():
+    """Load the HTML from file in dev-mode, otherwise embedded."""
     if DEV:
         try:
             with open("dev.html") as fptr:
@@ -3460,7 +3598,32 @@ def get_html():
             LOG.warning("Delivering embedded HTML")
     return INDEX
 
+def password_problems(password, name="UNKNOWN"):
+    """Rudimentary checks for password strength."""
+    problems = 0
+    password = str(password)
+    if password is None:
+        return problems
+    if len(password) < 8:
+        LOG.warning("Password %s is too short" % name)
+        problems += 1
+    if password.isalpha():
+        LOG.warning("Password %s does not contain digits" % name)
+        problems += 2
+    if password.isdigit():
+        LOG.warning("Password %s does not contain alphabetic characters" % name)
+        problems += 4
+    quota = len(set(password)) / len(password)
+    exp = len(password) ** len(set(password))
+    score = exp / quota / 8
+    if score < 65536:
+        LOG.warning("Password %s does not contain enough unique characters (%i)" % (
+            name, len(set(password))))
+        problems += 8
+    return problems
+
 def check_access(clientip):
+    """Check if IP is allowed to access the configurator / API."""
     global BANNED_IPS
     if clientip in BANNED_IPS:
         LOG.warning("Client IP banned.")
@@ -3476,36 +3639,50 @@ def check_access(clientip):
     return False
 
 def verify_hostname(request_hostname):
+    """Verify the provided host header is correct."""
     if VERIFY_HOSTNAME:
         if VERIFY_HOSTNAME not in request_hostname:
             return False
     return True
 
 class RequestHandler(BaseHTTPRequestHandler):
+    """Request handler."""
+    # pylint: disable=redefined-builtin
     def log_message(self, format, *args):
         LOG.info("%s - %s" % (self.client_address[0], format % args))
         return
 
+    # pylint: disable=invalid-name
     def do_BLOCK(self, status=420, reason="Policy not fulfilled"):
+        """Customized do_BLOCK method."""
         self.send_response(status)
         self.end_headers()
         self.wfile.write(bytes(reason, "utf8"))
 
+    # pylint: disable=invalid-name
     def do_GET(self):
+        """Customized do_GET method."""
         if not verify_hostname(self.headers.get('Host', '')):
             self.do_BLOCK(403, "Forbidden")
             return
         req = urlparse(self.path)
-        if SESAME:
-            if req.path.endswith("/%s" % SESAME):
+        if SESAME or TOTP:
+            chunk = req.path.split("/")[-1]
+            if chunk == SESAME or TOTP.verify(chunk):
                 if self.client_address[0] not in ALLOWED_NETWORKS:
                     ALLOWED_NETWORKS.append(self.client_address[0])
                 if self.client_address[0] in BANNED_IPS:
                     BANNED_IPS.remove(self.client_address[0])
-                url = req.path[:req.path.rfind(SESAME)]
+                url = req.path[:req.path.rfind(chunk)]
                 self.send_response(302)
                 self.send_header('Location', url)
                 self.end_headers()
+                data = {
+                    "title": "HASS Configurator - SESAME access",
+                    "message": "Your SESAME token has been used to whitelist " \
+                    "the IP address %s." % self.client_address[0]
+                }
+                notify(**data)
                 return
         if not check_access(self.client_address[0]):
             self.do_BLOCK()
@@ -3520,7 +3697,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             try:
                 if filename:
                     filename = unquote(filename[0]).encode('utf-8')
-                    if ENFORCE_BASEPATH and not is_safe_path(BASEPATH.encode('utf-8'), filename):
+                    if ENFORCE_BASEPATH and not is_safe_path(BASEPATH, filename):
                         raise OSError('Access denied.')
                     if os.path.isfile(os.path.join(BASEDIR.encode('utf-8'), filename)):
                         with open(os.path.join(BASEDIR.encode('utf-8'), filename)) as fptr:
@@ -3538,13 +3715,15 @@ class RequestHandler(BaseHTTPRequestHandler):
             try:
                 if filename:
                     filename = unquote(filename[0]).encode('utf-8')
-                    if ENFORCE_BASEPATH and not is_safe_path(BASEPATH.encode('utf-8'), filename):
+                    if ENFORCE_BASEPATH and not is_safe_path(BASEPATH, filename):
                         raise OSError('Access denied.')
                     LOG.info(filename)
                     if os.path.isfile(os.path.join(BASEDIR.encode('utf-8'), filename)):
                         with open(os.path.join(BASEDIR.encode('utf-8'), filename), 'rb') as fptr:
                             filecontent = fptr.read()
-                        self.send_header('Content-Disposition', 'attachment; filename=%s' % filename.decode('utf-8').split(os.sep)[-1])
+                        self.send_header(
+                            'Content-Disposition',
+                            'attachment; filename=%s' % filename.decode('utf-8').split(os.sep)[-1])
                         self.end_headers()
                         self.wfile.write(filecontent)
                         return
@@ -3565,7 +3744,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                 if dirpath:
                     dirpath = unquote(dirpath[0]).encode('utf-8')
                     if os.path.isdir(dirpath):
-                        if ENFORCE_BASEPATH and not is_safe_path(BASEPATH.encode('utf-8'), dirpath):
+                        if ENFORCE_BASEPATH and not is_safe_path(BASEPATH,
+                                                                 dirpath):
                             raise OSError('Access denied.')
                         repo = None
                         activebranch = None
@@ -3573,7 +3753,9 @@ class RequestHandler(BaseHTTPRequestHandler):
                         branches = []
                         if REPO:
                             try:
-                                repo = REPO(dirpath.decode('utf-8'), search_parent_directories=True)
+                                # pylint: disable=not-callable
+                                repo = REPO(dirpath.decode('utf-8'),
+                                            search_parent_directories=True)
                                 activebranch = repo.active_branch.name
                                 dirty = repo.is_dirty()
                                 for branch in repo.branches:
@@ -3581,14 +3763,15 @@ class RequestHandler(BaseHTTPRequestHandler):
                             except Exception as err:
                                 LOG.debug("Exception (no repo): %s" % str(err))
                         dircontent = get_dircontent(dirpath.decode('utf-8'), repo)
-                        filedata = {'content': dircontent,
-                                    'abspath': os.path.abspath(dirpath).decode('utf-8'),
-                                    'parent': os.path.dirname(os.path.abspath(dirpath)).decode('utf-8'),
-                                    'branches': branches,
-                                    'activebranch': activebranch,
-                                    'dirty': dirty,
-                                    'error': None
-                                   }
+                        filedata = {
+                            'content': dircontent,
+                            'abspath': os.path.abspath(dirpath).decode('utf-8'),
+                            'parent': os.path.dirname(os.path.abspath(dirpath)).decode('utf-8'),
+                            'branches': branches,
+                            'activebranch': activebranch,
+                            'dirty': dirty,
+                            'error': None
+                        }
                         self.wfile.write(bytes(json.dumps(filedata), "utf8"))
             except Exception as err:
                 LOG.warning(err)
@@ -3642,7 +3825,9 @@ class RequestHandler(BaseHTTPRequestHandler):
                 }
                 if HASS_API_PASSWORD:
                     headers["x-ha-access"] = HASS_API_PASSWORD
-                req = urllib.request.Request("%sservices/homeassistant/restart" % HASS_API, headers=headers, method='POST')
+                req = urllib.request.Request(
+                    "%sservices/homeassistant/restart" % HASS_API,
+                    headers=headers, method='POST')
                 with urllib.request.urlopen(req) as response:
                     res = json.loads(response.read().decode('utf-8'))
                     LOG.debug(res)
@@ -3662,7 +3847,9 @@ class RequestHandler(BaseHTTPRequestHandler):
                 }
                 if HASS_API_PASSWORD:
                     headers["x-ha-access"] = HASS_API_PASSWORD
-                req = urllib.request.Request("%sservices/homeassistant/check_config" % HASS_API, headers=headers, method='POST')
+                req = urllib.request.Request(
+                    "%sservices/homeassistant/check_config" % HASS_API,
+                    headers=headers, method='POST')
                 # with urllib.request.urlopen(req) as response:
                 #     print(json.loads(response.read().decode('utf-8')))
                 #     res['service'] = "called successfully"
@@ -3682,7 +3869,9 @@ class RequestHandler(BaseHTTPRequestHandler):
                 }
                 if HASS_API_PASSWORD:
                     headers["x-ha-access"] = HASS_API_PASSWORD
-                req = urllib.request.Request("%sservices/automation/reload" % HASS_API, headers=headers, method='POST')
+                req = urllib.request.Request(
+                    "%sservices/automation/reload" % HASS_API,
+                    headers=headers, method='POST')
                 with urllib.request.urlopen(req) as response:
                     LOG.debug(json.loads(response.read().decode('utf-8')))
                     res['service'] = "called successfully"
@@ -3702,7 +3891,9 @@ class RequestHandler(BaseHTTPRequestHandler):
                 }
                 if HASS_API_PASSWORD:
                     headers["x-ha-access"] = HASS_API_PASSWORD
-                req = urllib.request.Request("%sservices/script/reload" % HASS_API, headers=headers, method='POST')
+                req = urllib.request.Request(
+                    "%sservices/script/reload" % HASS_API,
+                    headers=headers, method='POST')
                 with urllib.request.urlopen(req) as response:
                     LOG.debug(json.loads(response.read().decode('utf-8')))
                     res['service'] = "called successfully"
@@ -3722,7 +3913,9 @@ class RequestHandler(BaseHTTPRequestHandler):
                 }
                 if HASS_API_PASSWORD:
                     headers["x-ha-access"] = HASS_API_PASSWORD
-                req = urllib.request.Request("%sservices/group/reload" % HASS_API, headers=headers, method='POST')
+                req = urllib.request.Request(
+                    "%sservices/group/reload" % HASS_API,
+                    headers=headers, method='POST')
                 with urllib.request.urlopen(req) as response:
                     LOG.debug(json.loads(response.read().decode('utf-8')))
                     res['service'] = "called successfully"
@@ -3742,7 +3935,9 @@ class RequestHandler(BaseHTTPRequestHandler):
                 }
                 if HASS_API_PASSWORD:
                     headers["x-ha-access"] = HASS_API_PASSWORD
-                req = urllib.request.Request("%sservices/homeassistant/reload_core_config" % HASS_API, headers=headers, method='POST')
+                req = urllib.request.Request(
+                    "%sservices/homeassistant/reload_core_config" % HASS_API,
+                    headers=headers, method='POST')
                 with urllib.request.urlopen(req) as response:
                     LOG.debug(json.loads(response.read().decode('utf-8')))
                     res['service'] = "called successfully"
@@ -3764,34 +3959,38 @@ class RequestHandler(BaseHTTPRequestHandler):
             events = "[]"
             states = "[]"
             try:
-                headers = {
-                    "Content-Type": "application/json"
-                }
-                if HASS_API_PASSWORD:
-                    headers["x-ha-access"] = HASS_API_PASSWORD
+                if HASS_API:
+                    headers = {
+                        "Content-Type": "application/json"
+                    }
+                    if HASS_API_PASSWORD:
+                        headers["x-ha-access"] = HASS_API_PASSWORD
 
-                req = urllib.request.Request("%sservices" % HASS_API, headers=headers, method='GET')
-                with urllib.request.urlopen(req) as response:
-                    services = response.read().decode('utf-8')
+                    req = urllib.request.Request("%sservices" % HASS_API,
+                                                 headers=headers, method='GET')
+                    with urllib.request.urlopen(req) as response:
+                        services = response.read().decode('utf-8')
 
-                req = urllib.request.Request("%sevents" % HASS_API, headers=headers, method='GET')
-                with urllib.request.urlopen(req) as response:
-                    events = response.read().decode('utf-8')
+                    req = urllib.request.Request("%sevents" % HASS_API,
+                                                 headers=headers, method='GET')
+                    with urllib.request.urlopen(req) as response:
+                        events = response.read().decode('utf-8')
 
-                req = urllib.request.Request("%sstates" % HASS_API, headers=headers, method='GET')
-                with urllib.request.urlopen(req) as response:
-                    states = response.read().decode('utf-8')
+                    req = urllib.request.Request("%sstates" % HASS_API,
+                                                 headers=headers, method='GET')
+                    with urllib.request.urlopen(req) as response:
+                        states = response.read().decode('utf-8')
 
             except Exception as err:
                 LOG.warning("Exception getting bootstrap")
                 LOG.warning(err)
 
-            color = "green"
+            color = ""
             try:
                 response = urllib.request.urlopen(RELEASEURL)
                 latest = json.loads(response.read().decode('utf-8'))['tag_name']
                 if VERSION != latest:
-                    color = "red"
+                    color = "red-text"
             except Exception as err:
                 LOG.warning("Exception getting release")
                 LOG.warning(err)
@@ -3801,18 +4000,21 @@ class RequestHandler(BaseHTTPRequestHandler):
                 ws_api = "%s://%swebsocket" % (
                     "wss" if protocol == 'https' else 'ws', uri
                 )
-            html = get_html().safe_substitute(services=services,
-                                              events=events,
-                                              states=states,
-                                              loadfile=loadfile,
-                                              current=VERSION,
-                                              versionclass=color,
-                                              separator="\%s" % os.sep if os.sep == "\\" else os.sep,
-                                              listening_address="%s://%s:%i" % (
-                                                  'https' if SSL_CERTIFICATE else 'http', LISTENIP, LISTENPORT),
-                                              hass_api_address="%s" % (HASS_API, ),
-                                              hass_ws_address=ws_api,
-                                              api_password=HASS_API_PASSWORD if HASS_API_PASSWORD else "")
+            html = get_html().safe_substitute(
+                services=services,
+                events=events,
+                states=states,
+                loadfile=loadfile,
+                current=VERSION,
+                versionclass=color,
+                githidden="" if GIT else "hiddendiv",
+                # pylint: disable=anomalous-backslash-in-string
+                separator="\%s" % os.sep if os.sep == "\\" else os.sep,
+                listening_address="%s://%s:%i" % (
+                    'https' if SSL_CERTIFICATE else 'http', LISTENIP, PORT),
+                hass_api_address="%s" % (HASS_API, ),
+                hass_ws_address=ws_api,
+                api_password=HASS_API_PASSWORD if HASS_API_PASSWORD else "")
             self.wfile.write(bytes(html, "utf8"))
             return
         else:
@@ -3820,7 +4022,9 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(bytes("File not found", "utf8"))
 
+    # pylint: disable=invalid-name
     def do_POST(self):
+        """Customized do_POST method."""
         global ALLOWED_NETWORKS, BANNED_IPS
         if not verify_hostname(self.headers.get('Host', '')):
             self.do_BLOCK(403, "Forbidden")
@@ -3838,7 +4042,8 @@ class RequestHandler(BaseHTTPRequestHandler):
         length = int(self.headers['content-length'])
         if req.path.endswith('/api/save'):
             try:
-                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'),
+                                    keep_blank_values=1)
             except Exception as err:
                 LOG.warning(err)
                 response['message'] = "%s" % (str(err))
@@ -3874,27 +4079,28 @@ class RequestHandler(BaseHTTPRequestHandler):
                 response['message'] = "File too big: %i" % read
                 self.wfile.write(bytes(json.dumps(response), "utf8"))
                 return
-            else:
-                form = cgi.FieldStorage(
-                    fp=self.rfile,
-                    headers=self.headers,
-                    environ={'REQUEST_METHOD': 'POST',
-                             'CONTENT_TYPE': self.headers['Content-Type'],
-                            })
-                filename = form['file'].filename
-                filepath = form['path'].file.read()
-                data = form['file'].file.read()
-                open("%s%s%s" % (filepath, os.sep, filename), "wb").write(data)
-                self.send_response(200)
-                self.send_header('Content-type', 'text/json')
-                self.end_headers()
-                response['error'] = False
-                response['message'] = "Upload successful"
-                self.wfile.write(bytes(json.dumps(response), "utf8"))
-                return
+            form = cgi.FieldStorage(
+                fp=self.rfile,
+                headers=self.headers,
+                environ={
+                    'REQUEST_METHOD': 'POST',
+                    'CONTENT_TYPE': self.headers['Content-Type'],
+                })
+            filename = form['file'].filename
+            filepath = form['path'].file.read()
+            data = form['file'].file.read()
+            open("%s%s%s" % (filepath, os.sep, filename), "wb").write(data)
+            self.send_response(200)
+            self.send_header('Content-type', 'text/json')
+            self.end_headers()
+            response['error'] = False
+            response['message'] = "Upload successful"
+            self.wfile.write(bytes(json.dumps(response), "utf8"))
+            return
         elif req.path.endswith('/api/delete'):
             try:
-                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'),
+                                    keep_blank_values=1)
             except Exception as err:
                 LOG.warning(err)
                 response['message'] = "%s" % (str(err))
@@ -3928,7 +4134,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                 response['message'] = "Missing filename or text"
         elif req.path.endswith('/api/exec_command'):
             try:
-                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'),
+                                    keep_blank_values=1)
             except Exception as err:
                 LOG.warning(err)
                 response['message'] = "%s" % (str(err))
@@ -3943,7 +4150,9 @@ class RequestHandler(BaseHTTPRequestHandler):
                                 timeout = int(postvars['timeout'][0])
                         try:
                             proc = subprocess.Popen(
-                                command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                                command,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE)
                             stdout, stderr = proc.communicate(timeout=timeout)
                             self.send_response(200)
                             self.send_header('Content-type', 'text/json')
@@ -3975,7 +4184,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                 response['message'] = "Missing command"
         elif req.path.endswith('/api/gitadd'):
             try:
-                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'),
+                                    keep_blank_values=1)
             except Exception as err:
                 LOG.warning(err)
                 response['message'] = "%s" % (str(err))
@@ -3984,8 +4194,11 @@ class RequestHandler(BaseHTTPRequestHandler):
                 if postvars['path']:
                     try:
                         addpath = unquote(postvars['path'][0])
-                        repo = REPO(addpath, search_parent_directories=True)
-                        filepath = "/".join(addpath.split(os.sep)[len(repo.working_dir.split(os.sep)):])
+                        # pylint: disable=not-callable
+                        repo = REPO(addpath,
+                                    search_parent_directories=True)
+                        filepath = "/".join(
+                            addpath.split(os.sep)[len(repo.working_dir.split(os.sep)):])
                         response['path'] = filepath
                         try:
                             repo.index.add([filepath])
@@ -4006,9 +4219,49 @@ class RequestHandler(BaseHTTPRequestHandler):
                         LOG.warning(err)
             else:
                 response['message'] = "Missing filename"
+        elif req.path.endswith('/api/gitdiff'):
+            try:
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'),
+                                    keep_blank_values=1)
+            except Exception as err:
+                LOG.warning(err)
+                response['message'] = "%s" % (str(err))
+                postvars = {}
+            if 'path' in postvars.keys():
+                if postvars['path']:
+                    try:
+                        diffpath = unquote(postvars['path'][0])
+                        # pylint: disable=not-callable
+                        repo = REPO(diffpath,
+                                    search_parent_directories=True)
+                        filepath = "/".join(
+                            diffpath.split(os.sep)[len(repo.working_dir.split(os.sep)):])
+                        response['path'] = filepath
+                        try:
+                            diff = repo.index.diff(None,
+                                                   create_patch=True,
+                                                   paths=filepath)[0].diff.decode("utf-8")
+                            response['error'] = False
+                            response['message'] = diff
+                            self.send_response(200)
+                            self.send_header('Content-type', 'text/json')
+                            self.end_headers()
+                            self.wfile.write(bytes(json.dumps(response), "utf8"))
+                            return
+                        except Exception as err:
+                            LOG.warning(err)
+                            response['error'] = True
+                            response['message'] = "Unable to load diff: %s" % str(err)
+
+                    except Exception as err:
+                        response['message'] = "%s" % (str(err))
+                        LOG.warning(err)
+            else:
+                response['message'] = "Missing filename"
         elif req.path.endswith('/api/commit'):
             try:
-                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'),
+                                    keep_blank_values=1)
             except Exception as err:
                 LOG.warning(err)
                 response['message'] = "%s" % (str(err))
@@ -4019,7 +4272,9 @@ class RequestHandler(BaseHTTPRequestHandler):
                         commitpath = unquote(postvars['path'][0])
                         response['path'] = commitpath
                         message = unquote(postvars['message'][0])
-                        repo = REPO(commitpath, search_parent_directories=True)
+                        # pylint: disable=not-callable
+                        repo = REPO(commitpath,
+                                    search_parent_directories=True)
                         try:
                             repo.index.commit(message)
                             response['error'] = False
@@ -4041,7 +4296,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                 response['message'] = "Missing path"
         elif req.path.endswith('/api/checkout'):
             try:
-                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'),
+                                    keep_blank_values=1)
             except Exception as err:
                 LOG.warning(err)
                 response['message'] = "%s" % (str(err))
@@ -4052,7 +4308,9 @@ class RequestHandler(BaseHTTPRequestHandler):
                         branchpath = unquote(postvars['path'][0])
                         response['path'] = branchpath
                         branch = unquote(postvars['branch'][0])
-                        repo = REPO(branchpath, search_parent_directories=True)
+                        # pylint: disable=not-callable
+                        repo = REPO(branchpath,
+                                    search_parent_directories=True)
                         try:
                             head = [h for h in repo.heads if h.name == branch][0]
                             head.checkout()
@@ -4075,7 +4333,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                 response['message'] = "Missing path or branch"
         elif req.path.endswith('/api/newbranch'):
             try:
-                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'),
+                                    keep_blank_values=1)
             except Exception as err:
                 LOG.warning(err)
                 response['message'] = "%s" % (str(err))
@@ -4086,7 +4345,9 @@ class RequestHandler(BaseHTTPRequestHandler):
                         branchpath = unquote(postvars['path'][0])
                         response['path'] = branchpath
                         branch = unquote(postvars['branch'][0])
-                        repo = REPO(branchpath, search_parent_directories=True)
+                        # pylint: disable=not-callable
+                        repo = REPO(branchpath,
+                                    search_parent_directories=True)
                         try:
                             repo.git.checkout("HEAD", b=branch)
                             response['error'] = False
@@ -4108,7 +4369,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                 response['message'] = "Missing path or branch"
         elif req.path.endswith('/api/init'):
             try:
-                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'),
+                                    keep_blank_values=1)
             except Exception as err:
                 LOG.warning(err)
                 response['message'] = "%s" % (str(err))
@@ -4139,7 +4401,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                 response['message'] = "Missing path or branch"
         elif req.path.endswith('/api/push'):
             try:
-                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'),
+                                    keep_blank_values=1)
             except Exception as err:
                 LOG.warning(err)
                 response['message'] = "%s" % (str(err))
@@ -4150,6 +4413,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                         repopath = unquote(postvars['path'][0])
                         response['path'] = repopath
                         try:
+                            # pylint: disable=not-callable
                             repo = REPO(repopath)
                             urls = []
                             if repo.remotes:
@@ -4177,9 +4441,44 @@ class RequestHandler(BaseHTTPRequestHandler):
                         LOG.warning("Exception (no repo): %s" % str(err))
             else:
                 response['message'] = "Missing path or branch"
+        elif req.path.endswith('/api/stash'):
+            try:
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'),
+                                    keep_blank_values=1)
+            except Exception as err:
+                LOG.warning(err)
+                response['message'] = "%s" % (str(err))
+                postvars = {}
+            if 'path' in postvars.keys():
+                if postvars['path']:
+                    try:
+                        repopath = unquote(postvars['path'][0])
+                        response['path'] = repopath
+                        try:
+                            # pylint: disable=not-callable
+                            repo = REPO(repopath)
+                            returnvalue = repo.git.stash()
+                            response['error'] = False
+                            response['message'] = "%s\n%s" % (returnvalue, repopath)
+                            self.send_response(200)
+                            self.send_header('Content-type', 'text/json')
+                            self.end_headers()
+                            self.wfile.write(bytes(json.dumps(response), "utf8"))
+                            return
+                        except Exception as err:
+                            response['error'] = True
+                            response['message'] = str(err)
+                            LOG.warning(response)
+
+                    except Exception as err:
+                        response['message'] = "Not a git repository: %s" % (str(err))
+                        LOG.warning("Exception (no repo): %s" % str(err))
+            else:
+                response['message'] = "Missing path or branch"
         elif req.path.endswith('/api/newfolder'):
             try:
-                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'),
+                                    keep_blank_values=1)
             except Exception as err:
                 LOG.warning(err)
                 response['message'] = "%s" % (str(err))
@@ -4208,7 +4507,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                         LOG.warning(err)
         elif req.path.endswith('/api/newfile'):
             try:
-                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'),
+                                    keep_blank_values=1)
             except Exception as err:
                 LOG.warning(err)
                 response['message'] = "%s" % (str(err))
@@ -4240,7 +4540,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                 response['message'] = "Missing filename or text"
         elif req.path.endswith('/api/allowed_networks'):
             try:
-                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'),
+                                    keep_blank_values=1)
             except Exception as err:
                 LOG.warning(err)
                 response['message'] = "%s" % (str(err))
@@ -4277,7 +4578,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                 response['message'] = "Missing network"
         elif req.path.endswith('/api/banned_ips'):
             try:
-                postvars = parse_qs(self.rfile.read(length).decode('utf-8'), keep_blank_values=1)
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'),
+                                    keep_blank_values=1)
             except Exception as err:
                 LOG.warning(err)
                 response['message'] = "%s" % (str(err))
@@ -4285,21 +4587,21 @@ class RequestHandler(BaseHTTPRequestHandler):
             if 'ip' in postvars.keys() and 'method' in postvars.keys():
                 if postvars['ip'] and postvars['method']:
                     try:
-                        ip = unquote(postvars['ip'][0])
+                        ip_address = unquote(postvars['ip'][0])
                         method = unquote(postvars['method'][0])
                         if method == 'unban':
-                            if ip in BANNED_IPS:
-                                BANNED_IPS.remove(ip)
+                            if ip_address in BANNED_IPS:
+                                BANNED_IPS.remove(ip_address)
                             response['error'] = False
                         elif method == 'ban':
-                            ipaddress.ip_network(ip)
-                            BANNED_IPS.append(ip)
+                            ipaddress.ip_network(ip_address)
+                            BANNED_IPS.append(ip_address)
                         else:
                             response['error'] = True
                         self.send_response(200)
                         self.send_header('Content-type', 'text/json')
                         self.end_headers()
-                        response['message'] = "BANNED_IPS (%s): %s" % (method, ip)
+                        response['message'] = "BANNED_IPS (%s): %s" % (method, ip_address)
                         self.wfile.write(bytes(json.dumps(response), "utf8"))
                         return
                     except Exception as err:
@@ -4317,12 +4619,15 @@ class RequestHandler(BaseHTTPRequestHandler):
         return
 
 class AuthHandler(RequestHandler):
+    """Handler to verify auth header."""
     def do_BLOCK(self, status=420, reason="Policy not fulfilled"):
         self.send_response(status)
         self.end_headers()
         self.wfile.write(bytes(reason, "utf8"))
 
+    # pylint: disable=invalid-name
     def do_AUTHHEAD(self):
+        """Request authorization."""
         LOG.info("Requesting authorization")
         self.send_response(401)
         self.send_header('WWW-Authenticate', 'Basic realm=\"HASS-Configurator\"')
@@ -4330,21 +4635,27 @@ class AuthHandler(RequestHandler):
         self.end_headers()
 
     def do_GET(self):
-        global CREDENTIALS
         if not verify_hostname(self.headers.get('Host', '')):
             self.do_BLOCK(403, "Forbidden")
             return
-        authorization = self.headers.get('Authorization', None)
-        if authorization is None:
+        header = self.headers.get('Authorization', None)
+        if header is None:
             self.do_AUTHHEAD()
             self.wfile.write(bytes('no auth header received', 'utf-8'))
-            pass
-        elif authorization == 'Basic %s' % CREDENTIALS.decode('utf-8'):
-            if BANLIMIT:
-                FAIL2BAN_IPS.pop(self.client_address[0], None)
-            super().do_GET()
-            pass
         else:
+            authorization = header.split()
+            if len(authorization) == 2 and authorization[0] == "Basic":
+                plain = base64.b64decode(authorization[1]).decode("utf-8")
+                parts = plain.split(':')
+                username = parts[0]
+                password = ":".join(parts[1:])
+                if PASSWORD.startswith("{sha256}"):
+                    password = "{sha256}%s" % hashlib.sha256(password.encode("utf-8")).hexdigest()
+                if username == USERNAME and password == PASSWORD:
+                    if BANLIMIT:
+                        FAIL2BAN_IPS.pop(self.client_address[0], None)
+                    super().do_GET()
+                    return
             if BANLIMIT:
                 bancounter = FAIL2BAN_IPS.get(self.client_address[0], 1)
                 if bancounter >= BANLIMIT:
@@ -4355,24 +4666,29 @@ class AuthHandler(RequestHandler):
                     FAIL2BAN_IPS[self.client_address[0]] = bancounter + 1
             self.do_AUTHHEAD()
             self.wfile.write(bytes('Authentication required', 'utf-8'))
-            pass
 
     def do_POST(self):
-        global CREDENTIALS
         if not verify_hostname(self.headers.get('Host', '')):
             self.do_BLOCK(403, "Forbidden")
             return
-        authorization = self.headers.get('Authorization', None)
-        if authorization is None:
+        header = self.headers.get('Authorization', None)
+        if header is None:
             self.do_AUTHHEAD()
             self.wfile.write(bytes('no auth header received', 'utf-8'))
-            pass
-        elif authorization == 'Basic %s' % CREDENTIALS.decode('utf-8'):
-            if BANLIMIT:
-                FAIL2BAN_IPS.pop(self.client_address[0], None)
-            super().do_POST()
-            pass
         else:
+            authorization = header.split()
+            if len(authorization) == 2 and authorization[0] == "Basic":
+                plain = base64.b64decode(authorization[1]).decode("utf-8")
+                parts = plain.split(':')
+                username = parts[0]
+                password = ":".join(parts[1:])
+                if PASSWORD.startswith("{sha256}"):
+                    password = "{sha256}%s" % hashlib.sha256(password.encode("utf-8")).hexdigest()
+                if username == USERNAME and password == PASSWORD:
+                    if BANLIMIT:
+                        FAIL2BAN_IPS.pop(self.client_address[0], None)
+                    super().do_POST()
+                    return
             if BANLIMIT:
                 bancounter = FAIL2BAN_IPS.get(self.client_address[0], 1)
                 if bancounter >= BANLIMIT:
@@ -4383,30 +4699,101 @@ class AuthHandler(RequestHandler):
                     FAIL2BAN_IPS[self.client_address[0]] = bancounter + 1
             self.do_AUTHHEAD()
             self.wfile.write(bytes('Authentication required', 'utf-8'))
-            pass
 
 class SimpleServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
+    """Server class."""
     daemon_threads = True
     allow_reuse_address = True
 
     def __init__(self, server_address, RequestHandlerClass):
         socketserver.TCPServer.__init__(self, server_address, RequestHandlerClass)
 
+def notify(title="HASS Configurator",
+           message="Notification by HASS Configurator",
+           notification_id=None):
+    """Helper function to send notifications via HASS."""
+    if not HASS_API or not NOTIFY_SERVICE:
+        return
+    headers = {
+        "Content-Type": "application/json"
+    }
+    data = {
+        "title": title,
+        "message": message
+    }
+    if notification_id and NOTIFY_SERVICE == NOTIFY_SERVICE_DEFAULT:
+        data["notification_id"] = notification_id
+    if HASS_API_PASSWORD:
+        headers["x-ha-access"] = HASS_API_PASSWORD
+    req = urllib.request.Request(
+        "%sservices/%s" % (HASS_API, NOTIFY_SERVICE.replace('.', '/')),
+        data=bytes(json.dumps(data).encode('utf-8')),
+        headers=headers, method='POST')
+    LOG.info("%s" % data)
+    try:
+        with urllib.request.urlopen(req) as response:
+            message = response.read().decode('utf-8')
+            LOG.debug(message)
+    except Exception as err:
+        LOG.warning("Exception while creating notification: %s" % err)
+
 def main(args):
-    global HTTPD, CREDENTIALS
+    """Main function, duh!"""
+    global HTTPD
     if args:
         load_settings(args[0])
-    LOG.info("Starting server")
-    CustomServer = SimpleServer
-    if ':' in LISTENIP:
-        CustomServer.address_family = socket.AF_INET6
-    server_address = (LISTENIP, LISTENPORT)
-    if CREDENTIALS:
-        CREDENTIALS = base64.b64encode(bytes(CREDENTIALS, "utf-8"))
-        Handler = AuthHandler
     else:
-        Handler = RequestHandler
-    HTTPD = CustomServer(server_address, Handler)
+        load_settings(None)
+    LOG.info("Starting server")
+
+    try:
+        problems = None
+        if HASS_API_PASSWORD:
+            problems = password_problems(HASS_API_PASSWORD, "HASS_API_PASSWORD")
+        if problems:
+            data = {
+                "title": "HASS Configurator - Password warning",
+                "message": "Your HASS API password seems insecure (%i). " \
+                "Refer to the HASS configurator logs for further information." % problems,
+                "notification_id": "HC_HASS_API_PASSWORD"
+            }
+            notify(**data)
+
+        problems = None
+        if SESAME:
+            problems = password_problems(SESAME, "SESAME")
+        if problems:
+            data = {
+                "title": "HASS Configurator - Password warning",
+                "message": "Your SESAME seems insecure (%i). " \
+                "Refer to the HASS configurator logs for further information." % problems,
+                "notification_id": "HC_SESAME"
+            }
+            notify(**data)
+
+        problems = None
+        if PASSWORD:
+            problems = password_problems(PASSWORD, "PASSWORD")
+        if problems:
+            data = {
+                "title": "HASS Configurator - Password warning",
+                "message": "Your PASSWORD seems insecure (%i). " \
+                "Refer to the HASS configurator logs for further information." % problems,
+                "notification_id": "HC_PASSWORD"
+            }
+            notify(**data)
+    except Exception as err:
+        LOG.warning("Exception while checking passwords: %s" % err)
+
+    custom_server = SimpleServer
+    if ':' in LISTENIP:
+        custom_server.address_family = socket.AF_INET6
+    server_address = (LISTENIP, PORT)
+    if USERNAME and PASSWORD:
+        handler = AuthHandler
+    else:
+        handler = RequestHandler
+    HTTPD = custom_server(server_address, handler)
     if SSL_CERTIFICATE:
         HTTPD.socket = ssl.wrap_socket(HTTPD.socket,
                                        certfile=SSL_CERTIFICATE,
@@ -4414,7 +4801,7 @@ def main(args):
                                        server_side=True)
     LOG.info('Listening on: %s://%s:%i' % ('https' if SSL_CERTIFICATE else 'http',
                                            LISTENIP,
-                                           LISTENPORT))
+                                           PORT))
     if BASEPATH:
         os.chdir(BASEPATH)
     HTTPD.serve_forever()

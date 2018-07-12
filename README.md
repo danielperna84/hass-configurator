@@ -35,12 +35,13 @@ There are no dependencies on Python modules that are not part of the standard li
 
 ### Configuration
 Near the top of the py-file you will find some global variables you can change to customize the configurator a little bit. If you are unfamiliar with Python: when setting variables of the type _string_, you have to write that within quotation marks. The default settings are fine for just checking this out quickly. With more customized setups you will have to change some settings though.  
-To keep your setting across updates it is also possible to save settings in an external file. In that case copy [settings.conf](https://github.com/danielperna84/hass-configurator/blob/master/settings.conf) whereever you like and append the full path to the file to the command when starting the configurator. E.g. `sudo .configurator.py /home/homeassistant/.homeassistant/mysettings.conf`. This file is in JSON format. So make sure it has a valid syntax (you can set the editor to JSON to get syntax highlighting for the settings). The major difference to the settings in the py-file is, that `None` becomes `null`.
+To keep your setting across updates it is also possible to save settings in an external file. In that case copy [settings.conf](https://github.com/danielperna84/hass-configurator/blob/master/settings.conf) whereever you like and append the full path to the file to the command when starting the configurator. E.g. `sudo .configurator.py /home/homeassistant/.homeassistant/mysettings.conf`. This file is in JSON format. So make sure it has a valid syntax (you can set the editor to JSON to get syntax highlighting for the settings). The major difference to the settings in the py-file is, that `None` becomes `null`.  
+Another way of passing settings is by using [environment variables](https://en.wikipedia.org/wiki/Environment_variable). All settings passed via environment variables will overwrite the settings you have set in the `settings.conf` file. This allows you to provide settings in you systemd service file or the way it is usually done with Docker. The names of the environment variables have to be named exactly like the regular ones, prepended with the prefix `HC_`. You can customize this prefix in the `settings.conf` by setting `ENV_PREFIX` to something you like. `ENV_PREFIX` can not be set via environment variable. For settings that are usually defined as lists (`ALLOWED_NETWORKS` etc.) a comma is used as a separator for each value (e.g. `HC_ALLOWED_NETWORKS="127.0.0.1,192.168.0.0/16"`).
 
 #### LISTENIP (string)
 The IP address the service is listening on. By default it is binding to `0.0.0.0`, which is every IPv4 interface on the system. When using `::`, all available IPv6- and IPv4-addresses will be used.
-#### LISTENPORT (integer)
-The port the service is listening on. By default it is using 3218, but you can change this if you need to.
+#### PORT (integer)
+The port the service is listening on. By default it is using 3218, but you can change this if you need to. The former setting `LISTENPORT` still works but is deprecated. Please change your settings accordingly.
 #### BASEPATH (string)
 It is possible to place configurator.py somewhere else. Set the `BASEPATH` to something like `"/home/homeassistant/.homeassistant"`, and no matter where you are running the configurator from, it will start serving files from there. This is needed if you plan on running the configurator with systemd.
 #### ENFORCE_BASEPATH (bool)
@@ -51,8 +52,14 @@ If you're using SSL, set the paths to your SSL files here. This is similar to th
 The configurator fetches some data from your running HASS instance. If the API isn't available through the default URL, modify this variable to fix this.
 #### HASS_API_PASSWORD (string)
 If you plan on using the restart button, you have to set your API password. Calling the restart service of HASS is prohibited without authentication.
+#### IGNORE_SSL (bool)
+Set IGNORE_SSL to `True` to disable SSL verification when connecting to the Home Assistant API (while fetching entities etc., not in your browser). This is useful if Home Assistant is configured with SSL, but the configurator accesses it via IP, in which case SSL verification will fail.
+#### USERNAME (string)
+If you want to enable [HTTP basic authentication](https://en.wikipedia.org/wiki/Basic_access_authentication) you can set the desired username here. The `:` character is not allowed.
+#### PASSWORD (string)
+Set the password that should be used for authentication. Only if `USERNAME` __and__ `PASSWORD` are set authentication will be enabled. You may provide the password as a SHA256-hash with the prefix `{sha256}`. For example `PASSWORD = "test"` is functionally equal to `PASSWORD = "{sha256}9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"`. The hash will be converted to lower case automatically. Using the hash provides extra security by not exposing the actual password in plaintext in your configuration.
 #### CREDENTIALS (string)
-Set credentials in the form of `"username:password"` if authentication should be required for access.
+The credentials in the form of `"username:password"` are now deprecated and should be removed from you configuration. Replace it by specifying `USERNAME` and `PASSWORD`. It will still work though to ensure backwards compatibility.
 #### ALLOWED_NETWORKS (list)
 Limit access to the configurator by adding allowed IP addresses / networks to the list, e.g `ALLOWED_NETWORKS = ["192.168.0.0/24", "172.16.47.23"]`. If you are using the [hass.io addon](https://www.home-assistant.io/addons/configurator/) of the configurator, add the docker-network `172.30.0.0/16` to this list.
 #### BANNED_IPS (list)
@@ -63,15 +70,21 @@ Ban IPs after n failed login attempts. Restart service to reset banning. The def
 Files and folders to ignore in the UI, e.g. `IGNORE_PATTERN = [".*", "*.log", "__pycache__"]`
 #### GIT (bool)
 Set this variable to `True` to enable Git integration. This feature requires [GitPython](https://gitpython.readthedocs.io)
- to be installed on the system that is running the configurator. For thechnical reasons this feature can't be enabled with a static configuration file.  
+ to be installed on the system that is running the configurator.  
 To push local commits to a remote repository, you have to add the remote manually: `git remote add origin ssh://somehost:/user/repo.git`  
 Verify, that the user that is running the configurator is allowed to push without any interaction (by using SSH PubKey authentication for example).
 #### DIRSFIRST (bool)
 If set to `true`, directories will be displayed at the top.
 #### SESAME (string)
 If set to _somesecretkeynobodycanguess_, you can browse to `https://your.configurator:3218/somesecretkeynobodycanguess` from any IP, and it will be removed from the `BANNED_IPS` list (in case it has been banned before) and added to the `ALLOWED_NETWORKS` list. Once the request has been processed you will automatically be redirected to the configurator. Think of this as dynamically allowing access from untrusted IPs by providing a secret key (_open sesame!_). Keep in mind, that once the IP has been added, you will either have to restart the configurator or manually remove the IP through the _Network status_ to revoke access.
+#### SESAME_TOTP_SECRET (string)
+Instead of or additionally to the `SESAME` token you may also specify a [Base32](https://en.wikipedia.org/wiki/Base32) encoded string that serves as the token for time based OTP (one time password) IP whitelisting. It works like the regular `SESAME`, but the request path that whitelists your IP changes every 30 seconds. You can add the `SESAME_TOTP_SECRET` to most of the available OTP-Apps (Google Authenticator and alike) and just append the 6-digit number to the URI where your configurator is reachable. For this to work the [pyotp](https://github.com/pyotp/pyotp) module has to be installed.
 #### VERIFY_HOSTNAME (string)
 HTTP requests include the hostname to which the request has been made. To improve security you can set this parameter to `yourdomain.example.com`. This will check if the hostname within the request matches the one you are expecting. If it does not match, a `403 Forbidden` response will be sent. As a result attackers that scan your IP address won't be able to connect unless they know the correct hostname. Be careful with this option though, because it prohibits you from accessing the configurator directly via IP.
+#### ENV_PREFIX (string)
+To modify the default prefix for settings passed as environment variables (`HC_`) change this setting to another value that meets your demands.
+#### NOTIFY_SERVICE (string)
+Define a notification service from your Home Assistant setup that should be used to send notifications, e.g. `notify.mytelegram`. The default is `persistent_notification.create`. Do __NOT__ change the value of the `NOTIFY_SERVICE_DEFAULT` variable! You will be notified if your `HASS_API_PASSWORD`, `SESAME` or `PASSWORD` password seems insecure. Additionally a notification with the accessing IP will be sent every time the `SESAME` token has been used for whitelisting. To disable this feature set the value to `False`.
  
 __Note regarding `ALLOWED_NETWORKS`, `BANNED_IPS` and `BANLIMIT`__:  
 The way this is implemented works in the following order:

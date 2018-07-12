@@ -1,3 +1,19 @@
+Version 0.3.0 (2018-)
+- Allow passing settings via environment variables (Issue #100) @danielperna84
+- Added basic git stash functionality (Issue #16) @danielperna84
+- Added NOTIFY_SERVICE option @danielperna84
+- Notifying if used passwords are insecure (Issue #100) and if SESAME has been used @danielperna84
+- CREDENTIALS setting replaced by USERNAME and PASSWORD @danielperna84
+- PASSWORD can optionally be provided as SHA256 hash (Issue #100) @danielperna84
+- Added SESAME_TOTP_SECRET for TOTP based IP whitelisting (Issue #100) @danielperna84
+- Added git diff functionality (Issue #16) @danielperna84
+- Red colored menu button as indicator for outdated version @danielperna84
+- GIT setting can now be set with settings file or environment variable @danielperna84
+- LISTENPORT has been renamed to PORT (LISTENPORT still works though)
+- Hiding git menu when git is disabled @danielperna84
+- Removed right dragging area for editor settings (Issue #102) @danielperna84
+- Added IGNORE_SSL option to disable SSL verification when connecting to HASS API @danielperna84
+
 Version 0.2.9 (2018-06-22)
 - Material Icons and HASS-help now open in new tab instead of modal (Issues #85 and #34) @danielperna84
 - Open file by URL (Issue #95) @danielperna84
