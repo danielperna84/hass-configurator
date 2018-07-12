@@ -25,7 +25,6 @@ from http.server import BaseHTTPRequestHandler
 import urllib.request
 from urllib.parse import urlparse, parse_qs, unquote
 
-
 ### Some options for you to change
 LISTENIP = "0.0.0.0"
 PORT = 3218
@@ -78,6 +77,8 @@ SESAME_TOTP_SECRET = None
 VERIFY_HOSTNAME = None
 # Prefix for environment variables
 ENV_PREFIX = "HC_"
+# Ignore SSL errors when connecting to the HASS API
+IGNORE_SSL = False
 # Notification service like `notify.mytelegram`. Default is `persistent_notification.create`
 NOTIFY_SERVICE_DEFAULT = "persistent_notification.create"
 NOTIFY_SERVICE = NOTIFY_SERVICE_DEFAULT
@@ -3429,7 +3430,7 @@ def load_settings(settingsfile):
     HASS_API_PASSWORD, CREDENTIALS, ALLOWED_NETWORKS, BANNED_IPS, BANLIMIT, \
     DEV, IGNORE_PATTERN, DIRSFIRST, SESAME, VERIFY_HOSTNAME, ENFORCE_BASEPATH, \
     ENV_PREFIX, NOTIFY_SERVICE, USERNAME, PASSWORD, SESAME_TOTP_SECRET, TOTP, \
-    GIT, REPO, PORT
+    GIT, REPO, PORT, IGNORE_SSL
     settings = {}
     if settingsfile:
         try:
@@ -3484,6 +3485,10 @@ def load_settings(settingsfile):
     SESAME_TOTP_SECRET = settings.get("SESAME_TOTP_SECRET", SESAME_TOTP_SECRET)
     VERIFY_HOSTNAME = settings.get("VERIFY_HOSTNAME", VERIFY_HOSTNAME)
     NOTIFY_SERVICE = settings.get("NOTIFY_SERVICE", NOTIFY_SERVICE_DEFAULT)
+    IGNORE_SSL = settings.get("IGNORE_SSL", IGNORE_SSL)
+    if IGNORE_SSL:
+        # pylint: disable=protected-access
+        ssl._create_default_https_context = ssl._create_unverified_context
     USERNAME = settings.get("USERNAME", USERNAME)
     PASSWORD = settings.get("PASSWORD", PASSWORD)
     if CREDENTIALS and (USERNAME is None or PASSWORD is None):

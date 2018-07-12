@@ -12,6 +12,7 @@ Version 0.3.0 (2018-)
 - LISTENPORT has been renamed to PORT (LISTENPORT still works though)
 - Hiding git menu when git is disabled @danielperna84
 - Removed right dragging area for editor settings (Issue #102) @danielperna84
+- Added IGNORE_SSL option to disables SSL verification when connecting to HASS API @danielperna84
 
 Version 0.2.9 (2018-06-22)
 - Material Icons and HASS-help now open in new tab instead of modal (Issues #85 and #34) @danielperna84

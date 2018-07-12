@@ -52,6 +52,8 @@ If you're using SSL, set the paths to your SSL files here. This is similar to th
 The configurator fetches some data from your running HASS instance. If the API isn't available through the default URL, modify this variable to fix this.
 #### HASS_API_PASSWORD (string)
 If you plan on using the restart button, you have to set your API password. Calling the restart service of HASS is prohibited without authentication.
+#### IGNORE_SSL (bool)
+Set IGNORE_SSL to `True` to disable SSL verification when connecting to the Home Assistant API (while fetching entities etc., not in your browser). This is useful if Home Assistant is configured with SSL, but the configurator accesses it via IP, in which case SSL verification will fail.
 #### USERNAME (string)
 If you want to enable [HTTP basic authentication](https://en.wikipedia.org/wiki/Basic_access_authentication) you can set the desired username here. The `:` character is not allowed.
 #### PASSWORD (string)
