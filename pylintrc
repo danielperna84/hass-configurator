@@ -2,7 +2,6 @@
 reports=no
 
 disable=
-  missing-docstring,
   global-statement,
   logging-not-lazy,
   broad-except,

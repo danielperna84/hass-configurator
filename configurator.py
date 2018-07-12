@@ -83,7 +83,6 @@ NOTIFY_SERVICE_DEFAULT = "persistent_notification.create"
 NOTIFY_SERVICE = NOTIFY_SERVICE_DEFAULT
 ### End of options
 
-
 LOGLEVEL = logging.INFO
 LOG = logging.getLogger(__name__)
 LOG.setLevel(LOGLEVEL)
@@ -3418,12 +3417,14 @@ editor.on('change', queue_lint);
 
 # pylint: disable=unused-argument
 def signal_handler(sig, frame):
+    """Handle signal to shut down server."""
     global HTTPD
     LOG.info("Got signal: %s. Shutting down server", str(sig))
     HTTPD.server_close()
     sys.exit(0)
 
 def load_settings(settingsfile):
+    """Load settings from file and environment."""
     global LISTENIP, LISTENPORT, BASEPATH, SSL_CERTIFICATE, SSL_KEY, HASS_API, \
     HASS_API_PASSWORD, CREDENTIALS, ALLOWED_NETWORKS, BANNED_IPS, BANLIMIT, \
     DEV, IGNORE_PATTERN, DIRSFIRST, SESAME, VERIFY_HOSTNAME, ENFORCE_BASEPATH, \
@@ -3500,6 +3501,7 @@ def load_settings(settingsfile):
             LOG.warning("Unable to create TOTP object: %s" % err)
 
 def is_safe_path(basedir, path, follow_symlinks=True):
+    """Check path for malicious traversal."""
     if basedir is None:
         return True
     if follow_symlinks:
@@ -3507,6 +3509,7 @@ def is_safe_path(basedir, path, follow_symlinks=True):
     return os.path.abspath(path).startswith(basedir.encode('utf-8'))
 
 def get_dircontent(path, repo=None):
+    """Get content of directory."""
     dircontent = []
     if repo:
         untracked = [
@@ -3534,6 +3537,7 @@ def get_dircontent(path, repo=None):
         unstaged = {}
 
     def sorted_file_list():
+        """Sort list of files / directories."""
         dirlist = [x for x in os.listdir(path) if os.path.isdir(os.path.join(path, x))]
         filelist = [x for x in os.listdir(path) if not os.path.isdir(os.path.join(path, x))]
         if DIRSFIRST:
@@ -3578,6 +3582,7 @@ def get_dircontent(path, repo=None):
     return dircontent
 
 def get_html():
+    """Load the HTML from file in dev-mode, otherwise embedded."""
     if DEV:
         try:
             with open("dev.html") as fptr:
@@ -3589,6 +3594,7 @@ def get_html():
     return INDEX
 
 def password_problems(password, name="UNKNOWN"):
+    """Rudimentary checks for password strength."""
     problems = 0
     password = str(password)
     if password is None:
@@ -3612,6 +3618,7 @@ def password_problems(password, name="UNKNOWN"):
     return problems
 
 def check_access(clientip):
+    """Check if IP is allowed to access the configurator / API."""
     global BANNED_IPS
     if clientip in BANNED_IPS:
         LOG.warning("Client IP banned.")
@@ -3627,12 +3634,14 @@ def check_access(clientip):
     return False
 
 def verify_hostname(request_hostname):
+    """Verify the provided host header is correct."""
     if VERIFY_HOSTNAME:
         if VERIFY_HOSTNAME not in request_hostname:
             return False
     return True
 
 class RequestHandler(BaseHTTPRequestHandler):
+    """Request handler."""
     # pylint: disable=redefined-builtin
     def log_message(self, format, *args):
         LOG.info("%s - %s" % (self.client_address[0], format % args))
@@ -3640,12 +3649,14 @@ class RequestHandler(BaseHTTPRequestHandler):
 
     # pylint: disable=invalid-name
     def do_BLOCK(self, status=420, reason="Policy not fulfilled"):
+        """Customized do_BLOCK method."""
         self.send_response(status)
         self.end_headers()
         self.wfile.write(bytes(reason, "utf8"))
 
     # pylint: disable=invalid-name
     def do_GET(self):
+        """Customized do_GET method."""
         if not verify_hostname(self.headers.get('Host', '')):
             self.do_BLOCK(403, "Forbidden")
             return
@@ -4008,6 +4019,7 @@ class RequestHandler(BaseHTTPRequestHandler):
 
     # pylint: disable=invalid-name
     def do_POST(self):
+        """Customized do_POST method."""
         global ALLOWED_NETWORKS, BANNED_IPS
         if not verify_hostname(self.headers.get('Host', '')):
             self.do_BLOCK(403, "Forbidden")
@@ -4602,6 +4614,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         return
 
 class AuthHandler(RequestHandler):
+    """Handler to verify auth header."""
     def do_BLOCK(self, status=420, reason="Policy not fulfilled"):
         self.send_response(status)
         self.end_headers()
@@ -4609,6 +4622,7 @@ class AuthHandler(RequestHandler):
 
     # pylint: disable=invalid-name
     def do_AUTHHEAD(self):
+        """Request authorization."""
         LOG.info("Requesting authorization")
         self.send_response(401)
         self.send_header('WWW-Authenticate', 'Basic realm=\"HASS-Configurator\"')
@@ -4682,6 +4696,7 @@ class AuthHandler(RequestHandler):
             self.wfile.write(bytes('Authentication required', 'utf-8'))
 
 class SimpleServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
+    """Server class."""
     daemon_threads = True
     allow_reuse_address = True
 
@@ -4691,6 +4706,7 @@ class SimpleServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
 def notify(title="HASS Configurator",
            message="Notification by HASS Configurator",
            notification_id=None):
+    """Helper function to send notifications via HASS."""
     if not HASS_API or not NOTIFY_SERVICE:
         return
     headers = {
@@ -4717,6 +4733,7 @@ def notify(title="HASS Configurator",
         LOG.warning("Exception while creating notification: %s" % err)
 
 def main(args):
+    """Main function, duh!"""
     global HTTPD
     if args:
         load_settings(args[0])
