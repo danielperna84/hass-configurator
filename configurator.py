@@ -1745,13 +1745,13 @@ INDEX = Template(r"""<!DOCTYPE html>
               <a class="col s3 waves-effect fbtoolbarbutton tooltipped modal-trigger" href="#modal_newfile" data-position="bottom" data-delay="500" data-tooltip="New File"><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">note_add</i></a>
               <a class="col s3 waves-effect fbtoolbarbutton tooltipped modal-trigger" href="#modal_newfolder" data-position="bottom" data-delay="500" data-tooltip="New Folder"><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">create_new_folder</i></a>
               <a class="col s3 waves-effect fbtoolbarbutton tooltipped modal-trigger" href="#modal_upload" data-position="bottom" data-delay="500" data-tooltip="Upload File"><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">file_upload</i></a>
-              <a class="col s3 waves-effect fbtoolbarbutton tooltipped dropdown-button" data-activates="dropdown_gitmenu" data-alignment='right' data-beloworigin='true' data-delay='500' data-position="bottom" data-tooltip="Git"><i class="mdi mdi-git grey-text text-darken-2 material-icons" style="padding-top: 17px;"></i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton tooltipped dropdown-button $githidden" data-activates="dropdown_gitmenu" data-alignment='right' data-beloworigin='true' data-delay='500' data-position="bottom" data-tooltip="Git"><i class="mdi mdi-git grey-text text-darken-2 material-icons" style="padding-top: 17px;"></i></a>
             </ul>
             <ul class="row center toolbar_mobile hide-on-med-and-up grey lighten-4" style="margin-bottom: 0;">
               <a class="col s3 waves-effect fbtoolbarbutton modal-trigger" href="#modal_newfile"><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">note_add</i></a>
               <a class="col s3 waves-effect fbtoolbarbutton modal-trigger" href="#modal_newfolder"><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">create_new_folder</i></a>
               <a class="col s3 waves-effect fbtoolbarbutton modal-trigger" href="#modal_upload"><i class="grey-text text-darken-2 material-icons fbtoolbarbutton_icon">file_upload</i></a>
-              <a class="col s3 waves-effect fbtoolbarbutton dropdown-button" data-activates="dropdown_gitmenu_mobile" data-alignment='right' data-beloworigin='true'><i class="mdi mdi-git grey-text text-darken-2 material-icons" style="padding-top: 17px;"></i></a>
+              <a class="col s3 waves-effect fbtoolbarbutton dropdown-button $githidden" data-activates="dropdown_gitmenu_mobile" data-alignment='right' data-beloworigin='true'><i class="mdi mdi-git grey-text text-darken-2 material-icons" style="padding-top: 17px;"></i></a>
             </ul>
           </li>
           <li>
@@ -3973,6 +3973,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                                               loadfile=loadfile,
                                               current=VERSION,
                                               versionclass=color,
+                                              githidden="" if GIT else "hiddendiv",
                                               separator="\%s" % os.sep if os.sep == "\\" else os.sep,
                                               listening_address="%s://%s:%i" % (
                                                   'https' if SSL_CERTIFICATE else 'http', LISTENIP, PORT),
