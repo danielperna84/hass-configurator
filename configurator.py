@@ -2283,12 +2283,12 @@ INDEX = Template(r"""<!DOCTYPE html>
             closeOnClick: false,
             draggable: true
         });
-        $('.ace_settings-collapse').sideNav({
+        /*$('.ace_settings-collapse').sideNav({
             menuWidth: 300,
             edge: 'right',
             closeOnClick: true,
             draggable: true
-        });
+        });*/
         // This fixes the dead spaces when trying to close the file browser
         $(document).on('click', '.drag-target', function(){$('.button-collapse').sideNav('hide');})
         listdir('.');
