@@ -1,4 +1,4 @@
-Version 0.3.0 (2018-)
+Version 0.3.0 (2018-07-13)
 - Allow passing settings via environment variables (Issue #100) @danielperna84
 - Added basic git stash functionality (Issue #16) @danielperna84
 - Added NOTIFY_SERVICE option @danielperna84
