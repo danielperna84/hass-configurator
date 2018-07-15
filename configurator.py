@@ -84,7 +84,15 @@ NOTIFY_SERVICE_DEFAULT = "persistent_notification.create"
 NOTIFY_SERVICE = NOTIFY_SERVICE_DEFAULT
 ### End of options
 
-LOGLEVEL = logging.INFO
+LOGLEVEL_MAPPING = {
+    "critical": logging.CRITICAL,
+    "error": logging.ERROR,
+    "warning": logging.WARNING,
+    "info": logging.INFO,
+    "debug": logging.DEBUG
+}
+DEFAULT_LOGLEVEL = "info"
+LOGLEVEL = LOGLEVEL_MAPPING.get(os.environ.get("HC_LOGLEVEL", DEFAULT_LOGLEVEL))
 LOG = logging.getLogger(__name__)
 LOG.setLevel(LOGLEVEL)
 SO = logging.StreamHandler(sys.stdout)
@@ -3438,6 +3446,8 @@ def load_settings(settingsfile):
             if os.path.isfile(settingsfile):
                 with open(settingsfile) as fptr:
                     settings = json.loads(fptr.read())
+                    LOG.debug("Settings from file:")
+                    LOG.debug(settings)
         except Exception as err:
             LOG.warning(err)
             LOG.warning("Not loading settings from file")
@@ -3457,6 +3467,8 @@ def load_settings(settingsfile):
             elif key[len(ENV_PREFIX):] in ["ALLOWED_NETWORKS", "BANNED_IPS", "IGNORE_PATTERN"]:
                 value = value.split(',')
             settings[key[len(ENV_PREFIX):]] = value
+    LOG.debug("Settings after looking at environment:")
+    LOG.debug(settings)
     GIT = settings.get("GIT", GIT)
     if GIT:
         try:
