@@ -3668,22 +3668,40 @@ class RequestHandler(BaseHTTPRequestHandler):
         req = urlparse(self.path)
         if SESAME or TOTP:
             chunk = req.path.split("/")[-1]
-            if chunk == SESAME or TOTP.verify(chunk):
-                if self.client_address[0] not in ALLOWED_NETWORKS:
-                    ALLOWED_NETWORKS.append(self.client_address[0])
-                if self.client_address[0] in BANNED_IPS:
-                    BANNED_IPS.remove(self.client_address[0])
-                url = req.path[:req.path.rfind(chunk)]
-                self.send_response(302)
-                self.send_header('Location', url)
-                self.end_headers()
-                data = {
-                    "title": "HASS Configurator - SESAME access",
-                    "message": "Your SESAME token has been used to whitelist " \
-                    "the IP address %s." % self.client_address[0]
-                }
-                notify(**data)
-                return
+            if SESAME:
+                if chunk == SESAME:
+                    if self.client_address[0] not in ALLOWED_NETWORKS:
+                        ALLOWED_NETWORKS.append(self.client_address[0])
+                    if self.client_address[0] in BANNED_IPS:
+                        BANNED_IPS.remove(self.client_address[0])
+                    url = req.path[:req.path.rfind(chunk)]
+                    self.send_response(302)
+                    self.send_header('Location', url)
+                    self.end_headers()
+                    data = {
+                        "title": "HASS Configurator - SESAME access",
+                        "message": "Your SESAME token has been used to whitelist " \
+                        "the IP address %s." % self.client_address[0]
+                    }
+                    notify(**data)
+                    return
+            if TOTP:
+                if TOTP.verify(chunk):
+                    if self.client_address[0] not in ALLOWED_NETWORKS:
+                        ALLOWED_NETWORKS.append(self.client_address[0])
+                    if self.client_address[0] in BANNED_IPS:
+                        BANNED_IPS.remove(self.client_address[0])
+                    url = req.path[:req.path.rfind(chunk)]
+                    self.send_response(302)
+                    self.send_header('Location', url)
+                    self.end_headers()
+                    data = {
+                        "title": "HASS Configurator - SESAME access",
+                        "message": "Your SESAME token has been used to whitelist " \
+                        "the IP address %s." % self.client_address[0]
+                    }
+                    notify(**data)
+                    return
         if not check_access(self.client_address[0]):
             self.do_BLOCK()
             return
