@@ -84,7 +84,15 @@ NOTIFY_SERVICE_DEFAULT = "persistent_notification.create"
 NOTIFY_SERVICE = NOTIFY_SERVICE_DEFAULT
 ### End of options
 
-LOGLEVEL = logging.INFO
+LOGLEVEL_MAPPING = {
+    "critical": logging.CRITICAL,
+    "error": logging.ERROR,
+    "warning": logging.WARNING,
+    "info": logging.INFO,
+    "debug": logging.DEBUG
+}
+DEFAULT_LOGLEVEL = "info"
+LOGLEVEL = LOGLEVEL_MAPPING.get(os.environ.get("HC_LOGLEVEL", DEFAULT_LOGLEVEL))
 LOG = logging.getLogger(__name__)
 LOG.setLevel(LOGLEVEL)
 SO = logging.StreamHandler(sys.stdout)
@@ -93,7 +101,7 @@ SO.setFormatter(
     logging.Formatter('%(levelname)s:%(asctime)s:%(name)s:%(message)s'))
 LOG.addHandler(SO)
 RELEASEURL = "https://api.github.com/repos/danielperna84/hass-configurator/releases/latest"
-VERSION = "0.3.0"
+VERSION = "0.3.1"
 BASEDIR = "."
 DEV = False
 LISTENPORT = None
@@ -1544,6 +1552,7 @@ INDEX = Template(r"""<!DOCTYPE html>
     <div id="modal_netstat" class="modal">
         <div class="modal-content">
             <h4 class="grey-text text-darken-3">Network status<i class="mdi mdi-network right grey-text text-darken-3" style="font-size: 2.48rem;"></i></h4>
+            <p><label for="your_address">Your address:&nbsp;</label><span id="your_address">$your_address</span></p>
             <p><label for="listening_address">Listening address:&nbsp;</label><span id="listening_address">$listening_address</span></p>
             <p><label for="hass_api_address">HASS API address:&nbsp;</label><span id="hass_api_address">$hass_api_address</span></p>
             <p>Modifying the following lists is not persistent. To statically control access please use the configuration file.</p>
@@ -3437,6 +3446,8 @@ def load_settings(settingsfile):
             if os.path.isfile(settingsfile):
                 with open(settingsfile) as fptr:
                     settings = json.loads(fptr.read())
+                    LOG.debug("Settings from file:")
+                    LOG.debug(settings)
         except Exception as err:
             LOG.warning(err)
             LOG.warning("Not loading settings from file")
@@ -3456,6 +3467,8 @@ def load_settings(settingsfile):
             elif key[len(ENV_PREFIX):] in ["ALLOWED_NETWORKS", "BANNED_IPS", "IGNORE_PATTERN"]:
                 value = value.split(',')
             settings[key[len(ENV_PREFIX):]] = value
+    LOG.debug("Settings after looking at environment:")
+    LOG.debug(settings)
     GIT = settings.get("GIT", GIT)
     if GIT:
         try:
@@ -3668,7 +3681,23 @@ class RequestHandler(BaseHTTPRequestHandler):
         req = urlparse(self.path)
         if SESAME or TOTP:
             chunk = req.path.split("/")[-1]
-            if chunk == SESAME or TOTP.verify(chunk):
+            if SESAME and chunk == SESAME:
+                if self.client_address[0] not in ALLOWED_NETWORKS:
+                    ALLOWED_NETWORKS.append(self.client_address[0])
+                if self.client_address[0] in BANNED_IPS:
+                    BANNED_IPS.remove(self.client_address[0])
+                url = req.path[:req.path.rfind(chunk)]
+                self.send_response(302)
+                self.send_header('Location', url)
+                self.end_headers()
+                data = {
+                    "title": "HASS Configurator - SESAME access",
+                    "message": "Your SESAME token has been used to whitelist " \
+                    "the IP address %s." % self.client_address[0]
+                }
+                notify(**data)
+                return
+            if TOTP and TOTP.verify(chunk):
                 if self.client_address[0] not in ALLOWED_NETWORKS:
                     ALLOWED_NETWORKS.append(self.client_address[0])
                 if self.client_address[0] in BANNED_IPS:
@@ -4010,6 +4039,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 githidden="" if GIT else "hiddendiv",
                 # pylint: disable=anomalous-backslash-in-string
                 separator="\%s" % os.sep if os.sep == "\\" else os.sep,
+                your_address=self.client_address[0],
                 listening_address="%s://%s:%i" % (
                     'https' if SSL_CERTIFICATE else 'http', LISTENIP, PORT),
                 hass_api_address="%s" % (HASS_API, ),

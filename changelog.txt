@@ -1,3 +1,8 @@
+Version 0.3.1 (2018-07-15)
+- Fix SESAME / SESAME_TOTP_SECRET bug (Issue #103) @danielperna84
+- Added client IP to network status modal @danielperna84
+- Allow setting logging level with environment variable HC_LOGLEVEL @danielperna84
+
 Version 0.3.0 (2018-07-13)
 - Allow passing settings via environment variables (Issue #100) @danielperna84
 - Added basic git stash functionality (Issue #16) @danielperna84
