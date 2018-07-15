@@ -1544,6 +1544,7 @@ INDEX = Template(r"""<!DOCTYPE html>
     <div id="modal_netstat" class="modal">
         <div class="modal-content">
             <h4 class="grey-text text-darken-3">Network status<i class="mdi mdi-network right grey-text text-darken-3" style="font-size: 2.48rem;"></i></h4>
+            <p><label for="your_address">Your address:&nbsp;</label><span id="your_address">$your_address</span></p>
             <p><label for="listening_address">Listening address:&nbsp;</label><span id="listening_address">$listening_address</span></p>
             <p><label for="hass_api_address">HASS API address:&nbsp;</label><span id="hass_api_address">$hass_api_address</span></p>
             <p>Modifying the following lists is not persistent. To statically control access please use the configuration file.</p>
@@ -4028,6 +4029,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 githidden="" if GIT else "hiddendiv",
                 # pylint: disable=anomalous-backslash-in-string
                 separator="\%s" % os.sep if os.sep == "\\" else os.sep,
+                your_address=self.client_address[0],
                 listening_address="%s://%s:%i" % (
                     'https' if SSL_CERTIFICATE else 'http', LISTENIP, PORT),
                 hass_api_address="%s" % (HASS_API, ),
