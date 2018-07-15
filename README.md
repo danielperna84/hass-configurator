@@ -30,6 +30,7 @@ There are no dependencies on Python modules that are not part of the standard li
 - Copy [configurator.py](https://github.com/danielperna84/hass-configurator/blob/master/configurator.py) to your HASS configuration directory (e.g /home/homeassistant/.homeassistant)
 - Make it executable (`sudo chmod 755 configurator.py`)
 - (Optional) Set the `GIT` variable in configurator.py to `True` if [GitPython](https://gitpython.readthedocs.io/) is installed on your system
+- (Optional) Install [pyotp](https://github.com/pyotp/pyotp) if you want to use the time based `SESAME` feature (see below).
 - Execute it (`sudo ./configurator.py`)
 - To terminate the process do the usual `CTRL+C`, maybe once or twice
 
