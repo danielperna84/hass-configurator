@@ -3504,6 +3504,7 @@ def load_settings(settingsfile):
         ssl._create_default_https_context = ssl._create_unverified_context
     USERNAME = settings.get("USERNAME", USERNAME)
     PASSWORD = settings.get("PASSWORD", PASSWORD)
+    PASSWORD = str(PASSWORD) if PASSWORD else None
     if CREDENTIALS and (USERNAME is None or PASSWORD is None):
         USERNAME = CREDENTIALS.split(":")[0]
         PASSWORD = ":".join(CREDENTIALS.split(":")[1:])
