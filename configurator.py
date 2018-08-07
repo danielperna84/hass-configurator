@@ -3489,10 +3489,29 @@ def load_settings(settingsfile):
     HASS_API_PASSWORD = settings.get("HASS_API_PASSWORD", HASS_API_PASSWORD)
     CREDENTIALS = settings.get("CREDENTIALS", CREDENTIALS)
     ALLOWED_NETWORKS = settings.get("ALLOWED_NETWORKS", ALLOWED_NETWORKS)
+    if ALLOWED_NETWORKS and not all(ALLOWED_NETWORKS):
+        LOG.warning("Invalid value for ALLOWED_NETWORKS. Using empty list.")
+        ALLOWED_NETWORKS = []
+    for net in ALLOWED_NETWORKS:
+        try:
+            ipaddress.ip_network(net)
+        except Exception:
+            LOG.warning("Invalid network in ALLOWED_NETWORKS: %s", net)
     BANNED_IPS = settings.get("BANNED_IPS", BANNED_IPS)
+    if BANNED_IPS and not all(BANNED_IPS):
+        LOG.warning("Invalid value for BANNED_IPS. Using empty list.")
+        BANNED_IPS = []
+    for banned_ip in BANNED_IPS:
+        try:
+            ipaddress.ip_address(banned_ip)
+        except Exception:
+            LOG.warning("Invalid IP address in BANNED_IPS: %s", banned_ip)
     BANLIMIT = settings.get("BANLIMIT", BANLIMIT)
     DEV = settings.get("DEV", DEV)
     IGNORE_PATTERN = settings.get("IGNORE_PATTERN", IGNORE_PATTERN)
+    if IGNORE_PATTERN and not all(IGNORE_PATTERN):
+        LOG.warning("Invalid value for IGNORE_PATTERN. Using empty list.")
+        IGNORE_PATTERN = []
     DIRSFIRST = settings.get("DIRSFIRST", DIRSFIRST)
     SESAME = settings.get("SESAME", SESAME)
     SESAME_TOTP_SECRET = settings.get("SESAME_TOTP_SECRET", SESAME_TOTP_SECRET)

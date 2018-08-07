@@ -1,5 +1,6 @@
 Version 0.3.2 (2018-)
 - Allow `PASSWORD` to be numeric (Issue #108) @danielperna84
+- Sanity check for `ALLOWED_NETWORKS`, `BANNED_IPS` and `IGNORE_PATTERN` (Issue #109) @danielperna84
 
 Version 0.3.1 (2018-07-15)
 - Fix SESAME / SESAME_TOTP_SECRET bug (Issue #103) @danielperna84
