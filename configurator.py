@@ -3749,8 +3749,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                     if ENFORCE_BASEPATH and not is_safe_path(BASEPATH, filename):
                         raise OSError('Access denied.')
                     if os.path.isfile(os.path.join(BASEDIR.encode('utf-8'), filename)):
-                        with open(os.path.join(BASEDIR.encode('utf-8'), filename)) as fptr:
-                            content += fptr.read()
+                        with open(os.path.join(BASEDIR.encode('utf-8'), filename), 'rb') as fptr:
+                            content += fptr.read().decode('utf-8')
                     else:
                         content = "File not found"
             except Exception as err:
