@@ -3664,7 +3664,6 @@ class RequestHandler(BaseHTTPRequestHandler):
     # pylint: disable=redefined-builtin
     def log_message(self, format, *args):
         LOG.info("%s - %s" % (self.client_address[0], format % args))
-        return
 
     # pylint: disable=invalid-name
     def do_BLOCK(self, status=420, reason="Policy not fulfilled"):
@@ -3719,6 +3718,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             return
         query = parse_qs(req.query)
         self.send_response(200)
+        # pylint: disable=no-else-return
         if req.path.endswith('/api/file'):
             content = ""
             self.send_header('Content-type', 'text/text')
@@ -3757,8 +3757,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                         self.end_headers()
                         self.wfile.write(filecontent)
                         return
-                    else:
-                        content = "File not found"
+                    content = "File not found"
             except Exception as err:
                 LOG.warning(err)
                 content = str(err)
@@ -4693,8 +4692,7 @@ class AuthHandler(RequestHandler):
                     LOG.warning("Blocking access from %s" % self.client_address[0])
                     self.do_BLOCK()
                     return
-                else:
-                    FAIL2BAN_IPS[self.client_address[0]] = bancounter + 1
+                FAIL2BAN_IPS[self.client_address[0]] = bancounter + 1
             self.do_AUTHHEAD()
             self.wfile.write(bytes('Authentication required', 'utf-8'))
 
@@ -4726,8 +4724,7 @@ class AuthHandler(RequestHandler):
                     LOG.warning("Blocking access from %s" % self.client_address[0])
                     self.do_BLOCK()
                     return
-                else:
-                    FAIL2BAN_IPS[self.client_address[0]] = bancounter + 1
+                FAIL2BAN_IPS[self.client_address[0]] = bancounter + 1
             self.do_AUTHHEAD()
             self.wfile.write(bytes('Authentication required', 'utf-8'))
 
