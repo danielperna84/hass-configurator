@@ -101,7 +101,7 @@ SO.setFormatter(
     logging.Formatter('%(levelname)s:%(asctime)s:%(name)s:%(message)s'))
 LOG.addHandler(SO)
 RELEASEURL = "https://api.github.com/repos/danielperna84/hass-configurator/releases/latest"
-VERSION = "0.3.1"
+VERSION = "0.3.2"
 BASEDIR = "."
 DEV = False
 LISTENPORT = None
@@ -3489,10 +3489,31 @@ def load_settings(settingsfile):
     HASS_API_PASSWORD = settings.get("HASS_API_PASSWORD", HASS_API_PASSWORD)
     CREDENTIALS = settings.get("CREDENTIALS", CREDENTIALS)
     ALLOWED_NETWORKS = settings.get("ALLOWED_NETWORKS", ALLOWED_NETWORKS)
+    if ALLOWED_NETWORKS and not all(ALLOWED_NETWORKS):
+        LOG.warning("Invalid value for ALLOWED_NETWORKS. Using empty list.")
+        ALLOWED_NETWORKS = []
+    for net in ALLOWED_NETWORKS:
+        try:
+            ipaddress.ip_network(net)
+        except Exception:
+            LOG.warning("Invalid network in ALLOWED_NETWORKS: %s", net)
+            ALLOWED_NETWORKS.remove(net)
     BANNED_IPS = settings.get("BANNED_IPS", BANNED_IPS)
+    if BANNED_IPS and not all(BANNED_IPS):
+        LOG.warning("Invalid value for BANNED_IPS. Using empty list.")
+        BANNED_IPS = []
+    for banned_ip in BANNED_IPS:
+        try:
+            ipaddress.ip_address(banned_ip)
+        except Exception:
+            LOG.warning("Invalid IP address in BANNED_IPS: %s", banned_ip)
+            BANNED_IPS.remove(banned_ip)
     BANLIMIT = settings.get("BANLIMIT", BANLIMIT)
     DEV = settings.get("DEV", DEV)
     IGNORE_PATTERN = settings.get("IGNORE_PATTERN", IGNORE_PATTERN)
+    if IGNORE_PATTERN and not all(IGNORE_PATTERN):
+        LOG.warning("Invalid value for IGNORE_PATTERN. Using empty list.")
+        IGNORE_PATTERN = []
     DIRSFIRST = settings.get("DIRSFIRST", DIRSFIRST)
     SESAME = settings.get("SESAME", SESAME)
     SESAME_TOTP_SECRET = settings.get("SESAME_TOTP_SECRET", SESAME_TOTP_SECRET)
@@ -3504,6 +3525,7 @@ def load_settings(settingsfile):
         ssl._create_default_https_context = ssl._create_unverified_context
     USERNAME = settings.get("USERNAME", USERNAME)
     PASSWORD = settings.get("PASSWORD", PASSWORD)
+    PASSWORD = str(PASSWORD) if PASSWORD else None
     if CREDENTIALS and (USERNAME is None or PASSWORD is None):
         USERNAME = CREDENTIALS.split(":")[0]
         PASSWORD = ":".join(CREDENTIALS.split(":")[1:])
@@ -3663,7 +3685,6 @@ class RequestHandler(BaseHTTPRequestHandler):
     # pylint: disable=redefined-builtin
     def log_message(self, format, *args):
         LOG.info("%s - %s" % (self.client_address[0], format % args))
-        return
 
     # pylint: disable=invalid-name
     def do_BLOCK(self, status=420, reason="Policy not fulfilled"):
@@ -3718,6 +3739,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             return
         query = parse_qs(req.query)
         self.send_response(200)
+        # pylint: disable=no-else-return
         if req.path.endswith('/api/file'):
             content = ""
             self.send_header('Content-type', 'text/text')
@@ -3729,8 +3751,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                     if ENFORCE_BASEPATH and not is_safe_path(BASEPATH, filename):
                         raise OSError('Access denied.')
                     if os.path.isfile(os.path.join(BASEDIR.encode('utf-8'), filename)):
-                        with open(os.path.join(BASEDIR.encode('utf-8'), filename)) as fptr:
-                            content += fptr.read()
+                        with open(os.path.join(BASEDIR.encode('utf-8'), filename), 'rb') as fptr:
+                            content += fptr.read().decode('utf-8')
                     else:
                         content = "File not found"
             except Exception as err:
@@ -3756,8 +3778,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                         self.end_headers()
                         self.wfile.write(filecontent)
                         return
-                    else:
-                        content = "File not found"
+                    content = "File not found"
             except Exception as err:
                 LOG.warning(err)
                 content = str(err)
@@ -4692,8 +4713,7 @@ class AuthHandler(RequestHandler):
                     LOG.warning("Blocking access from %s" % self.client_address[0])
                     self.do_BLOCK()
                     return
-                else:
-                    FAIL2BAN_IPS[self.client_address[0]] = bancounter + 1
+                FAIL2BAN_IPS[self.client_address[0]] = bancounter + 1
             self.do_AUTHHEAD()
             self.wfile.write(bytes('Authentication required', 'utf-8'))
 
@@ -4725,8 +4745,7 @@ class AuthHandler(RequestHandler):
                     LOG.warning("Blocking access from %s" % self.client_address[0])
                     self.do_BLOCK()
                     return
-                else:
-                    FAIL2BAN_IPS[self.client_address[0]] = bancounter + 1
+                FAIL2BAN_IPS[self.client_address[0]] = bancounter + 1
             self.do_AUTHHEAD()
             self.wfile.write(bytes('Authentication required', 'utf-8'))
 
