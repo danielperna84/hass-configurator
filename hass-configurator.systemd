@@ -5,6 +5,18 @@ After=network.target
 [Service]
 Type=simple
 User=homeassistant
+# Some security related options.
+# See https://www.freedesktop.org/software/systemd/man/systemd.exec.html for details.
+# NoNewPrivileges=true
+# ProtectSystem=true
+# InaccessiblePaths=-/mnt -/media
+# ReadOnlyPaths=/bin -/lib -/lib64 -/sbin
+# PrivateTmp=true
+# ProtectKernelTunables=true
+# ProtectKernelModules=true
+# ProtectControlGroups=true
+# RestrictRealtime=true
+
 # Set configuration options by specifying environment variables
 # Environment=HC_LISTENIP=0.0.0.0
 # Environment=HC_PORT=3218
