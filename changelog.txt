@@ -1,3 +1,6 @@
+Version 0.3.3 ()
+- Display covered last item in file browser
+
 Version 0.3.2 (2018-08-09)
 - Allow `PASSWORD` to be numeric (Issue #108) @danielperna84
 - Sanity check for `ALLOWED_NETWORKS`, `BANNED_IPS` and `IGNORE_PATTERN` (Issue #109) @danielperna84

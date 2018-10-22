@@ -283,6 +283,11 @@ INDEX = Template(r"""<!DOCTYPE html>
             border-bottom: 1px solid #eeeeee !important;
         }
 
+        .side-nav {
+            width: 337px !important;
+            height: 100% !important;
+        }
+
         .fb_side-nav li {
             line-height: 36px;
         }
