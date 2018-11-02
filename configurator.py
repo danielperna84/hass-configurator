@@ -3546,6 +3546,7 @@ def load_settings(settingsfile):
             LOG.warning("Unable to create TOTP object: %s" % err)
 
 def is_jwt(token):
+    """Perform basic check if token is a JWT token."""
     return len(token.split('.')) == 3
 
 def is_safe_path(basedir, path, follow_symlinks=True):
