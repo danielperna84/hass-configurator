@@ -1,5 +1,6 @@
 Version 0.3.3 ()
 - Display covered last item in file browser
+- Added support for long-lived JWT access tokens (Issue #118)
 
 Version 0.3.2 (2018-08-09)
 - Allow `PASSWORD` to be numeric (Issue #108) @danielperna84

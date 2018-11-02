@@ -3545,6 +3545,9 @@ def load_settings(settingsfile):
         except Exception as err:
             LOG.warning("Unable to create TOTP object: %s" % err)
 
+def is_jwt(token):
+    return len(token.split('.')) == 3
+
 def is_safe_path(basedir, path, follow_symlinks=True):
     """Check path for malicious traversal."""
     if basedir is None:
@@ -3879,7 +3882,10 @@ class RequestHandler(BaseHTTPRequestHandler):
                     "Content-Type": "application/json"
                 }
                 if HASS_API_PASSWORD:
-                    headers["x-ha-access"] = HASS_API_PASSWORD
+                    if is_jwt(HASS_API_PASSWORD):
+                        headers["Authorization"] = "Bearer %s" % HASS_API_PASSWORD
+                    else:
+                        headers["x-ha-access"] = HASS_API_PASSWORD
                 req = urllib.request.Request(
                     "%sservices/homeassistant/restart" % HASS_API,
                     headers=headers, method='POST')
@@ -3901,7 +3907,10 @@ class RequestHandler(BaseHTTPRequestHandler):
                     "Content-Type": "application/json"
                 }
                 if HASS_API_PASSWORD:
-                    headers["x-ha-access"] = HASS_API_PASSWORD
+                    if is_jwt(HASS_API_PASSWORD):
+                        headers["Authorization"] = "Bearer %s" % HASS_API_PASSWORD
+                    else:
+                        headers["x-ha-access"] = HASS_API_PASSWORD
                 req = urllib.request.Request(
                     "%sservices/homeassistant/check_config" % HASS_API,
                     headers=headers, method='POST')
@@ -3923,7 +3932,10 @@ class RequestHandler(BaseHTTPRequestHandler):
                     "Content-Type": "application/json"
                 }
                 if HASS_API_PASSWORD:
-                    headers["x-ha-access"] = HASS_API_PASSWORD
+                    if is_jwt(HASS_API_PASSWORD):
+                        headers["Authorization"] = "Bearer %s" % HASS_API_PASSWORD
+                    else:
+                        headers["x-ha-access"] = HASS_API_PASSWORD
                 req = urllib.request.Request(
                     "%sservices/automation/reload" % HASS_API,
                     headers=headers, method='POST')
@@ -3945,7 +3957,10 @@ class RequestHandler(BaseHTTPRequestHandler):
                     "Content-Type": "application/json"
                 }
                 if HASS_API_PASSWORD:
-                    headers["x-ha-access"] = HASS_API_PASSWORD
+                    if is_jwt(HASS_API_PASSWORD):
+                        headers["Authorization"] = "Bearer %s" % HASS_API_PASSWORD
+                    else:
+                        headers["x-ha-access"] = HASS_API_PASSWORD
                 req = urllib.request.Request(
                     "%sservices/script/reload" % HASS_API,
                     headers=headers, method='POST')
@@ -3967,7 +3982,10 @@ class RequestHandler(BaseHTTPRequestHandler):
                     "Content-Type": "application/json"
                 }
                 if HASS_API_PASSWORD:
-                    headers["x-ha-access"] = HASS_API_PASSWORD
+                    if is_jwt(HASS_API_PASSWORD):
+                        headers["Authorization"] = "Bearer %s" % HASS_API_PASSWORD
+                    else:
+                        headers["x-ha-access"] = HASS_API_PASSWORD
                 req = urllib.request.Request(
                     "%sservices/group/reload" % HASS_API,
                     headers=headers, method='POST')
@@ -3989,7 +4007,10 @@ class RequestHandler(BaseHTTPRequestHandler):
                     "Content-Type": "application/json"
                 }
                 if HASS_API_PASSWORD:
-                    headers["x-ha-access"] = HASS_API_PASSWORD
+                    if is_jwt(HASS_API_PASSWORD):
+                        headers["Authorization"] = "Bearer %s" % HASS_API_PASSWORD
+                    else:
+                        headers["x-ha-access"] = HASS_API_PASSWORD
                 req = urllib.request.Request(
                     "%sservices/homeassistant/reload_core_config" % HASS_API,
                     headers=headers, method='POST')
@@ -4019,7 +4040,10 @@ class RequestHandler(BaseHTTPRequestHandler):
                         "Content-Type": "application/json"
                     }
                     if HASS_API_PASSWORD:
-                        headers["x-ha-access"] = HASS_API_PASSWORD
+                        if is_jwt(HASS_API_PASSWORD):
+                            headers["Authorization"] = "Bearer %s" % HASS_API_PASSWORD
+                        else:
+                            headers["x-ha-access"] = HASS_API_PASSWORD
 
                     req = urllib.request.Request("%sservices" % HASS_API,
                                                  headers=headers, method='GET')
@@ -4778,7 +4802,10 @@ def notify(title="HASS Configurator",
     if notification_id and NOTIFY_SERVICE == NOTIFY_SERVICE_DEFAULT:
         data["notification_id"] = notification_id
     if HASS_API_PASSWORD:
-        headers["x-ha-access"] = HASS_API_PASSWORD
+        if is_jwt(HASS_API_PASSWORD):
+            headers["Authorization"] = "Bearer %s" % HASS_API_PASSWORD
+        else:
+            headers["x-ha-access"] = HASS_API_PASSWORD
     req = urllib.request.Request(
         "%sservices/%s" % (HASS_API, NOTIFY_SERVICE.replace('.', '/')),
         data=bytes(json.dumps(data).encode('utf-8')),
