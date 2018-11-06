@@ -101,7 +101,7 @@ SO.setFormatter(
     logging.Formatter('%(levelname)s:%(asctime)s:%(name)s:%(message)s'))
 LOG.addHandler(SO)
 RELEASEURL = "https://api.github.com/repos/danielperna84/hass-configurator/releases/latest"
-VERSION = "0.3.2"
+VERSION = "0.3.3"
 BASEDIR = "."
 DEV = False
 LISTENPORT = None
@@ -281,6 +281,11 @@ INDEX = Template(r"""<!DOCTYPE html>
 
         li.collection-item {
             border-bottom: 1px solid #eeeeee !important;
+        }
+
+        .side-nav {
+            width: 337px !important;
+            height: 100% !important;
         }
 
         .fb_side-nav li {
@@ -3540,6 +3545,10 @@ def load_settings(settingsfile):
         except Exception as err:
             LOG.warning("Unable to create TOTP object: %s" % err)
 
+def is_jwt(token):
+    """Perform basic check if token is a JWT token."""
+    return len(token.split('.')) == 3
+
 def is_safe_path(basedir, path, follow_symlinks=True):
     """Check path for malicious traversal."""
     if basedir is None:
@@ -3874,7 +3883,10 @@ class RequestHandler(BaseHTTPRequestHandler):
                     "Content-Type": "application/json"
                 }
                 if HASS_API_PASSWORD:
-                    headers["x-ha-access"] = HASS_API_PASSWORD
+                    if is_jwt(HASS_API_PASSWORD):
+                        headers["Authorization"] = "Bearer %s" % HASS_API_PASSWORD
+                    else:
+                        headers["x-ha-access"] = HASS_API_PASSWORD
                 req = urllib.request.Request(
                     "%sservices/homeassistant/restart" % HASS_API,
                     headers=headers, method='POST')
@@ -3896,7 +3908,10 @@ class RequestHandler(BaseHTTPRequestHandler):
                     "Content-Type": "application/json"
                 }
                 if HASS_API_PASSWORD:
-                    headers["x-ha-access"] = HASS_API_PASSWORD
+                    if is_jwt(HASS_API_PASSWORD):
+                        headers["Authorization"] = "Bearer %s" % HASS_API_PASSWORD
+                    else:
+                        headers["x-ha-access"] = HASS_API_PASSWORD
                 req = urllib.request.Request(
                     "%sservices/homeassistant/check_config" % HASS_API,
                     headers=headers, method='POST')
@@ -3918,7 +3933,10 @@ class RequestHandler(BaseHTTPRequestHandler):
                     "Content-Type": "application/json"
                 }
                 if HASS_API_PASSWORD:
-                    headers["x-ha-access"] = HASS_API_PASSWORD
+                    if is_jwt(HASS_API_PASSWORD):
+                        headers["Authorization"] = "Bearer %s" % HASS_API_PASSWORD
+                    else:
+                        headers["x-ha-access"] = HASS_API_PASSWORD
                 req = urllib.request.Request(
                     "%sservices/automation/reload" % HASS_API,
                     headers=headers, method='POST')
@@ -3940,7 +3958,10 @@ class RequestHandler(BaseHTTPRequestHandler):
                     "Content-Type": "application/json"
                 }
                 if HASS_API_PASSWORD:
-                    headers["x-ha-access"] = HASS_API_PASSWORD
+                    if is_jwt(HASS_API_PASSWORD):
+                        headers["Authorization"] = "Bearer %s" % HASS_API_PASSWORD
+                    else:
+                        headers["x-ha-access"] = HASS_API_PASSWORD
                 req = urllib.request.Request(
                     "%sservices/script/reload" % HASS_API,
                     headers=headers, method='POST')
@@ -3962,7 +3983,10 @@ class RequestHandler(BaseHTTPRequestHandler):
                     "Content-Type": "application/json"
                 }
                 if HASS_API_PASSWORD:
-                    headers["x-ha-access"] = HASS_API_PASSWORD
+                    if is_jwt(HASS_API_PASSWORD):
+                        headers["Authorization"] = "Bearer %s" % HASS_API_PASSWORD
+                    else:
+                        headers["x-ha-access"] = HASS_API_PASSWORD
                 req = urllib.request.Request(
                     "%sservices/group/reload" % HASS_API,
                     headers=headers, method='POST')
@@ -3984,7 +4008,10 @@ class RequestHandler(BaseHTTPRequestHandler):
                     "Content-Type": "application/json"
                 }
                 if HASS_API_PASSWORD:
-                    headers["x-ha-access"] = HASS_API_PASSWORD
+                    if is_jwt(HASS_API_PASSWORD):
+                        headers["Authorization"] = "Bearer %s" % HASS_API_PASSWORD
+                    else:
+                        headers["x-ha-access"] = HASS_API_PASSWORD
                 req = urllib.request.Request(
                     "%sservices/homeassistant/reload_core_config" % HASS_API,
                     headers=headers, method='POST')
@@ -4014,7 +4041,10 @@ class RequestHandler(BaseHTTPRequestHandler):
                         "Content-Type": "application/json"
                     }
                     if HASS_API_PASSWORD:
-                        headers["x-ha-access"] = HASS_API_PASSWORD
+                        if is_jwt(HASS_API_PASSWORD):
+                            headers["Authorization"] = "Bearer %s" % HASS_API_PASSWORD
+                        else:
+                            headers["x-ha-access"] = HASS_API_PASSWORD
 
                     req = urllib.request.Request("%sservices" % HASS_API,
                                                  headers=headers, method='GET')
@@ -4773,7 +4803,10 @@ def notify(title="HASS Configurator",
     if notification_id and NOTIFY_SERVICE == NOTIFY_SERVICE_DEFAULT:
         data["notification_id"] = notification_id
     if HASS_API_PASSWORD:
-        headers["x-ha-access"] = HASS_API_PASSWORD
+        if is_jwt(HASS_API_PASSWORD):
+            headers["Authorization"] = "Bearer %s" % HASS_API_PASSWORD
+        else:
+            headers["x-ha-access"] = HASS_API_PASSWORD
     req = urllib.request.Request(
         "%sservices/%s" % (HASS_API, NOTIFY_SERVICE.replace('.', '/')),
         data=bytes(json.dumps(data).encode('utf-8')),
