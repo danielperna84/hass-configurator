@@ -4200,7 +4200,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                             self.send_header('Content-type', 'text/json')
                             self.end_headers()
                             response['error'] = False
-                            response['message'] = "Deletetion successful"
+                            response['message'] = "Deletion successful"
                             self.wfile.write(bytes(json.dumps(response), "utf8"))
                             return
                         except Exception as err:
