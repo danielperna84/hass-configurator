@@ -670,11 +670,11 @@ INDEX = Template(r"""<!DOCTYPE html>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only markdirty hidesave" data-position="bottom" data-delay="500" data-tooltip="Save" onclick="save_check()"><i class="material-icons">save</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only modal-trigger" data-position="bottom" data-delay="500" data-tooltip="Close" href="#modal_close"><i class="material-icons">close</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="500" data-tooltip="Search" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
-                    <li><a class="waves-effect waves-light dropdown-button hide-on-small-only $versionclass" data-activates="dropdown_menu" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
+                    <li><a class="waves-effect waves-light dropdown-button hide-on-small-only $versionclass" data-activates="dropdown_menu" data-beloworigin="true"><i class="material-icons right">settings</i></a></li>
                     <li><a class="waves-effect waves-light hide-on-med-and-up markdirty hidesave" onclick="save_check()"><i class="material-icons">save</i></a></li>
                     <li><a class="waves-effect waves-light hide-on-med-and-up modal-trigger" href="#modal_close"><i class="material-icons">close</i></a></li>
                     <li><a class="waves-effect waves-light hide-on-med-and-up" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
-                    <li><a class="waves-effect waves-light dropdown-button hide-on-med-and-up $versionclass" data-activates="dropdown_menu_mobile" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
+                    <li><a class="waves-effect waves-light dropdown-button hide-on-med-and-up $versionclass" data-activates="dropdown_menu_mobile" data-beloworigin="true"><i class="material-icons right">settings</i></a></li>
                 </ul>
             </div>
         </nav>
@@ -1751,6 +1751,7 @@ INDEX = Template(r"""<!DOCTYPE html>
             <li><a class="btn-floating blue tooltipped" data-position="left" data-delay="50" data-tooltip="Indent" onclick="editor.execCommand('indent')"><i class="material-icons">format_indent_increase</i></a></li>
             <li><a class="btn-floating orange tooltipped" data-position="left" data-delay="50" data-tooltip="Outdent" onclick="editor.execCommand('outdent')"><i class="material-icons">format_indent_decrease</i></a></li>
             <li><a class="btn-floating brown tooltipped" data-position="left" data-delay="50" data-tooltip="Fold" onclick="toggle_fold()"><i class="material-icons">all_out</i></a></li>
+            <li><a class="btn-floating grey tooltipped" data-position="left" data-delay="50" data-tooltip="(Un)comment" onclick="editor.execCommand('togglecomment')">#</a></li>
           </ul>
         </div>
       </div>
