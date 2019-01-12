@@ -3461,7 +3461,7 @@ def load_settings(settingsfile):
         if key.startswith(ENV_PREFIX):
             # Convert booleans
             if value in ['true', 'false', 'True', 'False']:
-                value = True if value in ['true', 'True'] else False
+                value = value in ['true', 'True']
             # Convert None / null
             elif value in ['none', 'None', 'null']:
                 value = None
