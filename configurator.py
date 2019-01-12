@@ -3463,7 +3463,7 @@ def load_settings(settingsfile):
             if value in ['true', 'false', 'True', 'False']:
                 value = True if value in ['true', 'True'] else False
             # Convert None / null
-            elif value in ['none', 'None' 'null']:
+            elif value in ['none', 'None', 'null']:
                 value = None
             # Convert plain numbers
             elif value.isnumeric():
