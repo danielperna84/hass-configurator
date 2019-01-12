@@ -1,4 +1,5 @@
 Version 0.3.4 (2019-)
+- Spelling fix @nelsonblaha
 - Add env_var tag exception (Issue #138)
 
 Version 0.3.3 (2018-11-06)
