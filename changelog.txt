@@ -1,3 +1,6 @@
+Version 0.3.4 (2019-)
+- Add env_var tag exception (Issue #138)
+
 Version 0.3.3 (2018-11-06)
 - Display covered last item in file browser (Issue #120)
 - Proper displaying of file browser (Issue #121)

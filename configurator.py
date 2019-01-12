@@ -3387,7 +3387,7 @@ var lint_error = "";
 function check_lint() {
     if (document.getElementById('currentfile').value.match(".yaml$")) {
         try {
-            var text = editor.getValue().replace(/!(include|secret)/g,".$1"); // hack because js-yaml does not like !include/!secret
+            var text = editor.getValue().replace(/!(include|secret|env_var)/g,".$1"); // hack because js-yaml does not like !include/!secret
             jsyaml.safeLoad(text);
             lint_status.text("check_circle");
             lint_status.removeClass("cursor-pointer red-text grey-text");
