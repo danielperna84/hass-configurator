@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0" />
     <title>HASS Configurator</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/MaterialDesign-Webfont/2.0.46/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/MaterialDesign-Webfont/3.3.92/css/materialdesignicons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
     <style type="text/css" media="screen">
         body {
@@ -493,9 +493,9 @@
             height: auto;
         }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.3.3/ace.js" type="text/javascript" charset="utf-8"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.3.3/ext-modelist.js" type="text/javascript" charset="utf-8"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.3.3/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.2/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.2/ext-modelist.js" type="text/javascript" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.2/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
 </head>
 <body>
   <div class="preloader-background">
@@ -558,11 +558,11 @@
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only markdirty hidesave" data-position="bottom" data-delay="500" data-tooltip="Save" onclick="save_check()"><i class="material-icons">save</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only modal-trigger" data-position="bottom" data-delay="500" data-tooltip="Close" href="#modal_close"><i class="material-icons">close</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="500" data-tooltip="Search" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
-                    <li><a class="waves-effect waves-light dropdown-button hide-on-small-only $versionclass" data-activates="dropdown_menu" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
+                    <li><a class="waves-effect waves-light dropdown-button hide-on-small-only $versionclass" data-activates="dropdown_menu" data-beloworigin="true"><i class="material-icons right">settings</i></a></li>
                     <li><a class="waves-effect waves-light hide-on-med-and-up markdirty hidesave" onclick="save_check()"><i class="material-icons">save</i></a></li>
                     <li><a class="waves-effect waves-light hide-on-med-and-up modal-trigger" href="#modal_close"><i class="material-icons">close</i></a></li>
                     <li><a class="waves-effect waves-light hide-on-med-and-up" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
-                    <li><a class="waves-effect waves-light dropdown-button hide-on-med-and-up $versionclass" data-activates="dropdown_menu_mobile" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
+                    <li><a class="waves-effect waves-light dropdown-button hide-on-med-and-up $versionclass" data-activates="dropdown_menu_mobile" data-beloworigin="true"><i class="material-icons right">settings</i></a></li>
                 </ul>
             </div>
         </nav>
@@ -1157,7 +1157,7 @@
         <div class="modal-footer">
           <a onclick="ws_connect()" id="ws_b_c" class="modal-action waves-effect waves-green btn-flat light-blue-text">Connect</a>
           <a onclick="ws_disconnect()" id="ws_b_d" class="modal-action waves-effect waves-green btn-flat light-blue-text disabled">Disconnect</a>
-          <a class="modal-action modal-close waves-effect waves-red btn-flat light-blue-text">Close</a>
+          <a onclick="ws_disconnect()" class="modal-action modal-close waves-effect waves-red btn-flat light-blue-text">Close</a>
         </div>
     </div>
     <div id="modal_save" class="modal">
@@ -1639,6 +1639,7 @@
             <li><a class="btn-floating blue tooltipped" data-position="left" data-delay="50" data-tooltip="Indent" onclick="editor.execCommand('indent')"><i class="material-icons">format_indent_increase</i></a></li>
             <li><a class="btn-floating orange tooltipped" data-position="left" data-delay="50" data-tooltip="Outdent" onclick="editor.execCommand('outdent')"><i class="material-icons">format_indent_decrease</i></a></li>
             <li><a class="btn-floating brown tooltipped" data-position="left" data-delay="50" data-tooltip="Fold" onclick="toggle_fold()"><i class="material-icons">all_out</i></a></li>
+            <li><a class="btn-floating grey tooltipped" data-position="left" data-delay="50" data-tooltip="(Un)comment" onclick="editor.execCommand('togglecomment')">#</a></li>
           </ul>
         </div>
       </div>
@@ -1736,6 +1737,10 @@
               <p class="col s12">
                   <input type="checkbox" class="blue_check" onclick="set_save_prompt(this.checked)" id="savePrompt" />
                   <Label for="savePrompt">Prompt before save</label>
+              </p>
+              <p class="col s12">
+                <input type="checkbox" class="blue_check" onclick="set_hide_filedetails(this.checked)" id="hideDetails" />
+                <Label for="hideDetails">Hide details in browser</label>
               </p>
               <p class="col s12">
                   <input type="checkbox" class="blue_check" onclick="editor.setOption('animatedScroll', !editor.getOptions().animatedScroll)" id="animatedScroll" />
@@ -2035,7 +2040,7 @@
                   <input id="wrap_limit" type="number" onchange="editor.setOption('wrap', parseInt(this.value))" min="1" value="80">
                   <label class="active" for="wrap_limit">Wrap Limit</label>
               </div> <a class="waves-effect waves-light btn light-blue" onclick="save_ace_settings()">Save Settings Locally</a>
-              <p class="center col s12"> Ace Editor 1.3.3 </p>
+              <p class="center col s12"> Ace Editor 1.4.2 </p>
           </div>
         </ul>
       </div>
@@ -2054,10 +2059,18 @@
         try {
             ws = new WebSocket(document.getElementById("ws_uri").value);
             ws.addEventListener("open", function(event) {
-                var auth = {
-                    type: "auth",
-                    api_password: document.getElementById("ws_password").value
-                };
+                if (document.getElementById("ws_password").value.split(".").length == 3) {
+                    var auth = {
+                        type: "auth",
+                        access_token: document.getElementById("ws_password").value
+                    };
+                }
+                else {
+                    var auth = {
+                        type: "auth",
+                        api_password: document.getElementById("ws_password").value
+                    };
+                }
                 var data = {
                     id: 1,
                     type: "subscribe_events"
@@ -2198,6 +2211,7 @@
         $(document).on('click', '.drag-target', function(){$('.button-collapse').sideNav('hide');})
         listdir('.');
         document.getElementById('savePrompt').checked = get_save_prompt();
+        document.getElementById('hideDetails').checked = get_hide_filedetails();
         var entities_search = new Object();
         if (states_list) {
             for (var i = 0; i < states_list.length; i++) {
@@ -2423,7 +2437,9 @@
         }
 
         item.appendChild(itext);
-        item.appendChild(stats);
+        if (!get_hide_filedetails()) {
+            item.appendChild(stats);
+        }
 
         var dropdown = document.createElement('ul');
         dropdown.id = 'fb_dropdown_' + index;
@@ -2563,28 +2579,43 @@
             $('#modal_markdirty').modal('open');
         }
         else {
-            $.get("api/file?filename=" + filepath, function(data) {
-                fileparts = filepath.split('.');
-                extension = fileparts[fileparts.length -1];
-                if (modemapping.hasOwnProperty(extension)) {
-                    editor.setOption('mode', modemapping[extension]);
-                }
-                else {
-                    editor.setOption('mode', "ace/mode/text");
-                }
-                editor.getSession().setValue(data, -1);
-                document.getElementById('currentfile').value = decodeURI(filepath);
-                editor.session.getUndoManager().markClean();
-                $('.markdirty').each(function(i, o){o.classList.remove('red');});
-                $('.hidesave').css('opacity', 0);
-                document.title = filenameonly + " - HASS Configurator";
-                global_current_filepath = filepath;
-                global_current_filename = filenameonly;
-                var current_file = {current_filepath: global_current_filepath,
-                                    current_filename: global_current_filename}
-                localStorage.setItem('current_file', JSON.stringify(current_file));
-                check_lint();
-            });
+            url = "api/file?filename=" + filepath;
+            fileparts = filepath.split('.');
+            extension = fileparts[fileparts.length -1];
+            raw_open = [
+                "jpg",
+                "jpeg",
+                "png",
+                "svg",
+                "bmp",
+                "webp",
+                "gif"
+            ]
+            if (raw_open.indexOf(extension) > -1) {
+                window.open(url, '_blank');
+            }
+            else {
+                $.get(url, function(data) {
+                    if (modemapping.hasOwnProperty(extension)) {
+                        editor.setOption('mode', modemapping[extension]);
+                    }
+                    else {
+                        editor.setOption('mode', "ace/mode/text");
+                    }
+                    editor.getSession().setValue(data, -1);
+                    document.getElementById('currentfile').value = decodeURI(filepath);
+                    editor.session.getUndoManager().markClean();
+                    $('.markdirty').each(function(i, o){o.classList.remove('red');});
+                    $('.hidesave').css('opacity', 0);
+                    document.title = filenameonly + " - HASS Configurator";
+                    global_current_filepath = filepath;
+                    global_current_filename = filenameonly;
+                    var current_file = {current_filepath: global_current_filepath,
+                                        current_filename: global_current_filename}
+                    localStorage.setItem('current_file', JSON.stringify(current_file));
+                    check_lint();
+                });
+            }
         }
     }
 
@@ -3215,6 +3246,18 @@
         return false;
     }
 
+    function set_hide_filedetails(checked) {
+        localStorage.setItem('hide_filedetails', JSON.stringify({hide_filedetails: checked}));
+    }
+
+    function get_hide_filedetails() {
+        if (localStorage.getItem('hide_filedetails')) {
+            var hide_filedetails = JSON.parse(localStorage.getItem('hide_filedetails'));
+            return hide_filedetails.hide_filedetails;
+        }
+        return false;
+    }
+
     function apply_settings() {
         var options = editor.getOptions();
         for (var key in options) {
@@ -3266,7 +3309,7 @@
     }
 
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/3.12.0/js-yaml.js" type="text/javascript" charset="utf-8"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/3.12.1/js-yaml.js" type="text/javascript" charset="utf-8"></script>
 <script type="text/javascript">
 var lint_timeout;
 var lint_status = $('#lint-status'); // speed optimization
@@ -3275,7 +3318,7 @@ var lint_error = "";
 function check_lint() {
     if (document.getElementById('currentfile').value.match(".yaml$")) {
         try {
-            var text = editor.getValue().replace(/!(include|secret)/g,".$1"); // hack because js-yaml does not like !include/!secret
+            var text = editor.getValue().replace(/!(include|secret|env_var)/g,".$1"); // hack because js-yaml does not like !include/!secret
             jsyaml.safeLoad(text);
             lint_status.text("check_circle");
             lint_status.removeClass("cursor-pointer red-text grey-text");

@@ -1,3 +1,11 @@
+Version 0.3.4 (2019-01-27)
+- Spelling fix @nelsonblaha
+- Added env_var tag exception (Issue #138)
+- Event observer: support access tokens and disconnect on modal close (Issue #136)
+- Added editor option to hide file / directory stats (Issue #130)
+- Added HASS_WS_API option to correctly prefill the websocket URL
+- Open common image formats in new tab (Issue #133)
+
 Version 0.3.3 (2018-11-06)
 - Display covered last item in file browser (Issue #120)
 - Proper displaying of file browser (Issue #121)

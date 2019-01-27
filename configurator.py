@@ -20,6 +20,7 @@ import subprocess
 import logging
 import fnmatch
 import hashlib
+import mimetypes
 from string import Template
 from http.server import BaseHTTPRequestHandler
 import urllib.request
@@ -40,6 +41,9 @@ SSL_CERTIFICATE = None
 SSL_KEY = None
 # Set the destination where the HASS API is reachable
 HASS_API = "http://127.0.0.1:8123/api/"
+# Set the destination where the websocket API is reachable (if different
+# from HASS_API, e.g. wss://hass.example.com/api/websocket)
+HASS_WS_API = None
 # If a password is required to access the API, set it in the form of "password"
 # if you have HA ignoring SSL locally this is not needed if on same machine.
 HASS_API_PASSWORD = None
@@ -101,7 +105,7 @@ SO.setFormatter(
     logging.Formatter('%(levelname)s:%(asctime)s:%(name)s:%(message)s'))
 LOG.addHandler(SO)
 RELEASEURL = "https://api.github.com/repos/danielperna84/hass-configurator/releases/latest"
-VERSION = "0.3.3"
+VERSION = "0.3.4"
 BASEDIR = "."
 DEV = False
 LISTENPORT = None
@@ -117,7 +121,7 @@ INDEX = Template(r"""<!DOCTYPE html>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0" />
     <title>HASS Configurator</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/MaterialDesign-Webfont/2.0.46/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/MaterialDesign-Webfont/3.3.92/css/materialdesignicons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
     <style type="text/css" media="screen">
         body {
@@ -605,9 +609,9 @@ INDEX = Template(r"""<!DOCTYPE html>
             height: auto;
         }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.3.3/ace.js" type="text/javascript" charset="utf-8"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.3.3/ext-modelist.js" type="text/javascript" charset="utf-8"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.3.3/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.2/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.2/ext-modelist.js" type="text/javascript" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.2/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
 </head>
 <body>
   <div class="preloader-background">
@@ -670,11 +674,11 @@ INDEX = Template(r"""<!DOCTYPE html>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only markdirty hidesave" data-position="bottom" data-delay="500" data-tooltip="Save" onclick="save_check()"><i class="material-icons">save</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only modal-trigger" data-position="bottom" data-delay="500" data-tooltip="Close" href="#modal_close"><i class="material-icons">close</i></a></li>
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only" data-position="bottom" data-delay="500" data-tooltip="Search" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
-                    <li><a class="waves-effect waves-light dropdown-button hide-on-small-only $versionclass" data-activates="dropdown_menu" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
+                    <li><a class="waves-effect waves-light dropdown-button hide-on-small-only $versionclass" data-activates="dropdown_menu" data-beloworigin="true"><i class="material-icons right">settings</i></a></li>
                     <li><a class="waves-effect waves-light hide-on-med-and-up markdirty hidesave" onclick="save_check()"><i class="material-icons">save</i></a></li>
                     <li><a class="waves-effect waves-light hide-on-med-and-up modal-trigger" href="#modal_close"><i class="material-icons">close</i></a></li>
                     <li><a class="waves-effect waves-light hide-on-med-and-up" onclick="editor.execCommand('replace')"><i class="material-icons">search</i></a></li>
-                    <li><a class="waves-effect waves-light dropdown-button hide-on-med-and-up $versionclass" data-activates="dropdown_menu_mobile" data-beloworigin="true"><i class="material-icons right">more_vert</i></a></li>
+                    <li><a class="waves-effect waves-light dropdown-button hide-on-med-and-up $versionclass" data-activates="dropdown_menu_mobile" data-beloworigin="true"><i class="material-icons right">settings</i></a></li>
                 </ul>
             </div>
         </nav>
@@ -1269,7 +1273,7 @@ INDEX = Template(r"""<!DOCTYPE html>
         <div class="modal-footer">
           <a onclick="ws_connect()" id="ws_b_c" class="modal-action waves-effect waves-green btn-flat light-blue-text">Connect</a>
           <a onclick="ws_disconnect()" id="ws_b_d" class="modal-action waves-effect waves-green btn-flat light-blue-text disabled">Disconnect</a>
-          <a class="modal-action modal-close waves-effect waves-red btn-flat light-blue-text">Close</a>
+          <a onclick="ws_disconnect()" class="modal-action modal-close waves-effect waves-red btn-flat light-blue-text">Close</a>
         </div>
     </div>
     <div id="modal_save" class="modal">
@@ -1751,6 +1755,7 @@ INDEX = Template(r"""<!DOCTYPE html>
             <li><a class="btn-floating blue tooltipped" data-position="left" data-delay="50" data-tooltip="Indent" onclick="editor.execCommand('indent')"><i class="material-icons">format_indent_increase</i></a></li>
             <li><a class="btn-floating orange tooltipped" data-position="left" data-delay="50" data-tooltip="Outdent" onclick="editor.execCommand('outdent')"><i class="material-icons">format_indent_decrease</i></a></li>
             <li><a class="btn-floating brown tooltipped" data-position="left" data-delay="50" data-tooltip="Fold" onclick="toggle_fold()"><i class="material-icons">all_out</i></a></li>
+            <li><a class="btn-floating grey tooltipped" data-position="left" data-delay="50" data-tooltip="(Un)comment" onclick="editor.execCommand('togglecomment')">#</a></li>
           </ul>
         </div>
       </div>
@@ -1848,6 +1853,10 @@ INDEX = Template(r"""<!DOCTYPE html>
               <p class="col s12">
                   <input type="checkbox" class="blue_check" onclick="set_save_prompt(this.checked)" id="savePrompt" />
                   <Label for="savePrompt">Prompt before save</label>
+              </p>
+              <p class="col s12">
+                <input type="checkbox" class="blue_check" onclick="set_hide_filedetails(this.checked)" id="hideDetails" />
+                <Label for="hideDetails">Hide details in browser</label>
               </p>
               <p class="col s12">
                   <input type="checkbox" class="blue_check" onclick="editor.setOption('animatedScroll', !editor.getOptions().animatedScroll)" id="animatedScroll" />
@@ -2147,7 +2156,7 @@ INDEX = Template(r"""<!DOCTYPE html>
                   <input id="wrap_limit" type="number" onchange="editor.setOption('wrap', parseInt(this.value))" min="1" value="80">
                   <label class="active" for="wrap_limit">Wrap Limit</label>
               </div> <a class="waves-effect waves-light btn light-blue" onclick="save_ace_settings()">Save Settings Locally</a>
-              <p class="center col s12"> Ace Editor 1.3.3 </p>
+              <p class="center col s12"> Ace Editor 1.4.2 </p>
           </div>
         </ul>
       </div>
@@ -2166,10 +2175,18 @@ INDEX = Template(r"""<!DOCTYPE html>
         try {
             ws = new WebSocket(document.getElementById("ws_uri").value);
             ws.addEventListener("open", function(event) {
-                var auth = {
-                    type: "auth",
-                    api_password: document.getElementById("ws_password").value
-                };
+                if (document.getElementById("ws_password").value.split(".").length == 3) {
+                    var auth = {
+                        type: "auth",
+                        access_token: document.getElementById("ws_password").value
+                    };
+                }
+                else {
+                    var auth = {
+                        type: "auth",
+                        api_password: document.getElementById("ws_password").value
+                    };
+                }
                 var data = {
                     id: 1,
                     type: "subscribe_events"
@@ -2310,6 +2327,7 @@ INDEX = Template(r"""<!DOCTYPE html>
         $(document).on('click', '.drag-target', function(){$('.button-collapse').sideNav('hide');})
         listdir('.');
         document.getElementById('savePrompt').checked = get_save_prompt();
+        document.getElementById('hideDetails').checked = get_hide_filedetails();
         var entities_search = new Object();
         if (states_list) {
             for (var i = 0; i < states_list.length; i++) {
@@ -2535,7 +2553,9 @@ INDEX = Template(r"""<!DOCTYPE html>
         }
 
         item.appendChild(itext);
-        item.appendChild(stats);
+        if (!get_hide_filedetails()) {
+            item.appendChild(stats);
+        }
 
         var dropdown = document.createElement('ul');
         dropdown.id = 'fb_dropdown_' + index;
@@ -2675,28 +2695,43 @@ INDEX = Template(r"""<!DOCTYPE html>
             $('#modal_markdirty').modal('open');
         }
         else {
-            $.get("api/file?filename=" + filepath, function(data) {
-                fileparts = filepath.split('.');
-                extension = fileparts[fileparts.length -1];
-                if (modemapping.hasOwnProperty(extension)) {
-                    editor.setOption('mode', modemapping[extension]);
-                }
-                else {
-                    editor.setOption('mode', "ace/mode/text");
-                }
-                editor.getSession().setValue(data, -1);
-                document.getElementById('currentfile').value = decodeURI(filepath);
-                editor.session.getUndoManager().markClean();
-                $('.markdirty').each(function(i, o){o.classList.remove('red');});
-                $('.hidesave').css('opacity', 0);
-                document.title = filenameonly + " - HASS Configurator";
-                global_current_filepath = filepath;
-                global_current_filename = filenameonly;
-                var current_file = {current_filepath: global_current_filepath,
-                                    current_filename: global_current_filename}
-                localStorage.setItem('current_file', JSON.stringify(current_file));
-                check_lint();
-            });
+            url = "api/file?filename=" + filepath;
+            fileparts = filepath.split('.');
+            extension = fileparts[fileparts.length -1];
+            raw_open = [
+                "jpg",
+                "jpeg",
+                "png",
+                "svg",
+                "bmp",
+                "webp",
+                "gif"
+            ]
+            if (raw_open.indexOf(extension) > -1) {
+                window.open(url, '_blank');
+            }
+            else {
+                $.get(url, function(data) {
+                    if (modemapping.hasOwnProperty(extension)) {
+                        editor.setOption('mode', modemapping[extension]);
+                    }
+                    else {
+                        editor.setOption('mode', "ace/mode/text");
+                    }
+                    editor.getSession().setValue(data, -1);
+                    document.getElementById('currentfile').value = decodeURI(filepath);
+                    editor.session.getUndoManager().markClean();
+                    $('.markdirty').each(function(i, o){o.classList.remove('red');});
+                    $('.hidesave').css('opacity', 0);
+                    document.title = filenameonly + " - HASS Configurator";
+                    global_current_filepath = filepath;
+                    global_current_filename = filenameonly;
+                    var current_file = {current_filepath: global_current_filepath,
+                                        current_filename: global_current_filename}
+                    localStorage.setItem('current_file', JSON.stringify(current_file));
+                    check_lint();
+                });
+            }
         }
     }
 
@@ -3327,6 +3362,18 @@ INDEX = Template(r"""<!DOCTYPE html>
         return false;
     }
 
+    function set_hide_filedetails(checked) {
+        localStorage.setItem('hide_filedetails', JSON.stringify({hide_filedetails: checked}));
+    }
+
+    function get_hide_filedetails() {
+        if (localStorage.getItem('hide_filedetails')) {
+            var hide_filedetails = JSON.parse(localStorage.getItem('hide_filedetails'));
+            return hide_filedetails.hide_filedetails;
+        }
+        return false;
+    }
+
     function apply_settings() {
         var options = editor.getOptions();
         for (var key in options) {
@@ -3378,7 +3425,7 @@ INDEX = Template(r"""<!DOCTYPE html>
     }
 
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/3.12.0/js-yaml.js" type="text/javascript" charset="utf-8"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/3.12.1/js-yaml.js" type="text/javascript" charset="utf-8"></script>
 <script type="text/javascript">
 var lint_timeout;
 var lint_status = $('#lint-status'); // speed optimization
@@ -3387,7 +3434,7 @@ var lint_error = "";
 function check_lint() {
     if (document.getElementById('currentfile').value.match(".yaml$")) {
         try {
-            var text = editor.getValue().replace(/!(include|secret)/g,".$1"); // hack because js-yaml does not like !include/!secret
+            var text = editor.getValue().replace(/!(include|secret|env_var)/g,".$1"); // hack because js-yaml does not like !include/!secret
             jsyaml.safeLoad(text);
             lint_status.text("check_circle");
             lint_status.removeClass("cursor-pointer red-text grey-text");
@@ -3444,7 +3491,7 @@ def load_settings(settingsfile):
     HASS_API_PASSWORD, CREDENTIALS, ALLOWED_NETWORKS, BANNED_IPS, BANLIMIT, \
     DEV, IGNORE_PATTERN, DIRSFIRST, SESAME, VERIFY_HOSTNAME, ENFORCE_BASEPATH, \
     ENV_PREFIX, NOTIFY_SERVICE, USERNAME, PASSWORD, SESAME_TOTP_SECRET, TOTP, \
-    GIT, REPO, PORT, IGNORE_SSL
+    GIT, REPO, PORT, IGNORE_SSL, HASS_WS_API
     settings = {}
     if settingsfile:
         try:
@@ -3461,9 +3508,9 @@ def load_settings(settingsfile):
         if key.startswith(ENV_PREFIX):
             # Convert booleans
             if value in ['true', 'false', 'True', 'False']:
-                value = True if value in ['true', 'True'] else False
+                value = value in ['true', 'True']
             # Convert None / null
-            elif value in ['none', 'None' 'null']:
+            elif value in ['none', 'None', 'null']:
                 value = None
             # Convert plain numbers
             elif value.isnumeric():
@@ -3491,6 +3538,7 @@ def load_settings(settingsfile):
     SSL_CERTIFICATE = settings.get("SSL_CERTIFICATE", SSL_CERTIFICATE)
     SSL_KEY = settings.get("SSL_KEY", SSL_KEY)
     HASS_API = settings.get("HASS_API", HASS_API)
+    HASS_WS_API = settings.get("HASS_WS_API", HASS_WS_API)
     HASS_API_PASSWORD = settings.get("HASS_API_PASSWORD", HASS_API_PASSWORD)
     CREDENTIALS = settings.get("CREDENTIALS", CREDENTIALS)
     ALLOWED_NETWORKS = settings.get("ALLOWED_NETWORKS", ALLOWED_NETWORKS)
@@ -3751,23 +3799,39 @@ class RequestHandler(BaseHTTPRequestHandler):
         # pylint: disable=no-else-return
         if req.path.endswith('/api/file'):
             content = ""
-            self.send_header('Content-type', 'text/text')
-            self.end_headers()
             filename = query.get('filename', None)
             try:
                 if filename:
+                    is_raw = False
                     filename = unquote(filename[0]).encode('utf-8')
                     if ENFORCE_BASEPATH and not is_safe_path(BASEPATH, filename):
                         raise OSError('Access denied.')
-                    if os.path.isfile(os.path.join(BASEDIR.encode('utf-8'), filename)):
-                        with open(os.path.join(BASEDIR.encode('utf-8'), filename), 'rb') as fptr:
-                            content += fptr.read().decode('utf-8')
+                    filepath = os.path.join(BASEDIR.encode('utf-8'), filename)
+                    if os.path.isfile(filepath):
+                        mimetype = mimetypes.guess_type(filepath.decode('utf-8'))
+                        if mimetype[0] is not None:
+                            if mimetype[0].split('/')[0] == 'image':
+                                is_raw = True
+                        if is_raw:
+                            with open(filepath, 'rb') as fptr:
+                                content = fptr.read()
+                            self.send_header('Content-type', mimetype[0])
+                        else:
+                            with open(filepath, 'rb') as fptr:
+                                content += fptr.read().decode('utf-8')
+                            self.send_header('Content-type', 'text/text')
                     else:
+                        self.send_header('Content-type', 'text/text')
                         content = "File not found"
             except Exception as err:
                 LOG.warning(err)
+                self.send_header('Content-type', 'text/text')
                 content = str(err)
-            self.wfile.write(bytes(content, "utf8"))
+            self.end_headers()
+            if is_raw:
+                self.wfile.write(content)
+            else:
+                self.wfile.write(bytes(content, "utf8"))
             return
         elif req.path.endswith('/api/download'):
             content = ""
@@ -4080,6 +4144,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                 ws_api = "%s://%swebsocket" % (
                     "wss" if protocol == 'https' else 'ws', uri
                 )
+            if HASS_WS_API:
+                ws_api = HASS_WS_API
             html = get_html().safe_substitute(
                 services=services,
                 events=events,

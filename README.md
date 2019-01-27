@@ -10,8 +10,8 @@ While the configuration UI of [Home Assistant](https://home-assistant.io/) is st
 - Web-Based editor to modify your files with syntax highlighting and automatic yaml-linting
 - Upload and download files
 - Lists of available triggers, events, entities, conditions and services. Selected element gets inserted into the editor at the last cursor position.
-- Home Assistant event observer (connect to HASS via WebSocket and see all the events that happen)
-- Restart HASS directly with the click of a button
+- Home Assistant event observer (connect to Home Assistant via WebSocket and see all the events that happen)
+- Restart Home Assistant directly with the click of a button
 - SSL support
 - Optional authentication and IP filtering for added security
 - Direct links to Home Assistant documentation and icons
@@ -27,7 +27,7 @@ _WARNING_: This tool allows you to browse your filesystem and modify files. So b
 
 ### Installation
 There are no dependencies on Python modules that are not part of the standard library. And all the fancy JavaScript libraries are loaded from CDN (which means this does not work when you are offline).  
-- Copy [configurator.py](https://github.com/danielperna84/hass-configurator/blob/master/configurator.py) to your HASS configuration directory (e.g /home/homeassistant/.homeassistant)
+- Copy [configurator.py](https://github.com/danielperna84/hass-configurator/blob/master/configurator.py) to your Home Assistant configuration directory (e.g /home/homeassistant/.homeassistant)
 - Make it executable (`sudo chmod 755 configurator.py`)
 - (Optional) Set the `GIT` variable in configurator.py to `True` if [GitPython](https://gitpython.readthedocs.io/) is installed on your system
 - (Optional) Install [pyotp](https://github.com/pyotp/pyotp) if you want to use the time based `SESAME` feature (see below).
@@ -48,11 +48,13 @@ It is possible to place configurator.py somewhere else. Set the `BASEPATH` to so
 #### ENFORCE_BASEPATH (bool)
 Set ENFORCE_BASEPATH to `True` to lock the configurator into the basepath and thereby prevent it from opening files outside of the BASEPATH
 #### SSL_CERTIFICATE / SSL_KEY (string)
-If you're using SSL, set the paths to your SSL files here. This is similar to the SSL setup you can do in HASS.
+If you're using SSL, set the paths to your SSL files here. This is similar to the SSL setup you can do in Home Assistant.
 #### HASS_API (string)
-The configurator fetches some data from your running HASS instance. If the API isn't available through the default URL, modify this variable to fix this.
+The configurator fetches some data from your running Home Assistant instance. If the API isn't available through the default URL, modify this variable to fix this. E.g. `http://192.168.1.2:8123/api/`
+#### HASS_WS_API (string)
+The event observer requires direct access to the websocket API of Home Assistant. Use this option to prefill the URL in event observer dialog with the correct address. E.g. `wss://hass.example.com/api/websocket`. Without this option set the configurator uses the value of `HASS_API`, which might not always be the correct value.
 #### HASS_API_PASSWORD (string)
-If you plan on using API functions (reloading stuff, fetching entities and services etc.), you have to set your API password. Calling the API of HASS is prohibited without authentication. Both the old fashioned `api_password` and the _new_ [long-lived access tokens](https://developers.home-assistant.io/docs/en/auth_api.html#long-lived-access-token) (you can create those on your profile page at http://your-hass-address.com/profile) are supported.
+If you plan on using API functions (reloading stuff, fetching entities and services etc.), you have to set your API password. Calling the API of Home Assistant is prohibited without authentication. Both the old fashioned `api_password` and the _new_ [long-lived access tokens](https://developers.home-assistant.io/docs/en/auth_api.html#long-lived-access-token) (you can create those on your profile page at http://your-hass-address.com/profile) are supported.
 #### IGNORE_SSL (bool)
 Set IGNORE_SSL to `True` to disable SSL verification when connecting to the Home Assistant API (while fetching entities etc., not in your browser). This is useful if Home Assistant is configured with SSL, but the configurator accesses it via IP, in which case SSL verification will fail.
 #### USERNAME (string)
@@ -119,8 +121,8 @@ Starting at version 0.2.5 you can add / remove IP addresses and networks from an
    #### Example:
    - Example: `curl -d "method=ban&ip=9.9.9.9" -X POST http://127.0.0.1:3218/api/banned_ips`
 
-### Embedding into HASS
-HASS has the [panel_iframe](https://home-assistant.io/components/panel_iframe/) component. With this it is possible to embed the configurator directly into HASS, allowing you to modify your configuration through the HASS frontend.  
+### Embedding into Home Assistant
+Home Assistant has the [panel_iframe](https://home-assistant.io/components/panel_iframe/) component. With this it is possible to embed the configurator directly into Home Assistant, allowing you to modify your configuration through the Home Assistant frontend.  
 An example configuration would look like this:
 
 ```yaml
@@ -130,16 +132,16 @@ panel_iframe:
     icon: mdi:wrench
     url: http://123.123.132.132:3218
 ```
-__IMPORTANT__: Be careful when setting up port forwarding to the configurator while embedding into HASS. If you don't restrict access by requiring authentication and / or blocking based on client IP addresses, your configuration will be exposed to the web!
+__IMPORTANT__: Be careful when setting up port forwarding to the configurator while embedding into Home Assistant. If you don't restrict access by requiring authentication and / or blocking based on client IP addresses, your configuration will be exposed to the web!
 
 ### Keeping the configurator running
 Since the configurator script on its own is no service, you'll have to take some extra steps to keep it running. Here are three options (for Linux), but there are more, depending on your usecase.
 
 1. Simple fork into the background with the command `nohup sudo ./configurator.py &`
-2. If your system is using systemd (that's usually what you'll find on a Raspberry PI), there's a [template file](https://github.com/danielperna84/hass-configurator/blob/master/hass-configurator.systemd) you can use and then apply the same process to integrate it as mentioned in the [HASS documentation](https://home-assistant.io/getting-started/autostart-systemd/). If you use this method you have to set the `BASEPATH` variable according to your environment.
+2. If your system is using systemd (that's usually what you'll find on a Raspberry PI), there's a [template file](https://github.com/danielperna84/hass-configurator/blob/master/hass-configurator.systemd) you can use and then apply the same process to integrate it as mentioned in the [Home Assistant documentation](https://home-assistant.io/getting-started/autostart-systemd/). If you use this method you have to set the `BASEPATH` variable according to your environment.
 3. If you have [supervisor](http://supervisord.org/) running on your system, [hass-poc-configurator.supervisor](https://github.com/danielperna84/hass-configurator/blob/master/hass-configurator.supervisor) would be an example configuration you could use to control the configurator.
 4. A tool called [tmux](https://tmux.github.io/), which should be pre-installed with recent AIO installers.
-5. A tool called [screen](http://ss64.com/bash/screen.html). If it's not already installed on your system, you can do `sudo apt-get install screen` to get it. When it's installed, start a screen session by executing `screen`. Then navigate to your HASS directory and start the configurator like described above. Put the screen session into the background by pressing `CTRL+A` and then `CTRL+D`.
+5. A tool called [screen](http://ss64.com/bash/screen.html). If it's not already installed on your system, you can do `sudo apt-get install screen` to get it. When it's installed, start a screen session by executing `screen`. Then navigate to your Home Assistant directory and start the configurator like described above. Put the screen session into the background by pressing `CTRL+A` and then `CTRL+D`.
 To resume the screen session, log in to your machine and execute `screen -r`.
 
 ### Docker
