@@ -1269,7 +1269,7 @@ INDEX = Template(r"""<!DOCTYPE html>
         <div class="modal-footer">
           <a onclick="ws_connect()" id="ws_b_c" class="modal-action waves-effect waves-green btn-flat light-blue-text">Connect</a>
           <a onclick="ws_disconnect()" id="ws_b_d" class="modal-action waves-effect waves-green btn-flat light-blue-text disabled">Disconnect</a>
-          <a class="modal-action modal-close waves-effect waves-red btn-flat light-blue-text">Close</a>
+          <a onclick="ws_disconnect()" class="modal-action modal-close waves-effect waves-red btn-flat light-blue-text">Close</a>
         </div>
     </div>
     <div id="modal_save" class="modal">
@@ -2167,10 +2167,18 @@ INDEX = Template(r"""<!DOCTYPE html>
         try {
             ws = new WebSocket(document.getElementById("ws_uri").value);
             ws.addEventListener("open", function(event) {
-                var auth = {
-                    type: "auth",
-                    api_password: document.getElementById("ws_password").value
-                };
+                if (document.getElementById("ws_password").value.split(".").length == 3) {
+                    var auth = {
+                        type: "auth",
+                        access_token: document.getElementById("ws_password").value
+                    };
+                }
+                else {
+                    var auth = {
+                        type: "auth",
+                        api_password: document.getElementById("ws_password").value
+                    };
+                }
                 var data = {
                     id: 1,
                     type: "subscribe_events"
