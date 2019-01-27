@@ -5,6 +5,7 @@ Version 0.3.4 (2019-01-27)
 - Added editor option to hide file / directory stats (Issue #130)
 - Added HASS_WS_API option to correctly prefill the websocket URL
 - Open common image formats in new tab (Issue #133)
+- Update dependencies
 
 Version 0.3.3 (2018-11-06)
 - Display covered last item in file browser (Issue #120)
