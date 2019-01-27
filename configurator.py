@@ -40,6 +40,9 @@ SSL_CERTIFICATE = None
 SSL_KEY = None
 # Set the destination where the HASS API is reachable
 HASS_API = "http://127.0.0.1:8123/api/"
+# Set the destination where the websocket API is reachable (if different
+# from HASS_API, e.g. wss://hass.example.com/api/websocket)
+HASS_WS_API = None
 # If a password is required to access the API, set it in the form of "password"
 # if you have HA ignoring SSL locally this is not needed if on same machine.
 HASS_API_PASSWORD = None
@@ -3472,7 +3475,7 @@ def load_settings(settingsfile):
     HASS_API_PASSWORD, CREDENTIALS, ALLOWED_NETWORKS, BANNED_IPS, BANLIMIT, \
     DEV, IGNORE_PATTERN, DIRSFIRST, SESAME, VERIFY_HOSTNAME, ENFORCE_BASEPATH, \
     ENV_PREFIX, NOTIFY_SERVICE, USERNAME, PASSWORD, SESAME_TOTP_SECRET, TOTP, \
-    GIT, REPO, PORT, IGNORE_SSL
+    GIT, REPO, PORT, IGNORE_SSL, HASS_WS_API
     settings = {}
     if settingsfile:
         try:
@@ -3519,6 +3522,7 @@ def load_settings(settingsfile):
     SSL_CERTIFICATE = settings.get("SSL_CERTIFICATE", SSL_CERTIFICATE)
     SSL_KEY = settings.get("SSL_KEY", SSL_KEY)
     HASS_API = settings.get("HASS_API", HASS_API)
+    HASS_WS_API = settings.get("HASS_WS_API", HASS_WS_API)
     HASS_API_PASSWORD = settings.get("HASS_API_PASSWORD", HASS_API_PASSWORD)
     CREDENTIALS = settings.get("CREDENTIALS", CREDENTIALS)
     ALLOWED_NETWORKS = settings.get("ALLOWED_NETWORKS", ALLOWED_NETWORKS)
@@ -4108,6 +4112,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                 ws_api = "%s://%swebsocket" % (
                     "wss" if protocol == 'https' else 'ws', uri
                 )
+            if HASS_WS_API:
+                ws_api = HASS_WS_API
             html = get_html().safe_substitute(
                 services=services,
                 events=events,
