@@ -2579,28 +2579,43 @@
             $('#modal_markdirty').modal('open');
         }
         else {
-            $.get("api/file?filename=" + filepath, function(data) {
-                fileparts = filepath.split('.');
-                extension = fileparts[fileparts.length -1];
-                if (modemapping.hasOwnProperty(extension)) {
-                    editor.setOption('mode', modemapping[extension]);
-                }
-                else {
-                    editor.setOption('mode', "ace/mode/text");
-                }
-                editor.getSession().setValue(data, -1);
-                document.getElementById('currentfile').value = decodeURI(filepath);
-                editor.session.getUndoManager().markClean();
-                $('.markdirty').each(function(i, o){o.classList.remove('red');});
-                $('.hidesave').css('opacity', 0);
-                document.title = filenameonly + " - HASS Configurator";
-                global_current_filepath = filepath;
-                global_current_filename = filenameonly;
-                var current_file = {current_filepath: global_current_filepath,
-                                    current_filename: global_current_filename}
-                localStorage.setItem('current_file', JSON.stringify(current_file));
-                check_lint();
-            });
+            url = "api/file?filename=" + filepath;
+            fileparts = filepath.split('.');
+            extension = fileparts[fileparts.length -1];
+            raw_open = [
+                "jpg",
+                "jpeg",
+                "png",
+                "svg",
+                "bmp",
+                "webp",
+                "gif"
+            ]
+            if (raw_open.indexOf(extension) > -1) {
+                window.open(url, '_blank');
+            }
+            else {
+                $.get(url, function(data) {
+                    if (modemapping.hasOwnProperty(extension)) {
+                        editor.setOption('mode', modemapping[extension]);
+                    }
+                    else {
+                        editor.setOption('mode', "ace/mode/text");
+                    }
+                    editor.getSession().setValue(data, -1);
+                    document.getElementById('currentfile').value = decodeURI(filepath);
+                    editor.session.getUndoManager().markClean();
+                    $('.markdirty').each(function(i, o){o.classList.remove('red');});
+                    $('.hidesave').css('opacity', 0);
+                    document.title = filenameonly + " - HASS Configurator";
+                    global_current_filepath = filepath;
+                    global_current_filename = filenameonly;
+                    var current_file = {current_filepath: global_current_filepath,
+                                        current_filename: global_current_filename}
+                    localStorage.setItem('current_file', JSON.stringify(current_file));
+                    check_lint();
+                });
+            }
         }
     }
 

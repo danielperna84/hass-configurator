@@ -20,6 +20,7 @@ import subprocess
 import logging
 import fnmatch
 import hashlib
+import mimetypes
 from string import Template
 from http.server import BaseHTTPRequestHandler
 import urllib.request
@@ -2694,28 +2695,43 @@ INDEX = Template(r"""<!DOCTYPE html>
             $('#modal_markdirty').modal('open');
         }
         else {
-            $.get("api/file?filename=" + filepath, function(data) {
-                fileparts = filepath.split('.');
-                extension = fileparts[fileparts.length -1];
-                if (modemapping.hasOwnProperty(extension)) {
-                    editor.setOption('mode', modemapping[extension]);
-                }
-                else {
-                    editor.setOption('mode', "ace/mode/text");
-                }
-                editor.getSession().setValue(data, -1);
-                document.getElementById('currentfile').value = decodeURI(filepath);
-                editor.session.getUndoManager().markClean();
-                $('.markdirty').each(function(i, o){o.classList.remove('red');});
-                $('.hidesave').css('opacity', 0);
-                document.title = filenameonly + " - HASS Configurator";
-                global_current_filepath = filepath;
-                global_current_filename = filenameonly;
-                var current_file = {current_filepath: global_current_filepath,
-                                    current_filename: global_current_filename}
-                localStorage.setItem('current_file', JSON.stringify(current_file));
-                check_lint();
-            });
+            url = "api/file?filename=" + filepath;
+            fileparts = filepath.split('.');
+            extension = fileparts[fileparts.length -1];
+            raw_open = [
+                "jpg",
+                "jpeg",
+                "png",
+                "svg",
+                "bmp",
+                "webp",
+                "gif"
+            ]
+            if (raw_open.indexOf(extension) > -1) {
+                window.open(url, '_blank');
+            }
+            else {
+                $.get(url, function(data) {
+                    if (modemapping.hasOwnProperty(extension)) {
+                        editor.setOption('mode', modemapping[extension]);
+                    }
+                    else {
+                        editor.setOption('mode', "ace/mode/text");
+                    }
+                    editor.getSession().setValue(data, -1);
+                    document.getElementById('currentfile').value = decodeURI(filepath);
+                    editor.session.getUndoManager().markClean();
+                    $('.markdirty').each(function(i, o){o.classList.remove('red');});
+                    $('.hidesave').css('opacity', 0);
+                    document.title = filenameonly + " - HASS Configurator";
+                    global_current_filepath = filepath;
+                    global_current_filename = filenameonly;
+                    var current_file = {current_filepath: global_current_filepath,
+                                        current_filename: global_current_filename}
+                    localStorage.setItem('current_file', JSON.stringify(current_file));
+                    check_lint();
+                });
+            }
         }
     }
 
@@ -3783,23 +3799,39 @@ class RequestHandler(BaseHTTPRequestHandler):
         # pylint: disable=no-else-return
         if req.path.endswith('/api/file'):
             content = ""
-            self.send_header('Content-type', 'text/text')
-            self.end_headers()
             filename = query.get('filename', None)
             try:
                 if filename:
+                    is_raw = False
                     filename = unquote(filename[0]).encode('utf-8')
                     if ENFORCE_BASEPATH and not is_safe_path(BASEPATH, filename):
                         raise OSError('Access denied.')
-                    if os.path.isfile(os.path.join(BASEDIR.encode('utf-8'), filename)):
-                        with open(os.path.join(BASEDIR.encode('utf-8'), filename), 'rb') as fptr:
-                            content += fptr.read().decode('utf-8')
+                    filepath = os.path.join(BASEDIR.encode('utf-8'), filename)
+                    if os.path.isfile(filepath):
+                        mimetype = mimetypes.guess_type(filepath.decode('utf-8'))
+                        if mimetype[0] is not None:
+                            if mimetype[0].split('/')[0] == 'image':
+                                is_raw = True
+                        if is_raw:
+                            with open(filepath, 'rb') as fptr:
+                                content = fptr.read()
+                            self.send_header('Content-type', mimetype[0])
+                        else:
+                            with open(filepath, 'rb') as fptr:
+                                content += fptr.read().decode('utf-8')
+                            self.send_header('Content-type', 'text/text')
                     else:
+                        self.send_header('Content-type', 'text/text')
                         content = "File not found"
             except Exception as err:
                 LOG.warning(err)
+                self.send_header('Content-type', 'text/text')
                 content = str(err)
-            self.wfile.write(bytes(content, "utf8"))
+            self.end_headers()
+            if is_raw:
+                self.wfile.write(content)
+            else:
+                self.wfile.write(bytes(content, "utf8"))
             return
         elif req.path.endswith('/api/download'):
             content = ""
