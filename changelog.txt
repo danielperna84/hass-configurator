@@ -2,6 +2,7 @@ Version 0.3.4 (2019-)
 - Spelling fix @nelsonblaha
 - Add env_var tag exception (Issue #138)
 - Event observer: support access tokens and disconnect on modal close (Issue #136)
+- Added editor option to hide file / directory stats (Issue #130)
 
 Version 0.3.3 (2018-11-06)
 - Display covered last item in file browser (Issue #120)

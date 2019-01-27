@@ -1851,6 +1851,10 @@ INDEX = Template(r"""<!DOCTYPE html>
                   <Label for="savePrompt">Prompt before save</label>
               </p>
               <p class="col s12">
+                <input type="checkbox" class="blue_check" onclick="set_hide_filedetails(this.checked)" id="hideDetails" />
+                <Label for="hideDetails">Hide details in browser</label>
+              </p>
+              <p class="col s12">
                   <input type="checkbox" class="blue_check" onclick="editor.setOption('animatedScroll', !editor.getOptions().animatedScroll)" id="animatedScroll" />
                   <Label for="animatedScroll">Animated Scroll</label>
               </p>
@@ -2148,7 +2152,7 @@ INDEX = Template(r"""<!DOCTYPE html>
                   <input id="wrap_limit" type="number" onchange="editor.setOption('wrap', parseInt(this.value))" min="1" value="80">
                   <label class="active" for="wrap_limit">Wrap Limit</label>
               </div> <a class="waves-effect waves-light btn light-blue" onclick="save_ace_settings()">Save Settings Locally</a>
-              <p class="center col s12"> Ace Editor 1.3.3 </p>
+              <p class="center col s12"> Ace Editor 1.4.2 </p>
           </div>
         </ul>
       </div>
@@ -2319,6 +2323,7 @@ INDEX = Template(r"""<!DOCTYPE html>
         $(document).on('click', '.drag-target', function(){$('.button-collapse').sideNav('hide');})
         listdir('.');
         document.getElementById('savePrompt').checked = get_save_prompt();
+        document.getElementById('hideDetails').checked = get_hide_filedetails();
         var entities_search = new Object();
         if (states_list) {
             for (var i = 0; i < states_list.length; i++) {
@@ -2544,7 +2549,9 @@ INDEX = Template(r"""<!DOCTYPE html>
         }
 
         item.appendChild(itext);
-        item.appendChild(stats);
+        if (!get_hide_filedetails()) {
+            item.appendChild(stats);
+        }
 
         var dropdown = document.createElement('ul');
         dropdown.id = 'fb_dropdown_' + index;
@@ -3332,6 +3339,18 @@ INDEX = Template(r"""<!DOCTYPE html>
         if (localStorage.getItem('save_prompt')) {
             var save_prompt = JSON.parse(localStorage.getItem('save_prompt'));
             return save_prompt.save_prompt;
+        }
+        return false;
+    }
+
+    function set_hide_filedetails(checked) {
+        localStorage.setItem('hide_filedetails', JSON.stringify({hide_filedetails: checked}));
+    }
+
+    function get_hide_filedetails() {
+        if (localStorage.getItem('hide_filedetails')) {
+            var hide_filedetails = JSON.parse(localStorage.getItem('hide_filedetails'));
+            return hide_filedetails.hide_filedetails;
         }
         return false;
     }
