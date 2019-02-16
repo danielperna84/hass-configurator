@@ -65,6 +65,8 @@ Set the password that should be used for authentication. Only if `USERNAME` __an
 The credentials in the form of `"username:password"` are now deprecated and should be removed from you configuration. Replace it by specifying `USERNAME` and `PASSWORD`. It will still work though to ensure backwards compatibility.
 #### ALLOWED_NETWORKS (list)
 Limit access to the configurator by adding allowed IP addresses / networks to the list, e.g `ALLOWED_NETWORKS = ["192.168.0.0/24", "172.16.47.23"]`. If you are using the [hass.io addon](https://www.home-assistant.io/addons/configurator/) of the configurator, add the docker-network `172.30.0.0/16` to this list.
+#### ALLOWED_DOMAINS
+ALlow access to the configurator to client IP addesses which match the result of DNS lookups for the specified domains.
 #### BANNED_IPS (list)
 List of statically banned IP addresses, e.g. `BANNED_IPS = ["1.1.1.1", "2.2.2.2"]`
 #### BANLIMIT (integer)

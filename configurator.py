@@ -57,6 +57,9 @@ PASSWORD = None
 # Limit access to the configurator by adding allowed IP addresses / networks to
 # the list, e.g ALLOWED_NETWORKS = ["192.168.0.0/24", "172.16.47.23"]
 ALLOWED_NETWORKS = []
+# Allow access to the configurator to client IP addesses which match the result
+# of DNS lookups for the specified domains.
+ALLOWED_DOMAINS = []
 # List of statically banned IP addresses, e.g. ["1.1.1.1", "2.2.2.2"]
 BANNED_IPS = []
 # Ban IPs after n failed login attempts. Restart service to reset banning.
@@ -3491,7 +3494,7 @@ def load_settings(settingsfile):
     HASS_API_PASSWORD, CREDENTIALS, ALLOWED_NETWORKS, BANNED_IPS, BANLIMIT, \
     DEV, IGNORE_PATTERN, DIRSFIRST, SESAME, VERIFY_HOSTNAME, ENFORCE_BASEPATH, \
     ENV_PREFIX, NOTIFY_SERVICE, USERNAME, PASSWORD, SESAME_TOTP_SECRET, TOTP, \
-    GIT, REPO, PORT, IGNORE_SSL, HASS_WS_API
+    GIT, REPO, PORT, IGNORE_SSL, HASS_WS_API, ALLOWED_DOMAINS
     settings = {}
     if settingsfile:
         try:
@@ -3551,6 +3554,10 @@ def load_settings(settingsfile):
         except Exception:
             LOG.warning("Invalid network in ALLOWED_NETWORKS: %s", net)
             ALLOWED_NETWORKS.remove(net)
+    ALLOWED_DOMAINS = settings.get("ALLOWED_DOMAINS", ALLOWED_DOMAINS)
+    if ALLOWED_DOMAINS and not all(ALLOWED_DOMAINS):
+        LOG.warning("Invalid value for ALLOWED_DOMAINS. Using empty list.")
+        ALLOWED_DOMAINS = []
     BANNED_IPS = settings.get("BANNED_IPS", BANNED_IPS)
     if BANNED_IPS and not all(BANNED_IPS):
         LOG.warning("Invalid value for BANNED_IPS. Using empty list.")
@@ -3727,6 +3734,18 @@ def check_access(clientip):
         if ipobject in ipaddress.ip_network(net):
             return True
     LOG.warning("Client IP not within allowed networks.")
+    if ALLOWED_DOMAINS:
+        for domain in ALLOWED_DOMAINS:
+            try:
+                domain_data = socket.getaddrinfo(domain, None)
+            except Exception as err:
+                LOG.warning("Unable to lookup domain data: %s", err)
+                continue
+            for res in domain_data:
+                if res[0] in [socket.AF_INET, socket.AF_INET6]:
+                    if res[4][0] == clientip:
+                        return True
+        LOG.warning("Client IP not within allowed domains.")
     BANNED_IPS.append(clientip)
     return False
 
