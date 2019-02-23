@@ -3598,7 +3598,7 @@ def load_settings(settingsfile):
         except ImportError:
             LOG.warning("Unable to import pyotp module")
         except Exception as err:
-            LOG.warning("Unable to create TOTP object: %s" % err)
+            LOG.warning("Unable to create TOTP object: %s", err)
 
 def is_jwt(token):
     """Perform basic check if token is a JWT token."""
@@ -3704,20 +3704,20 @@ def password_problems(password, name="UNKNOWN"):
     if password is None:
         return problems
     if len(password) < 8:
-        LOG.warning("Password %s is too short" % name)
+        LOG.warning("Password %s is too short", name)
         problems += 1
     if password.isalpha():
-        LOG.warning("Password %s does not contain digits" % name)
+        LOG.warning("Password %s does not contain digits", name)
         problems += 2
     if password.isdigit():
-        LOG.warning("Password %s does not contain alphabetic characters" % name)
+        LOG.warning("Password %s does not contain alphabetic characters", name)
         problems += 4
     quota = len(set(password)) / len(password)
     exp = len(password) ** len(set(password))
     score = exp / quota / 8
     if score < 65536:
-        LOG.warning("Password %s does not contain enough unique characters (%i)" % (
-            name, len(set(password))))
+        LOG.warning("Password %s does not contain enough unique characters (%i)",
+                    name, len(set(password)))
         problems += 8
     return problems
 
@@ -3760,7 +3760,7 @@ class RequestHandler(BaseHTTPRequestHandler):
     """Request handler."""
     # pylint: disable=redefined-builtin
     def log_message(self, format, *args):
-        LOG.info("%s - %s" % (self.client_address[0], format % args))
+        LOG.info("%s - %s", self.client_address[0], format % args)
 
     # pylint: disable=invalid-name
     def do_BLOCK(self, status=420, reason="Policy not fulfilled"):
@@ -3903,7 +3903,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                                 for branch in repo.branches:
                                     branches.append(branch.name)
                             except Exception as err:
-                                LOG.debug("Exception (no repo): %s" % str(err))
+                                LOG.debug("Exception (no repo): %s", str(err))
                         dircontent = get_dircontent(dirpath.decode('utf-8'), repo)
                         filedata = {
                             'content': dircontent,
@@ -4454,7 +4454,7 @@ class RequestHandler(BaseHTTPRequestHandler):
 
                     except Exception as err:
                         response['message'] = "Not a git repository: %s" % (str(err))
-                        LOG.warning("Exception (no repo): %s" % str(err))
+                        LOG.warning("Exception (no repo): %s", str(err))
             else:
                 response['message'] = "Missing path"
         elif req.path.endswith('/api/checkout'):
@@ -4491,7 +4491,7 @@ class RequestHandler(BaseHTTPRequestHandler):
 
                     except Exception as err:
                         response['message'] = "Not a git repository: %s" % (str(err))
-                        LOG.warning("Exception (no repo): %s" % str(err))
+                        LOG.warning("Exception (no repo): %s", str(err))
             else:
                 response['message'] = "Missing path or branch"
         elif req.path.endswith('/api/newbranch'):
@@ -4527,7 +4527,7 @@ class RequestHandler(BaseHTTPRequestHandler):
 
                     except Exception as err:
                         response['message'] = "Not a git repository: %s" % (str(err))
-                        LOG.warning("Exception (no repo): %s" % str(err))
+                        LOG.warning("Exception (no repo): %s", str(err))
             else:
                 response['message'] = "Missing path or branch"
         elif req.path.endswith('/api/init'):
@@ -4559,7 +4559,7 @@ class RequestHandler(BaseHTTPRequestHandler):
 
                     except Exception as err:
                         response['message'] = "Not a git repository: %s" % (str(err))
-                        LOG.warning("Exception (no repo): %s" % str(err))
+                        LOG.warning("Exception (no repo): %s", str(err))
             else:
                 response['message'] = "Missing path or branch"
         elif req.path.endswith('/api/push'):
@@ -4601,7 +4601,7 @@ class RequestHandler(BaseHTTPRequestHandler):
 
                     except Exception as err:
                         response['message'] = "Not a git repository: %s" % (str(err))
-                        LOG.warning("Exception (no repo): %s" % str(err))
+                        LOG.warning("Exception (no repo): %s", str(err))
             else:
                 response['message'] = "Missing path or branch"
         elif req.path.endswith('/api/stash'):
@@ -4635,7 +4635,7 @@ class RequestHandler(BaseHTTPRequestHandler):
 
                     except Exception as err:
                         response['message'] = "Not a git repository: %s" % (str(err))
-                        LOG.warning("Exception (no repo): %s" % str(err))
+                        LOG.warning("Exception (no repo): %s", str(err))
             else:
                 response['message'] = "Missing path or branch"
         elif req.path.endswith('/api/newfolder'):
@@ -4822,7 +4822,7 @@ class AuthHandler(RequestHandler):
             if BANLIMIT:
                 bancounter = FAIL2BAN_IPS.get(self.client_address[0], 1)
                 if bancounter >= BANLIMIT:
-                    LOG.warning("Blocking access from %s" % self.client_address[0])
+                    LOG.warning("Blocking access from %s", self.client_address[0])
                     self.do_BLOCK()
                     return
                 FAIL2BAN_IPS[self.client_address[0]] = bancounter + 1
@@ -4854,7 +4854,7 @@ class AuthHandler(RequestHandler):
             if BANLIMIT:
                 bancounter = FAIL2BAN_IPS.get(self.client_address[0], 1)
                 if bancounter >= BANLIMIT:
-                    LOG.warning("Blocking access from %s" % self.client_address[0])
+                    LOG.warning("Blocking access from %s", self.client_address[0])
                     self.do_BLOCK()
                     return
                 FAIL2BAN_IPS[self.client_address[0]] = bancounter + 1
@@ -4893,13 +4893,13 @@ def notify(title="HASS Configurator",
         "%sservices/%s" % (HASS_API, NOTIFY_SERVICE.replace('.', '/')),
         data=bytes(json.dumps(data).encode('utf-8')),
         headers=headers, method='POST')
-    LOG.info("%s" % data)
+    LOG.info("%s", data)
     try:
         with urllib.request.urlopen(req) as response:
             message = response.read().decode('utf-8')
             LOG.debug(message)
     except Exception as err:
-        LOG.warning("Exception while creating notification: %s" % err)
+        LOG.warning("Exception while creating notification: %s", err)
 
 def main(args):
     """Main function, duh!"""
@@ -4947,7 +4947,7 @@ def main(args):
             }
             notify(**data)
     except Exception as err:
-        LOG.warning("Exception while checking passwords: %s" % err)
+        LOG.warning("Exception while checking passwords: %s", err)
 
     custom_server = SimpleServer
     if ':' in LISTENIP:
@@ -4963,9 +4963,8 @@ def main(args):
                                        certfile=SSL_CERTIFICATE,
                                        keyfile=SSL_KEY,
                                        server_side=True)
-    LOG.info('Listening on: %s://%s:%i' % ('https' if SSL_CERTIFICATE else 'http',
-                                           LISTENIP,
-                                           PORT))
+    LOG.info('Listening on: %s://%s:%i',
+             'https' if SSL_CERTIFICATE else 'http', LISTENIP, PORT)
     if BASEPATH:
         os.chdir(BASEPATH)
     HTTPD.serve_forever()

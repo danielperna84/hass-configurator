@@ -3,7 +3,6 @@ reports=no
 
 disable=
   global-statement,
-  logging-not-lazy,
   broad-except,
   too-many-return-statements,
   too-many-nested-blocks,
