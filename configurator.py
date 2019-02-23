@@ -124,7 +124,7 @@ INDEX = Template(r"""<!DOCTYPE html>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0" />
     <title>HASS Configurator</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/MaterialDesign-Webfont/3.3.92/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/MaterialDesign-Webfont/3.4.93/css/materialdesignicons.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
     <style type="text/css" media="screen">
         body {
@@ -3998,9 +3998,6 @@ class RequestHandler(BaseHTTPRequestHandler):
                 req = urllib.request.Request(
                     "%sservices/homeassistant/check_config" % HASS_API,
                     headers=headers, method='POST')
-                # with urllib.request.urlopen(req) as response:
-                #     print(json.loads(response.read().decode('utf-8')))
-                #     res['service'] = "called successfully"
             except Exception as err:
                 LOG.warning(err)
                 res['restart'] = str(err)
