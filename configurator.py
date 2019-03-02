@@ -3566,7 +3566,7 @@ def load_settings(args):
         LISTENIP = args.listen
     else:
         LISTENIP = settings.get("LISTENIP", LISTENIP)
-    if args.port:
+    if args.port is not None:
         PORT = args.port
     else:
         LISTENPORT = settings.get("LISTENPORT", None)
@@ -5043,7 +5043,8 @@ def main():
                                        keyfile=SSL_KEY,
                                        server_side=True)
     LOG.info('Listening on: %s://%s:%i',
-             'https' if SSL_CERTIFICATE else 'http', LISTENIP, PORT)
+             'https' if SSL_CERTIFICATE else 'http',
+             HTTPD.server_address[0], HTTPD.server_address[1])
     if BASEPATH:
         os.chdir(BASEPATH)
     HTTPD.serve_forever()
