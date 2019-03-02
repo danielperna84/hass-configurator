@@ -1,5 +1,7 @@
-Version 0.3.5 (2019-)
-- Add `ALLOWED_DOMAINS` option (Issue #143)
+Version 0.3.5 (2019-03-)
+- Added `ALLOWED_DOMAINS` option (Issue #143)
+- Refactor for Pypi packaging (Issue #147)
+- Include argparse for commandline parameters
 - Update dependencies
 - Code cleanup, lint (Issue #50)
 
