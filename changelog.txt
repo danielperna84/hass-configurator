@@ -4,6 +4,7 @@ Version 0.3.5 (2019-03-)
 - Include argparse for commandline parameters
 - Update dependencies
 - Code cleanup, lint (Issue #50)
+- Added standalone mode
 
 Version 0.3.4 (2019-01-27)
 - Spelling fix @nelsonblaha

@@ -18,6 +18,7 @@ While the configuration UI of [Home Assistant](https://home-assistant.io/) is st
 - Execute shell commands
 - Stage and commit changes in Git repositories, create and switch between branches, push to SSH remotes
 - Customizable editor settings (saved using [localStorage](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage))
+- Standalone mode that hides the Home Assistant related panel on the left side (triggers, entities etc.). Set `HASS_API` to `None` or use the commandline flag `-s` / `--standalone` to enable this mode.
 
 #### Screenshot HASS Configurator:
 ![Screenshot](https://github.com/danielperna84/hass-configurator/blob/master/screenshots/main.png)
@@ -50,7 +51,7 @@ Set ENFORCE_BASEPATH to `True` to lock the configurator into the basepath and th
 #### SSL_CERTIFICATE / SSL_KEY (string)
 If you're using SSL, set the paths to your SSL files here. This is similar to the SSL setup you can do in Home Assistant.
 #### HASS_API (string)
-The configurator fetches some data from your running Home Assistant instance. If the API isn't available through the default URL, modify this variable to fix this. E.g. `http://192.168.1.2:8123/api/`
+The configurator fetches some data from your running Home Assistant instance. If the API isn't available through the default URL, modify this variable to fix this. E.g. `http://192.168.1.2:8123/api/`. If you set this to `None`, the configurator will start in _standalone_ mode.
 #### HASS_WS_API (string)
 The event observer requires direct access to the websocket API of Home Assistant. Use this option to prefill the URL in event observer dialog with the correct address. E.g. `wss://hass.example.com/api/websocket`. Without this option set the configurator uses the value of `HASS_API`, which might not always be the correct value.
 #### HASS_API_PASSWORD (string)

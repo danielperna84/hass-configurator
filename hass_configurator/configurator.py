@@ -1696,7 +1696,7 @@ INDEX = Template(r"""<!DOCTYPE html>
     </div>
     <!-- Main Editor Area -->
     <div class="row">
-        <div class="col m4 l3 hide-on-small-only">
+        <div id="hass_menu_l" class="col m4 l3 hide-on-small-only">
             <br>
             <div class="input-field col s12">
                 <select onchange="insert(this.value)">
@@ -1802,7 +1802,7 @@ INDEX = Template(r"""<!DOCTYPE html>
             <ul id="fbelements"></ul>
           </li>
           <div class="row col s12 shadow"></div>
-          <div class="z-depth-3 hide-on-med-and-up">
+          <div id="hass_menu_s" class="z-depth-3 hide-on-med-and-up">
             <div class="input-field col s12" style="margin-top: 30px;">
               <select onchange="insert(this.value)">
                 <option value="" disabled selected>Select trigger platform</option>
@@ -2233,6 +2233,29 @@ INDEX = Template(r"""<!DOCTYPE html>
     var global_current_filepath = null;
     var global_current_filename = null;
 
+    function toggle_hass_panels() {
+        if (document.getElementById("hass_menu_l").style.display == "none") {
+            document.getElementById("hass_menu_l").style.display = "";
+            document.getElementById("editor").classList.remove("l12");
+            document.getElementById("editor").classList.add("l9");
+        }
+        else {
+            document.getElementById("hass_menu_l").style.display = "none";
+            document.getElementById("editor").classList.remove("l9");
+            document.getElementById("editor").classList.add("l12");
+        }
+        if (document.getElementById("hass_menu_s").style.display == "none") {
+            document.getElementById("hass_menu_s").style.display = "";
+            document.getElementById("editor").classList.remove("l12");
+            document.getElementById("editor").classList.add("l9");
+        }
+        else {
+            document.getElementById("hass_menu_s").style.display = "none";
+            document.getElementById("editor").classList.remove("l9");
+            document.getElementById("editor").classList.add("l12");
+        }
+    }
+
     function got_focus_or_visibility() {
         if (global_current_filename && global_current_filepath) {
             // The globals are set, set the localStorage to those values
@@ -2354,6 +2377,7 @@ INDEX = Template(r"""<!DOCTYPE html>
             },
             minLength: 1,
         });
+        $standalone
     });
 </script>
 <script type="text/javascript">
@@ -4191,6 +4215,9 @@ class RequestHandler(BaseHTTPRequestHandler):
                 )
             if HASS_WS_API:
                 ws_api = HASS_WS_API
+            standalone = ""
+            if not HASS_API:
+                standalone = "toggle_hass_panels();"
             html = get_html().safe_substitute(
                 services=services,
                 events=events,
@@ -4206,7 +4233,8 @@ class RequestHandler(BaseHTTPRequestHandler):
                     'https' if SSL_CERTIFICATE else 'http', LISTENIP, PORT),
                 hass_api_address="%s" % (HASS_API, ),
                 hass_ws_address=ws_api,
-                api_password=HASS_API_PASSWORD if HASS_API_PASSWORD else "")
+                api_password=HASS_API_PASSWORD if HASS_API_PASSWORD else "",
+                standalone=standalone)
             self.wfile.write(bytes(html, "utf8"))
             return
         else:
