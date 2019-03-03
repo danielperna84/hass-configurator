@@ -3623,7 +3623,10 @@ def load_settings(args):
             LOG.warning("Invalid IP address in BANNED_IPS: %s", banned_ip)
             BANNED_IPS.remove(banned_ip)
     BANLIMIT = settings.get("BANLIMIT", BANLIMIT)
-    DEV = settings.get("DEV", DEV)
+    if args.dev:
+        DEV = True
+    else:
+        DEV = settings.get("DEV", DEV)
     IGNORE_PATTERN = settings.get("IGNORE_PATTERN", IGNORE_PATTERN)
     if IGNORE_PATTERN and not all(IGNORE_PATTERN):
         LOG.warning("Invalid value for IGNORE_PATTERN. Using empty list.")
@@ -4974,7 +4977,8 @@ def main():
     "https://github.com/danielperna84/hass-configurator for more details " \
     "about the availble options.")
     parser.add_argument(
-        'settings', nargs='?', help="Path to file with persistent settings.")
+        'settings', nargs='?',
+        help="Path to file with persistent settings.")
     parser.add_argument(
         '--listen', '-l', nargs='?',
         help="The IP address the service is listening on. Default: 0.0.0.0")
@@ -4988,23 +4992,33 @@ def main():
         "from which access is allowed. Eg. 127.0.0.1,192.168.0.0/16. " \
         "By default access is allowed from anywhere.")
     parser.add_argument(
-        '--username', '-U', nargs='?', help="Username required for access.")
+        '--username', '-U', nargs='?',
+        help="Username required for access.")
     parser.add_argument(
-        '--password', '-P', nargs='?', help="Password required for access.")
+        '--password', '-P', nargs='?',
+        help="Password required for access.")
     parser.add_argument(
         '--sesame', '-S', nargs='?',
         help="SESAME token for whitelisting client IPs by accessing " \
         "a scret URL: http://1.2.3.4:3218/secret_sesame_token")
-    parser.add_argument('--basepath', '-b', nargs='?',
-                        help="Path to initially serve files from")
-    parser.add_argument('--enforce', '-e', action='store_true',
-                        help="Lock the configurator into the basepath.")
-    parser.add_argument('--standalone', '-s', action='store_true',
-                        help="Don't fetch data from HASS_API.")
-    parser.add_argument('--dirsfirst', '-d', action='store_true',
-                        help="Display directories first.")
-    parser.add_argument('--git', '-g', action='store_true',
-                        help="Enable GIT support.")
+    parser.add_argument(
+        '--basepath', '-b', nargs='?',
+        help="Path to initially serve files from")
+    parser.add_argument(
+        '--enforce', '-e', action='store_true',
+        help="Lock the configurator into the basepath.")
+    parser.add_argument(
+        '--standalone', '-s', action='store_true',
+        help="Don't fetch data from HASS_API.")
+    parser.add_argument(
+        '--dirsfirst', '-d', action='store_true',
+        help="Display directories first.")
+    parser.add_argument(
+        '--git', '-g', action='store_true',
+        help="Enable GIT support.")
+    parser.add_argument(
+        '--dev', '-D', action='store_true',
+        help="Enable Dev-Mode (serve dev.html instead of embedded HTML).")
     args = parser.parse_args()
     load_settings(args)
     LOG.info("Starting server")
