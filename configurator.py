@@ -4970,23 +4970,35 @@ def main():
     """Main function, duh!"""
     global HTTPD
     signal.signal(signal.SIGINT, signal_handler)
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Visit " \
+    "https://github.com/danielperna84/hass-configurator for more details " \
+    "about the availble options.")
     parser.add_argument(
         'settings', nargs='?', help="Path to file with persistent settings.")
     parser.add_argument(
         '--listen', '-l', nargs='?',
-        help="The IP address the service is listening on.")
+        help="The IP address the service is listening on. Default: 0.0.0.0")
     parser.add_argument(
         '--port', '-p', nargs='?', type=int,
-        help="The port the service is listening on.")
-    parser.add_argument('--basepath', '-b', nargs='?',
-                        help="Path to initially serve files from")
-    parser.add_argument('--enforce', '-e', action='store_true',
-                        help="Lock the configurator into the basepath.")
+        help="The port the service is listening on. " \
+        "0 allocates a dynamic port. Default: 3218")
+    parser.add_argument(
+        '--allowed_networks', '-a', nargs='?',
+        help="Comma-separated list of allowed networks / IP addresses " \
+        "from which access is allowed. Eg. 127.0.0.1,192.168.0.0/16. " \
+        "By default access is allowed from anywhere.")
     parser.add_argument(
         '--username', '-U', nargs='?', help="Username required for access.")
     parser.add_argument(
         '--password', '-P', nargs='?', help="Password required for access.")
+    parser.add_argument(
+        '--sesame', '-S', nargs='?',
+        help="SESAME token for whitelisting client IPs by accessing " \
+        "a scret URL: http://1.2.3.4:3218/secret_sesame_token")
+    parser.add_argument('--basepath', '-b', nargs='?',
+                        help="Path to initially serve files from")
+    parser.add_argument('--enforce', '-e', action='store_true',
+                        help="Lock the configurator into the basepath.")
     parser.add_argument('--standalone', '-s', action='store_true',
                         help="Don't fetch data from HASS_API.")
     parser.add_argument('--dirsfirst', '-d', action='store_true',
