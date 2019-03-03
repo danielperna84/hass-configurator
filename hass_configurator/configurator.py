@@ -1742,7 +1742,7 @@ INDEX = Template(r"""<!DOCTYPE html>
                 <label>Services</label>
             </div>
         </div>
-        <div class="col s12 m8 l9">
+        <div id="filename_row" class="col s12 m8 l9">
           <div class="card input-field col s12 grey lighten-4 hoverable pathtip">
               <input class="currentfile_input" value="" id="currentfile" type="text">
               <i class="material-icons" id="lint-status" onclick="show_lint_error()"></i>
@@ -2238,21 +2238,29 @@ INDEX = Template(r"""<!DOCTYPE html>
             document.getElementById("hass_menu_l").style.display = "";
             document.getElementById("editor").classList.remove("l12");
             document.getElementById("editor").classList.add("l9");
+            document.getElementById("filename_row").classList.remove("l12");
+            document.getElementById("filename_row").classList.add("l9");
         }
         else {
             document.getElementById("hass_menu_l").style.display = "none";
             document.getElementById("editor").classList.remove("l9");
             document.getElementById("editor").classList.add("l12");
+            document.getElementById("filename_row").classList.remove("l9");
+            document.getElementById("filename_row").classList.add("l12");
         }
         if (document.getElementById("hass_menu_s").style.display == "none") {
             document.getElementById("hass_menu_s").style.display = "";
             document.getElementById("editor").classList.remove("l12");
             document.getElementById("editor").classList.add("l9");
+            document.getElementById("filename_row").classList.remove("l12");
+            document.getElementById("filename_row").classList.add("l9");
         }
         else {
             document.getElementById("hass_menu_s").style.display = "none";
             document.getElementById("editor").classList.remove("l9");
             document.getElementById("editor").classList.add("l12");
+            document.getElementById("filename_row").classList.remove("l9");
+            document.getElementById("filename_row").classList.add("l12");
         }
     }
 
