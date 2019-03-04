@@ -3753,9 +3753,8 @@ def get_html():
     """Load the HTML from file in dev-mode, otherwise embedded."""
     if DEV:
         try:
-            with open(os.path.join(
-                os.path.dirname(
-                    os.path.realpath(__file__)), "dev.html")) as fptr:
+            with open(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                                   "dev.html")) as fptr:
                 html = Template(fptr.read())
                 return html
         except Exception as err:
