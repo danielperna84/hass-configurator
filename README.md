@@ -32,6 +32,9 @@ Possible methods to install the configurator are documented in the Wiki: [Instal
 ### Configuration
 Available options to customize the behaviour of the configurator are documented in the Wiki: [Configuration](https://github.com/danielperna84/hass-configurator/wiki/Configuration)
 
+### Keeping the configurator running
+Since the configurator script on its own is no service, you'll have to take some extra steps to keep it running. More information on this topic can be found in the Wiki: [Daemonizing](https://github.com/danielperna84/hass-configurator/wiki/Daemonizing)
+
 ### API
 
 There is an API available to programmatically add and remove IP addresses / networks to and from `ALLOWED_NETWORKS` and `BANNED_IPS`. Usage is documented in the Wiki: [API](https://github.com/danielperna84/hass-configurator/wiki/API)
@@ -48,6 +51,3 @@ panel_iframe:
     url: http://1.2.3.4:3218
 ```
 __IMPORTANT__: Be careful when setting up port forwarding to the configurator while embedding into Home Assistant. If you don't restrict access by requiring authentication and / or blocking based on client IP addresses, your configuration will be exposed to the web!
-
-### Keeping the configurator running
-Since the configurator script on its own is no service, you'll have to take some extra steps to keep it running. More information on this topic can be found in the Wiki: [Daemonizing](https://github.com/danielperna84/hass-configurator/wiki/Daemonizing)
