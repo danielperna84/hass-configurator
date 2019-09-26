@@ -1,5 +1,6 @@
 # HASS Configurator
 [![Build Status](https://travis-ci.org/danielperna84/hass-configurator.svg?branch=master)](https://travis-ci.org/danielperna84/hass-configurator)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fdanielperna84%2Fhass-configurator.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fdanielperna84%2Fhass-configurator?ref=badge_shield)
 ### Configuration UI for Home Assistant
 
 The HASS-Configurator is a small webapp (you access it via web browser) that provides a filesystem-browser and text-editor to modify files on the machine the configurator is running on. It has been created to allow easy configuration of [Home Assistant](https://home-assistant.io/). It is powered by [Ace editor](https://ace.c9.io/), which supports syntax highlighting for various code/markup languages. [YAML](https://en.wikipedia.org/wiki/YAML) files (the default language for Home Assistant configuration files) will be automatically checked for syntax errors while editing.  
@@ -51,3 +52,7 @@ panel_iframe:
     url: http://1.2.3.4:3218
 ```
 __IMPORTANT__: Be careful when setting up port forwarding to the configurator while embedding into Home Assistant. If you don't restrict access by requiring authentication and / or blocking based on client IP addresses, your configuration will be exposed to the web!
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fdanielperna84%2Fhass-configurator.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fdanielperna84%2Fhass-configurator?ref=badge_large)
