@@ -3660,6 +3660,7 @@ def load_settings(args):
         PASSWORD = PASSWORD.lower()
     if SESAME_TOTP_SECRET:
         try:
+            #pylint: disable=import-outside-toplevel
             import pyotp
             TOTP = pyotp.TOTP(SESAME_TOTP_SECRET)
         except ImportError:
