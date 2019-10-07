@@ -4,7 +4,7 @@ from setuptools import setup
 
 NAME = "hass-configurator"
 PACKAGE_NAME = "hass_configurator"
-VERSION = "0.3.5"
+VERSION = "0.3.6"
 
 # read the contents of your README file
 THIS_DIRECTORY = path.abspath(path.dirname(__file__))
