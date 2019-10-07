@@ -6,15 +6,10 @@ NAME = "hass-configurator"
 PACKAGE_NAME = "hass_configurator"
 VERSION = "0.3.6"
 
-# read the contents of your README file
-THIS_DIRECTORY = path.abspath(path.dirname(__file__))
-with open(path.join(THIS_DIRECTORY, 'README.md'), encoding='utf-8') as f:
-    LONG_DESCRIPTION = f.read()
-
 setup(name=NAME,
       version=VERSION,
       description='HASS-Configurator',
-      long_description=LONG_DESCRIPTION,
+      long_description="https://github.com/danielperna84/hass-configurator",
       long_description_content_type='text/markdown',
       url='http://github.com/danielperna84/hass-configurator',
       project_urls={
