@@ -1618,6 +1618,9 @@ INDEX = Template(r"""<!DOCTYPE html>
                 <li>
                     <div class="chip"> <img src="https://avatars3.githubusercontent.com/u/1561226?s=400&v=4" alt="Contact Person"> <a class="black-text" href="https://github.com/dimagoltsman" target="_blank">Dima Goltsman</a> </div>
                 </li>
+                <li>
+                    <div class="chip"> <img src="https://avatars3.githubusercontent.com/u/14281572?s=400&v=4" alt="Contact Person"> <a class="black-text" href="https://github.com/emontnemery" target="_blank">Erik Montnemery</a> </div>
+                </li>
             </ul>
             <p>Libraries used:</p>
             <div class="row">
