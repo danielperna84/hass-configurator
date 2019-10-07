@@ -76,6 +76,8 @@ IGNORE_PATTERN = []
 DIRSFIRST = False
 # Sesame token. Browse to the configurator URL + /secrettoken to unban your
 # client IP and add it to the list of allowed IPs.
+HIDEHIDDEN = False
+# Don't display hidden files (starting with .)
 SESAME = None
 # Instead of a static SESAME token you may also use a TOTP based token that
 # changes every 30 seconds. The value needs to be a base 32 encoded string.
@@ -2163,7 +2165,7 @@ INDEX = Template(r"""<!DOCTYPE html>
                   <input id="wrap_limit" type="number" onchange="editor.setOption('wrap', parseInt(this.value))" min="1" value="80">
                   <label class="active" for="wrap_limit">Wrap Limit</label>
               </div> <a class="waves-effect waves-light btn light-blue" onclick="save_ace_settings()">Save Settings Locally</a>
-              <p class="center col s12"> Ace Editor 1.4.4 </p>
+              <p class="center col s12"> Ace Editor 1.4.6 </p>
           </div>
         </ul>
       </div>
@@ -3530,7 +3532,7 @@ def load_settings(args):
     HASS_API_PASSWORD, CREDENTIALS, ALLOWED_NETWORKS, BANNED_IPS, BANLIMIT, \
     DEV, IGNORE_PATTERN, DIRSFIRST, SESAME, VERIFY_HOSTNAME, ENFORCE_BASEPATH, \
     ENV_PREFIX, NOTIFY_SERVICE, USERNAME, PASSWORD, SESAME_TOTP_SECRET, TOTP, \
-    GIT, REPO, PORT, IGNORE_SSL, HASS_WS_API, ALLOWED_DOMAINS
+    GIT, REPO, PORT, IGNORE_SSL, HASS_WS_API, ALLOWED_DOMAINS, HIDEHIDDEN
     settings = {}
     settingsfile = args.settings
     if settingsfile:
@@ -3638,6 +3640,10 @@ def load_settings(args):
         DIRSFIRST = args.dirsfirst
     else:
         DIRSFIRST = settings.get("DIRSFIRST", DIRSFIRST)
+    if args.hidehidden:
+        HIDEHIDDEN = args.hidehidden
+    else:
+        HIDEHIDDEN = settings.get("HIDEHIDDEN", HIDEHIDDEN)
     SESAME = settings.get("SESAME", SESAME)
     SESAME_TOTP_SECRET = settings.get("SESAME_TOTP_SECRET", SESAME_TOTP_SECRET)
     VERIFY_HOSTNAME = settings.get("VERIFY_HOSTNAME", VERIFY_HOSTNAME)
@@ -3712,6 +3718,9 @@ def get_dircontent(path, repo=None):
         """Sort list of files / directories."""
         dirlist = [x for x in os.listdir(path) if os.path.isdir(os.path.join(path, x))]
         filelist = [x for x in os.listdir(path) if not os.path.isdir(os.path.join(path, x))]
+        if HIDEHIDDEN:
+            dirlist = [x for x in dirlist if not x.startswith('.')]
+            filelist = [x for x in filelist if not x.startswith('.')]
         if DIRSFIRST:
             return sorted(dirlist, key=lambda x: x.lower()) + \
                 sorted(filelist, key=lambda x: x.lower())
@@ -5018,6 +5027,9 @@ def main():
     parser.add_argument(
         '--dirsfirst', '-d', action='store_true',
         help="Display directories first.")
+    parser.add_argument(
+        '--hidehidden', '-H', action='store_true',
+        help="Don't display hidden files.")
     parser.add_argument(
         '--git', '-g', action='store_true',
         help="Enable GIT support.")

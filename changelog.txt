@@ -1,5 +1,8 @@
 Version 0.3.6 (2019-10-08)
 - Update Ace Editor @emontnemery & @danielperna84
+- Update js-yaml
+- Update jQuery
+- Added setting to hide hidden elements (Issue #165)
 
 Version 0.3.5 (2019-03-08)
 - Added `ALLOWED_DOMAINS` option (Issue #143)
