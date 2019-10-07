@@ -76,6 +76,8 @@ IGNORE_PATTERN = []
 DIRSFIRST = False
 # Sesame token. Browse to the configurator URL + /secrettoken to unban your
 # client IP and add it to the list of allowed IPs.
+HIDEHIDDEN = False
+# Don't display hidden files (starting with .)
 SESAME = None
 # Instead of a static SESAME token you may also use a TOTP based token that
 # changes every 30 seconds. The value needs to be a base 32 encoded string.
@@ -109,7 +111,7 @@ SO.setFormatter(
     logging.Formatter('%(levelname)s:%(asctime)s:%(name)s:%(message)s'))
 LOG.addHandler(SO)
 RELEASEURL = "https://api.github.com/repos/danielperna84/hass-configurator/releases/latest"
-VERSION = "0.3.5"
+VERSION = "0.3.6"
 BASEDIR = "."
 DEV = False
 LISTENPORT = None
@@ -613,9 +615,9 @@ INDEX = Template(r"""<!DOCTYPE html>
             height: auto;
         }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.2/ace.js" type="text/javascript" charset="utf-8"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.2/ext-modelist.js" type="text/javascript" charset="utf-8"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.2/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.6/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.6/ext-modelist.js" type="text/javascript" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.6/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
 </head>
 <body>
   <div class="preloader-background">
@@ -707,6 +709,7 @@ INDEX = Template(r"""<!DOCTYPE html>
         <li><a class="modal-trigger" href="#modal_restart">Restart HASS</a></li>
         <li class="divider"></li>
         <li><a class="modal-trigger" href="#modal_exec_command">Execute shell command</a></li>
+        <li><a onclick="toggle_hass_panels()">Toggle HASS panel</a></li>
     </ul>
     <ul id="dropdown_menu_mobile" class="dropdown-content z-depth-4">
         <li><a onclick="localStorage.setItem('new_tab', true);window.open(window.location.origin+window.location.pathname, '_blank');">New tab</a></li>
@@ -727,6 +730,7 @@ INDEX = Template(r"""<!DOCTYPE html>
         <li><a class="modal-trigger" href="#modal_restart">Restart HASS</a></li>
         <li class="divider"></li>
         <li><a class="modal-trigger" href="#modal_exec_command">Execute shell command</a></li>
+        <li><a onclick="toggle_hass_panels()">Toggle HASS panel</a></li>
     </ul>
     <ul id="dropdown_gitmenu" class="dropdown-content z-depth-4">
         <li><a class="modal-trigger" href="#modal_init" class="nowrap waves-effect">git init</a></li>
@@ -1618,6 +1622,9 @@ INDEX = Template(r"""<!DOCTYPE html>
                 <li>
                     <div class="chip"> <img src="https://avatars3.githubusercontent.com/u/1561226?s=400&v=4" alt="Contact Person"> <a class="black-text" href="https://github.com/dimagoltsman" target="_blank">Dima Goltsman</a> </div>
                 </li>
+                <li>
+                    <div class="chip"> <img src="https://avatars3.githubusercontent.com/u/14281572?s=400&v=4" alt="Contact Person"> <a class="black-text" href="https://github.com/emontnemery" target="_blank">Erik Montnemery</a> </div>
+                </li>
             </ul>
             <p>Libraries used:</p>
             <div class="row">
@@ -2159,15 +2166,16 @@ INDEX = Template(r"""<!DOCTYPE html>
               <div class="input-field col s12">
                   <input id="wrap_limit" type="number" onchange="editor.setOption('wrap', parseInt(this.value))" min="1" value="80">
                   <label class="active" for="wrap_limit">Wrap Limit</label>
-              </div> <a class="waves-effect waves-light btn light-blue" onclick="save_ace_settings()">Save Settings Locally</a>
-              <p class="center col s12"> Ace Editor 1.4.2 </p>
+              </div>
+              <a class="waves-effect waves-light btn light-blue" onclick="save_ace_settings()">Save Settings Locally</a>
+              <p class="center col s12"> Ace Editor 1.4.6 </p>
           </div>
         </ul>
       </div>
 </main>
 <input type="hidden" id="fb_currentfile" value="" />
 <!-- Scripts -->
-<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
 <script>
     function ws_connect() {
@@ -2609,8 +2617,8 @@ INDEX = Template(r"""<!DOCTYPE html>
 
         // Delete button
         var dd_delete = document.createElement('li');
-        dd_delete.classList.add("waves-effect", "fb_dd");
         var dd_delete_a = document.createElement('a');
+        dd_delete_a.classList.add("waves-effect", "fb_dd");
         dd_delete_a.setAttribute('href', "#modal_delete");
         dd_delete_a.classList.add("modal-trigger");
         dd_delete_a.innerHTML = "Delete";
@@ -3461,7 +3469,7 @@ INDEX = Template(r"""<!DOCTYPE html>
     }
 
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/3.12.1/js-yaml.js" type="text/javascript" charset="utf-8"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/3.13.1/js-yaml.js" type="text/javascript" charset="utf-8"></script>
 <script type="text/javascript">
 var lint_timeout;
 var lint_status = $('#lint-status'); // speed optimization
@@ -3527,7 +3535,7 @@ def load_settings(args):
     HASS_API_PASSWORD, CREDENTIALS, ALLOWED_NETWORKS, BANNED_IPS, BANLIMIT, \
     DEV, IGNORE_PATTERN, DIRSFIRST, SESAME, VERIFY_HOSTNAME, ENFORCE_BASEPATH, \
     ENV_PREFIX, NOTIFY_SERVICE, USERNAME, PASSWORD, SESAME_TOTP_SECRET, TOTP, \
-    GIT, REPO, PORT, IGNORE_SSL, HASS_WS_API, ALLOWED_DOMAINS
+    GIT, REPO, PORT, IGNORE_SSL, HASS_WS_API, ALLOWED_DOMAINS, HIDEHIDDEN
     settings = {}
     settingsfile = args.settings
     if settingsfile:
@@ -3635,6 +3643,10 @@ def load_settings(args):
         DIRSFIRST = args.dirsfirst
     else:
         DIRSFIRST = settings.get("DIRSFIRST", DIRSFIRST)
+    if args.hidehidden:
+        HIDEHIDDEN = args.hidehidden
+    else:
+        HIDEHIDDEN = settings.get("HIDEHIDDEN", HIDEHIDDEN)
     SESAME = settings.get("SESAME", SESAME)
     SESAME_TOTP_SECRET = settings.get("SESAME_TOTP_SECRET", SESAME_TOTP_SECRET)
     VERIFY_HOSTNAME = settings.get("VERIFY_HOSTNAME", VERIFY_HOSTNAME)
@@ -3657,6 +3669,7 @@ def load_settings(args):
         PASSWORD = PASSWORD.lower()
     if SESAME_TOTP_SECRET:
         try:
+            #pylint: disable=import-outside-toplevel
             import pyotp
             TOTP = pyotp.TOTP(SESAME_TOTP_SECRET)
         except ImportError:
@@ -3708,6 +3721,9 @@ def get_dircontent(path, repo=None):
         """Sort list of files / directories."""
         dirlist = [x for x in os.listdir(path) if os.path.isdir(os.path.join(path, x))]
         filelist = [x for x in os.listdir(path) if not os.path.isdir(os.path.join(path, x))]
+        if HIDEHIDDEN:
+            dirlist = [x for x in dirlist if not x.startswith('.')]
+            filelist = [x for x in filelist if not x.startswith('.')]
         if DIRSFIRST:
             return sorted(dirlist, key=lambda x: x.lower()) + \
                 sorted(filelist, key=lambda x: x.lower())
@@ -5014,6 +5030,9 @@ def main():
     parser.add_argument(
         '--dirsfirst', '-d', action='store_true',
         help="Display directories first.")
+    parser.add_argument(
+        '--hidehidden', '-H', action='store_true',
+        help="Don't display hidden files.")
     parser.add_argument(
         '--git', '-g', action='store_true',
         help="Enable GIT support.")
