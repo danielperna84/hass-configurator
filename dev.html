@@ -493,9 +493,9 @@
             height: auto;
         }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.4/ace.js" type="text/javascript" charset="utf-8"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.4/ext-modelist.js" type="text/javascript" charset="utf-8"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.4/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.6/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.6/ext-modelist.js" type="text/javascript" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.6/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
 </head>
 <body>
   <div class="preloader-background">
@@ -587,6 +587,7 @@
         <li><a class="modal-trigger" href="#modal_restart">Restart HASS</a></li>
         <li class="divider"></li>
         <li><a class="modal-trigger" href="#modal_exec_command">Execute shell command</a></li>
+        <li><a onclick="toggle_hass_panels()">Toggle HASS panel</a></li>
     </ul>
     <ul id="dropdown_menu_mobile" class="dropdown-content z-depth-4">
         <li><a onclick="localStorage.setItem('new_tab', true);window.open(window.location.origin+window.location.pathname, '_blank');">New tab</a></li>
@@ -607,6 +608,7 @@
         <li><a class="modal-trigger" href="#modal_restart">Restart HASS</a></li>
         <li class="divider"></li>
         <li><a class="modal-trigger" href="#modal_exec_command">Execute shell command</a></li>
+        <li><a onclick="toggle_hass_panels()">Toggle HASS panel</a></li>
     </ul>
     <ul id="dropdown_gitmenu" class="dropdown-content z-depth-4">
         <li><a class="modal-trigger" href="#modal_init" class="nowrap waves-effect">git init</a></li>
@@ -1498,6 +1500,9 @@
                 <li>
                     <div class="chip"> <img src="https://avatars3.githubusercontent.com/u/1561226?s=400&v=4" alt="Contact Person"> <a class="black-text" href="https://github.com/dimagoltsman" target="_blank">Dima Goltsman</a> </div>
                 </li>
+                <li>
+                    <div class="chip"> <img src="https://avatars3.githubusercontent.com/u/14281572?s=400&v=4" alt="Contact Person"> <a class="black-text" href="https://github.com/emontnemery" target="_blank">Erik Montnemery</a> </div>
+                </li>
             </ul>
             <p>Libraries used:</p>
             <div class="row">
@@ -2039,15 +2044,16 @@
               <div class="input-field col s12">
                   <input id="wrap_limit" type="number" onchange="editor.setOption('wrap', parseInt(this.value))" min="1" value="80">
                   <label class="active" for="wrap_limit">Wrap Limit</label>
-              </div> <a class="waves-effect waves-light btn light-blue" onclick="save_ace_settings()">Save Settings Locally</a>
-              <p class="center col s12"> Ace Editor 1.4.4 </p>
+              </div>
+              <a class="waves-effect waves-light btn light-blue" onclick="save_ace_settings()">Save Settings Locally</a>
+              <p class="center col s12"> Ace Editor 1.4.6 </p>
           </div>
         </ul>
       </div>
 </main>
 <input type="hidden" id="fb_currentfile" value="" />
 <!-- Scripts -->
-<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
 <script>
     function ws_connect() {
@@ -3341,7 +3347,7 @@
     }
 
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/3.12.1/js-yaml.js" type="text/javascript" charset="utf-8"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/3.13.1/js-yaml.js" type="text/javascript" charset="utf-8"></script>
 <script type="text/javascript">
 var lint_timeout;
 var lint_status = $('#lint-status'); // speed optimization

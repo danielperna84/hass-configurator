@@ -709,6 +709,7 @@ INDEX = Template(r"""<!DOCTYPE html>
         <li><a class="modal-trigger" href="#modal_restart">Restart HASS</a></li>
         <li class="divider"></li>
         <li><a class="modal-trigger" href="#modal_exec_command">Execute shell command</a></li>
+        <li><a onclick="toggle_hass_panels()">Toggle HASS panel</a></li>
     </ul>
     <ul id="dropdown_menu_mobile" class="dropdown-content z-depth-4">
         <li><a onclick="localStorage.setItem('new_tab', true);window.open(window.location.origin+window.location.pathname, '_blank');">New tab</a></li>
@@ -729,6 +730,7 @@ INDEX = Template(r"""<!DOCTYPE html>
         <li><a class="modal-trigger" href="#modal_restart">Restart HASS</a></li>
         <li class="divider"></li>
         <li><a class="modal-trigger" href="#modal_exec_command">Execute shell command</a></li>
+        <li><a onclick="toggle_hass_panels()">Toggle HASS panel</a></li>
     </ul>
     <ul id="dropdown_gitmenu" class="dropdown-content z-depth-4">
         <li><a class="modal-trigger" href="#modal_init" class="nowrap waves-effect">git init</a></li>
@@ -2164,7 +2166,8 @@ INDEX = Template(r"""<!DOCTYPE html>
               <div class="input-field col s12">
                   <input id="wrap_limit" type="number" onchange="editor.setOption('wrap', parseInt(this.value))" min="1" value="80">
                   <label class="active" for="wrap_limit">Wrap Limit</label>
-              </div> <a class="waves-effect waves-light btn light-blue" onclick="save_ace_settings()">Save Settings Locally</a>
+              </div>
+              <a class="waves-effect waves-light btn light-blue" onclick="save_ace_settings()">Save Settings Locally</a>
               <p class="center col s12"> Ace Editor 1.4.6 </p>
           </div>
         </ul>
