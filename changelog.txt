@@ -1,3 +1,5 @@
+Version 0.3.7 ()
+
 Version 0.3.6 (2019-10-08)
 - Update Ace Editor @emontnemery & @danielperna84
 - Update js-yaml
