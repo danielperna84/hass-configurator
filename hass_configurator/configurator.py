@@ -887,6 +887,16 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'application/javascript')
             self.end_headers()
             self.wfile.write(data)
+        elif req.path.endswith('/flUhRq6tzZclQEJ-Vdg-IuiaDsNc.woff2'):
+            try:
+                data = load_file("flUhRq6tzZclQEJ-Vdg-IuiaDsNc.woff2", static=True)
+            except Exception as err:
+                self.send_response(404)
+                self.end_headers()
+                self.wfile.write(bytes("File not found", "utf8"))
+            self.send_header('Content-type', 'font/woff')
+            self.end_headers()
+            self.wfile.write(data)
         elif req.path.endswith('/js-yaml.min.js'):
             try:
                 data = load_file("js-yaml.min.js", static=True)
