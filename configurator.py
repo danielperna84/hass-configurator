@@ -74,10 +74,10 @@ GIT = False
 IGNORE_PATTERN = []
 # if DIRSFIRST is set to `true`, directories will be displayed at the top
 DIRSFIRST = False
+# Don't display hidden files (starting with .)
+HIDEHIDDEN = False
 # Sesame token. Browse to the configurator URL + /secrettoken to unban your
 # client IP and add it to the list of allowed IPs.
-HIDEHIDDEN = False
-# Don't display hidden files (starting with .)
 SESAME = None
 # Instead of a static SESAME token you may also use a TOTP based token that
 # changes every 30 seconds. The value needs to be a base 32 encoded string.
