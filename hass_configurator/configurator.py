@@ -74,10 +74,10 @@ GIT = False
 IGNORE_PATTERN = []
 # if DIRSFIRST is set to `true`, directories will be displayed at the top
 DIRSFIRST = False
+# Don't display hidden files (starting with .)
+HIDEHIDDEN = False
 # Sesame token. Browse to the configurator URL + /secrettoken to unban your
 # client IP and add it to the list of allowed IPs.
-HIDEHIDDEN = False
-# Don't display hidden files (starting with .)
 SESAME = None
 # Instead of a static SESAME token you may also use a TOTP based token that
 # changes every 30 seconds. The value needs to be a base 32 encoded string.
@@ -1370,6 +1370,17 @@ INDEX = Template(r"""<!DOCTYPE html>
           <a onclick="closefile()" class="modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Yes</a>
         </div>
     </div>
+    <div id="modal_rename" class="modal">
+        <div class="modal-content">
+            <h4 class="grey-text text-darken-3">Rename</h4>
+            <p>Please enter a new name for <span class="fb_currentfile"></span>.</p>
+            <input type="text" id="rename_name_new" />
+        </div>
+        <div class="modal-footer">
+          <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">Cancel</a>
+          <a onclick="rename_file()" class="modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Apply</a>
+        </div>
+    </div>
     <div id="modal_delete" class="modal">
         <div class="modal-content">
             <h4 class="grey-text text-darken-3">Delete</h4>
@@ -1725,7 +1736,7 @@ INDEX = Template(r"""<!DOCTYPE html>
                 <label>Events</label>
             </div>
             <div class="input-field col s12">
-                <input type="text" id="entities-search" class="autocomplete" placeholder="sensor.example">
+                <input type="text" id="entities-search" class="autocomplete" autocomplete="off" placeholder="sensor.example">
                 <label>Search entity</label>
             </div>
             <div class="input-field col s12">
@@ -2615,6 +2626,16 @@ INDEX = Template(r"""<!DOCTYPE html>
         dd_download.appendChild(dd_download_a);
         dropdown.appendChild(dd_download);
 
+        // Rename button
+        var dd_rename = document.createElement('li');
+        var dd_rename_a = document.createElement('a');
+        dd_rename_a.classList.add("waves-effect", "fb_dd");
+        dd_rename_a.setAttribute('href', "#modal_rename");
+        dd_rename_a.classList.add("modal-trigger");
+        dd_rename_a.innerHTML = "Rename";
+        dd_rename.appendChild(dd_rename_a);
+        dropdown.appendChild(dd_rename);
+
         // Delete button
         var dd_delete = document.createElement('li');
         var dd_delete_a = document.createElement('a');
@@ -3062,11 +3083,35 @@ INDEX = Template(r"""<!DOCTYPE html>
         window.open("api/download?filename="+encodeURI(filepath));
     }
 
+    function rename_file() {
+        var src = document.getElementById("fb_currentfile").value;
+        var dstfilename = document.getElementById("rename_name_new").value;
+        if (src.length > 0 && dstfilename.length > 0) {
+            data = new Object();
+            data.src = src;
+            data.dstfilename = dstfilename;
+            $.post("api/rename", data).done(function(resp) {
+                if (resp.error) {
+                    var $toastContent = $("<div><pre>" + resp.message + "\n" + resp.path + "</pre></div>");
+                    Materialize.toast($toastContent, 5000);
+                }
+                else {
+                    var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
+                    Materialize.toast($toastContent, 2000);
+                    listdir(document.getElementById('fbheader').innerHTML)
+                    document.getElementById('currentfile').value='';
+                    editor.setValue('');
+                    document.getElementById("rename_name_new").value = "";
+                }
+            })
+        }
+    }
+
     function delete_file() {
         var path = document.getElementById('currentfile').value;
         if (path.length > 0) {
             data = new Object();
-            data.path= path;
+            data.path = path;
             $.post("api/delete", data).done(function(resp) {
                 if (resp.error) {
                     var $toastContent = $("<div><pre>" + resp.message + "\n" + resp.path + "</pre></div>");
@@ -3574,7 +3619,7 @@ def load_settings(args):
         GIT = settings.get("GIT", GIT)
     if GIT:
         try:
-            # pylint: disable=redefined-outer-name,import-outside-toplevel
+            # pylint: disable=redefined-outer-name
             from git import Repo as REPO
         except ImportError:
             LOG.warning("Unable to import Git module")
@@ -4345,6 +4390,40 @@ class RequestHandler(BaseHTTPRequestHandler):
             response['message'] = "Upload successful"
             self.wfile.write(bytes(json.dumps(response), "utf8"))
             return
+        elif req.path.endswith('/api/rename'):
+            try:
+                postvars = parse_qs(self.rfile.read(length).decode('utf-8'),
+                                    keep_blank_values=1)
+            except Exception as err:
+                LOG.warning(err)
+                response['message'] = "%s" % (str(err))
+                postvars = {}
+            if 'src' in postvars.keys() and 'dstfilename' in postvars.keys():
+                if postvars['src'] and postvars['dstfilename']:
+                    try:
+                        src = unquote(postvars['src'][0])
+                        dstfilename = unquote(postvars['dstfilename'][0])
+                        renamepath = src[:src.index(os.path.basename(src))] + dstfilename
+                        response['path'] = renamepath
+                        try:
+                            os.rename(src, renamepath)
+                            self.send_response(200)
+                            self.send_header('Content-type', 'text/json')
+                            self.end_headers()
+                            response['error'] = False
+                            response['message'] = "Rename successful"
+                            self.wfile.write(bytes(json.dumps(response), "utf8"))
+                            return
+                        except Exception as err:
+                            LOG.warning(err)
+                            response['error'] = True
+                            response['message'] = str(err)
+
+                    except Exception as err:
+                        response['message'] = "%s" % (str(err))
+                        LOG.warning(err)
+            else:
+                response['message'] = "Missing filename or text"
         elif req.path.endswith('/api/delete'):
             try:
                 postvars = parse_qs(self.rfile.read(length).decode('utf-8'),

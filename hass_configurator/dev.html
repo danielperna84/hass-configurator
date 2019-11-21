@@ -1248,6 +1248,17 @@
           <a onclick="closefile()" class="modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Yes</a>
         </div>
     </div>
+    <div id="modal_rename" class="modal">
+        <div class="modal-content">
+            <h4 class="grey-text text-darken-3">Rename</h4>
+            <p>Please enter a new name for <span class="fb_currentfile"></span>.</p>
+            <input type="text" id="rename_name_new" />
+        </div>
+        <div class="modal-footer">
+          <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">Cancel</a>
+          <a onclick="rename_file()" class="modal-action modal-close waves-effect waves-green btn-flat light-blue-text">Apply</a>
+        </div>
+    </div>
     <div id="modal_delete" class="modal">
         <div class="modal-content">
             <h4 class="grey-text text-darken-3">Delete</h4>
@@ -2493,6 +2504,16 @@
         dd_download.appendChild(dd_download_a);
         dropdown.appendChild(dd_download);
 
+        // Rename button
+        var dd_rename = document.createElement('li');
+        var dd_rename_a = document.createElement('a');
+        dd_rename_a.classList.add("waves-effect", "fb_dd");
+        dd_rename_a.setAttribute('href', "#modal_rename");
+        dd_rename_a.classList.add("modal-trigger");
+        dd_rename_a.innerHTML = "Rename";
+        dd_rename.appendChild(dd_rename_a);
+        dropdown.appendChild(dd_rename);
+
         // Delete button
         var dd_delete = document.createElement('li');
         var dd_delete_a = document.createElement('a');
@@ -2940,11 +2961,35 @@
         window.open("api/download?filename="+encodeURI(filepath));
     }
 
+    function rename_file() {
+        var src = document.getElementById("fb_currentfile").value;
+        var dstfilename = document.getElementById("rename_name_new").value;
+        if (src.length > 0 && dstfilename.length > 0) {
+            data = new Object();
+            data.src = src;
+            data.dstfilename = dstfilename;
+            $.post("api/rename", data).done(function(resp) {
+                if (resp.error) {
+                    var $toastContent = $("<div><pre>" + resp.message + "\n" + resp.path + "</pre></div>");
+                    Materialize.toast($toastContent, 5000);
+                }
+                else {
+                    var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
+                    Materialize.toast($toastContent, 2000);
+                    listdir(document.getElementById('fbheader').innerHTML)
+                    //document.getElementById('currentfile').value='';
+                    //editor.setValue('');
+                    document.getElementById("rename_name_new").value = "";
+                }
+            })
+        }
+    }
+
     function delete_file() {
         var path = document.getElementById('currentfile').value;
         if (path.length > 0) {
             data = new Object();
-            data.path= path;
+            data.path = path;
             $.post("api/delete", data).done(function(resp) {
                 if (resp.error) {
                     var $toastContent = $("<div><pre>" + resp.message + "\n" + resp.path + "</pre></div>");
