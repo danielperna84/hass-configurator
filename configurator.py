@@ -3619,7 +3619,7 @@ def load_settings(args):
         GIT = settings.get("GIT", GIT)
     if GIT:
         try:
-            # pylint: disable=redefined-outer-name
+            # pylint: disable=redefined-outer-name,import-outside-toplevel
             from git import Repo as REPO
         except ImportError:
             LOG.warning("Unable to import Git module")
