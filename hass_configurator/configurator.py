@@ -2795,6 +2795,17 @@ INDEX = Template(r"""<!DOCTYPE html>
                                         current_filename: global_current_filename}
                     localStorage.setItem('current_file', JSON.stringify(current_file));
                     check_lint();
+                    if (localStorage.getItem("filehistory") === null) {
+                        localStorage.setItem("filehistory", JSON.stringify([filepath]));
+                    }
+                    else {
+                        var filehistory = JSON.parse(localStorage.getItem("filehistory"));
+                        filehistory.push(filepath);
+                        while (filehistory.length > 10) {
+                            filehistory.shift();
+                        }
+                        localStorage.setItem("filehistory", JSON.stringify(filehistory));
+                    }
                 });
             }
         }
@@ -3099,8 +3110,8 @@ INDEX = Template(r"""<!DOCTYPE html>
                     var $toastContent = $("<div><pre>" + resp.message + "</pre></div>");
                     Materialize.toast($toastContent, 2000);
                     listdir(document.getElementById('fbheader').innerHTML)
-                    document.getElementById('currentfile').value='';
-                    editor.setValue('');
+                    //document.getElementById('currentfile').value='';
+                    //editor.setValue('');
                     document.getElementById("rename_name_new").value = "";
                 }
             })
