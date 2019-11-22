@@ -2804,11 +2804,14 @@ INDEX = Template(r"""<!DOCTYPE html>
                     }
                     else {
                         var filehistory = JSON.parse(localStorage.getItem("filehistory"));
-                        filehistory.push(filepath);
-                        while (filehistory.length > 10) {
-                            filehistory.shift();
+                        if (filehistory[filehistory.length -1] != filepath) {
+                            filehistory.push(filepath);
+                            filehistory = filehistory.reduce(function(a,b){if(a.indexOf(b)<0)a.push(b);return a;},[]);
+                            while (filehistory.length > 10) {
+                                filehistory.shift();
+                            }
+                            localStorage.setItem("filehistory", JSON.stringify(filehistory));
                         }
-                        localStorage.setItem("filehistory", JSON.stringify(filehistory));
                     }
                     var history_ul = document.getElementById("file_history");
                     while (history_ul.firstChild) {
@@ -2818,7 +2821,7 @@ INDEX = Template(r"""<!DOCTYPE html>
                     for (i = 0; i < filehistory.length; i++) {
                         var li = document.createElement('li');
                         var item = document.createElement('span');
-                        var parts = filehistory[i].split(separator);
+                        var parts = decodeURI(filehistory[i]).split(separator);
                         var filename = parts[parts.length - 1];
                         item.innerHTML = "..." + decodeURI(filehistory[i].slice(filehistory[i].length - 25));
                         item.setAttribute("onclick", "loadfile('" + filehistory[i] + "', '" + filename + "')");
