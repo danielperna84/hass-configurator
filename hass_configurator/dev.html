@@ -198,7 +198,7 @@
             color: #fff;
         }
 
-        #dropdown_menu, #dropdown_menu_mobile {
+        #file_history, #dropdown_menu, #dropdown_menu_mobile {
             min-width: 235px;
         }
 
@@ -552,7 +552,9 @@
             <div class="nav-wrapper">
                 <ul class="left">
                     <li><a class="waves-effect waves-light tooltipped files-collapse hide-on-small-only" data-activates="slide-out" data-position="bottom" data-delay="500" data-tooltip="Browse Filesystem" style="padding-left: 25px; padding-right: 25px;"><i class="material-icons">folder</i></a></li>
+                    <li><a class="waves-effect waves-light tooltipped dropdown-button hide-on-small-only" data-activates="file_history" data-beloworigin="true" data-delay="500" data-tooltip="File History" style="padding-left: 25px; padding-right: 25px;"><i class="material-icons">history</i></a></li>
                     <li><a class="waves-effect waves-light files-collapse hide-on-med-and-up" data-activates="slide-out" style="padding-left: 25px; padding-right: 25px;"><i class="material-icons">folder</i></a></li>
+                    <li><a class="waves-effect waves-light dropdown-button hide-on-med-and-up" data-activates="file_history" data-beloworigin="true" style="padding-left: 25px; padding-right: 25px;"><i class="material-icons">history</i></a></li>
                 </ul>
                 <ul class="right">
                     <li><a class="waves-effect waves-light tooltipped hide-on-small-only markdirty hidesave" data-position="bottom" data-delay="500" data-tooltip="Save" onclick="save_check()"><i class="material-icons">save</i></a></li>
@@ -569,6 +571,7 @@
     </div>
   </header>
   <main>
+    <ul id="file_history" class="dropdown-content z-depth-4"></ul>
     <ul id="dropdown_menu" class="dropdown-content z-depth-4">
         <li><a onclick="localStorage.setItem('new_tab', true);window.open(window.location.origin+window.location.pathname, '_blank');">New tab</a></li>
         <li class="divider"></li>
@@ -2675,6 +2678,7 @@
                     check_lint();
                     if (localStorage.getItem("filehistory") === null) {
                         localStorage.setItem("filehistory", JSON.stringify([filepath]));
+                        var filehistory = JSON.parse(localStorage.getItem("filehistory"));
                     }
                     else {
                         var filehistory = JSON.parse(localStorage.getItem("filehistory"));
@@ -2683,6 +2687,21 @@
                             filehistory.shift();
                         }
                         localStorage.setItem("filehistory", JSON.stringify(filehistory));
+                    }
+                    var history_ul = document.getElementById("file_history");
+                    while (history_ul.firstChild) {
+                        history_ul.removeChild(history_ul.firstChild);
+                    }
+                    filehistory.reverse();
+                    for (i = 0; i < filehistory.length; i++) {
+                        var li = document.createElement('li');
+                        var item = document.createElement('span');
+                        var parts = filehistory[i].split(separator);
+                        var filename = parts[parts.length - 1];
+                        item.innerHTML = "..." + decodeURI(filehistory[i].slice(filehistory[i].length - 25));
+                        item.setAttribute("onclick", "loadfile('" + filehistory[i] + "', '" + filename + "')");
+                        li.appendChild(item);
+                        history_ul.appendChild(li);
                     }
                 });
             }
