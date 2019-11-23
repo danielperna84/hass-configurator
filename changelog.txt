@@ -1,3 +1,5 @@
+Version 0.3.8 ()
+
 Version 0.3.7 (2019-11-23)
 - Rename files via UI (Issue #162)
 - Disable browser-autocomplete on searchbox @ProLoser
