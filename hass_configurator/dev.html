@@ -4,498 +4,13 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0" />
     <title>HASS Configurator</title>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="material-icons.fallback.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/MaterialDesign-Webfont/3.4.93/css/materialdesignicons.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
-    <style type="text/css" media="screen">
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #fafafa;
-            display: flex;
-            min-height: 100vh;
-            flex-direction: column;
-        }
-
-        main {
-            flex: 1 0 auto;
-        }
-
-        #editor {
-            position: fixed;
-            top: 135px;
-            right: 0;
-            bottom: 0;
-        }
-
-        @media only screen and (max-width: 600px) {
-          #editor {
-              top: 125px;
-          }
-          .toolbar_mobile {
-              margin-bottom: 0;
-          }
-        }
-
-        .leftellipsis {
-            overflow: hidden;
-            direction: rtl;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .select-wrapper input.select-dropdown {
-            width: 96%;
-            overflow: hidden;
-            direction: ltr;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        #edit_float {
-              z-index: 10;
-        }
-
-        #filebrowser {
-            background-color: #fff;
-        }
-
-        #fbheader {
-            display: block;
-            cursor: initial;
-            pointer-events: none;
-            color: #424242 !important;
-            font-weight: 400;
-            font-size: .9em;
-            min-height: 64px;
-            padding-top: 8px;
-            margin-left: -5px;
-            max-width: 250px;
-        }
-
-        #fbheaderbranch {
-            padding: 5px 10px !important;
-            display: none;
-            color: #757575 !important;
-        }
-
-        #branchselector {
-            font-weight: 400;
-        }
-
-        a.branch_select.active {
-            color: white !important;
-        }
-
-        #fbelements {
-            margin: 0;
-            position: relative;
-        }
-
-        a.collection-item {
-            color: #616161 !important;
-        }
-
-        .fbtoolbarbutton {
-            color: #757575 !important;
-            min-height: 64px !important;
-        }
-
-        .fbmenubutton {
-            color: #616161 !important;
-            display: inline-block;
-            float: right;
-            min-height: 64px;
-            padding-top: 8px !important;
-            padding-left: 20px !important;
-        }
-
-        .filename {
-            color: #616161 !important;
-            font-weight: 400;
-            display: inline-block;
-            width: 182px;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-            cursor: pointer;
-        }
-
-        .nowrap {
-            white-space: nowrap;
-        }
-
-        .text_darkgreen {
-            color: #1b5e20 !important;
-        }
-
-        .text_darkred {
-            color: #b71c1c !important;
-        }
-
-        span.stats {
-            margin: -10px 0 0 0;
-            padding: 0;
-            font-size: 0.5em;
-            color: #616161 !important;
-            line-height: 16px;
-            display: inherit;
-        }
-
-        .collection-item #uplink {
-            background-color: #f5f5f5;
-            width: 323px !important;
-            margin-left: -3px !important;
-        }
-
-        input.currentfile_input {
-            margin-bottom: 0;
-            margin-top: 0;
-            padding-left: 5px;
-            border-bottom: 0;
-        }
-
-        .side_tools {
-            vertical-align: middle;
-        }
-
-        .fbtoolbarbutton_icon {
-            margin-top: 20px;
-        }
-
-        .collection {
-            margin: 0;
-            background-color: #fff;
-        }
-
-        li.collection-item {
-            border-bottom: 1px solid #eeeeee !important;
-        }
-
-        .side-nav {
-            width: 337px !important;
-            height: 100% !important;
-        }
-
-        .fb_side-nav li {
-            line-height: 36px;
-        }
-
-        .fb_side-nav a {
-          padding: 0 0 0 16px;
-          display: inline-block !important;
-        }
-
-        .fb_side-nav li>a>i {
-            margin-right: 16px !important;
-            cursor: pointer;
-        }
-
-        .green {
-            color: #fff;
-        }
-
-        .red {
-            color: #fff;
-        }
-
-        #file_history, #dropdown_menu, #dropdown_menu_mobile {
-            min-width: 235px;
-        }
-
-        #dropdown_gitmenu {
-            min-width: 140px !important;
-        }
-
-        .dropdown-content li>a,
-        .dropdown-content li>span {
-            color: #616161 !important;
-        }
-
-        .fb_dd {
-            margin-left: -15px !important;
-        }
-
-        .blue_check:checked+label:before {
-            border-right: 2px solid #03a9f4;
-            border-bottom: 2px solid #03a9f4;
-        }
-
-        .input-field input:focus+label {
-            color: #03a9f4 !important;
-        }
-
-        .input-field input[type=text].valid {
-            border-bottom: 1px solid #03a9f4 !important;
-            box-shadow: 0 1px 0 0 #03a9f4 !important;
-        }
-
-        .input-field input[type=text]:focus {
-            border-bottom: 1px solid #03a9f4 !important;
-            box-shadow: 0 1px 0 0 #03a9f4 !important;
-        }
-
-        .input-field input:focus+label {
-            color: #03a9f4 !important;
-        }
-
-        .input-field input[type=password].valid {
-            border-bottom: 1px solid #03a9f4 !important;
-            box-shadow: 0 1px 0 0 #03a9f4 !important;
-        }
-
-        .input-field input[type=password]:focus {
-            border-bottom: 1px solid #03a9f4 !important;
-            box-shadow: 0 1px 0 0 #03a9f4 !important;
-        }
-
-        .input-field textarea:focus+label {
-            color: #03a9f4 !important;
-        }
-
-        .input-field textarea:focus {
-            border-bottom: 1px solid #03a9f4 !important;
-            box-shadow: 0 1px 0 0 #03a9f4 !important;
-        }
-
-        #modal_acekeyboard {
-            top: auto;
-            width: 96%;
-            min-height: 96%;
-            border-radius: 0;
-            margin: auto;
-        }
-
-        .modal .modal-content_nopad {
-            padding: 0;
-        }
-
-        .waves-effect.waves-blue .waves-ripple {
-            background-color: #03a9f4;
-        }
-
-        .preloader-background {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #eee;
-            position: fixed;
-            z-index: 10000;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-        }
-
-        .modal-content_nopad {
-            position: relative;
-        }
-
-        .modal-content_nopad .modal_btn {
-            position: absolute;
-            top: 2px;
-            right:0;
-        }
-
-        footer {
-            z-index: 10;
-        }
-
-        .shadow {
-            height: 25px;
-            margin: -26px;
-            min-width: 320px;
-            background-color: transparent;
-        }
-
-        .ace_optionsMenuEntry input {
-            position: relative !important;
-            left: 0 !important;
-            opacity: 1 !important;
-        }
-
-        .ace_optionsMenuEntry select {
-            position: relative !important;
-            left: 0 !important;
-            opacity: 1 !important;
-            display: block !important;
-        }
-
-        .ace_search {
-            background-color: #eeeeee !important;
-            border-radius: 0 !important;
-            border: 0 !important;
-            box-shadow: 0 6px 10px 0 rgba(0, 0, 0, 0.14), 0 1px 18px 0 rgba(0, 0, 0, 0.12), 0 3px 5px -1px rgba(0, 0, 0, 0.3);
-        }
-
-        .ace_search_form {
-            background-color: #fafafa;
-            width: 300px;
-            border: 0 !important;
-            border-radius: 0 !important;
-            outline: none !important;
-            box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 2px 1px -2px rgba(0, 0, 0, 0.2);
-            margin-bottom: 15px !important;
-            margin-left: 8px !important;
-            color: #424242 !important;
-        }
-
-        .ace_search_field {
-            padding-left: 4px !important;
-            margin-left: 10px !important;
-            max-width: 275px !important;
-            font-family: 'Roboto', sans-serif !important;
-            border-bottom: 1px solid #03a9f4 !important;
-            color: #424242 !important;
-        }
-
-        .ace_replace_form {
-            background-color: #fafafa;
-            width: 300px;
-            border: 0 !important;
-            border-radius: 0 !important;
-            outline: none !important;
-            box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12), 0 2px 1px -2px rgba(0, 0, 0, 0.2);
-            margin-bottom: 15px !important;
-            margin-left: 8px !important;
-        }
-
-        .ace_search_options {
-            background-color: #eeeeee;
-            text-align: left !important;
-            letter-spacing: .5px !important;
-            transition: .2s ease-out;
-            font-family: 'Roboto', sans-serif !important;
-            font-size: 130%;
-            top: 0 !important;
-        }
-
-        .ace_searchbtn {
-            text-decoration: none !important;
-            min-width: 40px !important;
-            min-height: 30px !important;
-            color: #424242 !important;
-            text-align: center !important;
-            letter-spacing: .5px !important;
-            transition: .2s ease-out;
-            cursor: pointer;
-            font-family: 'Roboto', sans-serif !important;
-        }
-
-        .ace_searchbtn:hover {
-            background-color: #03a9f4;
-        }
-
-        .ace_replacebtn {
-            text-decoration: none !important;
-            min-width: 40px !important;
-            min-height: 30px !important;
-            color: #424242 !important;
-            text-align: center !important;
-            letter-spacing: .5px !important;
-            transition: .2s ease-out;
-            cursor: pointer;
-            font-family: 'Roboto', sans-serif !important;
-        }
-
-        .ace_replacebtn:hover {
-            background-color: #03a9f4;
-        }
-
-        .ace_button {
-            text-decoration: none !important;
-            min-width: 40px !important;
-            min-height: 30px !important;
-            border-radius: 0 !important;
-            outline: none !important;
-            color: #424242 !important;
-            background-color: #fafafa;
-            text-align: center;
-            letter-spacing: .5px;
-            transition: .2s ease-out;
-            cursor: pointer;
-            font-family: 'Roboto', sans-serif !important;
-        }
-
-        .ace_button:hover {
-            background-color: #03a9f4 !important;
-        }
-
-        .ace_invisible {
-            color: rgba(191, 191, 191, 0.5) !important;
-        }
-
-        .fbicon_pad {
-            min-height: 64px !important;
-        }
-
-        .fbmenuicon_pad {
-            min-height: 64px;
-            margin-top: 6px !important;
-            margin-right: 18px !important;
-            color: #616161 !important;
-        }
-
-        .no-padding {
-            padding: 0 !important;
-        }
-
-        .branch_select {
-            min-width: 300px !important;
-            font-size: 14px !important;
-            font-weight: 400 !important;
-        }
-
-        a.branch_hover:hover {
-            background-color: #e0e0e0 !important;
-        }
-
-        .hidesave {
-            opacity: 0;
-            -webkit-transition: all 0.5s ease-in-out;
-            -moz-transition: all 0.5s ease-in-out;
-            -ms-transition: all 0.5s ease-in-out;
-            -o-transition: all 0.5s ease-in-out;
-            transition: all 0.5s ease-in-out;
-        }
-
-        .pathtip_color {
-            -webkit-animation: fadeinout 1.75s linear 1 forwards;
-            animation: fadeinout 1.75s linear 1 forwards;
-        }
-
-        @-webkit-keyframes fadeinout {
-            0% { background-color: #f5f5f5; }
-            50% { background-color: #ff8a80; }
-            100% { background-color: #f5f5f5; }
-        }
-        @keyframes fadeinout {
-            0% { background-color: #f5f5f5; }
-            50% { background-color: #ff8a80; }
-            100% { background-color: #f5f5f5; }
-        }
-
-        #lint-status {
-            position: absolute;
-            top: 0.75rem;
-            right: 10px;
-        }
-
-        .cursor-pointer {
-            cursor: pointer;
-        }
-
-        #modal_lint.modal {
-            width: 80%;
-        }
-
-        #modal_lint textarea {
-            resize: none;
-            height: auto;
-        }
-    </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.7/ace.js" type="text/javascript" charset="utf-8"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.7/ext-modelist.js" type="text/javascript" charset="utf-8"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.7/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/css/materialize.min.css">
+    <link rel="stylesheet" type="text/css" href="style.css" media="screen">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.8/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.8/ext-modelist.js" type="text/javascript" charset="utf-8"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.8/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
 </head>
 <body>
   <div class="preloader-background">
@@ -614,16 +129,16 @@
         <li><a onclick="toggle_hass_panels()">Toggle HASS panel</a></li>
     </ul>
     <ul id="dropdown_gitmenu" class="dropdown-content z-depth-4">
-        <li><a class="modal-trigger" href="#modal_init" class="nowrap waves-effect">git init</a></li>
-        <li><a class="modal-trigger" href="#modal_commit" class="nowrap waves-effect">git commit</a></li>
-        <li><a class="modal-trigger" href="#modal_push" class="nowrap waves-effect">git push</a></li>
-        <li><a class="modal-trigger" href="#modal_stash" class="nowrap waves-effect">git stash</a></li>
+        <li><a class="modal-trigger nowrap waves-effect" href="#modal_init">git init</a></li>
+        <li><a class="modal-trigger nowrap waves-effect" href="#modal_commit">git commit</a></li>
+        <li><a class="modal-trigger nowrap waves-effect" href="#modal_push">git push</a></li>
+        <li><a class="modal-trigger nowrap waves-effect" href="#modal_stash">git stash</a></li>
     </ul>
     <ul id="dropdown_gitmenu_mobile" class="dropdown-content z-depth-4">
-        <li><a class="modal-trigger" href="#modal_init" class="nowrap waves-effect">git init</a></li>
-        <li><a class="modal-trigger" href="#modal_commit" class="nowrap waves-effect">git commit</a></li>
-        <li><a class="modal-trigger" href="#modal_push" class="nowrap waves-effect">git push</a></li>
-        <li><a class="modal-trigger" href="#modal_stash" class="nowrap waves-effect">git stash</a></li>
+        <li><a class="modal-trigger nowrap waves-effect" href="#modal_init">git init</a></li>
+        <li><a class="modal-trigger nowrap waves-effect" href="#modal_commit">git commit</a></li>
+        <li><a class="modal-trigger nowrap waves-effect" href="#modal_push">git push</a></li>
+        <li><a class="modal-trigger nowrap waves-effect" href="#modal_stash">git stash</a></li>
     </ul>
     <div id="modal_acekeyboard" class="modal bottom-sheet modal-fixed-footer">
         <div class="modal-content centered">
@@ -1469,7 +984,7 @@
                 <ul id="allowed_networks" class="collection with-header"></ul>
                 <br />
                 <div class="input-field">
-                    <a href="#" class="prefix" onclick="helper_a_net_add()"><i class="mdi mdi-plus-circle prefix light-blue-text"></i></a></i>
+                    <a href="#" class="prefix" onclick="helper_a_net_add()"><i class="mdi mdi-plus-circle prefix light-blue-text"></i></a>
                     <input placeholder="192.168.0.0/16" id="add_net_ip" type="text">
                     <label for="add_net_ip">Add network / IP</label>
                 </div>
@@ -1478,7 +993,7 @@
                 <ul id="banned_ips" class="collection with-header"></ul>
                 <br />
                 <div class="input-field">
-                    <a href="#" class="prefix" onclick="helper_banned_ban()"><i class="mdi mdi-plus-circle prefix light-blue-text"></i></a></i>
+                    <a href="#" class="prefix" onclick="helper_banned_ban()"><i class="mdi mdi-plus-circle prefix light-blue-text"></i></a>
                     <input placeholder="1.2.3.4" id="add_banned_ip" type="text">
                     <label for="add_banned_ip">Ban IP</label>
                 </div>
@@ -2060,15 +1575,15 @@
                   <label class="active" for="wrap_limit">Wrap Limit</label>
               </div>
               <a class="waves-effect waves-light btn light-blue" onclick="save_ace_settings()">Save Settings Locally</a>
-              <p class="center col s12"> Ace Editor 1.4.7 </p>
+              <p class="center col s12"> Ace Editor 1.4.8 </p>
           </div>
         </ul>
       </div>
 </main>
 <input type="hidden" id="fb_currentfile" value="" />
 <!-- Scripts -->
-<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
+<script src="jquery-3.4.1.min.js"></script>
+<script src="materialize.min.js"></script>
 <script>
     function ws_connect() {
         function msg(str) {
@@ -3425,7 +2940,7 @@
     }
 
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/3.13.1/js-yaml.js" type="text/javascript" charset="utf-8"></script>
+<script src="js-yaml.min.js" type="application/javascript" charset="utf-8"></script>
 <script type="text/javascript">
 var lint_timeout;
 var lint_status = $('#lint-status'); // speed optimization
