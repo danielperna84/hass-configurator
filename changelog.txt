@@ -1,5 +1,6 @@
 Version 0.3.8 ()
 - Some dependencies are now included within the package (Issue #177)
+- Update Ace Editor to 1.4.8
 
 Version 0.3.7 (2019-11-23)
 - Rename files via UI (Issue #162)
