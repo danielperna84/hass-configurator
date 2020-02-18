@@ -1,1 +1,7 @@
 include hass_configurator/dev.html
+include hass_configurator/flUhRq6tzZclQEJ-Vdg-IuiaDsNc.woff2
+include hass_configurator/jquery-3.4.1.min.js
+include hass_configurator/js-yaml.min.js
+include hass_configurator/material-icons.fallback.css
+include hass_configurator/materialize.min.js
+include hass_configurator/style.css
