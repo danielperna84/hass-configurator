@@ -1,5 +1,5 @@
 Version 0.3.9 (2020-02-18)
-- Some dependencies were missing from the package (Issue #187)
+- Some dependencies were missing from the package (Issue #187) @tjorim
 
 Version 0.3.8 (2020-02-17)
 - Some dependencies are now included within the package (Issue #177)
