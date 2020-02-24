@@ -1650,6 +1650,7 @@
     var init_loadfile = $loadfile;
     var global_current_filepath = null;
     var global_current_filename = null;
+    var global_hass_panel_hidden = null;
 
     function toggle_hass_panels() {
         if (document.getElementById("hass_menu_l").style.display == "none") {
@@ -1658,6 +1659,7 @@
             document.getElementById("editor").classList.add("l9");
             document.getElementById("filename_row").classList.remove("l12");
             document.getElementById("filename_row").classList.add("l9");
+            global_hass_panel_hidden = false;
         }
         else {
             document.getElementById("hass_menu_l").style.display = "none";
@@ -1665,6 +1667,7 @@
             document.getElementById("editor").classList.add("l12");
             document.getElementById("filename_row").classList.remove("l9");
             document.getElementById("filename_row").classList.add("l12");
+            global_hass_panel_hidden = true;
         }
         if (document.getElementById("hass_menu_s").style.display == "none") {
             document.getElementById("hass_menu_s").style.display = "";
@@ -1672,6 +1675,7 @@
             document.getElementById("editor").classList.add("l9");
             document.getElementById("filename_row").classList.remove("l12");
             document.getElementById("filename_row").classList.add("l9");
+            global_hass_panel_hidden = false;
         }
         else {
             document.getElementById("hass_menu_s").style.display = "none";
@@ -1679,7 +1683,9 @@
             document.getElementById("editor").classList.add("l12");
             document.getElementById("filename_row").classList.remove("l9");
             document.getElementById("filename_row").classList.add("l12");
+            global_hass_panel_hidden = true;
         }
+        localStorage.setItem('hass_panel_hidden', global_hass_panel_hidden);
     }
 
     function got_focus_or_visibility() {
@@ -1826,6 +1832,9 @@
                 localStorage.removeItem("current_file");
             }
             localStorage.removeItem("new_tab");
+            if (localStorage.getItem("hass_panel_hidden") =="true") {
+                toggle_hass_panels();
+            }
         }
     });
 </script>

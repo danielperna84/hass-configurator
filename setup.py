@@ -4,7 +4,7 @@ from setuptools import setup
 
 NAME = "hass-configurator"
 PACKAGE_NAME = "hass_configurator"
-VERSION = "0.3.9"
+VERSION = "0.4.0"
 
 setup(name=NAME,
       version=VERSION,
