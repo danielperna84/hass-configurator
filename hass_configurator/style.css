@@ -188,7 +188,7 @@ li.collection-item {
     color: #fff;
 }
 
-#dropdown_menu, #dropdown_menu_mobile {
+#file_history, #dropdown_menu, #dropdown_menu_mobile {
     min-width: 235px;
 }
 

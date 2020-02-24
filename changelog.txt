@@ -1,3 +1,6 @@
+Version 0.4.0 (2020-02-24)
+- Fix file history width (Issue #192)
+
 Version 0.3.9 (2020-02-18)
 - Some dependencies were missing from the package (Issue #187) @tjorim
 
