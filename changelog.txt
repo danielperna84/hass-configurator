@@ -1,3 +1,6 @@
+Version 0.4.1 (2020-04-23)
+- Ignore `input`-keyword used in blueprints (Issue #207) @danielperna84
+
 Version 0.4.0 (2020-02-24)
 - Fix file history width (Issue #192)
 - Store HASS-panel visibility state (Issue #189)
