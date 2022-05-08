@@ -106,6 +106,7 @@
         <li class="divider"></li>
         <li><a class="modal-trigger" href="#modal_exec_command">Execute shell command</a></li>
         <li><a onclick="toggle_hass_panels()">Toggle HASS panel</a></li>
+        <li><a onclick="generate_uuid()">Generate UUID</a></li>
     </ul>
     <ul id="dropdown_menu_mobile" class="dropdown-content z-depth-4">
         <li><a onclick="localStorage.setItem('new_tab', true);window.open(window.location.origin+window.location.pathname, '_blank');">New tab</a></li>
@@ -127,6 +128,7 @@
         <li class="divider"></li>
         <li><a class="modal-trigger" href="#modal_exec_command">Execute shell command</a></li>
         <li><a onclick="toggle_hass_panels()">Toggle HASS panel</a></li>
+        <li><a onclick="generate_uuid()">Generate UUID</a></li>
     </ul>
     <ul id="dropdown_gitmenu" class="dropdown-content z-depth-4">
         <li><a class="modal-trigger nowrap waves-effect" href="#modal_init">git init</a></li>
@@ -1688,6 +1690,17 @@
         localStorage.setItem('hass_panel_hidden', global_hass_panel_hidden);
     }
 
+    function generate_uuid() {
+      var uuid = "xxxxxxxx-xxxx-4xxx-nxxx-xxxxxxxxxxxx"
+        .replaceAll('n', function() {
+          return (crypto.getRandomValues(new Uint8Array(1))[0] % 4 + 8).toString(16);
+        })
+        .replaceAll('x', function() {
+          return (crypto.getRandomValues(new Uint8Array(1))[0] % 16).toString(16);
+        });
+      editor.insert(uuid);
+    }
+
     function got_focus_or_visibility() {
         if (global_current_filename && global_current_filepath) {
             // The globals are set, set the localStorage to those values
@@ -1710,8 +1723,8 @@
 
     // Got this from here: https://developer.mozilla.org/en-US/docs/Web/API/Page_Visibility_API
     // Set the name of the hidden property and the change event for visibility
-    var hidden, visibilityChange; 
-    if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support 
+    var hidden, visibilityChange;
+    if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support
         hidden = "hidden";
         visibilityChange = "visibilitychange";
     }
@@ -1749,7 +1762,7 @@
             return false;
         }
         return true;
-    }); 
+    });
 
     $(document).ready(function () {
         $('select').material_select();
@@ -1945,7 +1958,7 @@
                 renderpath(data);
             }
             else {
-                console.log("Permission denied."); 
+                console.log("Permission denied.");
             }
         });
         document.getElementById("slide-out").scrollTop = 0;
