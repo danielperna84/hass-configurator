@@ -1757,7 +1757,7 @@ def main():
             data = {
                 "title": "HASS Configurator - Password warning",
                 "message": "Your HASS API password seems insecure (%i). " \
-                "Refer to the HASS configurator logs for further information." % problems,
+                "Refer to the HASS Configurator logs for further information." % problems,
                 "notification_id": "HC_HASS_API_PASSWORD"
             }
             notify(**data)
@@ -1769,7 +1769,7 @@ def main():
             data = {
                 "title": "HASS Configurator - Password warning",
                 "message": "Your SESAME seems insecure (%i). " \
-                "Refer to the HASS configurator logs for further information." % problems,
+                "Refer to the HASS Configurator logs for further information." % problems,
                 "notification_id": "HC_SESAME"
             }
             notify(**data)
@@ -1781,7 +1781,7 @@ def main():
             data = {
                 "title": "HASS Configurator - Password warning",
                 "message": "Your PASSWORD seems insecure (%i). " \
-                "Refer to the HASS configurator logs for further information." % problems,
+                "Refer to the HASS Configurator logs for further information." % problems,
                 "notification_id": "HC_PASSWORD"
             }
             notify(**data)
