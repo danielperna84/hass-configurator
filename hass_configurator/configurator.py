@@ -1756,7 +1756,7 @@ def main():
         if problems:
             data = {
                 "title": "HASS Configurator - Password warning",
-                "message": "Your HASS API password seems insecure (%i). " \
+                "message": "Your Home Assistant API password seems insecure (%i). " \
                 "Refer to the HASS Configurator logs for further information." % problems,
                 "notification_id": "HC_HASS_API_PASSWORD"
             }
