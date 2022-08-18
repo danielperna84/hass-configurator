@@ -94,18 +94,18 @@
         <li><a target="_blank" href="https://materialdesignicons.com/">Material Icons</a></li>
         <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
         <li><a class="modal-trigger" href="#modal_netstat" onclick="get_netstat()">Network status</a></li>
-        <li><a class="modal-trigger" href="#modal_about">About HASS-Configurator</a></li>
+        <li><a class="modal-trigger" href="#modal_about">About HASS Configurator</a></li>
         <li class="divider"></li>
-        <!--<li><a href="#modal_check_config">Check HASS Configuration</a></li>-->
+        <!--<li><a href="#modal_check_config">Check Home Assistant Configuration</a></li>-->
         <li><a class="modal-trigger" href="#modal_events">Observe events</a></li>
         <li><a class="modal-trigger" href="#modal_reload_automations">Reload automations</a></li>
         <li><a class="modal-trigger" href="#modal_reload_scripts">Reload scripts</a></li>
         <li><a class="modal-trigger" href="#modal_reload_groups">Reload groups</a></li>
         <li><a class="modal-trigger" href="#modal_reload_core">Reload core</a></li>
-        <li><a class="modal-trigger" href="#modal_restart">Restart HASS</a></li>
+        <li><a class="modal-trigger" href="#modal_restart">Restart Home Assistant</a></li>
         <li class="divider"></li>
         <li><a class="modal-trigger" href="#modal_exec_command">Execute shell command</a></li>
-        <li><a onclick="toggle_hass_panels()">Toggle HASS panel</a></li>
+        <li><a onclick="toggle_hass_panels()">Toggle Home Assistant panel</a></li>
     </ul>
     <ul id="dropdown_menu_mobile" class="dropdown-content z-depth-4">
         <li><a onclick="localStorage.setItem('new_tab', true);window.open(window.location.origin+window.location.pathname, '_blank');">New tab</a></li>
@@ -115,18 +115,18 @@
         <li><a target="_blank" href="https://materialdesignicons.com/">Material Icons</a></li>
         <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
         <li><a class="modal-trigger" href="#modal_netstat" onclick="get_netstat()">Network status</a></li>
-        <li><a class="modal-trigger" href="#modal_about">About HASS-Configurator</a></li>
+        <li><a class="modal-trigger" href="#modal_about">About HASS Configurator</a></li>
         <li class="divider"></li>
-        <!--<li><a href="#modal_check_config">Check HASS Configuration</a></li>-->
+        <!--<li><a href="#modal_check_config">Check Home Assistant Configuration</a></li>-->
         <li><a class="modal-trigger" href="#modal_events">Observe events</a></li>
         <li><a class="modal-trigger" href="#modal_reload_automations">Reload automations</a></li>
         <li><a class="modal-trigger" href="#modal_reload_scripts">Reload scripts</a></li>
         <li><a class="modal-trigger" href="#modal_reload_groups">Reload groups</a></li>
         <li><a class="modal-trigger" href="#modal_reload_core">Reload core</a></li>
-        <li><a class="modal-trigger" href="#modal_restart">Restart HASS</a></li>
+        <li><a class="modal-trigger" href="#modal_restart">Restart Home Assistant</a></li>
         <li class="divider"></li>
         <li><a class="modal-trigger" href="#modal_exec_command">Execute shell command</a></li>
-        <li><a onclick="toggle_hass_panels()">Toggle HASS panel</a></li>
+        <li><a onclick="toggle_hass_panels()">Toggle Home Assistant panel</a></li>
     </ul>
     <ul id="dropdown_gitmenu" class="dropdown-content z-depth-4">
         <li><a class="modal-trigger nowrap waves-effect" href="#modal_init">git init</a></li>
@@ -978,7 +978,7 @@
             <h4 class="grey-text text-darken-3">Network status<i class="mdi mdi-network right grey-text text-darken-3" style="font-size: 2.48rem;"></i></h4>
             <p><label for="your_address">Your address:&nbsp;</label><span id="your_address">$your_address</span></p>
             <p><label for="listening_address">Listening address:&nbsp;</label><span id="listening_address">$listening_address</span></p>
-            <p><label for="hass_api_address">HASS API address:&nbsp;</label><span id="hass_api_address">$hass_api_address</span></p>
+            <p><label for="hass_api_address">Home Assistant API address:&nbsp;</label><span id="hass_api_address">$hass_api_address</span></p>
             <p>Modifying the following lists is not persistent. To statically control access please use the configuration file.</p>
             <p>
                 <ul id="allowed_networks" class="collection with-header"></ul>
@@ -1710,8 +1710,8 @@
 
     // Got this from here: https://developer.mozilla.org/en-US/docs/Web/API/Page_Visibility_API
     // Set the name of the hidden property and the change event for visibility
-    var hidden, visibilityChange; 
-    if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support 
+    var hidden, visibilityChange;
+    if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support
         hidden = "hidden";
         visibilityChange = "visibilitychange";
     }
@@ -1749,7 +1749,7 @@
             return false;
         }
         return true;
-    }); 
+    });
 
     $(document).ready(function () {
         $('select').material_select();
@@ -1945,7 +1945,7 @@
                 renderpath(data);
             }
             else {
-                console.log("Permission denied."); 
+                console.log("Permission denied.");
             }
         });
         document.getElementById("slide-out").scrollTop = 0;
@@ -2294,7 +2294,7 @@
     function restart() {
         $.get("api/restart", function (resp) {
             if (resp.length == 0) {
-                var $toastContent = $("<div><pre>Restarting HASS</pre></div>");
+                var $toastContent = $("<div><pre>Restarting Home Assistant</pre></div>");
                 Materialize.toast($toastContent, 2000);
             }
             else {
