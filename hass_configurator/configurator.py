@@ -1584,7 +1584,7 @@ class AuthHandler(RequestHandler):
         """Request authorization."""
         LOG.info("Requesting authorization")
         self.send_response(401)
-        self.send_header('WWW-Authenticate', 'Basic realm=\"HASS-Configurator\"')
+        self.send_header('WWW-Authenticate', 'Basic realm=\"HASS Configurator\"')
         self.send_header('Content-type', 'text/html')
         self.end_headers()
 
