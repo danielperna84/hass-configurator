@@ -877,9 +877,9 @@ class RequestHandler(BaseHTTPRequestHandler):
                 html = ERROR_HTML
             self.wfile.write(bytes(html, "utf8"))
             return
-        elif req.path.endswith('/jquery-3.4.1.min.js'):
+        elif req.path.endswith('/jquery-3.6.0.min.js'):
             try:
-                data = load_file("jquery-3.4.1.min.js", static=True)
+                data = load_file("jquery-3.6.0.min.js", static=True)
             except Exception as err:
                 self.send_response(404)
                 self.end_headers()
@@ -1584,7 +1584,7 @@ class AuthHandler(RequestHandler):
         """Request authorization."""
         LOG.info("Requesting authorization")
         self.send_response(401)
-        self.send_header('WWW-Authenticate', 'Basic realm=\"HASS-Configurator\"')
+        self.send_header('WWW-Authenticate', 'Basic realm=\"HASS Configurator\"')
         self.send_header('Content-type', 'text/html')
         self.end_headers()
 
@@ -1756,8 +1756,8 @@ def main():
         if problems:
             data = {
                 "title": "HASS Configurator - Password warning",
-                "message": "Your HASS API password seems insecure (%i). " \
-                "Refer to the HASS configurator logs for further information." % problems,
+                "message": "Your Home Assistant API password seems insecure (%i). " \
+                "Refer to the HASS Configurator logs for further information." % problems,
                 "notification_id": "HC_HASS_API_PASSWORD"
             }
             notify(**data)
@@ -1769,7 +1769,7 @@ def main():
             data = {
                 "title": "HASS Configurator - Password warning",
                 "message": "Your SESAME seems insecure (%i). " \
-                "Refer to the HASS configurator logs for further information." % problems,
+                "Refer to the HASS Configurator logs for further information." % problems,
                 "notification_id": "HC_SESAME"
             }
             notify(**data)
@@ -1781,7 +1781,7 @@ def main():
             data = {
                 "title": "HASS Configurator - Password warning",
                 "message": "Your PASSWORD seems insecure (%i). " \
-                "Refer to the HASS configurator logs for further information." % problems,
+                "Refer to the HASS Configurator logs for further information." % problems,
                 "notification_id": "HC_PASSWORD"
             }
             notify(**data)

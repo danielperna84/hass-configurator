@@ -94,18 +94,19 @@
         <li><a target="_blank" href="https://materialdesignicons.com/">Material Icons</a></li>
         <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
         <li><a class="modal-trigger" href="#modal_netstat" onclick="get_netstat()">Network status</a></li>
-        <li><a class="modal-trigger" href="#modal_about">About HASS-Configurator</a></li>
+        <li><a class="modal-trigger" href="#modal_about">About HASS Configurator</a></li>
         <li class="divider"></li>
-        <!--<li><a href="#modal_check_config">Check HASS Configuration</a></li>-->
+        <!--<li><a href="#modal_check_config">Check Home Assistant Configuration</a></li>-->
         <li><a class="modal-trigger" href="#modal_events">Observe events</a></li>
         <li><a class="modal-trigger" href="#modal_reload_automations">Reload automations</a></li>
         <li><a class="modal-trigger" href="#modal_reload_scripts">Reload scripts</a></li>
         <li><a class="modal-trigger" href="#modal_reload_groups">Reload groups</a></li>
         <li><a class="modal-trigger" href="#modal_reload_core">Reload core</a></li>
-        <li><a class="modal-trigger" href="#modal_restart">Restart HASS</a></li>
+        <li><a class="modal-trigger" href="#modal_restart">Restart Home Assistant</a></li>
         <li class="divider"></li>
         <li><a class="modal-trigger" href="#modal_exec_command">Execute shell command</a></li>
-        <li><a onclick="toggle_hass_panels()">Toggle HASS panel</a></li>
+        <li><a onclick="toggle_hass_panels()">Toggle Home Assistant panel</a></li>
+        <li><a onclick="generate_uuid()">Generate UUID</a></li>
     </ul>
     <ul id="dropdown_menu_mobile" class="dropdown-content z-depth-4">
         <li><a onclick="localStorage.setItem('new_tab', true);window.open(window.location.origin+window.location.pathname, '_blank');">New tab</a></li>
@@ -115,18 +116,19 @@
         <li><a target="_blank" href="https://materialdesignicons.com/">Material Icons</a></li>
         <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
         <li><a class="modal-trigger" href="#modal_netstat" onclick="get_netstat()">Network status</a></li>
-        <li><a class="modal-trigger" href="#modal_about">About HASS-Configurator</a></li>
+        <li><a class="modal-trigger" href="#modal_about">About HASS Configurator</a></li>
         <li class="divider"></li>
-        <!--<li><a href="#modal_check_config">Check HASS Configuration</a></li>-->
+        <!--<li><a href="#modal_check_config">Check Home Assistant Configuration</a></li>-->
         <li><a class="modal-trigger" href="#modal_events">Observe events</a></li>
         <li><a class="modal-trigger" href="#modal_reload_automations">Reload automations</a></li>
         <li><a class="modal-trigger" href="#modal_reload_scripts">Reload scripts</a></li>
         <li><a class="modal-trigger" href="#modal_reload_groups">Reload groups</a></li>
         <li><a class="modal-trigger" href="#modal_reload_core">Reload core</a></li>
-        <li><a class="modal-trigger" href="#modal_restart">Restart HASS</a></li>
+        <li><a class="modal-trigger" href="#modal_restart">Restart Home Assistant</a></li>
         <li class="divider"></li>
         <li><a class="modal-trigger" href="#modal_exec_command">Execute shell command</a></li>
-        <li><a onclick="toggle_hass_panels()">Toggle HASS panel</a></li>
+        <li><a onclick="toggle_hass_panels()">Toggle Home Assistant panel</a></li>
+        <li><a onclick="generate_uuid()">Generate UUID</a></li>
     </ul>
     <ul id="dropdown_gitmenu" class="dropdown-content z-depth-4">
         <li><a class="modal-trigger nowrap waves-effect" href="#modal_init">git init</a></li>
@@ -978,7 +980,7 @@
             <h4 class="grey-text text-darken-3">Network status<i class="mdi mdi-network right grey-text text-darken-3" style="font-size: 2.48rem;"></i></h4>
             <p><label for="your_address">Your address:&nbsp;</label><span id="your_address">$your_address</span></p>
             <p><label for="listening_address">Listening address:&nbsp;</label><span id="listening_address">$listening_address</span></p>
-            <p><label for="hass_api_address">HASS API address:&nbsp;</label><span id="hass_api_address">$hass_api_address</span></p>
+            <p><label for="hass_api_address">Home Assistant API address:&nbsp;</label><span id="hass_api_address">$hass_api_address</span></p>
             <p>Modifying the following lists is not persistent. To statically control access please use the configuration file.</p>
             <p>
                 <ul id="allowed_networks" class="collection with-header"></ul>
@@ -1033,17 +1035,24 @@
                     <div class="chip"> <img src="https://avatars3.githubusercontent.com/u/14281572?s=400&v=4" alt="Contact Person"> <a class="black-text" href="https://github.com/emontnemery" target="_blank">Erik Montnemery</a> </div>
                 </li>
                 <li>
-                  <div class="chip"> <img src="https://avatars0.githubusercontent.com/u/1294876?s=400&v=4" alt="Contact Person"> <a class="black-text" href="https://github.com/tjorim" target="_blank">Jorim Tielemans</a> </div>
-              </li>
+                    <div class="chip"> <img src="https://avatars0.githubusercontent.com/u/1294876?s=400&v=4" alt="Contact Person"> <a class="black-text" href="https://github.com/tjorim" target="_blank">Jorim Tielemans</a> </div>
+                </li>
+                <li>
+                    <div class="chip"> <img src="https://avatars.githubusercontent.com/u/874635?v=4&s=400" alt="Contact Person"> <a class="black-text" href="https://github.com/javawizard" target="_blank">Alex Boyd</a> </div>
+                </li>
+                <li>
+                    <div class="chip"> <img src="https://avatars.githubusercontent.com/u/20040931?v=4&s=400" alt="Contact Person"> <a class="black-text" href="https://github.com/salim-b" target="_blank">Salim B</a> </div>
+                </li>
+                <li>
+                    <div class="chip"> <img src="https://avatars.githubusercontent.com/u/85389871?v=4&s=400" alt="Contact Person"> <a class="black-text" href="https://github.com/wrt54g" target="_blank">Sven Serlier</a> </div>
+                </li>
             </ul>
             <p>Libraries used:</p>
             <div class="row">
               <div class="col s6 m3 l3">
                 <a href="https://ace.c9.io/" target="_blank">
                   <div class="card grey lighten-3 hoverable waves-effect">
-                    <div class="card-image">
-                      <img src="https://drive.google.com/uc?export=view&id=0B6wTGzSOtvNBeld4U09LQkV0c2M">
-                    </div>
+                    <div class="card-image"></div>
                     <div class="card-content">
                       <p class="grey-text text-darken-2">Ace Editor</p>
                     </div>
@@ -1053,9 +1062,7 @@
               <div class="col s6 m3 l3">
                 <a class="light-blue-text" href="http://materializecss.com/" target="_blank">
                   <div class="card grey lighten-3 hoverable">
-                    <div class="card-image">
-                      <img src="https://evwilkin.github.io/images/materializecss.png">
-                    </div>
+                    <div class="card-image"></div>
                     <div class="card-content">
                       <p class="grey-text text-darken-2">Materialize</p>
                     </div>
@@ -1065,9 +1072,7 @@
               <div class="col s6 m3 l3">
                 <a class="light-blue-text" href="https://jquery.com/" target="_blank">
                   <div class="card grey lighten-3 hoverable">
-                    <div class="card-image">
-                      <img src="https://drive.google.com/uc?export=view&id=0B6wTGzSOtvNBdFI0ZXRGb01xNzQ">
-                    </div>
+                    <div class="card-image"></div>
                     <div class="card-content">
                       <p class="grey-text text-darken-2">JQuery</p>
                     </div>
@@ -1077,9 +1082,7 @@
               <div class="col s6 m3 l3">
                 <a class="light-blue-text" href="https://gitpython.readthedocs.io" target="_blank">
                   <div class="card grey lighten-3 hoverable">
-                    <div class="card-image">
-                      <img src="https://drive.google.com/uc?export=view&id=0B6wTGzSOtvNBakk4ek1uRGxqYVE">
-                    </div>
+                    <div class="card-image"></div>
                     <div class="card-content">
                       <p class="grey-text text-darken-2">GitPython</p>
                     </div>
@@ -1089,8 +1092,7 @@
               <div class="col s6 m3 l3">
                 <a class="light-blue-text" href="https://github.com/nodeca/js-yaml" target="_blank">
                   <div class="card grey lighten-3 hoverable">
-                    <div class="card-image">
-                    </div>
+                    <div class="card-image"></div>
                     <div class="card-content">
                       <p class="grey-text text-darken-2">js-yaml</p>
                     </div>
@@ -1585,7 +1587,7 @@
 </main>
 <input type="hidden" id="fb_currentfile" value="" />
 <!-- Scripts -->
-<script src="jquery-3.4.1.min.js"></script>
+<script src="jquery-3.6.0.min.js"></script>
 <script src="materialize.min.js"></script>
 <script>
     function ws_connect() {
@@ -1688,6 +1690,17 @@
         localStorage.setItem('hass_panel_hidden', global_hass_panel_hidden);
     }
 
+    function generate_uuid() {
+      var uuid = "xxxxxxxx-xxxx-4xxx-nxxx-xxxxxxxxxxxx"
+        .replaceAll('n', function() {
+          return (crypto.getRandomValues(new Uint8Array(1))[0] % 4 + 8).toString(16);
+        })
+        .replaceAll('x', function() {
+          return (crypto.getRandomValues(new Uint8Array(1))[0] % 16).toString(16);
+        });
+      editor.insert(uuid);
+    }
+
     function got_focus_or_visibility() {
         if (global_current_filename && global_current_filepath) {
             // The globals are set, set the localStorage to those values
@@ -1710,8 +1723,8 @@
 
     // Got this from here: https://developer.mozilla.org/en-US/docs/Web/API/Page_Visibility_API
     // Set the name of the hidden property and the change event for visibility
-    var hidden, visibilityChange; 
-    if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support 
+    var hidden, visibilityChange;
+    if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support
         hidden = "hidden";
         visibilityChange = "visibilitychange";
     }
@@ -1749,7 +1762,7 @@
             return false;
         }
         return true;
-    }); 
+    });
 
     $(document).ready(function () {
         $('select').material_select();
@@ -1945,7 +1958,7 @@
                 renderpath(data);
             }
             else {
-                console.log("Permission denied."); 
+                console.log("Permission denied.");
             }
         });
         document.getElementById("slide-out").scrollTop = 0;
@@ -2294,7 +2307,7 @@
     function restart() {
         $.get("api/restart", function (resp) {
             if (resp.length == 0) {
-                var $toastContent = $("<div><pre>Restarting HASS</pre></div>");
+                var $toastContent = $("<div><pre>Restarting Home Assistant</pre></div>");
                 Materialize.toast($toastContent, 2000);
             }
             else {
@@ -2962,7 +2975,7 @@ function check_lint() {
     if (document.getElementById('currentfile').value.match(".yaml$")) {
         try {
             var text = editor.getValue().replace(/!(include|secret|env_var|input)/g,".$1"); // hack because js-yaml does not like !include/!secret
-            jsyaml.safeLoad(text);
+            jsyaml.load(text);
             lint_status.text("check_circle");
             lint_status.removeClass("cursor-pointer red-text grey-text");
             lint_status.addClass("green-text");

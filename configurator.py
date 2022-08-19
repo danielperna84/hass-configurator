@@ -701,18 +701,18 @@ INDEX = Template(r"""<!DOCTYPE html>
         <li><a target="_blank" href="https://materialdesignicons.com/">Material Icons</a></li>
         <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
         <li><a class="modal-trigger" href="#modal_netstat" onclick="get_netstat()">Network status</a></li>
-        <li><a class="modal-trigger" href="#modal_about">About HASS-Configurator</a></li>
+        <li><a class="modal-trigger" href="#modal_about">About HASS Configurator</a></li>
         <li class="divider"></li>
-        <!--<li><a href="#modal_check_config">Check HASS Configuration</a></li>-->
+        <!--<li><a href="#modal_check_config">Check Home Assistant Configuration</a></li>-->
         <li><a class="modal-trigger" href="#modal_events">Observe events</a></li>
         <li><a class="modal-trigger" href="#modal_reload_automations">Reload automations</a></li>
         <li><a class="modal-trigger" href="#modal_reload_scripts">Reload scripts</a></li>
         <li><a class="modal-trigger" href="#modal_reload_groups">Reload groups</a></li>
         <li><a class="modal-trigger" href="#modal_reload_core">Reload core</a></li>
-        <li><a class="modal-trigger" href="#modal_restart">Restart HASS</a></li>
+        <li><a class="modal-trigger" href="#modal_restart">Restart Home Assistant</a></li>
         <li class="divider"></li>
         <li><a class="modal-trigger" href="#modal_exec_command">Execute shell command</a></li>
-        <li><a onclick="toggle_hass_panels()">Toggle HASS panel</a></li>
+        <li><a onclick="toggle_hass_panels()">Toggle Home Assistant panel</a></li>
     </ul>
     <ul id="dropdown_menu_mobile" class="dropdown-content z-depth-4">
         <li><a onclick="localStorage.setItem('new_tab', true);window.open(window.location.origin+window.location.pathname, '_blank');">New tab</a></li>
@@ -722,18 +722,18 @@ INDEX = Template(r"""<!DOCTYPE html>
         <li><a target="_blank" href="https://materialdesignicons.com/">Material Icons</a></li>
         <li><a href="#" data-activates="ace_settings" class="ace_settings-collapse">Editor Settings</a></li>
         <li><a class="modal-trigger" href="#modal_netstat" onclick="get_netstat()">Network status</a></li>
-        <li><a class="modal-trigger" href="#modal_about">About HASS-Configurator</a></li>
+        <li><a class="modal-trigger" href="#modal_about">About HASS Configurator</a></li>
         <li class="divider"></li>
-        <!--<li><a href="#modal_check_config">Check HASS Configuration</a></li>-->
+        <!--<li><a href="#modal_check_config">Check Home Assistant Configuration</a></li>-->
         <li><a class="modal-trigger" href="#modal_events">Observe events</a></li>
         <li><a class="modal-trigger" href="#modal_reload_automations">Reload automations</a></li>
         <li><a class="modal-trigger" href="#modal_reload_scripts">Reload scripts</a></li>
         <li><a class="modal-trigger" href="#modal_reload_groups">Reload groups</a></li>
         <li><a class="modal-trigger" href="#modal_reload_core">Reload core</a></li>
-        <li><a class="modal-trigger" href="#modal_restart">Restart HASS</a></li>
+        <li><a class="modal-trigger" href="#modal_restart">Restart Home Assistant</a></li>
         <li class="divider"></li>
         <li><a class="modal-trigger" href="#modal_exec_command">Execute shell command</a></li>
-        <li><a onclick="toggle_hass_panels()">Toggle HASS panel</a></li>
+        <li><a onclick="toggle_hass_panels()">Toggle Home Assistant panel</a></li>
     </ul>
     <ul id="dropdown_gitmenu" class="dropdown-content z-depth-4">
         <li><a class="modal-trigger" href="#modal_init" class="nowrap waves-effect">git init</a></li>
@@ -1585,7 +1585,7 @@ INDEX = Template(r"""<!DOCTYPE html>
             <h4 class="grey-text text-darken-3">Network status<i class="mdi mdi-network right grey-text text-darken-3" style="font-size: 2.48rem;"></i></h4>
             <p><label for="your_address">Your address:&nbsp;</label><span id="your_address">$your_address</span></p>
             <p><label for="listening_address">Listening address:&nbsp;</label><span id="listening_address">$listening_address</span></p>
-            <p><label for="hass_api_address">HASS API address:&nbsp;</label><span id="hass_api_address">$hass_api_address</span></p>
+            <p><label for="hass_api_address">Home Assistant API address:&nbsp;</label><span id="hass_api_address">$hass_api_address</span></p>
             <p>Modifying the following lists is not persistent. To statically control access please use the configuration file.</p>
             <p>
                 <ul id="allowed_networks" class="collection with-header"></ul>
@@ -2889,7 +2889,7 @@ INDEX = Template(r"""<!DOCTYPE html>
     function restart() {
         $.get("api/restart", function (resp) {
             if (resp.length == 0) {
-                var $toastContent = $("<div><pre>Restarting HASS</pre></div>");
+                var $toastContent = $("<div><pre>Restarting Home Assistant</pre></div>");
                 Materialize.toast($toastContent, 2000);
             }
             else {
@@ -4990,7 +4990,7 @@ class AuthHandler(RequestHandler):
         """Request authorization."""
         LOG.info("Requesting authorization")
         self.send_response(401)
-        self.send_header('WWW-Authenticate', 'Basic realm=\"HASS-Configurator\"')
+        self.send_header('WWW-Authenticate', 'Basic realm=\"HASS Configurator\"')
         self.send_header('Content-type', 'text/html')
         self.end_headers()
 
@@ -5069,7 +5069,7 @@ class SimpleServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
 def notify(title="HASS Configurator",
            message="Notification by HASS Configurator",
            notification_id=None):
-    """Helper function to send notifications via HASS."""
+    """Helper function to send notifications via Home Assistant."""
     if not HASS_API or not NOTIFY_SERVICE:
         return
     headers = {
@@ -5162,8 +5162,8 @@ def main():
         if problems:
             data = {
                 "title": "HASS Configurator - Password warning",
-                "message": "Your HASS API password seems insecure (%i). " \
-                "Refer to the HASS configurator logs for further information." % problems,
+                "message": "Your Home Assistant API password seems insecure (%i). " \
+                "Refer to the HASS Configurator logs for further information." % problems,
                 "notification_id": "HC_HASS_API_PASSWORD"
             }
             notify(**data)
@@ -5175,7 +5175,7 @@ def main():
             data = {
                 "title": "HASS Configurator - Password warning",
                 "message": "Your SESAME seems insecure (%i). " \
-                "Refer to the HASS configurator logs for further information." % problems,
+                "Refer to the HASS Configurator logs for further information." % problems,
                 "notification_id": "HC_SESAME"
             }
             notify(**data)
@@ -5187,7 +5187,7 @@ def main():
             data = {
                 "title": "HASS Configurator - Password warning",
                 "message": "Your PASSWORD seems insecure (%i). " \
-                "Refer to the HASS configurator logs for further information." % problems,
+                "Refer to the HASS Configurator logs for further information." % problems,
                 "notification_id": "HC_PASSWORD"
             }
             notify(**data)
