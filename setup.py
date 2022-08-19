@@ -8,7 +8,7 @@ VERSION = "0.4.1"
 
 setup(name=NAME,
       version=VERSION,
-      description='HASS-Configurator',
+      description='HASS Configurator',
       long_description="https://github.com/danielperna84/hass-configurator",
       long_description_content_type='text/markdown',
       url='http://github.com/danielperna84/hass-configurator',
