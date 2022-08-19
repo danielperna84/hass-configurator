@@ -877,9 +877,9 @@ class RequestHandler(BaseHTTPRequestHandler):
                 html = ERROR_HTML
             self.wfile.write(bytes(html, "utf8"))
             return
-        elif req.path.endswith('/jquery-3.4.1.min.js'):
+        elif req.path.endswith('/jquery-3.6.0.min.js'):
             try:
-                data = load_file("jquery-3.4.1.min.js", static=True)
+                data = load_file("jquery-3.6.0.min.js", static=True)
             except Exception as err:
                 self.send_response(404)
                 self.end_headers()
