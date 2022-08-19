@@ -1587,7 +1587,7 @@
 </main>
 <input type="hidden" id="fb_currentfile" value="" />
 <!-- Scripts -->
-<script src="jquery-3.4.1.min.js"></script>
+<script src="jquery-3.6.0.min.js"></script>
 <script src="materialize.min.js"></script>
 <script>
     function ws_connect() {
@@ -2975,7 +2975,7 @@ function check_lint() {
     if (document.getElementById('currentfile').value.match(".yaml$")) {
         try {
             var text = editor.getValue().replace(/!(include|secret|env_var|input)/g,".$1"); // hack because js-yaml does not like !include/!secret
-            jsyaml.safeLoad(text);
+            jsyaml.load(text);
             lint_status.text("check_circle");
             lint_status.removeClass("cursor-pointer red-text grey-text");
             lint_status.addClass("green-text");
