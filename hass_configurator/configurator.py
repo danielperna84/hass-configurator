@@ -110,8 +110,7 @@ SO.setLevel(LOGLEVEL)
 SO.setFormatter(
     logging.Formatter('%(levelname)s:%(asctime)s:%(name)s:%(message)s'))
 LOG.addHandler(SO)
-RELEASEURL = "https://api.github.com/repos/danielperna84/hass-configurator/releases/latest"
-VERSION = "0.5.0"
+VERSION = "0.5.1"
 BASEDIR = "."
 DEV = False
 LISTENPORT = None
@@ -834,14 +833,6 @@ class RequestHandler(BaseHTTPRequestHandler):
                 LOG.warning(err)
 
             color = ""
-            try:
-                response = urllib.request.urlopen(RELEASEURL)
-                latest = json.loads(response.read().decode('utf-8'))['tag_name']
-                if VERSION != latest:
-                    color = "red-text"
-            except Exception as err:
-                LOG.warning("Exception getting release")
-                LOG.warning(err)
             ws_api = ""
             if HASS_API:
                 protocol, uri = HASS_API.split("//")

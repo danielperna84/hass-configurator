@@ -2873,7 +2873,8 @@
         editor.setOptions(JSON.parse(localStorage.pochass));
         editor.setOptions({
             enableBasicAutocompletion: true,
-            enableSnippets: true
+            enableSnippets: true,
+            useWorker: false
         })
         editor.$blockScrolling = Infinity;
     }
@@ -2885,7 +2886,8 @@
             displayIndentGuides: true,
             highlightSelectedWord: true,
             enableBasicAutocompletion: true,
-            enableSnippets: true
+            enableSnippets: true,
+            useWorker: false
         })
         editor.$blockScrolling = Infinity;
     }
