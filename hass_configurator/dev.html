@@ -2972,7 +2972,7 @@ var lint_status = $('#lint-status'); // speed optimization
 var lint_error = "";
 
 var SCHEMA = jsyaml.DEFAULT_SCHEMA.extend(
-    ["include", "secret", "env_var", "input"].map(
+    ["include", "include_dir_list", "include_dir_named", "include_dir_merge_list", "include_dir_merge_named", "secret", "env_var", "input"].map(
         entry => new jsyaml.Type(`!${entry}`, {kind: "scalar",})
         )
     );
