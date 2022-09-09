@@ -3553,16 +3553,11 @@ var lint_timeout;
 var lint_status = $('#lint-status'); // speed optimization
 var lint_error = "";
 
-var SCHEMA = jsyaml.DEFAULT_SCHEMA.extend(
-    ["include", "include_dir_list", "include_dir_named", "include_dir_merge_list", "include_dir_merge_named", "secret", "env_var", "input"].map(
-        entry => new jsyaml.Type(`!${entry}`, {kind: "scalar",})
-        )
-    );
-
 function check_lint() {
     if (document.getElementById('currentfile').value.match(".yaml$")) {
         try {
-            jsyaml.load(editor.getValue(), { schema: SCHEMA });
+            var text = editor.getValue().replace(/!(include|secret|env_var)/g,".$1"); // hack because js-yaml does not like !include/!secret
+            jsyaml.safeLoad(text);
             lint_status.text("check_circle");
             lint_status.removeClass("cursor-pointer red-text grey-text");
             lint_status.addClass("green-text");
