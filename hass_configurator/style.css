@@ -414,6 +414,10 @@ footer {
     color: rgba(191, 191, 191, 0.5) !important;
 }
 
+.ace_gutter-cell.ace_error {
+    background-image: none !important;
+}
+
 .fbicon_pad {
     min-height: 64px !important;
 }
