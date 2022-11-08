@@ -1,3 +1,6 @@
+Version 0.5.2 (2022-11-08)
+- Bugfix: Fix page load with special characters in states (Issue #217)
+
 Version 0.5.1 (2022-09-08)
 - Bugfix: Disable Ace-internal yaml-linting (Issue #226)
 - Disable internal check for new releases
