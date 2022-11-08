@@ -110,7 +110,7 @@ SO.setLevel(LOGLEVEL)
 SO.setFormatter(
     logging.Formatter('%(levelname)s:%(asctime)s:%(name)s:%(message)s'))
 LOG.addHandler(SO)
-VERSION = "0.5.1"
+VERSION = "0.5.2"
 BASEDIR = "."
 DEV = False
 LISTENPORT = None
@@ -826,7 +826,17 @@ class RequestHandler(BaseHTTPRequestHandler):
                     req = urllib.request.Request("%sstates" % HASS_API,
                                                  headers=headers, method='GET')
                     with urllib.request.urlopen(req) as response:
-                        states = response.read().decode('utf-8')
+                        states_clean = []
+                        for state in json.loads(response.read().decode('utf-8')):
+                            states_clean.append(
+                                {
+                                    "entity_id": state.get("entity_id", ""),
+                                    "attributes":
+                                    {"friendly_name": state.get("attributes", {}).get(
+                                        "friendly_name", state.get("entity_id", ""))}
+                                }
+                            )
+                        states = json.dumps(states_clean)
 
             except Exception as err:
                 LOG.warning("Exception getting bootstrap")
