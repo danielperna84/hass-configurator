@@ -1810,7 +1810,7 @@
             data: entities_search,
             limit: 40,
             onAutocomplete: function(val) {
-                insert(val.split("(")[1].split(")")[0]);
+                insert(val.split("(").pop().split(")")[0]);
             },
             minLength: 1,
         });
@@ -1818,7 +1818,7 @@
             data: entities_search,
             limit: 40,
             onAutocomplete: function(val) {
-                insert(val.split("(")[1].split(")")[0]);
+                insert(val.split("(").pop().split(")")[0]);
             },
             minLength: 1,
         });
