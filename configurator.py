@@ -1905,15 +1905,15 @@ INDEX = Template(r"""<!DOCTYPE html>
               </div>
               <p class="col s12">
                   <input type="checkbox" class="blue_check" onclick="editor.setOption('highlightActiveLine', !editor.getOptions().highlightActiveLine)" id="highlightActiveLine" />
-                  <Label for="highlightActiveLine">Hightlight Active Line</label>
+                  <Label for="highlightActiveLine">Highlight Active Line</label>
               </p>
               <p class="col s12">
                   <input type="checkbox" class="blue_check" onclick="editor.setOption('highlightGutterLine', !editor.getOptions().highlightGutterLine)" id="highlightGutterLine" />
-                  <Label for="highlightGutterLine">Hightlight Gutter Line</label>
+                  <Label for="highlightGutterLine">Highlight Gutter Line</label>
               </p>
               <p class="col s12">
                   <input type="checkbox" class="blue_check" onclick="editor.setOption('highlightSelectedWord', !editor.getOptions().highlightSelectedWord)" id="highlightSelectedWord" />
-                  <Label for="highlightSelectedWord">Hightlight Selected Word</label>
+                  <Label for="highlightSelectedWord">Highlight Selected Word</label>
               </p>
               <p class="col s12">
                   <input type="checkbox" class="blue_check" onclick="editor.setOption('hScrollBarAlwaysVisible', !editor.getOptions().hScrollBarAlwaysVisible)" id="hScrollBarAlwaysVisible" />
