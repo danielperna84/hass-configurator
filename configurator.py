@@ -1264,7 +1264,7 @@ INDEX = Template(r"""<!DOCTYPE html>
                     <div class="row">
                         <div class="input-field col s12">
                             <input type="text" id="ws_uri" placeholder="ws://127.0.0.1:8123/api/websocket" value="$hass_ws_address"/>
-                            <label for="ws_uri">Websocket URI</label>
+                            <label for="ws_uri">WebSocket URI</label>
                         </div>
                     </div>
                     <div class="row">
@@ -1346,7 +1346,7 @@ INDEX = Template(r"""<!DOCTYPE html>
     <div id="modal_push" class="modal">
         <div class="modal-content">
           <h4 class="grey-text text-darken-3">git push<i class="mdi mdi-git right grey-text text-darken-3" style="font-size: 2.48rem;"></i></h4>
-          <p>Are you sure you want to push your commited changes to the configured remote / origin?</p>
+          <p>Are you sure you want to push your committed changes to the configured remote / origin?</p>
         </div>
         <div class="modal-footer">
           <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">Cancel</a>
@@ -1477,7 +1477,7 @@ INDEX = Template(r"""<!DOCTYPE html>
     <div id="modal_a_net_add" class="modal">
             <div class="modal-content">
                 <h4 class="grey-text text-darken-3">Add allowed network / IP<i class="mdi mdi-settings right grey-text text-darken-3" style="font-size: 2rem;"></i></h4>
-                <p>Do you really want to Add the network / IP <b><span id="addnet"></span></b> to the list of allowed networks?</p>
+                <p>Do you really want to add the network / IP <b><span id="addnet"></span></b> to the list of allowed networks?</p>
             </div>
             <div class="modal-footer">
               <a class=" modal-action modal-close waves-effect waves-red btn-flat light-blue-text">No</a>
@@ -3427,7 +3427,7 @@ INDEX = Template(r"""<!DOCTYPE html>
                     Materialize.toast($toastContent, 2000);
                 }
                 else {
-                    var $toastContent = $("<div><pre>Upload succesful</pre></div>");
+                    var $toastContent = $("<div><pre>Upload successful</pre></div>");
                     Materialize.toast($toastContent, 2000);
                     listdir(document.getElementById('fbheader').innerHTML);
                     document.getElementById('uploadform').reset();
@@ -4638,7 +4638,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                         try:
                             repo.index.commit(message)
                             response['error'] = False
-                            response['message'] = "Changes commited"
+                            response['message'] = "Changes committed"
                             self.send_response(200)
                             self.send_header('Content-type', 'text/json')
                             self.end_headers()
