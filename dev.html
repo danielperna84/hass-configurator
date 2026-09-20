@@ -581,12 +581,12 @@
         <li><a class="modal-trigger" href="#modal_netstat" onclick="get_netstat()">Network status</a></li>
         <li><a class="modal-trigger" href="#modal_about">About HASS Configurator</a></li>
         <li class="divider"></li>
-        <!--<li><a href="#modal_check_config">Check Home Assistant Configuration</a></li>-->
         <li><a class="modal-trigger" href="#modal_events">Observe events</a></li>
         <li><a class="modal-trigger" href="#modal_reload_automations">Reload automations</a></li>
         <li><a class="modal-trigger" href="#modal_reload_scripts">Reload scripts</a></li>
         <li><a class="modal-trigger" href="#modal_reload_groups">Reload groups</a></li>
         <li><a class="modal-trigger" href="#modal_reload_core">Reload core</a></li>
+        <li><a class="modal-trigger" href="#modal_check_config">Check Home Assistant Configuration</a></li>
         <li><a class="modal-trigger" href="#modal_restart">Restart Home Assistant</a></li>
         <li class="divider"></li>
         <li><a class="modal-trigger" href="#modal_exec_command">Execute shell command</a></li>
@@ -602,12 +602,12 @@
         <li><a class="modal-trigger" href="#modal_netstat" onclick="get_netstat()">Network status</a></li>
         <li><a class="modal-trigger" href="#modal_about">About HASS Configurator</a></li>
         <li class="divider"></li>
-        <!--<li><a href="#modal_check_config">Check Home Assistant Configuration</a></li>-->
         <li><a class="modal-trigger" href="#modal_events">Observe events</a></li>
         <li><a class="modal-trigger" href="#modal_reload_automations">Reload automations</a></li>
         <li><a class="modal-trigger" href="#modal_reload_scripts">Reload scripts</a></li>
         <li><a class="modal-trigger" href="#modal_reload_groups">Reload groups</a></li>
         <li><a class="modal-trigger" href="#modal_reload_core">Reload core</a></li>
+        <li><a class="modal-trigger" href="#modal_check_config">Check Home Assistant Configuration</a></li>
         <li><a class="modal-trigger" href="#modal_restart">Restart Home Assistant</a></li>
         <li class="divider"></li>
         <li><a class="modal-trigger" href="#modal_exec_command">Execute shell command</a></li>
@@ -2725,12 +2725,17 @@
 
     function check_config() {
         $.get("api/check_config", function (resp) {
-            if (resp.length == 0) {
+            if (resp.result === "valid") {
                 var $toastContent = $("<div><pre>Configuration seems valid.</pre></div>");
                 Materialize.toast($toastContent, 2000);
             }
+            else if (resp.errors) {
+                var $toastContent = $("<div><pre></pre></div>");
+                $toastContent.find("pre").text(resp.errors);
+                Materialize.toast($toastContent, 2000);
+            }
             else {
-                var $toastContent = $("<div><pre>" + resp[0].state + "</pre></div>");
+                var $toastContent = $("<div><pre>Unable to check configuration.</pre></div>");
                 Materialize.toast($toastContent, 2000);
             }
         });

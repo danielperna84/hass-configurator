@@ -4155,11 +4155,14 @@ class RequestHandler(BaseHTTPRequestHandler):
                     else:
                         headers["x-ha-access"] = HASS_API_PASSWORD
                 req = urllib.request.Request(
-                    "%sservices/homeassistant/check_config" % HASS_API,
+                    "%sconfig/core/check_config" % HASS_API,
                     headers=headers, method='POST')
+                with urllib.request.urlopen(req) as response:
+                    res = json.loads(response.read().decode('utf-8'))
+                    LOG.debug(res)
             except Exception as err:
                 LOG.warning(err)
-                res['restart'] = str(err)
+                res['errors'] = str(err)
             self.wfile.write(bytes(json.dumps(res), "utf8"))
             return
         elif req.path.endswith('/api/reload_automations'):
