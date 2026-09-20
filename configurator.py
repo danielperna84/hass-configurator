@@ -5102,6 +5102,7 @@ def main():
     """Main function, duh!"""
     global HTTPD
     signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
     parser = argparse.ArgumentParser(description="Visit " \
     "https://github.com/danielperna84/hass-configurator for more details " \
     "about the availble options.")
