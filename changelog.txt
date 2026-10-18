@@ -1,3 +1,8 @@
+Version 0.7.0 (2026-10-18)
+- Handle SIGTERM for clean shutdown (#257) @agners
+- Fix typos and spelling errors (#261) @kernelpanic85
+- Fix check-config-link (#183) @dajiaohuang
+
 Version 0.6.0 (2026-04-07)
 - Add dark/light mode (Issue #199) @mallewski
 - Add several triggers and conditions @danielperna84

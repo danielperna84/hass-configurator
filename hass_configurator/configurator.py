@@ -110,7 +110,7 @@ SO.setLevel(LOGLEVEL)
 SO.setFormatter(
     logging.Formatter('%(levelname)s:%(asctime)s:%(name)s:%(message)s'))
 LOG.addHandler(SO)
-VERSION = "0.6.0"
+VERSION = "0.7.0"
 BASEDIR = "."
 DEV = False
 LISTENPORT = None
