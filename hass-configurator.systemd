@@ -23,10 +23,10 @@ User=homeassistant
 # Environment=HC_GIT=false
 # Environment=HC_ALLOWED_NETWORKS=192.168.1.0/24,127.0.0.1
 # ...
-# Set the path to your configurator.py location
+# Directory containing your settings.conf
 WorkingDirectory=/etc/homeassistant
 # You can also save your static options in a JSON formatted conf-file
-ExecStart=/usr/bin/python3 /etc/homeassistant/configurator.py settings.conf
+ExecStart=/usr/local/bin/hass-configurator settings.conf
 Restart=always
 
 [Install]
