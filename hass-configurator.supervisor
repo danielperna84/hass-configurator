@@ -4,5 +4,6 @@
 ; Modify the paths below to match your setup.
 [program:hass-configurator]
 directory = /home/hass/.homeassistant/
-command = /usr/bin/python3 -u /home/hass/.homeassistant/configurator.py /home/hass/.homeassistant/settings.conf
+environment = PYTHONUNBUFFERED="1"
+command = /usr/local/bin/hass-configurator /home/hass/.homeassistant/settings.conf
 user = hass
