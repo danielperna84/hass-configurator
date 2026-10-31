@@ -827,6 +827,11 @@ class RequestHandler(BaseHTTPRequestHandler):
                 res['restart'] = str(err)
             self.wfile.write(bytes(json.dumps(res), "utf8"))
             return
+        elif req.path.endswith('/healthz'):
+            self.send_header('Content-type', 'text/plain')
+            self.end_headers()
+            self.wfile.write(bytes("ok", "utf8"))
+            return
         elif req.path.endswith('/'):
             self.send_header('Content-type', 'text/html')
             self.end_headers()
